@@ -1,0 +1,304 @@
+/* =========================================
+   HAMBURGER
+   ========================================= */
+
+.menu-button {
+    border: none;
+    background: transparent;
+
+    font-size: 26px;
+
+    cursor: pointer;
+
+    padding: 8px;
+
+    line-height: 1;
+
+    color: #222;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-button:hover {
+    opacity: 0.65;
+}
+
+
+/* =========================================
+   OVERLAY
+   ========================================= */
+
+.menu-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    z-index: 999;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
+
+.menu-overlay.active {
+    opacity: 1;
+
+    visibility: visible;
+}
+
+
+/* =========================================
+   SIDE MENU
+   ========================================= */
+
+.side-menu {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 380px;
+
+    max-width: 90vw;
+
+    height: 100vh;
+
+    background: #c9b8a8;
+
+    z-index: 1000;
+
+    transform: translateX(-100%);
+
+    transition: transform 0.3s ease;
+
+    overflow-y: auto;
+}
+
+.side-menu.active {
+    transform: translateX(0);
+}
+
+
+/* =========================================
+   MENU HEADER
+   ========================================= */
+
+.side-menu-header {
+    height: 150px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 25px;
+
+    padding: 30px 24px;
+}
+
+.side-menu-header button {
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    color: #111;
+}
+
+.menu-close {
+    font-size: 38px;
+
+    font-weight: 300;
+
+    line-height: 1;
+}
+
+.search-button {
+    font-size: 32px;
+
+    font-weight: 300;
+
+    line-height: 1;
+}
+
+
+/* =========================================
+   MENU LIST
+   ========================================= */
+
+.menu-list {
+    list-style: none;
+
+    padding: 0;
+
+    margin: 0;
+}
+
+.menu-list li {
+    margin: 0;
+
+    padding: 0;
+}
+
+
+/* =========================================
+   MENU ITEM
+   ========================================= */
+
+.menu-item {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 48px;
+
+    padding: 11px 24px;
+
+    color: #111;
+
+    text-decoration: none;
+
+    font-size: 19px;
+
+    line-height: 1.4;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        padding-left 0.2s ease;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+
+    padding-left: 28px;
+}
+
+
+/* =========================================
+   BEST SELLERS
+   ========================================= */
+
+.menu-item.highlight {
+    background: rgba(160, 145, 130, 0.35);
+}
+
+
+/* =========================================
+   DETAILS
+   ========================================= */
+
+.menu-list details {
+    margin: 0;
+    padding: 0;
+}
+
+.menu-list summary {
+    list-style: none;
+}
+
+.menu-list summary::-webkit-details-marker {
+    display: none;
+}
+
+
+/* =========================================
+   ARROW
+   ========================================= */
+
+.menu-arrow {
+    font-size: 20px;
+
+    margin-left: 12px;
+
+    transition: transform 0.25s ease;
+}
+
+.menu-list details[open] .menu-arrow {
+    transform: rotate(90deg);
+}
+
+
+/* =========================================
+   SUB MENU
+   ========================================= */
+
+.submenu {
+    background: rgba(255, 255, 255, 0.08);
+
+    padding: 5px 0 10px;
+}
+
+.submenu a {
+    display: block;
+
+    padding: 9px 24px 9px 42px;
+
+    color: #222;
+
+    text-decoration: none;
+
+    font-size: 16px;
+
+    line-height: 1.4;
+}
+
+.submenu a:hover {
+    background: rgba(255, 255, 255, 0.12);
+
+    padding-left: 47px;
+}
+
+
+/* =========================================
+   BODY
+   ========================================= */
+
+body.menu-open {
+    overflow: hidden;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 800px) {
+
+    .side-menu {
+        width: 380px;
+
+        max-width: 92vw;
+    }
+
+    .side-menu-header {
+        height: 130px;
+
+        padding: 25px 22px;
+    }
+
+    .menu-item {
+        font-size: 18px;
+
+        padding: 11px 24px;
+    }
+
+    .submenu a {
+        font-size: 16px;
+
+        padding-left: 40px;
+    }
+}

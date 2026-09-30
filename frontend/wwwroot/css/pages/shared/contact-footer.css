@@ -1,0 +1,170 @@
+/* =========================================================
+   CONTACT PAGE
+   ========================================================= */
+
+.contact-page {
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 70px 25px;
+}
+
+.contact-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 70px;
+}
+
+.contact-info h1 {
+    margin: 0 0 20px;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 50px;
+
+    font-weight: 400;
+}
+
+.contact-info p {
+    line-height: 1.7;
+
+    color: #666;
+}
+
+.contact-info strong {
+    color: #24191d;
+}
+
+.contact-form {
+    background: #ffffff;
+
+    padding: 30px;
+
+    border: 1px solid #eeeeee;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.site-footer {
+    background: #24191d;
+
+    color: #ffffff;
+
+    margin-top: 50px;
+}
+
+.footer-main {
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 60px 25px;
+
+    display: grid;
+
+    grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
+
+    gap: 45px;
+}
+
+.footer-column h3 {
+    margin: 0 0 20px;
+
+    font-size: 13px;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+}
+
+.footer-column p {
+    color: #d8ced1;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+.footer-column a {
+    display: block;
+
+    color: #d8ced1;
+
+    font-size: 13px;
+
+    margin-bottom: 12px;
+
+    transition: color 0.2s ease;
+}
+
+.footer-column a:hover {
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   FOOTER NEWSLETTER
+   ========================================================= */
+
+.footer-newsletter {
+    display: flex;
+
+    margin-top: 20px;
+}
+
+.footer-email {
+    flex: 1;
+
+    margin: 0;
+
+    border: 1px solid #66575b;
+
+    border-right: 0;
+
+    border-radius: 0;
+
+    background: transparent;
+
+    color: #ffffff;
+}
+
+.footer-email::placeholder {
+    color: #bdb2b5;
+}
+
+.footer-newsletter button {
+    border: none;
+
+    padding: 0 20px;
+
+    background: #68142e;
+
+    color: #ffffff;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   FOOTER BOTTOM
+   ========================================================= */
+
+.footer-bottom {
+    border-top: 1px solid #4a3c40;
+
+    padding: 20px 25px;
+
+    text-align: center;
+
+    color: #aaa;
+
+    font-size: 11px;
+}
+
+

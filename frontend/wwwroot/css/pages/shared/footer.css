@@ -1,0 +1,488 @@
+/* =========================================================
+   UBHAYA FASHIONS FOOTER
+   ========================================================= */
+
+.site-footer {
+    width: 100%;
+    background: #111111;
+    color: #eeeeee;
+    margin-top: 80px;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   FOOTER MAIN
+   ========================================================= */
+
+.footer-main {
+    width: 100%;
+    max-width: 1500px;
+
+    margin: 0 auto;
+
+    padding: 65px 50px 55px;
+
+    display: grid;
+
+    grid-template-columns:
+        1.5fr
+        0.8fr
+        1fr
+        1.4fr;
+
+    gap: 60px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   COLUMNS
+   ========================================================= */
+
+.footer-column {
+    min-width: 0;
+}
+
+.footer-column h3 {
+    margin: 0 0 24px;
+
+    color: #ffffff;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    letter-spacing: 0.3px;
+}
+
+
+/* =========================================================
+   ABOUT / SUPPORT
+   ========================================================= */
+
+.footer-about h3 {
+    font-size: 17px;
+}
+
+.footer-pin {
+    margin-right: 7px;
+    font-size: 15px;
+}
+
+.footer-about p {
+    margin: 0 0 18px;
+
+    color: #bdbdbd;
+
+    font-size: 15px;
+
+    line-height: 1.8;
+
+    max-width: 360px;
+}
+
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+.footer-column ul {
+    list-style: none;
+
+    padding: 0;
+
+    margin: 0;
+}
+
+.footer-column li {
+    margin-bottom: 14px;
+}
+
+.footer-column li a {
+    color: #bdbdbd;
+
+    text-decoration: none;
+
+    font-size: 15px;
+
+    transition:
+        color 0.2s ease,
+        padding-left 0.2s ease;
+}
+
+.footer-column li a:hover {
+    color: #ffffff;
+
+    padding-left: 4px;
+}
+
+
+/* =========================================================
+   NEWSLETTER
+   IMPORTANT:
+   Keep newsletter content VERTICAL.
+   This overrides the old global footer-newsletter rule.
+   ========================================================= */
+
+.footer-newsletter {
+    display: block !important;
+
+    width: 100%;
+
+    min-width: 0;
+
+    margin: 0;
+
+    padding: 0;
+}
+
+
+/* Newsletter heading */
+
+.footer-newsletter h3 {
+    margin: 0 0 20px;
+}
+
+
+/* Newsletter description */
+
+.footer-newsletter p {
+    display: block !important;
+
+    width: 100%;
+
+    max-width: 330px;
+
+    margin: 0 0 25px;
+
+    color: #bdbdbd;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   NEWSLETTER FORM
+   ========================================================= */
+
+.newsletter-form {
+    width: 100%;
+
+    max-width: 360px;
+
+    height: 52px;
+
+    display: flex !important;
+
+    flex-direction: row;
+
+    align-items: stretch;
+
+    border: 1px solid #666666;
+
+    background: transparent;
+
+    box-sizing: border-box;
+}
+
+.newsletter-form input {
+    flex: 1;
+
+    min-width: 0;
+
+    width: auto;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    padding: 0 18px;
+
+    font-size: 15px;
+
+    margin: 0;
+
+    box-sizing: border-box;
+}
+
+.newsletter-form input::placeholder {
+    color: #aaaaaa;
+}
+
+.newsletter-form button {
+    flex: 0 0 55px;
+
+    width: 55px;
+
+    height: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 23px;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+
+    box-sizing: border-box;
+}
+
+.newsletter-form button:hover {
+    background: #292929;
+}
+
+
+/* =========================================================
+   NEWSLETTER NOTE
+   ========================================================= */
+
+.footer-newsletter small {
+    display: block !important;
+
+    width: 100%;
+
+    max-width: 350px;
+
+    margin-top: 14px;
+
+    color: #777777;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   FOOTER BOTTOM
+   ========================================================= */
+
+.footer-bottom {
+    width: 100%;
+
+    max-width: 1500px;
+
+    min-height: 90px;
+
+    margin: 0 auto;
+
+    padding: 25px 50px;
+
+    border-top: 1px solid #292929;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 25px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   COPYRIGHT
+   ========================================================= */
+
+.footer-copyright {
+    color: #888888;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+}
+
+.footer-copyright strong {
+    color: #aaaaaa;
+}
+
+
+/* =========================================================
+   BOTTOM LINKS
+   ========================================================= */
+
+.footer-links {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    color: #777777;
+
+    font-size: 12px;
+}
+
+.footer-links a {
+    color: #888888;
+
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+}
+
+.footer-links span {
+    color: #555555;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .footer-main {
+        grid-template-columns:
+            1.5fr
+            1fr
+            1fr;
+
+        gap: 45px;
+
+        padding: 60px 35px 50px;
+    }
+
+    .footer-newsletter {
+        grid-column: span 3;
+    }
+
+    .footer-newsletter p {
+        max-width: 420px;
+    }
+
+    .footer-bottom {
+        padding: 25px 35px;
+    }
+}
+
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .footer-main {
+        grid-template-columns:
+            1fr
+            1fr;
+
+        gap: 45px;
+
+        padding: 55px 30px;
+    }
+
+    .footer-about {
+        grid-column: span 2;
+    }
+
+    .footer-newsletter {
+        grid-column: span 2;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 25px 30px;
+    }
+
+    .footer-links {
+        justify-content: flex-start;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .site-footer {
+        margin-top: 50px;
+    }
+
+    .footer-main {
+        grid-template-columns: 1fr;
+
+        padding: 45px 22px;
+
+        gap: 38px;
+    }
+
+    .footer-about {
+        grid-column: auto;
+    }
+
+    .footer-newsletter {
+        grid-column: auto;
+    }
+
+    .footer-column h3 {
+        margin-bottom: 18px;
+    }
+
+    .footer-about p {
+        max-width: 100%;
+    }
+
+    .footer-newsletter p {
+        max-width: 100%;
+    }
+
+    .newsletter-form {
+        width: 100%;
+
+        max-width: 100%;
+    }
+
+    .footer-newsletter small {
+        max-width: 100%;
+    }
+
+    .footer-bottom {
+        padding: 22px;
+
+        gap: 15px;
+    }
+
+    .footer-copyright {
+        white-space: normal;
+    }
+
+    .footer-links {
+        line-height: 1.8;
+
+        justify-content: flex-start;
+    }
+}

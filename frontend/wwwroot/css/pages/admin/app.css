@@ -1,0 +1,588 @@
+/* Admin application layout and responsive dashboard */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body.admin-body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.admin-shell {
+    width: 100%;
+    min-height: 100vh;
+    grid-template-columns: 244px minmax(0, 1fr);
+}
+
+.admin-sidebar {
+    z-index: 2;
+    min-width: 0;
+    padding: 30px 18px 20px;
+    background: linear-gradient(180deg, #4a1023 0%, #35101c 100%);
+}
+
+.admin-brand {
+    margin: 0 10px 40px;
+    font-size: 18px;
+    line-height: 1.15;
+}
+
+.admin-sidebar nav a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+    color: #f5e8ec;
+}
+
+.admin-sidebar nav a:hover,
+.admin-sidebar nav a[aria-current="page"] {
+    border-color: rgb(255 255 255 / 12%);
+    background: rgb(255 255 255 / 9%);
+}
+
+.admin-top {
+    min-width: 0;
+    min-height: 78px;
+    padding: 12px clamp(18px, 3vw, 40px);
+}
+
+.admin-top-title {
+    display: grid;
+    gap: 3px;
+}
+
+.admin-top-title > span {
+    color: #96737d;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .15em;
+}
+
+.admin-top-title > strong {
+    font-size: 19px;
+}
+
+.admin-user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.admin-user-avatar {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    background: #f5e9ed;
+    color: #68142e;
+    font-weight: 700;
+}
+
+.admin-content {
+    width: 100%;
+    max-width: 1512px;
+    min-width: 0;
+    padding: clamp(22px, 3vw, 40px);
+}
+
+.page-head {
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.page-head h1 {
+    line-height: 1.15;
+}
+
+.page-head p {
+    line-height: 1.5;
+}
+
+.stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.stats > div {
+    min-width: 0;
+    min-height: 132px;
+    align-content: space-between;
+    padding: 22px;
+}
+
+.admin-grid {
+    gap: 18px;
+}
+
+.admin-card {
+    min-width: 0;
+    min-height: 112px;
+    align-content: center;
+    padding: 22px;
+}
+
+.table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+
+.admin-content table {
+    min-width: 760px;
+}
+
+.admin-content th,
+.admin-content td {
+    padding: 15px 17px;
+}
+
+.admin-content td {
+    line-height: 1.45;
+}
+
+.product-cell,
+.admin-variant-summary {
+    min-width: 0;
+}
+
+.product-cell > div {
+    min-width: 0;
+}
+
+.product-cell b,
+.admin-variant-summary span {
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+.actions {
+    white-space: nowrap;
+}
+
+.products-table-wrap {
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgb(48 35 33 / 4%);
+}
+
+.products-table {
+    table-layout: fixed;
+}
+
+.products-col-product { width: 36%; }
+.products-col-category { width: 15%; }
+.products-col-variants { width: 37%; }
+.products-col-actions { width: 12%; }
+
+.products-table th,
+.products-table td {
+    padding: 17px 20px;
+}
+
+.products-table tbody tr {
+    transition: background-color .16s ease;
+}
+
+.products-table tbody tr:hover {
+    background: #fdfaf9;
+}
+
+.products-table .products-actions-heading {
+    text-align: center;
+}
+
+.products-table .products-actions {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.products-action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.products-action-buttons form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.products-action-buttons a,
+.products-action-buttons button {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid #eadde1;
+    border-radius: 5px;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.products-action-buttons a:hover {
+    border-color: #68142e;
+    background: #fbf4f6;
+}
+
+.products-action-buttons button {
+    color: #9b3549;
+}
+
+.products-action-buttons button:hover {
+    border-color: #e6c4cb;
+    background: #fff6f7;
+}
+
+.admin-product-filters {
+    display: flex;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 18px;
+    padding: 16px;
+    border: 1px solid #ece5e2;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.admin-product-filters label {
+    display: grid;
+    gap: 6px;
+    color: #685b57;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-product-filters select {
+    min-width: 170px;
+}
+
+.admin-product-filters input[type="search"] {
+    min-width: 190px;
+}
+
+.inventory-empty {
+    padding: 32px !important;
+    color: #806d67;
+    text-align: center;
+}
+
+.admin-filter-clear {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 10px;
+    color: #68142e;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.admin-filter-clear:hover {
+    text-decoration: underline;
+}
+
+.admin-grid-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    margin-top: 22px;
+}
+
+.admin-pagination,
+.admin-page-numbers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.admin-pagination {
+    margin-top: 0;
+}
+
+.admin-page-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: #685b57;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-page-size select {
+    min-width: 82px;
+    min-height: 38px;
+    padding: 0 10px;
+    border: 1px solid #eadde1;
+    border-radius: 5px;
+    background: #fff;
+    color: #68142e;
+    font: inherit;
+}
+
+.admin-pagination > a,
+.admin-pagination > span,
+.admin-page-numbers a,
+.admin-page-numbers span {
+    min-width: 38px;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid #eadde1;
+    border-radius: 5px;
+    background: #fff;
+    color: #68142e;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.admin-pagination > a:hover,
+.admin-page-numbers a:hover,
+.admin-page-numbers .is-current {
+    border-color: #68142e;
+    background: #68142e;
+    color: #fff;
+}
+
+.admin-pagination .is-disabled {
+    color: #a99a96;
+}
+
+@media (max-width: 760px) {
+    .admin-grid-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .admin-product-filters {
+        align-items: stretch;
+    }
+
+    .admin-product-filters label,
+    .admin-product-filters select,
+    .admin-product-filters input[type="search"],
+    .admin-product-filters > .primary {
+        width: 100%;
+    }
+
+    .products-table {
+        table-layout: auto;
+    }
+
+    .products-col-product { width: auto; }
+    .products-col-category { width: auto; }
+    .products-col-variants { width: auto; }
+    .products-col-actions { width: 128px; }
+
+    .products-table th,
+    .products-table td {
+        padding: 13px 12px;
+    }
+}
+
+.form-card {
+    padding: clamp(16px, 2.5vw, 30px);
+}
+
+.alert.error {
+    margin: 0 0 20px;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+@media (max-width: 1000px) {
+    .admin-shell {
+        grid-template-columns: 210px minmax(0, 1fr);
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .admin-shell {
+        display: block;
+    }
+
+    .admin-sidebar {
+        position: relative;
+        height: auto;
+        padding: 14px 18px 12px;
+    }
+
+    .admin-brand {
+        margin: 0 0 12px;
+        font-size: 15px;
+    }
+
+    .admin-brand span {
+        display: inline;
+        margin: 0 0 0 7px;
+        font-size: 9px;
+    }
+
+    .admin-sidebar nav {
+        display: flex;
+        gap: 5px;
+        overflow-x: auto;
+        padding-bottom: 3px;
+        scrollbar-width: thin;
+    }
+
+    .admin-sidebar nav a {
+        min-height: 40px;
+        flex: 0 0 auto;
+        padding: 8px 11px;
+        font-size: 12px;
+    }
+
+    .admin-side-bottom {
+        display: flex;
+        justify-content: flex-end;
+        gap: 4px;
+        margin-top: 5px;
+        padding-top: 5px;
+        border-top: 0;
+    }
+
+    .admin-side-bottom a {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .admin-top {
+        min-height: 64px;
+        padding: 10px 18px;
+    }
+
+    .admin-top-title > span {
+        font-size: 8px;
+    }
+
+    .admin-top-title > strong {
+        font-size: 17px;
+    }
+
+    .admin-content {
+        padding: 24px 18px 36px;
+    }
+
+    .stats {
+        gap: 11px;
+        margin-bottom: 18px;
+    }
+
+    .stats > div {
+        min-height: 112px;
+        padding: 16px;
+    }
+
+    .stats strong {
+        font-size: 25px;
+    }
+
+    .admin-grid {
+        gap: 11px;
+    }
+
+    .admin-card {
+        min-height: 100px;
+        padding: 17px;
+    }
+
+    .page-head {
+        align-items: flex-start;
+        margin-bottom: 21px;
+    }
+
+    .page-head .primary,
+    .page-head .secondary {
+        min-height: 42px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-user > span:last-child {
+        max-width: 104px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .admin-content {
+        padding: 21px 14px 30px;
+    }
+
+    .admin-content h1 {
+        font-size: 28px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stats > div {
+        min-height: 100px;
+        padding: 14px;
+    }
+
+    .stats span {
+        font-size: 12px;
+    }
+
+    .stats strong {
+        font-size: 23px;
+    }
+
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-head {
+        gap: 14px;
+    }
+
+    .variant-editor {
+        padding: 14px;
+    }
+
+    .variant-editor-heading {
+        align-items: flex-start;
+    }
+
+    .variant-editor-heading h2 {
+        font-size: 19px;
+    }
+
+    .variant-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .form-actions {
+        flex-wrap: wrap;
+    }
+
+    .form-actions > * {
+        flex: 1 1 120px;
+    }
+}

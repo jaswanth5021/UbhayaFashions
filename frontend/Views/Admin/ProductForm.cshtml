@@ -1,0 +1,202 @@
+@model AdminProductInput
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Add product" : "Edit product";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-head">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p>Enter the product information shown in your store.</p>
+    </div>
+    <a class="secondary" asp-action="Products">← Products</a>
+</div>
+
+<div class="form-card">
+    <form asp-action="SaveProduct" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
+        <div asp-validation-summary="All" class="alert error"></div>
+        @if (ViewBag.CategoryLoadError is string categoryLoadError)
+        {
+            <div class="category-notice error" role="alert">@categoryLoadError</div>
+        }
+        @if (TempData["ProductImageMessage"] is string imageMessage)
+        {
+            <p class="admin-image-feedback success" role="status">@imageMessage</p>
+        }
+        @if (TempData["ProductImageError"] is string imageError)
+        {
+            <p class="admin-image-feedback error" role="alert">@imageError</p>
+        }
+
+        <div class="form-grid">
+            <div class="full">
+                <label asp-for="Name">Product name</label>
+                <input asp-for="Name" required />
+            </div>
+            <div>
+                <label asp-for="CategoryId">Category</label>
+                @{ var categories = ViewBag.Categories as List<CategoryViewModel> ?? []; }
+                <select asp-for="CategoryId" required>
+                    <option value="">Choose category</option>
+                    @foreach (var category in categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+                @if (categories.Count == 0)
+                {
+                    <small>No categories yet. <a asp-action="Categories">Add a category</a> first.</small>
+                }
+            </div>
+            <div class="full">
+                <label asp-for="Description">Description</label>
+                <textarea asp-for="Description" rows="5"></textarea>
+            </div>
+            <div class="full variant-editor">
+                <div class="variant-editor-heading">
+                    <div><h2>Size variants</h2><p>Set the price, discount, and stock for every size.</p></div>
+                    <button class="secondary" type="button" id="addVariantRow">+ Add size</button>
+                </div>
+                <div class="variant-row variant-row-header" aria-hidden="true"><span>Size</span><span>Price (INR)</span><span>Discount (%)</span><span>Stock</span><span></span></div>
+                <div id="variantRows">
+                    @for (var index = 0; index < Model.Variants.Count; index++)
+                    {
+                        var variant = Model.Variants[index];
+                        <div class="variant-row" data-variant-row>
+                            <select name="Variants[@index].Size" data-variant-field="Size" required>
+                                <option value="">Choose size</option>
+                                @foreach (var size in new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" })
+                                {
+                                    <option value="@size" selected="@(variant.Size == size)">@size</option>
+                                }
+                            </select>
+                            <input name="Variants[@index].Price" data-variant-field="Price" type="number" min="0" step="0.01" value="@variant.Price" required aria-label="Price" />
+                            <input name="Variants[@index].Discount" data-variant-field="Discount" type="number" min="0" max="100" step="0.01" value="@variant.Discount" aria-label="Discount percent" />
+                            <input name="Variants[@index].Stock" data-variant-field="Stock" type="number" min="0" step="1" value="@variant.Stock" required aria-label="Stock" />
+                            <button class="variant-remove" type="button" data-remove-variant>Remove</button>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div>
+                <label asp-for="Colors">Colors</label>
+                <input asp-for="Colors" placeholder="Pink,Blue" />
+            </div>
+
+            <div class="full admin-product-images">
+                <label for="image">Main product image</label>
+                <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" />
+                <label asp-for="NewImageUrl">Or use a new image URL</label>
+                <input asp-for="NewImageUrl" type="url" placeholder="https://example.com/product-image.jpg" />
+                <small>Leave blank to keep the current image. A selected file takes priority over this URL.</small>
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img class="preview admin-main-image-preview" src="@ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"])" alt="Current main product image" />
+                    <label class="admin-image-delete-option"><input type="checkbox" name="removeImage" value="true" /> <span>Remove current main image when saving</span></label>
+                }
+            </div>
+
+            <div class="full admin-product-images">
+                <label for="subImages">Additional product images</label>
+                <input id="subImages" name="subImages" type="file" accept="image/jpeg,image/png,image/webp" multiple />
+                <small>Select one or more extra product images. Existing additional images are kept.</small>
+                @if (Model.Images.Count > 0)
+                {
+                    <div class="admin-image-gallery">
+                        @foreach (var productImage in Model.Images.OrderBy(x => x.SortOrder))
+                        {
+                            <div class="admin-image-item">
+                                <img src="@ImageUrlHelper.Resolve(productImage.ImageUrl, Configuration["ApiBaseUrl"])" alt="Additional image for @Model.Name" />
+                                <button class="admin-image-remove" type="button" data-delete-image-url="@Url.Action("DeleteProductImage", "Admin")" data-product-id="@Model.Id" data-image-id="@productImage.Id" aria-label="Remove additional image" title="Remove image">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="full admin-product-images">
+                <label for="productVideos">Product videos</label>
+                <input id="productVideos" name="productVideos" type="file" accept="video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv" multiple />
+                <small>Upload up to five MP4, WebM, or Ogg videos, up to 100 MB each. Videos are added to the product gallery.</small>
+                @if (Model.Videos.Count > 0)
+                {
+                    <div class="admin-video-gallery">
+                        @foreach (var video in Model.Videos.OrderBy(item => item.SortOrder))
+                        {
+                            <video src="@video.VideoUrl" controls preload="metadata" aria-label="Product video for @Model.Name"></video>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="secondary" asp-action="Products">Cancel</a>
+            <button class="primary" type="submit">SAVE PRODUCT</button>
+        </div>
+    </form>
+</div>
+
+<template id="variantRowTemplate">
+    <div class="variant-row" data-variant-row>
+        <select name="Variants[__index__].Size" data-variant-field="Size" required>
+            <option value="">Choose size</option><option value="S">S</option><option value="M">M</option><option value="L">L</option>
+            <option value="XL">XL</option><option value="XXL">XXL</option><option value="3XL">3XL</option><option value="FREE SIZE">FREE SIZE</option>
+        </select>
+        <input name="Variants[__index__].Price" data-variant-field="Price" type="number" min="0" step="0.01" value="0" required aria-label="Price" />
+        <input name="Variants[__index__].Discount" data-variant-field="Discount" type="number" min="0" max="100" step="0.01" value="0" aria-label="Discount percent" />
+        <input name="Variants[__index__].Stock" data-variant-field="Stock" type="number" min="0" step="1" value="0" required aria-label="Stock" />
+        <button class="variant-remove" type="button" data-remove-variant>Remove</button>
+    </div>
+</template>
+<script>
+    const variantRows = document.getElementById("variantRows");
+    document.getElementById("addVariantRow")?.addEventListener("click", () => {
+        const index = variantRows.querySelectorAll("[data-variant-row]").length;
+        const row = document.getElementById("variantRowTemplate").content.cloneNode(true);
+        row.querySelectorAll("[name]").forEach((field) => field.name = field.name.replace("__index__", index));
+        variantRows.appendChild(row);
+    });
+    variantRows?.addEventListener("click", (event) => {
+        const removeButton = event.target.closest("[data-remove-variant]");
+        if (!removeButton) return;
+        removeButton.closest("[data-variant-row]").remove();
+        variantRows.querySelectorAll("[data-variant-row]").forEach((row, index) => {
+            row.querySelectorAll("[data-variant-field]").forEach((field) => {
+                field.name = `Variants[${index}].${field.dataset.variantField}`;
+            });
+        });
+    });
+
+    document.querySelector(".admin-image-gallery")?.addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-delete-image-url]");
+        if (!button) return;
+
+        const item = button.closest(".admin-image-item");
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const body = new FormData();
+        body.append("id", button.dataset.productId);
+        body.append("imageId", button.dataset.imageId);
+        body.append("__RequestVerificationToken", token || "");
+        button.disabled = true;
+
+        try {
+            const response = await fetch(button.dataset.deleteImageUrl, {
+                method: "POST",
+                body,
+                credentials: "same-origin"
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || `Image removal failed (${response.status}).`);
+            item.remove();
+        } catch (error) {
+            window.alert(error.message || "Could not remove this image.");
+            button.disabled = false;
+        }
+    });
+</script>

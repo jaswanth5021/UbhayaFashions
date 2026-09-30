@@ -1,0 +1,43 @@
+@{
+    var title = ViewData["Title"]?.ToString() ?? "Admin";
+    var adminName = string.IsNullOrWhiteSpace(Context.Request.Cookies["admin_name"])
+        ? "Administrator"
+        : Context.Request.Cookies["admin_name"]!;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - Ubhaya Admin</title>
+    <link rel="stylesheet" href="~/css/pages/admin/base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/admin/management.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/admin/app.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a class="admin-brand" asp-controller="Admin" asp-action="Dashboard">UBHAYA <span>ADMIN</span></a>
+            <nav aria-label="Admin navigation">
+                <a asp-action="Dashboard">Dashboard</a>
+                <a asp-action="Products">Products</a>
+                <a asp-action="Categories">Categories</a>
+                <a asp-action="Inventory">Inventory</a>
+                <a asp-action="Orders">Orders</a>
+                <a asp-action="Payments">Payments</a>
+            </nav>
+            <div class="admin-side-bottom">
+                <a href="/" target="_blank" rel="noopener">View Store <span aria-hidden="true">?</span></a>
+                <a asp-action="Logout">Logout</a>
+            </div>
+        </aside>
+        <main class="admin-main">
+            <header class="admin-top">
+                <div class="admin-top-title"><span>UBHAYA FASHIONS</span><strong>Administration</strong></div>
+                <div class="admin-user"><span class="admin-user-avatar" aria-hidden="true">@adminName[..1].ToUpperInvariant()</span><span>@adminName</span></div>
+            </header>
+            <div class="admin-content">@RenderBody()</div>
+        </main>
+    </div>
+</body>
+</html>

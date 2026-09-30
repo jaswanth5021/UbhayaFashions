@@ -1,0 +1,504 @@
+@using System.Text.Json
+@using Microsoft.Extensions.Caching.Memory
+@inject LadiesDressStore.Web.Services.ApiService Api
+@inject IMemoryCache ProductCache
+@{
+    var pageTitle = ViewData["Title"]?.ToString() ?? "Home";
+    var cartItems = new List<LadiesDressStore.Web.Models.CartItemViewModel>();
+    var cartCookie = Context.Request.Cookies["cart"];
+    if (!string.IsNullOrWhiteSpace(cartCookie))
+    {
+        try
+        {
+            cartItems = JsonSerializer.Deserialize<List<LadiesDressStore.Web.Models.CartItemViewModel>>(cartCookie) ?? [];
+        }
+        catch (JsonException) { }
+    }
+    var cartCount = cartItems.Sum(item => Math.Max(0, item.Quantity));
+    var cartTotal = cartItems.Sum(item => item.Price * item.Quantity);
+    var cartVariants = ViewBag.CartVariants as Dictionary<int, List<LadiesDressStore.Web.Models.ProductVariantViewModel>> ?? new();
+    var missingCartProductIds = cartItems.Select(item => item.ProductId).Distinct().Where(id => !cartVariants.ContainsKey(id)).ToList();
+    var cartProductTasks = missingCartProductIds.Select(async id =>
+    {
+        try
+        {
+            var product = await ProductCache.GetOrCreateAsync($"cart-product:{id}", async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60);
+                return await Api.GetProductAsync(id);
+            });
+            return (Id: id, Variants: product?.Variants);
+        }
+        catch (HttpRequestException) { return (Id: id, Variants: (List<LadiesDressStore.Web.Models.ProductVariantViewModel>?)null); }
+        catch (JsonException) { return (Id: id, Variants: (List<LadiesDressStore.Web.Models.ProductVariantViewModel>?)null); }
+    });
+    foreach (var productData in await Task.WhenAll(cartProductTasks))
+    {
+        if (productData.Variants is not null) cartVariants[productData.Id] = productData.Variants;
+    }
+    var openCartDrawer = TempData["OpenCartDrawer"] as bool? == true;
+    var savedCheckoutAddresses = new List<LadiesDressStore.Web.Models.SavedAddressViewModel>();
+
+    var wishlistCount = 0;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        var wishlistTask = Api.GetWishlistAsync();
+        var addressesTask = Api.GetMyAddressesAsync();
+        try
+        {
+            wishlistCount = (await wishlistTask).Count;
+        }
+        catch (HttpRequestException) { }
+
+        try
+        {
+            savedCheckoutAddresses = await addressesTask;
+        }
+        catch (HttpRequestException) { }
+        catch (JsonException) { }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" type="image/png" href="~/images/favicon.png" asp-append-version="true" />
+
+    <title>@pageTitle - UBHAYA FASHIONS</title>
+
+    <!-- Shared and page feature styles, in cascade order -->
+    <link rel="stylesheet" href="~/css/pages/home/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/products/details.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/components.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/contact-footer.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/responsive.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/home/new-arrivals.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/products/catalog.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/home/home-products.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/site-polish.css" asp-append-version="true" />
+
+    <!-- Hamburger Menu CSS -->
+    <link rel="stylesheet"
+          href="~/css/pages/shared/menu.css"
+          asp-append-version="true" />
+
+    <!-- Footer CSS -->
+    <link rel="stylesheet"
+          href="~/css/pages/shared/footer.css"
+          asp-append-version="true" />
+
+    <!-- Contact Page CSS -->
+    <link rel="stylesheet"
+          href="~/css/pages/contact/contact.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+      href="~/css/pages/account/profile.css"
+      asp-append-version="true" />      
+</head>
+
+<body>
+
+    <!-- =========================================
+         ANNOUNCEMENT BAR
+         ========================================= -->
+
+    <div class="announcement-bar">
+        ✦ NEW COLLECTIONS ARE COMING ✦
+    </div>
+
+
+    <!-- =========================================
+         HEADER
+         ========================================= -->
+
+    <header class="header">
+
+        <!-- LEFT: HAMBURGER -->
+
+        <button class="menu-button"
+                id="menuOpen"
+                type="button"
+                aria-label="Open menu"
+                aria-controls="sideMenu"
+                aria-expanded="false">
+
+            ☰
+
+        </button>
+
+
+        <!-- CENTER: LOGO -->
+
+        <a class="brand"
+           asp-controller="Home"
+           asp-action="Index">
+
+            <img src="~/images/logo.png"
+                 alt="UBHAYA FASHIONS" />
+
+        </a>
+
+
+        <!-- =====================================
+             HEADER ICONS
+             ===================================== -->
+
+        <div class="header-actions">
+
+            <!-- SEARCH -->
+
+            <a asp-controller="Home"
+               asp-action="Index"
+               asp-fragment="products"
+               class="header-icon"
+               aria-label="Browse products">
+
+                <svg width="22"
+                     height="22"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.6"
+                     stroke-linecap="round"
+                     stroke-linejoin="round">
+
+                    <circle cx="11"
+                            cy="11"
+                            r="7" />
+
+                    <path d="m20 20-4-4" />
+
+                </svg>
+
+            </a>
+
+
+            <!-- ACCOUNT -->
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Account"
+                   asp-action="Profile"
+                   class="header-icon"
+                   aria-label="My account">
+
+                    <svg width="22"
+                         height="22"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.7"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+
+                        <circle cx="12"
+                                cy="8"
+                                r="4" />
+
+                        <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+
+                    </svg>
+
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Account"
+                   asp-action="Login"
+                   class="header-icon"
+                   aria-label="Login">
+
+                    <svg width="22"
+                         height="22"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.7"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+
+                        <circle cx="12"
+                                cy="8"
+                                r="4" />
+
+                        <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+
+                    </svg>
+
+                </a>
+            }
+
+
+            <a asp-controller="Wishlist"
+               asp-action="Index"
+               class="header-icon wishlist-header-icon"
+                aria-label="My wishlist"
+                title="My wishlist">
+                @if (wishlistCount > 0)
+                {
+                    <span class="header-icon-count" aria-label="@wishlistCount items">@wishlistCount</span>
+                }
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" />
+                </svg>
+            </a>
+
+            <!-- SHOPPING BAG -->
+
+            <a asp-controller="Cart"
+               asp-action="Index"
+               class="header-icon cart-icon"
+               id="cartDrawerOpen"
+               aria-label="Shopping cart@(cartCount > 0 ? $", {cartCount} items" : "")">
+
+                @if (cartCount > 0)
+                {
+                    <span class="header-icon-count" aria-label="@cartCount items">@cartCount</span>
+                }
+
+                <svg width="22"
+                     height="22"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.6"
+                     stroke-linecap="round"
+                     stroke-linejoin="round">
+
+                    <path d="M4 8h16l-1 13H5L4 8Z" />
+
+                    <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+
+                </svg>
+
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================
+         HAMBURGER SIDE MENU
+         ========================================= -->
+
+    @await Html.PartialAsync("_SideMenu")
+
+
+    <!-- =========================================
+         MAIN CONTENT
+         ========================================= -->
+
+    <main class="container">
+
+        @RenderBody()
+
+    </main>
+
+    <div class="cart-drawer-backdrop @(openCartDrawer ? "is-open" : string.Empty)" id="cartDrawerBackdrop" hidden></div>
+    <aside class="cart-drawer @(openCartDrawer ? "is-open" : string.Empty)" id="cartDrawer" aria-labelledby="cartDrawerTitle" aria-hidden="@(!openCartDrawer)">
+        <div class="cart-drawer-header">
+            <h2 id="cartDrawerTitle">Your cart</h2>
+            <button type="button" class="cart-drawer-close" id="cartDrawerClose" aria-label="Close cart">×</button>
+        </div>
+        <div class="cart-drawer-columns"><span>Product</span><span>Total</span></div>
+        @if (TempData["CartMessage"] is string drawerCartMessage)
+        {
+            <p class="cart-drawer-notice" role="status">@drawerCartMessage</p>
+        }
+        @if (TempData["CartError"] is string drawerCartError)
+        {
+            <p class="cart-drawer-notice is-error" role="alert">@drawerCartError</p>
+        }
+        <div class="cart-drawer-items" id="cartDrawerItemsStep">
+            @if (cartItems.Count == 0)
+            {
+                <p class="cart-drawer-empty">Your cart is empty.</p>
+            }
+            else
+            {
+                @foreach (var item in cartItems)
+                {
+                    <article class="cart-drawer-item">
+                        <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
+                        <div class="cart-drawer-item-info">
+                            <h3>@item.Name</h3>
+                            <form asp-controller="Cart" asp-action="Update" method="post" class="cart-item-update cart-drawer-update" data-cart-update>
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <input type="hidden" name="currentSize" value="@item.Size" />
+                                <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+                                <label>Size <select name="size" data-cart-size>
+                                    @foreach (var variant in cartVariants.GetValueOrDefault(item.ProductId, []).Where(variant => variant.Stock > 0).OrderBy(variant => variant.Size))
+                                    {
+                                        <option value="@variant.Size" data-stock="@variant.Stock" selected="@(string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@variant.Size</option>
+                                    }
+                                </select></label>
+                                @{ var selectedCartVariant = cartVariants.GetValueOrDefault(item.ProductId, []).FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase)); }
+                                <label>Qty <select name="quantity" data-cart-quantity>
+                                    @for (var qty = 1; qty <= Math.Max(1, selectedCartVariant?.Stock ?? item.Quantity); qty++)
+                                    {
+                                        <option value="@qty" selected="@(qty == item.Quantity ? "selected" : null)">@qty</option>
+                                    }
+                                </select></label>
+                            </form>
+                        </div>
+                        <strong>Rs. @((item.Price * item.Quantity).ToString("N2"))</strong>
+                        <form asp-controller="Cart" asp-action="Remove" method="post" class="cart-drawer-remove" data-cart-remove>
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <input type="hidden" name="size" value="@item.Size" />
+                            <button type="submit" aria-label="Remove @item.Name from cart">×</button>
+                        </form>
+                    </article>
+                }
+            }
+        </div>
+        <section class="cart-drawer-address-step" id="cartDrawerAddressStep" hidden aria-label="Choose delivery address">
+            <div class="checkout-drawer-title-row">
+                <button type="button" class="cart-drawer-back" id="cartDrawerBackToItems">← Back</button>
+                <span>Delivery</span>
+                <button type="button" class="cart-drawer-close checkout-inline-close" id="cartDrawerAddressClose" aria-label="Close">×</button>
+            </div>
+
+            <form asp-controller="Orders" asp-action="Checkout" method="post" class="cart-drawer-address-form" id="drawerCheckoutForm">
+                @Html.AntiForgeryToken()
+                <div class="checkout-step-label">DELIVERY ADDRESS</div>
+
+                <div class="drawer-address-list" id="drawerAddressList">
+                    @if (savedCheckoutAddresses.Count > 0)
+                    {
+                        @for (var addressIndex = 0; addressIndex < savedCheckoutAddresses.Count; addressIndex++)
+                        {
+                            var savedAddress = savedCheckoutAddresses[addressIndex];
+                            var checkedAddress = savedAddress.IsDefault || (!savedCheckoutAddresses.Any(x => x.IsDefault) && addressIndex == 0);
+                            <label class="drawer-address-card">
+                                <input type="radio" name="drawerSavedAddress" value="@savedAddress.Id"
+                                       data-address="@savedAddress.FullAddress"
+                                       data-name="@savedAddress.Name"
+                                       data-mobile="@savedAddress.Mobile"
+                                       checked="@(checkedAddress ? "checked" : null)" />
+                                <span class="drawer-address-radio" aria-hidden="true"></span>
+                                <span class="drawer-address-card-copy">
+                                    <strong>@savedAddress.Name</strong>
+                                    <span>@savedAddress.FullAddress</span>
+                                    <small>@savedAddress.Mobile</small>
+                                </span>
+                                <button type="button" class="drawer-address-delete" data-address-id="@savedAddress.Id" aria-label="Delete address">×</button>
+                            </label>
+                        }
+                    }
+                    else
+                    {
+                        <div class="drawer-no-address">No saved addresses yet.</div>
+                    }
+                </div>
+
+                <button type="button" class="drawer-add-address" id="drawerAddNewAddress">＋ Add new address</button>
+
+                <div class="drawer-new-address" id="drawerNewAddress" hidden>
+                    <div class="drawer-new-address-head">
+                        <strong>Add a new address</strong>
+                        <button type="button" id="drawerCancelNewAddress">Cancel</button>
+                    </div>
+
+                    <button type="button" class="use-location-button" id="drawerUseLocation">
+                        <span aria-hidden="true">⌖</span> Use my current location
+                    </button>
+                    <div id="drawerAddressAutocomplete" data-google-maps-key="@Configuration["Google:MapsApiKey"]"></div>
+                    <p class="drawer-address-hint">Search your address or use your current location.</p>
+
+                    <div class="drawer-form-grid">
+                        <div class="drawer-field drawer-field-full">
+                            <label for="newAddressName">Name</label>
+                            <input id="newAddressName" type="text" autocomplete="name" />
+                        </div>
+                        <div class="drawer-field drawer-field-full">
+                            <label for="newAddressMobile">Mobile</label>
+                            <input id="newAddressMobile" type="tel" autocomplete="tel" />
+                        </div>
+                        <div class="drawer-field drawer-field-full">
+                            <label for="newAddressLine1">House / Flat / Street</label>
+                            <input id="newAddressLine1" type="text" autocomplete="address-line1" />
+                        </div>
+                        <div class="drawer-field drawer-field-full">
+                            <label for="newAddressLine2">Area / Landmark</label>
+                            <input id="newAddressLine2" type="text" autocomplete="address-line2" />
+                        </div>
+                        <div class="drawer-field">
+                            <label for="newAddressCity">City</label>
+                            <input id="newAddressCity" type="text" autocomplete="address-level2" />
+                        </div>
+                        <div class="drawer-field">
+                            <label for="newAddressState">State</label>
+                            <input id="newAddressState" type="text" autocomplete="address-level1" />
+                        </div>
+                        <div class="drawer-field">
+                            <label for="newAddressPostalCode">PIN Code</label>
+                            <input id="newAddressPostalCode" type="text" inputmode="numeric" maxlength="10" autocomplete="postal-code" />
+                        </div>
+                    </div>
+
+                    <label class="drawer-default-address">
+                        <input id="newAddressDefault" type="checkbox" />
+                        <span>Make this my default address</span>
+                    </label>
+
+                    <p class="drawer-address-error" id="drawerAddressError" hidden></p>
+                    <button type="button" class="drawer-save-address" id="drawerSaveAddress">Save address</button>
+                </div>
+
+                <div class="drawer-selected-address" id="drawerSelectedAddress" hidden></div>
+                <input type="hidden" id="drawerShippingAddress" name="ShippingAddress" required />
+                <button class="cart-drawer-checkout" id="drawerContinuePayment" type="submit">Continue to payment</button>
+            </form>
+        </section>
+        <div class="cart-drawer-footer" id="cartDrawerFooterStep">
+            <div class="cart-drawer-total"><span>Estimated total</span><strong>Rs. @cartTotal.ToString("N2")</strong></div>
+            <p>Taxes, discounts and shipping calculated at checkout.</p>
+            @if (cartItems.Count > 0 && User.Identity?.IsAuthenticated == true)
+            {
+                <button class="cart-drawer-checkout" type="button" id="cartDrawerBeginCheckout">Checkout</button>
+            }
+            else if (cartItems.Count > 0)
+            {
+                <a class="cart-drawer-checkout" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Cart">Login to checkout</a>
+            }
+            <a class="cart-drawer-view-cart" asp-controller="Cart" asp-action="Index">View cart</a>
+        </div>
+    </aside>
+
+
+    <!-- =========================================
+         FOOTER
+         ========================================= -->
+
+    @await Html.PartialAsync("_Footer")
+
+
+    <!-- =========================================
+         JAVASCRIPT
+         ========================================= -->
+
+    <script src="~/js/menu.js"
+            asp-append-version="true">
+    </script>
+    <script src="~/js/cart-drawer.js" asp-append-version="true"></script>
+    <script src="~/js/cart-update.js" asp-append-version="true"></script>
+    <script src="~/js/checkout-address.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+    )
+
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+@model LadiesDressStore.Web.Models.ContactViewModel
+
+<div class="contact-page">
+
+    <div class="contact-header">
+        <h1>Contact Us</h1>
+        <p>We'd love to hear from you. Get in touch with Ubhaya Fashions.</p>
+    </div>
+
+    <div class="contact-content">
+
+        <div class="contact-info">
+            <h2>Get in Touch</h2>
+
+            <p>
+                Have a question about our products or your order?
+                Send us a message and we'll get back to you.
+            </p>
+
+            <div class="contact-item">
+                <strong>Email</strong>
+                <span>ubhayafashions@gamil.com</span>
+            </div>
+
+            <div class="contact-item">
+                <strong>Phone</strong>
+                <span>+91 XXXXX XXXXX</span>
+            </div>
+
+            <div class="contact-item">
+                <strong>Location</strong>
+                <span>Hyderabad, Telangana, India</span>
+            </div>
+        </div>
+
+        <div class="contact-form">
+
+            <h2>Send Us a Message</h2>
+
+            <form asp-controller="Contact"
+                  asp-action="Index"
+                  method="post">
+
+                <label asp-for="Name"></label>
+                <input asp-for="Name" />
+                <span asp-validation-for="Name" class="error"></span>
+
+                <label asp-for="Email"></label>
+                <input asp-for="Email" type="email" />
+                <span asp-validation-for="Email" class="error"></span>
+
+                <label asp-for="Subject"></label>
+                <input asp-for="Subject" />
+                <span asp-validation-for="Subject" class="error"></span>
+
+                <label asp-for="Message"></label>
+                <textarea asp-for="Message"></textarea>
+                <span asp-validation-for="Message" class="error"></span>
+
+                <button type="submit" class="button">
+                    Send Message
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

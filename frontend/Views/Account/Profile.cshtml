@@ -1,0 +1,170 @@
+@model LadiesDressStore.Web.Models.ProfileViewModel
+@using LadiesDressStore.Web.Models
+@{
+    ViewData["Title"] = "My Profile";
+    var addresses = ViewBag.SavedAddresses as List<SavedAddressViewModel> ?? [];
+    var activeTab = ViewBag.ActiveTab as string ?? "details";
+    var firstLetter = string.IsNullOrWhiteSpace(Model.Name) ? "U" : Model.Name.Trim()[0].ToString().ToUpperInvariant();
+}
+
+<div class="profile-page">
+    <section class="profile-card profile-account-card">
+        <header class="profile-header">
+            <div class="profile-avatar">@firstLetter</div>
+            <div class="profile-heading">
+                <span class="profile-eyebrow">ACCOUNT</span>
+                <h1>@(activeTab == "addresses" ? "Your Addresses" : "My Profile")</h1>
+                <p>@(activeTab == "addresses" ? "Manage the addresses you use for delivery." : "Manage your personal information, delivery addresses, and password.")</p>
+            </div>
+        </header>
+
+        @if (TempData["ProfileSuccess"] is string success) { <div class="profile-success">@success</div> }
+        @if (TempData["ProfileError"] is string error) { <div class="profile-error">@error</div> }
+        @if (!string.IsNullOrWhiteSpace(ViewBag.Error)) { <div class="profile-error">@ViewBag.Error</div> }
+
+        <nav class="profile-tabs" aria-label="Profile sections">
+            <a class="@(activeTab == "details" ? "is-active" : "")" asp-action="Profile" asp-route-tab="details">Personal details</a>
+            <a class="@(activeTab == "addresses" ? "is-active" : "")" asp-action="Profile" asp-route-tab="addresses">My addresses</a>
+            <a class="@(activeTab == "security" ? "is-active" : "")" asp-action="Profile" asp-route-tab="security">Password &amp; security</a>
+        </nav>
+
+        @if (activeTab == "addresses")
+        {
+            <section class="profile-tab-panel">
+                <div class="profile-panel-heading"><h2>Your Addresses</h2><p>Choose an address for your deliveries or add a new one.</p></div>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.AddressLoadError))
+                {
+                    <div class="profile-error">@ViewBag.AddressLoadError</div>
+                }
+                <div class="profile-address-list">
+                    <details class="profile-address-card profile-add-address">
+                        <summary><span aria-hidden="true">+</span><strong>Add address</strong></summary>
+                        <div class="profile-address-editor">
+                            <h3>New address</h3>
+                            <form asp-action="SaveAddress" method="post" class="profile-address-form">
+                                @Html.AntiForgeryToken()
+                                <div class="profile-form-grid">
+                                    <label>Name<input name="Name" value="@Model.Name" required maxlength="150" /></label>
+                                    <label>Mobile<input name="Mobile" value="@Model.Mobile" required type="tel" /></label>
+                                    <label class="profile-field-wide">House / street<input name="AddressLine1" required maxlength="500" /></label>
+                                    <label class="profile-field-wide">Area / landmark<input name="AddressLine2" maxlength="500" /></label>
+                                    <label>City<input name="City" required /></label>
+                                    <label>State<input name="State" required /></label>
+                                    <label>PIN code<input name="PostalCode" required /></label>
+                                    <label>Country<input name="Country" value="India" required /></label>
+                                </div>
+                                <label class="profile-default-option"><input type="checkbox" name="IsDefault" value="true" /> Make this my default address</label>
+                                <button class="profile-save-button" type="submit">Add address</button>
+                            </form>
+                        </div>
+                    </details>
+                    @foreach (var address in addresses)
+                    {
+                        <article class="profile-address-card">
+                            @if (address.IsDefault) { <span class="profile-default-badge">Default</span> }
+                            <div class="profile-address-summary">
+                                <strong>@address.Name</strong>
+                                <span>@address.AddressLine1</span>
+                                @if (!string.IsNullOrWhiteSpace(address.AddressLine2)) { <span>@address.AddressLine2</span> }
+                                <span>@address.City, @address.State @address.PostalCode</span>
+                                <span>@address.Country</span>
+                                <span>Phone number: @address.Mobile</span>
+                                <span class="profile-delivery-note">Add delivery instructions</span>
+                            </div>
+                            <div class="profile-address-actions">
+                                <details class="profile-edit-address">
+                                    <summary>Edit</summary>
+                                    <div class="profile-address-editor">
+                                        <form asp-action="SaveAddress" method="post" class="profile-address-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="Id" value="@address.Id" />
+                                            <div class="profile-form-grid">
+                                                <label>Name<input name="Name" value="@address.Name" required maxlength="150" /></label>
+                                                <label>Mobile<input name="Mobile" value="@address.Mobile" required type="tel" /></label>
+                                                <label class="profile-field-wide">House / street<input name="AddressLine1" value="@address.AddressLine1" required maxlength="500" /></label>
+                                                <label class="profile-field-wide">Area / landmark<input name="AddressLine2" value="@address.AddressLine2" maxlength="500" /></label>
+                                                <label>City<input name="City" value="@address.City" required /></label>
+                                                <label>State<input name="State" value="@address.State" required /></label>
+                                                <label>PIN code<input name="PostalCode" value="@address.PostalCode" required /></label>
+                                                <label>Country<input name="Country" value="@address.Country" required /></label>
+                                            </div>
+                                            <label class="profile-default-option"><input type="checkbox" name="IsDefault" value="true" checked="@(address.IsDefault ? "checked" : null)" /> Make this my default address</label>
+                                            <button class="profile-save-button" type="submit">Save address</button>
+                                        </form>
+                                    </div>
+                                </details>
+                                <span aria-hidden="true">|</span>
+                            <form asp-action="DeleteAddress" method="post" class="profile-address-delete">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@address.Id" />
+                                <button type="submit">Remove address</button>
+                            </form>
+                                @if (!address.IsDefault)
+                                {
+                                    <span aria-hidden="true">|</span>
+                                    <form asp-action="SaveAddress" method="post" class="profile-set-default">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="Id" value="@address.Id" />
+                                        <input type="hidden" name="Name" value="@address.Name" />
+                                        <input type="hidden" name="Mobile" value="@address.Mobile" />
+                                        <input type="hidden" name="AddressLine1" value="@address.AddressLine1" />
+                                        <input type="hidden" name="AddressLine2" value="@address.AddressLine2" />
+                                        <input type="hidden" name="City" value="@address.City" />
+                                        <input type="hidden" name="State" value="@address.State" />
+                                        <input type="hidden" name="PostalCode" value="@address.PostalCode" />
+                                        <input type="hidden" name="Country" value="@address.Country" />
+                                        <input type="hidden" name="IsDefault" value="true" />
+                                        <button type="submit">Set as Default</button>
+                                    </form>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+        else if (activeTab == "security")
+        {
+            <section class="profile-tab-panel">
+                <div class="profile-panel-heading"><h2>Change password</h2><p>Use a unique password with at least 8 characters.</p></div>
+                <form asp-action="ChangePassword" method="post" class="profile-form">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="profile-error"></div>
+                    <div class="profile-field"><label for="CurrentPassword">Current password</label><input id="CurrentPassword" name="CurrentPassword" type="password" autocomplete="current-password" required /></div>
+                    <div class="profile-field"><label for="NewPassword">New password</label><input id="NewPassword" name="NewPassword" type="password" autocomplete="new-password" minlength="8" required /></div>
+                    <div class="profile-field"><label for="ConfirmPassword">Confirm new password</label><input id="ConfirmPassword" name="ConfirmPassword" type="password" autocomplete="new-password" minlength="8" required /></div>
+                    <button class="profile-save-button" type="submit">Update password</button>
+                </form>
+                <p class="profile-reset-note">Forgot your current password? <a asp-action="ForgotPassword">Reset it by email</a>.</p>
+            </section>
+        }
+        else
+        {
+            <section class="profile-tab-panel">
+                <div class="profile-panel-heading"><h2>Personal details</h2><p>Keep your account information up to date.</p></div>
+                <form asp-action="Profile" method="post" class="profile-form">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="profile-error"></div>
+                    <div class="profile-form-grid">
+                        <label class="profile-field">Full name<input asp-for="Name" autocomplete="name" required /></label>
+                        <label class="profile-field">Email address<input asp-for="Email" readonly class="profile-readonly" autocomplete="email" /><small class="profile-help">Contact support to change your email address.</small></label>
+                        <label class="profile-field">Mobile number<input asp-for="Mobile" type="tel" autocomplete="tel" /></label>
+                        <label class="profile-field">Age<input asp-for="Age" type="number" min="18" max="120" /></label>
+                        <label class="profile-field">Date of birth<input asp-for="DateOfBirth" type="date" /></label>
+                        <label class="profile-field">Gender <select asp-for="Gender"><option value="">Prefer not to say</option><option>Woman</option><option>Man</option><option>Non-binary</option><option>Self-describe</option></select></label>
+                    </div>
+                    <button class="profile-save-button" type="submit">Save changes</button>
+                </form>
+            </section>
+        }
+
+        <div class="profile-actions">
+            <a asp-controller="Home" asp-action="Index" class="profile-shopping-link">← Continue shopping</a>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="profile-logout-button">Logout</button>
+            </form>
+        </div>
+    </section>
+</div>

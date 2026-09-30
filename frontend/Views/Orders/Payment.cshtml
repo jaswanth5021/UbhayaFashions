@@ -1,0 +1,79 @@
+@model LadiesDressStore.Web.Models.PaymentCheckoutViewModel
+@{
+    ViewData["Title"] = "Secure Payment";
+}
+
+<div class="checkout-payment-page" style="max-width:720px;margin:60px auto;padding:32px;text-align:center;">
+    <h1>Complete Your Payment</h1>
+    <p>Order #@Model.OrderId</p>
+    <h2>₹@((Model.Amount / 100m).ToString("N2"))</h2>
+    <p id="payment-message">Click the button below to open Razorpay Checkout.</p>
+
+    <button id="pay-button" class="button" type="button" style="min-width:220px;">
+        Pay ₹@((Model.Amount / 100m).ToString("N0"))
+    </button>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+(() => {
+    const button = document.getElementById('pay-button');
+    const message = document.getElementById('payment-message');
+
+    const options = {
+        key: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.KeyId)),
+        amount: @Model.Amount,
+        currency: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Currency)),
+        name: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name)),
+        description: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Description)),
+        order_id: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RazorpayOrderId)),
+        theme: {
+            color: "#111111"
+        },
+        handler: async function (response) {
+            button.disabled = true;
+            message.textContent = 'Verifying your payment...';
+
+            const formData = new FormData();
+            formData.append('OrderId', '@Model.OrderId');
+            formData.append('RazorpayOrderId', response.razorpay_order_id || '');
+            formData.append('RazorpayPaymentId', response.razorpay_payment_id || '');
+            formData.append('RazorpaySignature', response.razorpay_signature || '');
+            formData.append('__RequestVerificationToken',
+                document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+            const verifyResponse = await fetch('@Url.Action("Verify", "Orders")', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            const result = await verifyResponse.json();
+            if (verifyResponse.ok && result.success) {
+                window.location.href = result.redirectUrl;
+                return;
+            }
+
+            button.disabled = false;
+            message.textContent = result.message || 'Payment verification failed. Please contact support.';
+        },
+        modal: {
+            ondismiss: function () {
+                message.textContent = 'Payment window closed. You can try again.';
+            }
+        }
+    };
+
+    button.addEventListener('click', function () {
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+            message.textContent = response.error?.description || 'Payment failed. Please try again.';
+        });
+        rzp.open();
+    });
+})();
+</script>
+
+<form style="display:none">
+    @Html.AntiForgeryToken()
+</form>

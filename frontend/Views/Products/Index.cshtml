@@ -1,0 +1,183 @@
+@model List<ProductViewModel>
+
+@{
+    var category = ViewBag.Category as string;
+    var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
+    var productCount = (int)ViewBag.ProductCount;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var pageCount = (int)ViewBag.PageCount;
+    ViewData["Title"] = string.IsNullOrWhiteSpace(category)
+        ? "Shop All"
+        : category;
+}
+
+<section class="catalog-page">
+    <header class="catalog-header">
+        <div class="catalog-heading-copy">
+            <p class="catalog-eyebrow">THE UBHAYA COLLECTION</p>
+            <h1>@(string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
+            <p class="catalog-count">@productCount @(productCount == 1 ? "style" : "styles")</p>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(category))
+        {
+            <a class="catalog-back-categories" asp-action="Categories">← Back to categories</a>
+        }
+        else
+        {
+            <a class="catalog-back-categories" asp-controller="Home" asp-action="Index">← Back to homepage</a>
+        }
+    </header>
+
+    @if (TempData["WishlistMessage"] is string wishlistMessage)
+    {
+        <div class="wishlist-notice" role="status">@wishlistMessage</div>
+    }
+    @if (TempData["WishlistError"] is string wishlistError)
+    {
+        <div class="wishlist-notice error" role="alert">@wishlistError</div>
+    }
+
+    @if (Model.Count > 0)
+    {
+        <div class="catalog-grid">
+            @foreach (var product in Model)
+            {
+                var hasImage = !string.IsNullOrWhiteSpace(product.ImageUrl);
+                var hasPriceRange = product.Variants.Select(variant => variant.Price).Distinct().Count() > 1;
+                <article class="catalog-card">
+                    <div class="catalog-image-wrap">
+                        <a asp-action="Details" asp-route-id="@product.Id" class="catalog-image-link" aria-label="View @product.Name">
+                            @if (hasImage)
+                            {
+                                <img src="@ImageUrlHelper.Resolve(product.ImageUrl, Configuration["ApiBaseUrl"])"
+                                     alt="@product.Name"
+                                     class="catalog-image"
+                                     onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
+                                <div class="catalog-image-fallback" hidden aria-label="Product image unavailable">
+                                    <span>UBHAYA</span>
+                                    <small>@product.Name</small>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="catalog-image-fallback" aria-label="Product image unavailable">
+                                    <span>UBHAYA</span>
+                                    <small>@product.Name</small>
+                                </div>
+                            }
+                        </a>
+
+                        @if (product.Discount > 0)
+                        {
+                            <span class="discount-badge">-@product.Discount%</span>
+                        }
+
+                        @if (product.Stock <= 0)
+                        {
+                            <span class="catalog-stock-label sold-out">OUT OF STOCK</span>
+                        }
+
+                        <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(product.Id) ? "true" : "false")" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Products", new { category, page = currentPage })" />
+                            <button class="wishlist-button @(wishlistedProductIds.Contains(product.Id) ? "is-saved" : string.Empty)"
+                                    type="submit"
+                                    aria-label="@(wishlistedProductIds.Contains(product.Id) ? $"Remove {product.Name} from wishlist" : $"Add {product.Name} to wishlist")"
+                                    title="@(wishlistedProductIds.Contains(product.Id) ? "Remove from wishlist" : "Add to wishlist")">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" /></svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    <p class="product-category">@product.Category</p>
+                    <h2 class="product-name">
+                        <a asp-action="Details" asp-route-id="@product.Id">@product.Name</a>
+                    </h2>
+
+                    <div class="product-price">
+                        <span class="current-price">@(hasPriceRange ? "From " : "")₹@product.Price.ToString("N0")</span>
+                        @if (product.Discount > 0 && product.Discount < 100)
+                        {
+                            var originalPrice = product.Price / (1 - (product.Discount / 100));
+                            <span class="old-price">₹@Math.Round(originalPrice).ToString("N0")</span>
+                        }
+                    </div>
+
+                    @{
+                        var standardSizes = new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" };
+                        var availableSizes = new HashSet<string>(
+                            product.Variants.Where(variant => variant.Stock > 0).Select(variant => variant.Size),
+                            StringComparer.OrdinalIgnoreCase);
+                    }
+                    <div class="size-options catalog-size-options" aria-label="Available sizes">
+                        @foreach (var size in standardSizes)
+                        {
+                            var isAvailable = availableSizes.Contains(size);
+                            <span class="@(isAvailable ? "size-available" : "size-unavailable")"
+                                  aria-label="@size: @(isAvailable ? "available" : "unavailable")"
+                                  title="@(isAvailable ? $"{size} available" : $"{size} unavailable")">
+                                @size
+                                @if (!isAvailable)
+                                {
+                                    <span class="size-cross" aria-hidden="true">×</span>
+                                }
+                            </span>
+                        }
+                    </div>
+
+                    @if (product.Stock > 0)
+                    {
+                        <p class="catalog-stock-label in-stock">@product.Stock in stock</p>
+                        <a class="catalog-action" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
+                    }
+                    else
+                    {
+                        <p class="catalog-stock-label sold-out-text">Out of stock</p>
+                        <button class="catalog-action disabled" type="button" disabled>OUT OF STOCK</button>
+                    }
+                </article>
+            }
+        </div>
+
+        @if (pageCount > 1)
+        {
+            <nav class="catalog-pagination" aria-label="Product pages">
+                @if (currentPage > 1)
+                {
+                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-category="@category" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
+                }
+                else
+                {
+                    <span class="catalog-page-link catalog-page-previous is-disabled" aria-disabled="true">← Previous</span>
+                }
+                <div class="catalog-page-numbers">
+                    @for (var pageNumber = 1; pageNumber <= pageCount; pageNumber++)
+                    {
+                        if (pageNumber == currentPage)
+                        {
+                            <span class="catalog-page-number is-current" aria-current="page">@pageNumber</span>
+                        }
+                        else
+                        {
+                            <a class="catalog-page-number" asp-action="Index" asp-route-category="@category" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
+                        }
+                    }
+                </div>
+                @if (currentPage < pageCount)
+                {
+                    <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-category="@category" asp-route-page="@(currentPage + 1)" aria-label="Next page">Next →</a>
+                }
+                else
+                {
+                    <span class="catalog-page-link catalog-page-next is-disabled" aria-disabled="true">Next →</span>
+                }
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="catalog-empty">No products are available in this collection yet.</div>
+    }
+</section>

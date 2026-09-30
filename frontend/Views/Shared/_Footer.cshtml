@@ -1,0 +1,230 @@
+<footer class="site-footer">
+
+    <!-- =========================
+         FOOTER MAIN
+         ========================= -->
+
+    <div class="footer-main">
+
+        <!-- BRAND / SUPPORT -->
+        <div class="footer-column footer-about">
+
+            <h3>
+                <span class="footer-pin">📌</span>
+                Order &amp; Support Information
+            </h3>
+
+            <p>
+                We carefully inspect every order before
+                dispatch to ensure quality and accuracy.
+            </p>
+
+            <p>
+                If you receive a damaged or incorrect
+                item, our support team will help resolve
+                it quickly.
+            </p>
+
+            <p>
+                A parcel opening video is required
+                for verification.
+            </p>
+
+            <p>
+                Approved cases will receive a replacement
+                or refund based on product availability.
+            </p>
+
+        </div>
+
+
+        <!-- SHOP -->
+        <div class="footer-column">
+
+            <h3>SHOP</h3>
+
+            <ul>
+
+                <li>
+                    <a asp-controller="Home"
+                       asp-action="Index">
+                        Home
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        New Arrivals
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        Best Sellers
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        Comfort Wear
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        Co-ord Sets
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        Ethnic Wear
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        Nighties
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+
+
+        <!-- CUSTOMER CARE -->
+        <div class="footer-column">
+
+            <h3>CUSTOMER CARE</h3>
+
+            <ul>
+
+                <li>
+                    <a asp-controller="Cart"
+                       asp-action="Index">
+                        My Cart
+                    </a>
+                </li>
+
+                <li>
+                    <a asp-controller="Orders"
+                       asp-action="Index">
+                        My Orders
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        Shipping Information
+                    </a>
+                </li>
+
+                @* <li>
+                    <a href="#">
+                        Refund Policy
+                    </a>
+                </li> *@
+
+                <li>
+                   <a asp-controller="Contact"
+   asp-action="Index">
+    Contact Us
+</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+
+        <!-- NEWSLETTER -->
+        <div class="footer-column footer-newsletter">
+
+            <h3>
+                Join Our Newsletter
+            </h3>
+
+            <p>
+                Unlock exclusive deals and offers
+                by joining our newsletter.
+            </p>
+
+            <form class="newsletter-form"
+                  method="post"
+                  action="#">
+
+                <input type="email"
+                       name="email"
+                       placeholder="Email"
+                       autocomplete="email"
+                       required />
+
+                <button type="submit"
+                        aria-label="Subscribe">
+
+                    →
+
+                </button>
+
+            </form>
+
+            <small>
+                By subscribing, you agree to receive
+                updates and offers from Ubhaya Fashions.
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         FOOTER BOTTOM
+         ========================= -->
+
+    <div class="footer-bottom">
+
+        <div class="footer-copyright">
+
+            © @DateTime.Now.Year
+            <strong>UBHAYA FASHIONS</strong>
+
+        </div>
+
+
+        <div class="footer-links">
+
+            <a href="#">
+                Privacy Policy
+            </a>
+
+            @* <span>·</span> *@
+
+            @* <a href="#">
+                Refund Policy
+            </a> *@
+
+            <span>·</span>
+
+            <a href="#">
+                Shipping Policy
+            </a>
+
+            <span>·</span>
+
+            <a href="#">
+                Terms of Service
+            </a>
+
+            <span>·</span>
+
+            <a href="#">
+                Contact Information
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>

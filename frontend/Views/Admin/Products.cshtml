@@ -1,0 +1,68 @@
+﻿@model List<AdminProductInput>
+@{ var productCount = (int)ViewBag.ProductCount; var currentPage = (int)ViewBag.CurrentPage; var pageCount = (int)ViewBag.PageCount; var pageSize = (int)ViewBag.PageSize; var categories = ViewBag.Categories as List<CategoryViewModel> ?? []; var sizes = ViewBag.Sizes as List<string> ?? []; var discounts = ViewBag.Discounts as List<decimal> ?? []; var selectedCategoryId = (int)ViewBag.SelectedCategoryId; var selectedSize = ViewBag.SelectedSize as string; decimal? selectedDiscount = ViewBag.SelectedDiscount; ViewData["Title"] = "Products"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
+<div class="page-head"><div><h1>Products</h1><p>@productCount matching @(productCount == 1 ? "product" : "products") · Page @currentPage of @pageCount</p></div><a class="primary" asp-action="CreateProduct">+ Add product</a></div>
+<form class="admin-product-filters" asp-action="Products" method="get">
+    <label>Category
+        <select name="categoryId">
+            <option value="0">All categories</option>
+            @foreach (var category in categories) { <option value="@category.Id" selected="@(selectedCategoryId == category.Id)">@category.Name</option> }
+        </select>
+    </label>
+    <label>Size
+        <select name="size">
+            <option value="">All sizes</option>
+            @foreach (var availableSize in sizes) { <option value="@availableSize" selected="@(string.Equals(selectedSize, availableSize, StringComparison.OrdinalIgnoreCase))">@availableSize</option> }
+        </select>
+    </label>
+    <label>Discount
+        <select name="discount">
+            <option value="">Any discount</option>
+            @foreach (var availableDiscount in discounts) { <option value="@availableDiscount" selected="@(selectedDiscount == availableDiscount)">@availableDiscount% off</option> }
+        </select>
+    </label>
+    <button class="primary" type="submit">Apply filters</button>
+    <a class="admin-filter-clear" asp-action="Products">Clear</a>
+</form>
+<div class="table-wrap products-table-wrap"><table class="products-table"><colgroup><col class="products-col-product" /><col class="products-col-category" /><col class="products-col-variants" /><col class="products-col-actions" /></colgroup><thead><tr><th>Product</th><th>Category</th><th>Size variants</th><th class="products-actions-heading">Actions</th></tr></thead><tbody>
+@foreach (var product in Model)
+{
+    <tr>
+        <td><div class="product-cell">@if (!string.IsNullOrWhiteSpace(product.ImageUrl)) { <img src="@ImageUrlHelper.Resolve(product.ImageUrl, Configuration["ApiBaseUrl"])" alt="" /> }<div><b>@product.Name</b><small>#@product.Id</small></div></div></td>
+        <td>@product.Category</td>
+        <td><div class="admin-variant-summary">@foreach (var variant in product.Variants.OrderBy(item => item.Size)) { <span><b>@variant.Size</b> · @variant.Stock in stock · ₹@variant.Price.ToString("N0") · @variant.Discount% off</span> }</div></td>
+        <td class="actions products-actions"><div class="products-action-buttons"><a asp-action="EditProduct" asp-route-id="@product.Id">Edit</a><form asp-action="DeleteProduct" method="post" onsubmit="return confirm('Delete this product?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@product.Id" /><input type="hidden" name="page" value="@currentPage" /><input type="hidden" name="pageSize" value="@pageSize" /><input type="hidden" name="categoryId" value="@selectedCategoryId" /><input type="hidden" name="size" value="@selectedSize" /><input type="hidden" name="discount" value="@selectedDiscount" /><button type="submit">Delete</button></form></div></td>
+    </tr>
+}
+</tbody></table></div>
+<div class="admin-grid-footer">
+    @if (pageCount > 1)
+    {
+        <nav class="admin-pagination" aria-label="Product pages">
+        @if (currentPage > 1) { <a asp-action="Products" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" asp-route-categoryId="@selectedCategoryId" asp-route-size="@selectedSize" asp-route-discount="@selectedDiscount" aria-label="Previous page">← Previous</a> }
+        else { <span class="is-disabled" aria-disabled="true">← Previous</span> }
+        <div class="admin-page-numbers">
+            @for (var pageNumber = 1; pageNumber <= pageCount; pageNumber++)
+            {
+                if (pageNumber == currentPage) { <span class="is-current" aria-current="page">@pageNumber</span> }
+                else { <a asp-action="Products" asp-route-page="@pageNumber" asp-route-pageSize="@pageSize" asp-route-categoryId="@selectedCategoryId" asp-route-size="@selectedSize" asp-route-discount="@selectedDiscount" aria-label="Page @pageNumber">@pageNumber</a> }
+            }
+        </div>
+        @if (currentPage < pageCount) { <a asp-action="Products" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" asp-route-categoryId="@selectedCategoryId" asp-route-size="@selectedSize" asp-route-discount="@selectedDiscount" aria-label="Next page">Next →</a> }
+        else { <span class="is-disabled" aria-disabled="true">Next →</span> }
+        </nav>
+    }
+    <form class="admin-page-size" asp-action="Products" method="get">
+        <input type="hidden" name="categoryId" value="@selectedCategoryId" />
+        <input type="hidden" name="size" value="@selectedSize" />
+        <input type="hidden" name="discount" value="@selectedDiscount" />
+        <label for="products-page-size">Rows per page</label>
+        <select id="products-page-size" name="pageSize" onchange="this.form.submit()">
+            <option value="5" selected="@(pageSize == 5)">5</option>
+            <option value="10" selected="@(pageSize == 10)">10</option>
+            <option value="15" selected="@(pageSize == 15)">15</option>
+            <option value="50" selected="@(pageSize == 50)">50</option>
+            <option value="100" selected="@(pageSize == 100)">100</option>
+            <option value="0" selected="@(pageSize == 0)">All</option>
+        </select>
+    </form>
+</div>

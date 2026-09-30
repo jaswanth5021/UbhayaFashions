@@ -1,0 +1,132 @@
+@model List<CategoryViewModel>
+@{
+    ViewData["Title"] = "Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-head">
+    <div>
+        <h1>Categories</h1>
+        <p>@ViewBag.ItemCount categories · @ViewBag.HomePageCategoryCount of 4 shown on the home page</p>
+    </div>
+    <a class="secondary" asp-action="Products">← Products</a>
+</div>
+
+@if (ViewBag.CategoryLoadError is string loadError)
+{
+    <div class="category-notice error" role="alert">@loadError</div>
+}
+
+@if (TempData["CategoryMessage"] is string message)
+{
+    <div class="category-notice success" role="status">@message</div>
+}
+@if (TempData["CategoryError"] is string error)
+{
+    <div class="category-notice error" role="alert">@error</div>
+}
+
+<section class="category-card">
+    <h2>Add category</h2>
+    <form asp-action="SaveCategory" method="post" enctype="multipart/form-data" class="category-create-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="0" />
+        <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+        <input type="hidden" name="pageSize" value="@ViewBag.PageSize" />
+        <label for="newCategoryName">Category name</label>
+        <div class="category-form-controls">
+            <input id="newCategoryName" name="name" maxlength="250" placeholder="e.g. Dresses" required />
+            <label class="category-home-choice"><input type="checkbox" name="showOnHomePage" value="true" class="category-home-checkbox" /> Show on home page</label>
+            <label class="category-upload-label">Category image <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" /></label>
+            <button class="primary" type="submit">Add category</button>
+        </div>
+    </form>
+</section>
+
+<section class="category-card">
+    <h2>Existing categories <span>@ViewBag.ItemCount</span> <small class="category-home-counter">@ViewBag.HomePageCategoryCount of 4 shown on home page</small></h2>
+    @if (Model.Count == 0)
+    {
+        <p class="category-empty">No categories found.</p>
+    }
+    else
+    {
+        <div class="category-list">
+            @foreach (var category in Model)
+            {
+                <div class="category-row">
+                    <form asp-action="SaveCategory" method="post" enctype="multipart/form-data" class="category-edit-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@category.Id" />
+                        <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+                        <input type="hidden" name="pageSize" value="@ViewBag.PageSize" />
+                        <label class="sr-only" for="category-@category.Id">Category name</label>
+                        <input id="category-@category.Id" name="name" value="@category.Name" maxlength="250" required />
+                        @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
+                        {
+                            <img class="category-admin-image" src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])" alt="@category.Name" />
+                        }
+                        <label class="category-home-choice"><input type="checkbox" name="showOnHomePage" value="true" class="category-home-checkbox" checked="@category.ShowOnHomePage" /> Home page</label>
+                        <label class="category-upload-label">@(string.IsNullOrWhiteSpace(category.ImageUrl) ? "Upload image" : "Replace image")<input type="file" name="image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" /></label>
+                        <button class="secondary" type="submit">Save</button>
+                    </form>
+                    <form asp-action="DeleteCategory" method="post" onsubmit="return confirm('Delete this category? Products assigned to it must be reassigned first.');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@category.Id" />
+                        <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+                        <input type="hidden" name="pageSize" value="@ViewBag.PageSize" />
+                        <button class="category-delete-button" type="submit">Delete</button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+<div class="admin-grid-footer">
+    @if ((int)ViewBag.PageCount > 1)
+    {
+        <nav class="admin-pagination" aria-label="Category pages">
+            @if ((int)ViewBag.CurrentPage > 1) { <a asp-action="Categories" asp-route-page="@((int)ViewBag.CurrentPage - 1)" asp-route-pageSize="@ViewBag.PageSize">← Previous</a> }
+            else { <span class="is-disabled" aria-disabled="true">← Previous</span> }
+            <div class="admin-page-numbers">
+                @for (var pageNumber = 1; pageNumber <= (int)ViewBag.PageCount; pageNumber++)
+                {
+                    if (pageNumber == (int)ViewBag.CurrentPage) { <span class="is-current" aria-current="page">@pageNumber</span> }
+                    else { <a asp-action="Categories" asp-route-page="@pageNumber" asp-route-pageSize="@ViewBag.PageSize" aria-label="Page @pageNumber">@pageNumber</a> }
+                }
+            </div>
+            @if ((int)ViewBag.CurrentPage < (int)ViewBag.PageCount) { <a asp-action="Categories" asp-route-page="@((int)ViewBag.CurrentPage + 1)" asp-route-pageSize="@ViewBag.PageSize">Next →</a> }
+            else { <span class="is-disabled" aria-disabled="true">Next →</span> }
+        </nav>
+    }
+    <form class="admin-page-size" asp-action="Categories" method="get">
+        <label for="categories-page-size">Rows per page</label>
+        <select id="categories-page-size" name="pageSize" onchange="this.form.submit()">
+            <option value="5" selected="@((int)ViewBag.PageSize == 5)">5</option>
+            <option value="10" selected="@((int)ViewBag.PageSize == 10)">10</option>
+            <option value="15" selected="@((int)ViewBag.PageSize == 15)">15</option>
+            <option value="50" selected="@((int)ViewBag.PageSize == 50)">50</option>
+            <option value="100" selected="@((int)ViewBag.PageSize == 100)">100</option>
+            <option value="0" selected="@((int)ViewBag.PageSize == 0)">All</option>
+        </select>
+    </form>
+</div>
+
+<script>
+    (() => {
+        const checks = [...document.querySelectorAll('.category-home-checkbox')];
+        const counter = document.querySelector('.category-home-counter');
+        const selectedOnAllPages = @ViewBag.HomePageCategoryCount;
+        const selectedOnThisPage = checks.filter(check => check.checked).length;
+        const refresh = () => {
+            const selected = selectedOnAllPages + checks.filter(check => check.checked).length - selectedOnThisPage;
+            if (counter) counter.textContent = `${selected} of 4 shown on home page`;
+            checks.forEach(check => {
+                check.disabled = !check.checked && selected >= 4;
+            });
+        };
+        checks.forEach(check => check.addEventListener('change', refresh));
+        refresh();
+    })();
+</script>

@@ -1,0 +1,106 @@
+@model LadiesDressStore.Web.Models.SignupViewModel
+
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="auth-card">
+
+    <h1>Create Account</h1>
+
+    <p>
+        Create your UBHAYA customer account. We’ll email you a verification code before the account is created.
+    </p>
+
+
+    <div asp-validation-summary="ModelOnly"
+         class="error">
+    </div>
+
+
+    <form asp-action="Signup"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+
+        <label asp-for="Name">
+            Full Name
+        </label>
+
+        <input asp-for="Name"
+               placeholder="Your name" />
+
+        <span asp-validation-for="Name">
+        </span>
+
+
+        <label asp-for="Email">
+            Email
+        </label>
+
+        <input asp-for="Email"
+               placeholder="you@example.com" />
+
+        <span asp-validation-for="Email">
+        </span>
+
+        <label asp-for="Mobile">Mobile number</label>
+        <input asp-for="Mobile" type="tel" autocomplete="tel" placeholder="+91 98765 43210" />
+        <span asp-validation-for="Mobile"></span>
+
+
+        <label asp-for="Age">
+            Age
+        </label>
+
+        <input asp-for="Age"
+               type="number"
+               min="18"
+               max="120" />
+
+        <span asp-validation-for="Age">
+        </span>
+
+
+        <label asp-for="Password">
+            Password
+        </label>
+
+        <input asp-for="Password" />
+
+        <span asp-validation-for="Password">
+        </span>
+
+
+        <label asp-for="ConfirmPassword">
+            Confirm Password
+        </label>
+
+        <input asp-for="ConfirmPassword" />
+
+        <span asp-validation-for="ConfirmPassword">
+        </span>
+
+
+        <button class="button full"
+                type="submit">
+
+            Send verification code
+
+        </button>
+
+    </form>
+
+
+    <p class="center">
+
+        Already have an account?
+
+        <a asp-action="Login">
+            Login
+        </a>
+
+    </p>
+
+</div>

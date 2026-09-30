@@ -1,0 +1,76 @@
+/* =====================================================
+   NEW ARRIVALS - 4 PRODUCTS IN ONE ROW
+   ===================================================== */
+
+.featured-products {
+    width: 100%;
+    background: #f8eae7;
+    padding: 65px 5% 55px;
+}
+
+.featured-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 42px;
+}
+
+.featured-eyebrow {
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    font-weight: 500;
+    color: #80645f;
+    margin-bottom: 20px;
+}
+
+.featured-title {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 60px;
+    font-weight: 400;
+    line-height: 1;
+    color: #302522;
+}
+
+.shop-all-link {
+    color: #4b111e;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.shop-all-link span {
+    font-size: 25px;
+}
+
+
+/* =========================================
+   EXACTLY 4 PRODUCTS
+   ========================================= */
+
+.featured-products .product-grid,
+.featured-products .new-arrivals-grid,
+.featured-products > .grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 25px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+.featured-products .product-card,
+.featured-products .card {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+.product-card {
+    min-width: 0;
+    width: 100%;
+}
+

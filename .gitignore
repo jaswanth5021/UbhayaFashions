@@ -1,0 +1,21 @@
+﻿# Visual Studio and build output
+.vs/
+**/bin/
+**/obj/
+**/TestResults/
+
+# Local configuration and credentials
+/backend/appsettings.json
+/backend/appsettings.*.json
+!/backend/appsettings.example.json
+**/secrets.json
+**/secrets.*.json
+
+# Local databases and logs
+*.db
+*.sqlite
+*.log
+
+# Local package caches
+**/.nuget/
+**/packages/

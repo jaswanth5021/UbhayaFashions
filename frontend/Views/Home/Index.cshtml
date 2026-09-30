@@ -1,0 +1,417 @@
+@model List<ProductViewModel>
+
+@{
+    ViewData["Title"] = "Ubhaya Fashions";
+    var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
+    var homeCategories = ViewBag.HomeCategories as List<CategoryViewModel> ?? [];
+}
+
+@if (TempData["SuccessMessage"] is string success)
+{
+    <div class="global-success-message">
+        @success
+    </div>
+}
+
+
+<!-- =====================================================
+     HERO
+     ===================================================== -->
+
+<section class="home-hero">
+
+    <!-- Hero Image -->
+    <img src="/images/dress-banner.jpeg"
+         alt="Ubhaya Fashions"
+         class="home-hero-image" />
+
+    <!-- Dark Overlay -->
+    <div class="home-hero-overlay"></div>
+
+    <!-- Hero Content -->
+    <div class="home-hero-content">
+
+        <p class="hero-location">
+            THE UBHAYA EDIT · HYDERABAD
+        </p>
+
+        <a asp-controller="Products"
+           asp-action="Index"
+           class="hero-shop-button">
+
+            <span>SHOP NEW ARRIVALS</span>
+
+            <span class="hero-arrow">
+                →
+            </span>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SHOP BY CATEGORY
+     ===================================================== -->
+
+<section class="category-section">
+
+    <div class="category-header">
+
+        <div>
+
+            <p class="category-eyebrow">
+                A LITTLE SOMETHING FOR EVERYONE
+            </p>
+
+            <h2>
+                Shop by category
+            </h2>
+
+        </div>
+
+        <a asp-controller="Products"
+           asp-action="Categories"
+           class="category-view-all">
+
+            VIEW ALL Categorys
+
+            <span>→</span>
+
+        </a>
+
+    </div>
+
+
+    @if (homeCategories.Count > 0)
+    {
+        <div class="category-grid">
+            @foreach (var category in homeCategories.Take(4))
+            {
+                <a class="category-tile" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">
+                    @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
+                    {
+                        <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])" alt="@category.Name" />
+                    }
+                    <div class="category-tile-content">
+                        <h3>@category.Name</h3>
+                        <span>Explore edit <span class="category-arrow">→</span></span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+
+</section>
+
+
+<!-- =====================================================
+     NEW ARRIVALS
+     ===================================================== -->
+
+<section class="featured-products">
+
+    <!-- Section Header -->
+
+    <div class="featured-header">
+
+        <div>
+
+            <div class="featured-eyebrow">
+                FRESHLY PICKED FOR YOU
+            </div>
+
+            <h2 class="featured-title">
+                New arrivals
+            </h2>
+
+        </div>
+
+
+        <a asp-controller="Products"
+           asp-action="Index"
+           class="shop-all-link">
+
+            SHOP ALL
+
+            <span>→</span>
+
+        </a>
+
+    </div>
+
+
+    <!-- Products -->
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="new-arrivals-grid">
+
+            @foreach (var p in Model)
+            {
+                <article class="product-card">
+
+                    <!-- ================================
+                         PRODUCT IMAGE
+                         ================================ -->
+
+                    <div class="product-image-wrapper">
+
+                        @if (p.Discount > 0)
+                        {
+                            <span class="discount-badge">
+                                -@p.Discount%
+                            </span>
+                        }
+
+
+                        <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@p.Id" />
+                            <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(p.Id) ? "true" : "false")" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Home")" />
+                            <button class="wishlist-button @(wishlistedProductIds.Contains(p.Id) ? "is-saved" : string.Empty)"
+                                    type="submit"
+                                    data-product-name="@p.Name"
+                                    aria-label="@(wishlistedProductIds.Contains(p.Id) ? $"Remove {p.Name} from wishlist" : $"Add {p.Name} to wishlist")"
+                                    title="@(wishlistedProductIds.Contains(p.Id) ? "Remove from wishlist" : "Add to wishlist")">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" /></svg>
+                            </button>
+                        </form>
+
+
+                        <a asp-controller="Products"
+                           asp-action="Details"
+                           asp-route-id="@p.Id">
+
+                            @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
+                            {
+                                <img src="@ImageUrlHelper.Resolve(p.ImageUrl, Configuration["ApiBaseUrl"])"
+                                     alt="@p.Name"
+                                     class="product-image"
+                                     onerror="this.hidden=true; this.nextElementSibling.hidden=false;" />
+                                <div class="product-image-fallback" hidden aria-label="Product image unavailable">
+                                    <span>UBHAYA</span>
+                                    <small>@p.Name</small>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="product-image-fallback" aria-label="Product image unavailable">
+                                    <span>UBHAYA</span>
+                                    <small>@p.Name</small>
+                                </div>
+                            }
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- ================================
+                         CATEGORY
+                         ================================ -->
+
+                    <div class="product-category">
+                        @p.Category
+                    </div>
+
+
+                    <!-- ================================
+                         PRODUCT NAME
+                         ================================ -->
+
+                    <h3 class="product-name">
+
+                        <a asp-controller="Products"
+                           asp-action="Details"
+                           asp-route-id="@p.Id">
+
+                            @p.Name
+
+                        </a>
+
+                    </h3>
+
+
+                    <!-- ================================
+                         PRICE
+                         ================================ -->
+
+                    <div class="product-price">
+
+                        <span class="current-price">
+                            ₹@p.Price.ToString("N0")
+                        </span>
+
+
+                        @if (p.Discount > 0)
+                        {
+                            var originalPrice =
+                                p.Price / (1 - (p.Discount / 100));
+
+                            <span class="old-price">
+                                ₹@Math.Round(originalPrice).ToString("N0")
+                            </span>
+                        }
+
+                    </div>
+
+
+                    <!-- ================================
+                         SIZES
+                         ================================ -->
+
+                    @if (p.Variants.Count > 0)
+                    {
+                        <div class="size-options">
+                            @foreach (var variant in p.Variants.OrderBy(variant => variant.Size))
+                            {
+                                <button type="button" class="@(variant.Stock > 0 ? "size-available" : "size-unavailable")" data-size="@variant.Size" disabled="@(variant.Stock < 1)" title="@(variant.Stock > 0 ? variant.Size : "Out of stock")" aria-pressed="false">
+                                    @variant.Size
+                                    @if (variant.Stock < 1)
+                                    {
+                                        <span class="size-cross" aria-hidden="true">×</span>
+                                    }
+                                </button>
+                            }
+
+                        </div>
+                    }
+
+
+                    <!-- ================================
+                         ADD TO BAG
+                         ================================ -->
+
+                    <button class="add-to-bag"
+                            type="button"
+                            data-product-id="@p.Id">
+
+                        ADD TO BAG
+
+                        <span>
+                            →
+                        </span>
+
+                    </button>
+
+                </article>
+            }
+
+        </div>
+    }
+    else
+    {
+        <div class="no-products">
+            <p>
+                No new arrivals available at the moment.
+            </p>
+        </div>
+    }
+
+</section>
+
+@section Scripts {
+    <script src="~/js/new-arrivals.js" asp-append-version="true"></script>
+}
+
+<!-- =========================================================
+     UBHAYA PROMISE
+     ========================================================= -->
+
+<section class="ubhaya-promise">
+
+    <div class="promise-header">
+
+        <p class="promise-eyebrow">
+            THE UBHAYA PROMISE
+        </p>
+
+        <h2>
+            Made to be lived in.
+        </h2>
+
+    </div>
+
+
+    <div class="promise-grid">
+
+        <!-- 01 -->
+        <div class="promise-item">
+
+            <div class="promise-number">
+                01
+            </div>
+
+            <h3>
+                Carefully curated
+            </h3>
+
+            <p>
+                Thoughtful styles for the many moods of you.
+            </p>
+
+        </div>
+
+
+        <!-- 02 -->
+        <div class="promise-item">
+
+            <div class="promise-number">
+                02
+            </div>
+
+            <h3>
+                Quality first
+            </h3>
+
+            <p>
+                Beautiful fabrics and finishing that feel as good
+                as they look.
+            </p>
+
+        </div>
+
+
+        <!-- 03 -->
+        <div class="promise-item">
+
+            <div class="promise-number">
+                03
+            </div>
+
+            <h3>
+                Easy delivery
+            </h3>
+
+            <p>
+                A considered experience, from our edit to your
+                door.
+            </p>
+
+        </div>
+
+
+        <!-- 04 -->
+        <div class="promise-item">
+
+            <div class="promise-number">
+                04
+            </div>
+
+            <h3>
+                Customer first
+            </h3>
+
+            <p>
+                Here to make every Ubhaya moment feel personal.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>

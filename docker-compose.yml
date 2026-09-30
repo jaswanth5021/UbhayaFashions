@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "ChangeThisStrongPassword123!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+
+  api:
+    build: ./backend
+    environment:
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=LadiesDressStore;User Id=sa;Password=ChangeThisStrongPassword123!;TrustServerCertificate=True;Encrypt=False"
+      Jwt__Key: "ChangeThisToALongRandomProductionSecretAtLeast32Chars"
+      Jwt__Issuer: "LadiesDressStore"
+      Jwt__Audience: "LadiesDressStoreWeb"
+      FrontendUrl: "http://localhost:5173"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+  web:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+volumes:
+  sql-data:

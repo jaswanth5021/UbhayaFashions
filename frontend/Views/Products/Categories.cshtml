@@ -1,0 +1,38 @@
+@model List<CategoryViewModel>
+@{
+    ViewData["Title"] = "Shop by category";
+}
+
+<section class="all-categories-page">
+    <header class="all-categories-header">
+        <div>
+            <p class="category-eyebrow">FIND YOUR NEXT FAVORITE</p>
+            <h1>Shop by category</h1>
+            <p>Browse all @Model.Count categories in our collection.</p>
+        </div>
+        <a class="all-categories-home-link" asp-controller="Home" asp-action="Index">← Back to homepage</a>
+    </header>
+
+    @if (Model.Count > 0)
+    {
+        <div class="category-grid">
+            @foreach (var category in Model)
+            {
+                <a class="category-tile" asp-action="Index" asp-route-category="@category.Name">
+                    @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
+                    {
+                        <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])" alt="@category.Name" />
+                    }
+                    <div class="category-tile-content">
+                        <h3>@category.Name</h3>
+                        <span>Explore edit <span class="category-arrow">→</span></span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="all-categories-empty">No categories are available yet.</p>
+    }
+</section>
