@@ -96,6 +96,22 @@ namespace backend.Migrations
                     b.Property<int?>("Age")
                         .HasColumnType("int");
 
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("EmailVerificationCodeExpiresUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmailVerificationCodeHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("EmailVerificationFailedAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EmailVerificationLastSentUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
