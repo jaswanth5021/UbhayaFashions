@@ -8,6 +8,16 @@ public class Customer
 
     public string? Email { get; set; }
 
+    public bool EmailVerified { get; set; }
+
+    public string? EmailVerificationCodeHash { get; set; }
+
+    public DateTime? EmailVerificationCodeExpiresUtc { get; set; }
+
+    public DateTime? EmailVerificationLastSentUtc { get; set; }
+
+    public int EmailVerificationFailedAttempts { get; set; }
+
     public string? Mobile { get; set; }
 
     public int? Age { get; set; }

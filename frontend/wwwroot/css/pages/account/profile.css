@@ -382,3 +382,14 @@
     .profile-address-editor .profile-form-grid { grid-template-columns:1fr; }
 }
 @media (min-width:601px) and (max-width:900px) { .profile-address-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.profile-email-verification {
+    margin: 22px 0;
+    padding: 18px;
+    border: 1px solid #eadfd2;
+    border-radius: 10px;
+    background: #fbf8f5;
+}
+
+.profile-email-verification p { margin: 0 0 12px; }
+.profile-email-verification strong { color: #2e7049; }
+.profile-email-verification .profile-field { margin: 14px 0; }

@@ -130,7 +130,7 @@ public class ApiService(
     {
         var response =
             await Client.PostAsJsonAsync(
-                "api/auth/signup/request-verification",
+                "api/auth/signup",
                 new
                 {
                     name = model.Name,
@@ -166,6 +166,23 @@ public class ApiService(
     public async Task<(bool Success, string Message)> ResendSignupCodeAsync(string email)
     {
         using var response = await Client.PostAsJsonAsync("api/auth/signup/resend-otp", new { email });
+        return (response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
+    }
+
+    public async Task<(bool Success, string Message)> SendMyEmailVerificationAsync()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/me/email-verification/send");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        return (response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
+    }
+
+    public async Task<(bool Success, string Message)> ConfirmMyEmailVerificationAsync(string code)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/me/email-verification/confirm");
+        AddToken(request);
+        request.Content = JsonContent.Create(new { code });
+        using var response = await Client.SendAsync(request);
         return (response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
     }
 

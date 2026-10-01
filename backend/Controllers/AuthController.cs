@@ -27,7 +27,7 @@ public class AuthController(
     // SIGNUP
     // =====================================================
 
-    [HttpPost("signup/request-verification")]
+    [HttpPost("signup")]
     public async Task<IActionResult> SignUp(SignUpRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email))
@@ -49,36 +49,77 @@ public class AuthController(
             x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == mobileDigits))
             return Conflict("An account with this mobile number already exists. Please login.");
 
-        var pending = await db.PendingSignups.FirstOrDefaultAsync(x => x.Email == email);
-        if (pending is not null && DateTime.UtcNow - pending.LastSentUtc < TimeSpan.FromSeconds(60))
+        db.Customers.Add(new Customer
+        {
+            Name = request.Name.Trim(),
+            Email = email,
+            Mobile = mobile,
+            Age = request.Age,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            EmailVerified = false
+        });
+        await db.SaveChangesAsync();
+        return Ok(new { success = true, message = "Account created. You can verify your email from your profile after logging in." });
+    }
+
+    [Authorize]
+    [HttpPost("me/email-verification/send")]
+    public async Task<IActionResult> SendMyEmailVerification()
+    {
+        if (!TryGetCustomerId(out var customerId)) return Unauthorized();
+        var customer = await db.Customers.FirstOrDefaultAsync(x => x.Id == customerId);
+        if (customer is null) return NotFound("Customer not found.");
+        if (customer.EmailVerified) return BadRequest("Your email is already verified.");
+        if (string.IsNullOrWhiteSpace(customer.Email)) return BadRequest("Add an email address to your account first.");
+        if (customer.EmailVerificationLastSentUtc is DateTime lastSent && DateTime.UtcNow - lastSent < TimeSpan.FromSeconds(60))
             return StatusCode(429, "Wait one minute before requesting another code.");
-        if (await db.PendingSignups.AnyAsync(x => x.Email != email && x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == mobileDigits))
-            return Conflict("This mobile number is already being used for another signup.");
 
         var code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
         try
         {
-            await SendConfiguredEmailAsync(email, "Verify your Ubhaya Fashions email",
-                $"Your verification code is {code}. It expires in 10 minutes. If you did not request this, you can ignore this email.");
+            await SendConfiguredEmailAsync(customer.Email, "Verify your Ubhaya Fashions email", code);
         }
         catch (InvalidOperationException ex) { return StatusCode(503, ex.Message); }
         catch (SmtpException) { return StatusCode(503, "Could not send the verification email. Check the backend SMTP settings."); }
 
-        if (pending is null)
-        {
-            pending = new PendingSignup { Email = email };
-            db.PendingSignups.Add(pending);
-        }
-        pending.Name = request.Name.Trim();
-        pending.Mobile = mobile;
-        pending.Age = request.Age;
-        pending.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        pending.CodeHash = HashSignupCode(email, code);
-        pending.ExpiresUtc = DateTime.UtcNow.AddMinutes(10);
-        pending.LastSentUtc = DateTime.UtcNow;
-        pending.FailedAttempts = 0;
+        customer.EmailVerificationCodeHash = HashSignupCode(customer.Email, code);
+        customer.EmailVerificationCodeExpiresUtc = DateTime.UtcNow.AddMinutes(10);
+        customer.EmailVerificationLastSentUtc = DateTime.UtcNow;
+        customer.EmailVerificationFailedAttempts = 0;
         await db.SaveChangesAsync();
-        return Ok(new { success = true, message = "A verification code has been sent to your email." });
+        return Ok(new { success = true, message = "Verification code sent." });
+    }
+
+    [Authorize]
+    [HttpPost("me/email-verification/confirm")]
+    public async Task<IActionResult> ConfirmMyEmailVerification(VerifyMyEmailRequest request)
+    {
+        if (!TryGetCustomerId(out var customerId)) return Unauthorized();
+        var customer = await db.Customers.FirstOrDefaultAsync(x => x.Id == customerId);
+        if (customer is null) return NotFound("Customer not found.");
+        if (customer.EmailVerified) return Ok(new { success = true });
+        if (string.IsNullOrWhiteSpace(customer.Email) || !Regex.IsMatch(request.Code ?? "", "^[0-9]{6}$"))
+            return BadRequest("Enter the 6-digit verification code from your email.");
+        if (string.IsNullOrWhiteSpace(customer.EmailVerificationCodeHash) || customer.EmailVerificationCodeExpiresUtc <= DateTime.UtcNow)
+            return BadRequest("That code is invalid or expired. Request a new code.");
+        if (customer.EmailVerificationFailedAttempts >= 5)
+            return StatusCode(429, "Too many incorrect attempts. Request a new code.");
+
+        var expectedHash = Convert.FromHexString(customer.EmailVerificationCodeHash);
+        var suppliedHash = Convert.FromHexString(HashSignupCode(customer.Email, request.Code));
+        if (!CryptographicOperations.FixedTimeEquals(expectedHash, suppliedHash))
+        {
+            customer.EmailVerificationFailedAttempts++;
+            await db.SaveChangesAsync();
+            return BadRequest("The verification code is incorrect.");
+        }
+
+        customer.EmailVerified = true;
+        customer.EmailVerificationCodeHash = null;
+        customer.EmailVerificationCodeExpiresUtc = null;
+        customer.EmailVerificationFailedAttempts = 0;
+        await db.SaveChangesAsync();
+        return Ok(new { success = true, message = "Email verified successfully." });
     }
 
     [HttpPost("signup/resend-otp")]
@@ -93,8 +134,7 @@ public class AuthController(
         var code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
         try
         {
-            await SendConfiguredEmailAsync(email, "Your Ubhaya Fashions verification code",
-                $"Your new verification code is {code}. It expires in 10 minutes.");
+            await SendConfiguredEmailAsync(email, "Your Ubhaya Fashions verification code", code);
         }
         catch (InvalidOperationException ex) { return StatusCode(503, ex.Message); }
         catch (SmtpException) { return StatusCode(503, "Could not send the verification email. Check the backend SMTP settings."); }
@@ -253,7 +293,8 @@ public class AuthController(
                 customer.Age,
                 customer.ProfileImage,
                 customer.DateOfBirth,
-                customer.Gender));
+                customer.Gender,
+                customer.EmailVerified));
     }
 
 
@@ -339,7 +380,8 @@ public class AuthController(
                 customer.Age,
                 customer.ProfileImage,
                 customer.DateOfBirth,
-                customer.Gender));
+                customer.Gender,
+                customer.EmailVerified));
     }
 
     [Authorize]
@@ -616,14 +658,41 @@ public class AuthController(
         return Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(key), Encoding.UTF8.GetBytes(email + ":" + code)));
     }
 
-    private async Task SendConfiguredEmailAsync(string recipient, string subject, string body)
+    private async Task SendConfiguredEmailAsync(string recipient, string subject, string code)
     {
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
         var from = smtp["From"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
             throw new InvalidOperationException("Email verification is not configured. Set the backend Smtp configuration.");
-        using var message = new MailMessage(from, recipient) { Subject = subject, Body = body, IsBodyHtml = false };
+        var plainText = $"Your Ubhaya Fashions verification code is {code}. It expires in 10 minutes. If you did not request this, you can ignore this email.";
+        var html = $"""
+                <!doctype html>
+                <html lang="en">
+                <body style="margin:0;padding:0;background-color:#f6f3ef;font-family:Arial,Helvetica,sans-serif;color:#292421;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f6f3ef;padding:36px 12px;">
+                    <tr><td align="center">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;">
+                        <tr><td style="background:#542b35;padding:26px 32px;text-align:center;color:#ffffff;">
+                          <div style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#f1d8b5;">Ubhaya Fashions</div>
+                          <div style="font-size:23px;font-weight:600;margin-top:10px;">Verify your email</div>
+                        </td></tr>
+                        <tr><td style="padding:32px;text-align:center;">
+                          <p style="font-size:16px;line-height:1.6;margin:0 0 22px;">Enter this verification code to continue creating your account:</p>
+                          <div style="display:inline-block;background:#f8f4ef;border:1px solid #eadfD2;border-radius:10px;padding:15px 26px;color:#542b35;font-size:32px;font-weight:700;letter-spacing:8px;">{code}</div>
+                          <p style="font-size:14px;line-height:1.6;color:#746b65;margin:22px 0 0;">This code expires in <strong>10 minutes</strong>.</p>
+                          <p style="font-size:13px;line-height:1.6;color:#8b817a;margin:18px 0 0;">If you did not request this email, you can safely ignore it.</p>
+                        </td></tr>
+                        <tr><td style="border-top:1px solid #eee8e2;padding:18px 28px;text-align:center;color:#9a918a;font-size:12px;">A little elegance, made for you.</td></tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                </body>
+                </html>
+                """;
+        using var message = new MailMessage(from, recipient) { Subject = subject, Body = plainText, IsBodyHtml = false };
+        message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
+        message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
         var port = int.TryParse(smtp["Port"], out var configuredPort) ? configuredPort : 587;
         using var client = new SmtpClient(host, port)
         {
