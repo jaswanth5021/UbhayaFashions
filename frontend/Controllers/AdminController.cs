@@ -2,6 +2,7 @@ using LadiesDressStore.Web.Models;using LadiesDressStore.Web.Services;using Micr
 namespace LadiesDressStore.Web.Controllers;
 public class AdminController(AdminApiService api):Controller{
  bool LoggedIn=>!string.IsNullOrWhiteSpace(Request.Cookies["admin_token"]);
+ public IActionResult Index()=>RedirectToAction(nameof(Login));
  public IActionResult Login(){if(LoggedIn)return RedirectToAction(nameof(Dashboard));return View();}
  [HttpPost][ValidateAntiForgeryToken] public async Task<IActionResult> Login(string email,string password){var r=await api.Login(email,password);if(!r.ok){ViewBag.Error=r.message;return View();}Response.Cookies.Append("admin_token",r.data!.Token,new CookieOptions{HttpOnly=true,Secure=true,SameSite=SameSiteMode.Lax,MaxAge=TimeSpan.FromHours(2)});Response.Cookies.Append("admin_name",r.data.Name,new CookieOptions{HttpOnly=false,Secure=true,SameSite=SameSiteMode.Lax,MaxAge=TimeSpan.FromHours(2)});return RedirectToAction(nameof(Dashboard));}
  public IActionResult Logout(){Response.Cookies.Delete("admin_token");Response.Cookies.Delete("admin_name");return RedirectToAction(nameof(Login));}
