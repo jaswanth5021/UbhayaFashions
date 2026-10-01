@@ -1,9 +1,7 @@
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-var builder =
-    WebApplication.CreateBuilder(args);
-
+var builder = WebApplication.CreateBuilder(args);
 
 // =====================================================
 // MVC
@@ -12,13 +10,11 @@ var builder =
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 
-
 // =====================================================
 // HTTP CONTEXT
 // =====================================================
 
 builder.Services.AddHttpContextAccessor();
-
 
 // =====================================================
 // API HTTP CLIENT
@@ -26,7 +22,7 @@ builder.Services.AddHttpContextAccessor();
 
 var apiBaseUrl =
     builder.Configuration["ApiBaseUrl"]
-    ?? "https://localhost:56738/";
+    ?? "http://localhost:5000/";
 
 builder.Services
     .AddHttpClient(
@@ -46,14 +42,15 @@ builder.Services
 
             if (builder.Environment.IsDevelopment())
             {
-                // Accept the local ASP.NET development certificate only in development.
+                // Accept the local ASP.NET development certificate
+                // only in development.
                 handler.ServerCertificateCustomValidationCallback =
-                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                    HttpClientHandler
+                        .DangerousAcceptAnyServerCertificateValidator;
             }
 
             return handler;
         });
-
 
 // =====================================================
 // API SERVICE
@@ -61,7 +58,6 @@ builder.Services
 
 builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<AdminApiService>();
-
 
 // =====================================================
 // FRONTEND COOKIE AUTHENTICATION
@@ -91,6 +87,8 @@ builder.Services
             options.Cookie.SameSite =
                 SameSiteMode.Lax;
 
+            // Required for the current HTTP-only EC2 test setup.
+            // When HTTPS is configured later, change this to Always.
             options.Cookie.SecurePolicy =
                 CookieSecurePolicy.SameAsRequest;
 
@@ -101,21 +99,17 @@ builder.Services
                 true;
         });
 
-
 // =====================================================
 // AUTHORIZATION
 // =====================================================
 
 builder.Services.AddAuthorization();
 
-
 // =====================================================
 // BUILD
 // =====================================================
 
-var app =
-    builder.Build();
-
+var app = builder.Build();
 
 // =====================================================
 // PIPELINE
@@ -125,17 +119,17 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler(
         "/Home/Error");
-
-    app.UseHsts();
 }
-
 
 // =====================================================
 // HTTPS
 // =====================================================
-
-app.UseHttpsRedirection();
-
+// HTTPS is not configured yet.
+// Keep HTTP for the current EC2 test environment.
+//
+// When HTTPS is configured later, enable:
+// app.UseHsts();
+// app.UseHttpsRedirection();
 
 // =====================================================
 // STATIC FILES
@@ -143,13 +137,11 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-
 // =====================================================
 // ROUTING
 // =====================================================
 
 app.UseRouting();
-
 
 // =====================================================
 // AUTHENTICATION
@@ -159,7 +151,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-
 // =====================================================
 // ROUTES
 // =====================================================
@@ -168,7 +159,6 @@ app.MapControllerRoute(
     name: "default",
     pattern:
         "{controller=Home}/{action=Index}/{id?}");
-
 
 // =====================================================
 // RUN
