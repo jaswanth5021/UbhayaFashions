@@ -55,6 +55,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Customer>().Property(x => x.PasswordResetTokenHash).HasMaxLength(64);
         modelBuilder.Entity<InventoryTransaction>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<AdminUser>().HasIndex(x => x.Email).IsUnique();
+        modelBuilder.Entity<AdminUser>().Property(x => x.PasswordResetTokenHash).HasMaxLength(64);
+        modelBuilder.Entity<AdminUser>().Property(x => x.PasswordResetTokenHash).HasMaxLength(64);
         modelBuilder.Entity<WishlistItem>().HasIndex(x => new { x.CustomerId, x.ProductId }).IsUnique();
         modelBuilder.Entity<WishlistItem>().HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<WishlistItem>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);

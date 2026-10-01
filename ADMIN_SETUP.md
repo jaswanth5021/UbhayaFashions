@@ -8,12 +8,9 @@ The admin panel has been added to the existing frontend/backend solution. No sep
 - Admin login: https://localhost:5001/Admin/Login
 - Backend Swagger: https://localhost:56738/swagger
 
-## Default admin login
+## Admin account
 
-- Email: `admin@ubhaya.com`
-- Password: `Admin@123`
-
-Change this password before production. The account is created automatically when the backend starts if no admin exists.
+The admin login uses records in `dbo.AdminUsers`. The repository lists `admin@ubhaya.com` / `Admin@123` as sample credentials, but the current backend does not seed that account automatically. Confirm that an active row exists and has a BCrypt password hash before expecting those credentials to work.
 
 ## Admin features
 
@@ -26,6 +23,16 @@ Change this password before production. The account is created automatically whe
 - Order status updates
 - Payment status tracking using the existing Order.PaymentStatus field
 - Admin-only JWT role protection on backend admin APIs
+- Admin password recovery by one-time email link
+
+## Admin password recovery
+
+Use **Forgot your password?** on `/Admin/Login`. Reset email uses the backend SMTP settings documented in `backend/ACCOUNT_SETUP.md`. Apply the latest EF migration from the backend directory before deploying:
+
+```powershell
+dotnet ef database update
+```
+- Signed-in admin password change with current-password confirmation
 
 ## Database note
 

@@ -144,3 +144,36 @@ public class ResetPasswordViewModel
     [Required, Compare(nameof(NewPassword)), DataType(DataType.Password)]
     public string ConfirmPassword { get; set; } = "";
 }
+
+public class AdminChangePasswordViewModel
+{
+    [Required, DataType(DataType.Password)]
+    public string CurrentPassword { get; set; } = "";
+
+    [Required, MinLength(12), DataType(DataType.Password)]
+    public string NewPassword { get; set; } = "";
+
+    [Required, Compare(nameof(NewPassword)), DataType(DataType.Password)]
+    public string ConfirmPassword { get; set; } = "";
+}
+
+public class AdminForgotPasswordViewModel
+{
+    [Required, EmailAddress]
+    public string Email { get; set; } = "";
+}
+
+public class AdminResetPasswordViewModel
+{
+    [Required, EmailAddress]
+    public string Email { get; set; } = "";
+
+    [Required]
+    public string Token { get; set; } = "";
+
+    [Required, MinLength(12), DataType(DataType.Password)]
+    public string NewPassword { get; set; } = "";
+
+    [Required, Compare(nameof(NewPassword)), DataType(DataType.Password)]
+    public string ConfirmPassword { get; set; } = "";
+}

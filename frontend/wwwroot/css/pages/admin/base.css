@@ -344,6 +344,20 @@
     overflow: hidden;
 }
 
+.admin-password-panel { max-width: 560px; }
+.admin-password-panel form { display: grid; gap: 9px; }
+.admin-password-panel label { color: #473a37; font-size: 13px; font-weight: 700; }
+.admin-password-panel input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 12px;
+    border: 1px solid #d9ceca;
+    border-radius: 5px;
+    font: inherit;
+}
+.admin-password-panel input:focus { outline: 2px solid rgb(104 20 46 / 16%); border-color: #68142e; }
+.admin-password-panel button { justify-self: start; margin-top: 12px; }
+
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -566,6 +580,26 @@
     text-decoration: underline;
 }
 
+.admin-forgot-password {
+    display: block;
+    margin-top: 16px;
+    color: #68142e;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+}
+.admin-forgot-password:hover { text-decoration: underline; }
+.admin-login-card .alert.success {
+    margin: 0 0 15px;
+    padding: 12px 14px;
+    border: 1px solid #c4e3cf;
+    border-radius: 5px;
+    background: #f1faf4;
+    color: #24643b;
+    font-size: 13px;
+}
+
+
 .admin-login-card .alert.error {
     margin: 0 0 15px;
     padding: 12px 14px;
@@ -662,4 +696,3 @@
     background: #fff4f5;
     color: #a1263b;
 }
-

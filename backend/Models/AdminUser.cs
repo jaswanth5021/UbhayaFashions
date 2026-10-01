@@ -1,2 +1,2 @@
 namespace backend.Models;
-public class AdminUser { public int Id { get; set; } public string Name { get; set; } = ""; public string Email { get; set; } = ""; public string PasswordHash { get; set; } = ""; public bool IsActive { get; set; } = true; public DateTime CreatedDate { get; set; } = DateTime.UtcNow; }
+public class AdminUser { public int Id { get; set; } public string Name { get; set; } = ""; public string Email { get; set; } = ""; public string PasswordHash { get; set; } = ""; public string? PasswordResetTokenHash { get; set; } public DateTime? PasswordResetExpiresUtc { get; set; } public bool IsActive { get; set; } = true; public DateTime CreatedDate { get; set; } = DateTime.UtcNow; }
