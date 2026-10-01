@@ -1,6 +1,6 @@
 # Signup email verification setup
 
-Signup now sends a 6-digit email code. New customers are created only after the code is confirmed. Codes expire after 10 minutes, allow five attempts, and can be resent once per minute.
+Signup does not require email verification. Customers can log in immediately, then request a 6-digit code from **My Profile** to verify their email. Codes expire after 10 minutes, allow five attempts, and can be resent once per minute.
 
 ## Apply the backend database migration
 
@@ -9,6 +9,8 @@ From the backend directory, run:
 ```powershell
 dotnet ef database update
 ```
+
+This applies the customer email verification status and code fields. Existing customer accounts start as unverified until their owner completes verification.
 
 ## Configure Gmail SMTP on the backend
 

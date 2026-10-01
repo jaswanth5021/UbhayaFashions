@@ -156,6 +156,25 @@
                     </div>
                     <button class="profile-save-button" type="submit">Save changes</button>
                 </form>
+                    <div class="profile-email-verification">
+                        @if (Model.EmailVerified)
+                        {
+                            <p><strong>Email verified</strong></p>
+                        }
+                        else
+                        {
+                            <p>Your email is not verified yet.</p>
+                            <form asp-action="SendEmailVerification" method="post">
+                                @Html.AntiForgeryToken()
+                                <button class="profile-save-button" type="submit">Send verification code</button>
+                            </form>
+                            <form asp-action="ConfirmEmailVerification" method="post" class="profile-form" style="margin-top:16px">
+                                @Html.AntiForgeryToken()
+                                <div class="profile-field"><label for="EmailVerificationCode">6-digit verification code</label><input id="EmailVerificationCode" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required /></div>
+                                <button class="profile-save-button" type="submit">Verify email</button>
+                            </form>
+                        }
+                    </div>
             </section>
         }
 

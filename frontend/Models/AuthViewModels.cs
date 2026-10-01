@@ -80,6 +80,7 @@ public class AuthResponse
     public int? Age { get; set; }
 
     public string? ProfileImage { get; set; }
+
 }
 
 
@@ -110,6 +111,8 @@ public class ProfileViewModel
     public string? Gender { get; set; }
 
     public string? ProfileImage { get; set; }
+
+    public bool EmailVerified { get; set; }
 }
 
 public class ChangePasswordViewModel

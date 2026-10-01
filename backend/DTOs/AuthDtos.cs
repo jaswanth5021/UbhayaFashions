@@ -14,6 +14,7 @@ public record SignUpRequest(
 
 public record VerifySignupEmailRequest(string Email, string Code);
 public record ResendSignupOtpRequest(string Email);
+public record VerifyMyEmailRequest(string Code);
 
 
 // =====================================================
@@ -74,5 +75,6 @@ public record ProfileResponse(
     int? Age,
     string? ProfileImage,
     DateTime? DateOfBirth,
-    string? Gender);
+    string? Gender,
+    bool EmailVerified);
 

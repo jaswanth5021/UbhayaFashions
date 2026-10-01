@@ -96,8 +96,32 @@ public class AccountController(ApiService api) : Controller
             return View(model);
         }
 
-        TempData["SignupCodeSent"] = "We sent a verification code to your email.";
-        return RedirectToAction(nameof(VerifySignupEmail), new { email = model.Email });
+        TempData["SignupSuccess"] = "Your account is ready. Sign in now; you can verify your email later from your profile.";
+        return RedirectToAction(nameof(Login));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SendEmailVerification()
+    {
+        if (User.Identity?.IsAuthenticated != true) return RedirectToAction(nameof(Login));
+        var result = await api.SendMyEmailVerificationAsync();
+        TempData[result.Success ? "ProfileSuccess" : "ProfileError"] = result.Success
+            ? "Verification code sent to your email."
+            : result.Message.Trim('"');
+        return RedirectToAction(nameof(Profile), new { tab = "details" });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmEmailVerification(string code)
+    {
+        if (User.Identity?.IsAuthenticated != true) return RedirectToAction(nameof(Login));
+        var result = await api.ConfirmMyEmailVerificationAsync(code);
+        TempData[result.Success ? "ProfileSuccess" : "ProfileError"] = result.Success
+            ? "Your email has been verified."
+            : result.Message.Trim('"');
+        return RedirectToAction(nameof(Profile), new { tab = "details" });
     }
 
     [HttpGet]

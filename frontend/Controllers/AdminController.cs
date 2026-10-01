@@ -2,6 +2,7 @@ using LadiesDressStore.Web.Models;using LadiesDressStore.Web.Services;using Micr
 namespace LadiesDressStore.Web.Controllers;
 public class AdminController(AdminApiService api):Controller{
  bool LoggedIn=>!string.IsNullOrWhiteSpace(Request.Cookies["admin_token"]);
+ public IActionResult Index()=>RedirectToAction(nameof(Login));
  public IActionResult Login(){if(LoggedIn)return RedirectToAction(nameof(Dashboard));return View();}
  [HttpGet] public IActionResult ForgotPassword()=>View(new AdminForgotPasswordViewModel());
  [HttpPost][ValidateAntiForgeryToken] public async Task<IActionResult> ForgotPassword(AdminForgotPasswordViewModel model){if(!ModelState.IsValid)return View(model);var result=await api.ForgotPassword(model.Email);if(!result.ok){ViewBag.Error=result.message.Trim('"');return View(model);}ViewBag.Success="If an active admin account matches that email, a reset link has been sent.";return View(model);}

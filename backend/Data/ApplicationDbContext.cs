@@ -53,6 +53,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<CustomerAddress>().Property(x => x.Country).HasMaxLength(100).IsRequired();
         modelBuilder.Entity<Customer>().Property(x => x.Gender).HasMaxLength(30);
         modelBuilder.Entity<Customer>().Property(x => x.PasswordResetTokenHash).HasMaxLength(64);
+        modelBuilder.Entity<Customer>().Property(x => x.EmailVerificationCodeHash).HasMaxLength(64);
         modelBuilder.Entity<InventoryTransaction>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<AdminUser>().HasIndex(x => x.Email).IsUnique();
         modelBuilder.Entity<AdminUser>().Property(x => x.PasswordResetTokenHash).HasMaxLength(64);

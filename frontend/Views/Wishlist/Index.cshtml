@@ -8,6 +8,10 @@
         <p class="wishlist-eyebrow">SAVED FOR LATER</p>
         <h1>My Wishlist</h1>
         <p>@Model.Count @(Model.Count == 1 ? "saved style" : "saved styles")</p>
+        <nav class="wishlist-navigation" aria-label="Wishlist navigation">
+            <a asp-controller="Home" asp-action="Index">Back to homepage</a>
+            <a class="wishlist-continue-shopping" asp-controller="Products" asp-action="Index">Continue shopping</a>
+        </nav>
     </header>
 
     @if (TempData["WishlistMessage"] is string message)

@@ -4,103 +4,56 @@
     ViewData["Title"] = "Create Account";
 }
 
-<div class="auth-card">
-
-    <h1>Create Account</h1>
-
-    <p>
-        Create your UBHAYA customer account. We’ll email you a verification code before the account is created.
-    </p>
-
-
-    <div asp-validation-summary="ModelOnly"
-         class="error">
+<main class="auth-card signup-card">
+    <div class="signup-heading">
+        <span class="signup-eyebrow">UBHAYA FASHIONS</span>
+        <h1>Create your account</h1>
+        <p>Join us for a more personal shopping experience. You can verify your email later from your profile.</p>
     </div>
 
+    <div asp-validation-summary="ModelOnly" class="error signup-validation-summary"></div>
 
-    <form asp-action="Signup"
-          method="post">
-
+    <form asp-action="Signup" method="post" class="signup-form">
         @Html.AntiForgeryToken()
 
+        <div class="signup-field">
+            <label asp-for="Name">Full name</label>
+            <input asp-for="Name" autocomplete="name" placeholder="Your name" />
+            <span asp-validation-for="Name"></span>
+        </div>
 
-        <label asp-for="Name">
-            Full Name
-        </label>
+        <div class="signup-field">
+            <label asp-for="Email">Email address</label>
+            <input asp-for="Email" autocomplete="email" placeholder="you@example.com" />
+            <span asp-validation-for="Email"></span>
+        </div>
 
-        <input asp-for="Name"
-               placeholder="Your name" />
+        <div class="signup-field">
+            <label asp-for="Mobile">Mobile number</label>
+            <input asp-for="Mobile" type="tel" autocomplete="tel" placeholder="+91 98765 43210" />
+            <span asp-validation-for="Mobile"></span>
+        </div>
 
-        <span asp-validation-for="Name">
-        </span>
+        <div class="signup-field">
+            <label asp-for="Age">Age</label>
+            <input asp-for="Age" type="number" min="18" max="120" />
+            <span asp-validation-for="Age"></span>
+        </div>
 
+        <div class="signup-field">
+            <label asp-for="Password">Password</label>
+            <input asp-for="Password" autocomplete="new-password" />
+            <span asp-validation-for="Password"></span>
+        </div>
 
-        <label asp-for="Email">
-            Email
-        </label>
+        <div class="signup-field">
+            <label asp-for="ConfirmPassword">Confirm password</label>
+            <input asp-for="ConfirmPassword" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword"></span>
+        </div>
 
-        <input asp-for="Email"
-               placeholder="you@example.com" />
-
-        <span asp-validation-for="Email">
-        </span>
-
-        <label asp-for="Mobile">Mobile number</label>
-        <input asp-for="Mobile" type="tel" autocomplete="tel" placeholder="+91 98765 43210" />
-        <span asp-validation-for="Mobile"></span>
-
-
-        <label asp-for="Age">
-            Age
-        </label>
-
-        <input asp-for="Age"
-               type="number"
-               min="18"
-               max="120" />
-
-        <span asp-validation-for="Age">
-        </span>
-
-
-        <label asp-for="Password">
-            Password
-        </label>
-
-        <input asp-for="Password" />
-
-        <span asp-validation-for="Password">
-        </span>
-
-
-        <label asp-for="ConfirmPassword">
-            Confirm Password
-        </label>
-
-        <input asp-for="ConfirmPassword" />
-
-        <span asp-validation-for="ConfirmPassword">
-        </span>
-
-
-        <button class="button full"
-                type="submit">
-
-            Send verification code
-
-        </button>
-
+        <button class="button full signup-submit" type="submit">Create account</button>
     </form>
 
-
-    <p class="center">
-
-        Already have an account?
-
-        <a asp-action="Login">
-            Login
-        </a>
-
-    </p>
-
-</div>
+    <p class="signup-login">Already have an account? <a asp-action="Login">Log in</a></p>
+</main>
