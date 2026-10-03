@@ -67,8 +67,8 @@ public class AdminAuthController(
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword(AdminChangePasswordRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 12)
-            return BadRequest("Admin password must contain at least 12 characters.");
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
+            return BadRequest("New password is required.");
         if (string.IsNullOrWhiteSpace(request.CurrentPassword))
             return BadRequest("Current password is required.");
         var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -142,8 +142,8 @@ public class AdminAuthController(
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(AdminResetPasswordRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 12)
-            return BadRequest("Admin password must contain at least 12 characters.");
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
+            return BadRequest("New password is required.");
         var email = request.Email?.Trim().ToLowerInvariant();
         var admin = await db.AdminUsers.FirstOrDefaultAsync(x => x.Email == email && x.IsActive);
         var tokenHash = HashResetToken(request.Token ?? "");

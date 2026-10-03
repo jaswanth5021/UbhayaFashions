@@ -10,7 +10,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/admin/categories")]
 [Authorize(Roles = "Admin")]
-public class AdminCategoriesController(ApplicationDbContext db, IWebHostEnvironment env) : ControllerBase
+public class AdminCategoriesController(ApplicationDbContext db, IConfiguration config) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -68,8 +68,7 @@ public class AdminCategoriesController(ApplicationDbContext db, IWebHostEnvironm
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!new[] { ".jpg", ".jpeg", ".png", ".webp" }.Contains(extension)) return BadRequest("Only JPG, JPEG, PNG and WEBP images are supported.");
 
-        var root = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
-        var folder = Path.Combine(root, "uploads", "categories", id.ToString());
+        var folder = Path.Combine(config["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads", "categories", id.ToString());
         Directory.CreateDirectory(folder);
         var fileName = $"{Guid.NewGuid():N}{extension}";
         await using (var stream = System.IO.File.Create(Path.Combine(folder, fileName))) await file.CopyToAsync(stream);
@@ -107,8 +106,9 @@ public class AdminCategoriesController(ApplicationDbContext db, IWebHostEnvironm
         if (string.IsNullOrWhiteSpace(imageUrl) || Uri.TryCreate(imageUrl, UriKind.Absolute, out _)) return;
         var relativePath = imageUrl.Replace('\\', '/').TrimStart('/');
         if (!relativePath.StartsWith("uploads/categories/", StringComparison.OrdinalIgnoreCase)) return;
-        var path = Path.GetFullPath(Path.Combine(env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot"), relativePath));
-        var root = Path.GetFullPath(Path.Combine(env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot"), "uploads", "categories")) + Path.DirectorySeparatorChar;
+        var uploadsRoot = Path.GetFullPath(config["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads");
+        var path = Path.GetFullPath(Path.Combine(uploadsRoot, relativePath["uploads/".Length..]));
+        var root = Path.GetFullPath(Path.Combine(uploadsRoot, "categories")) + Path.DirectorySeparatorChar;
         if (path.StartsWith(root, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(path)) System.IO.File.Delete(path);
     }
 }

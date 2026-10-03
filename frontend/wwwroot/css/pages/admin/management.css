@@ -175,6 +175,74 @@
     border: 0;
 }
 
+.admin-account-create { padding: 24px; }
+.admin-account-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.admin-account-section-head h2 { margin: 0; color: #302321; font: 400 23px Georgia, "Times New Roman", serif; }
+.admin-account-section-head p { margin: 5px 0 0; color: #806f6a; font-size: 13px; }
+.admin-account-form { display: grid; grid-template-columns: repeat(3, minmax(150px, 1fr)) auto auto; align-items: end; gap: 14px; }
+.admin-account-form > label:not(.category-home-choice) { display: grid; gap: 7px; color: #473a37; font-size: 12px; font-weight: 700; }
+.admin-account-form input:not([type="checkbox"]) { width: 100%; min-width: 0; min-height: 42px; padding: 9px 11px; border: 1px solid #d9ceca; border-radius: 5px; background: #fff; color: #302321; font: 13px Arial, sans-serif; }
+.admin-account-form input:focus { border-color: #8c2946; outline: 3px solid #8c29461c; }
+.admin-account-form label > span { color: #887b76; font-weight: 400; }
+.admin-account-form .category-home-choice { min-height: 42px; }
+.admin-account-form button { min-height: 42px; white-space: nowrap; }
+.admin-account-list { margin-top: 30px; }
+.admin-account-list > .admin-account-section-head { margin-bottom: 12px; }
+.admin-product-filters.admin-account-filters { display: grid; grid-template-columns: minmax(220px, 260px) minmax(160px, 200px) max-content max-content; justify-content: start; align-items: end; gap: 14px; margin: 0 0 20px; padding: 16px; }
+.admin-account-filters label { display: grid; min-width: 0; gap: 6px; }
+.admin-account-filters input[type="search"],
+.admin-account-filters select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; padding: 9px 12px; border: 1px solid #d9ceca; border-radius: 5px; background: #fff; color: #302321; font: 14px Arial, sans-serif; }
+.admin-account-filters input[type="search"]:focus,
+.admin-account-filters select:focus { border-color: #8c2946; outline: 3px solid #8c29461c; }
+.admin-product-filters.admin-account-filters > .primary { width: 150px; min-height: 42px; white-space: nowrap; }
+.admin-account-filters .admin-filter-clear { min-width: 92px; min-height: 42px; justify-content: center; padding: 0 14px; border: 1px solid #eadde1; border-radius: 5px; background: #fff; white-space: nowrap; }
+.admin-account-filters .admin-filter-clear:hover { border-color: #68142e; background: #fbf4f6; text-decoration: none; }
+.admin-account-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.admin-account-empty { padding: 28px; border: 1px dashed #d9ceca; border-radius: 7px; background: #fff; color: #75696d; text-align: center; font-size: 14px; }
+.admin-account-card { min-width: 0; padding: 18px 20px; border: 1px solid #e9e1de; border-radius: 7px; background: #fff; }
+.admin-account-card[hidden] { display: none; }
+.admin-account-no-results { grid-column: 1 / -1; padding: 28px; border: 1px dashed #d9ceca; border-radius: 7px; background: #fff; color: #75696d; text-align: center; font-size: 14px; }
+.admin-account-identity { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.admin-account-avatar { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #f5e9ed; color: #68142e; font-weight: 700; }
+.admin-account-identity > div { display: grid; gap: 4px; min-width: 0; }
+.admin-account-identity strong { color: #302321; font-size: 14px; }
+.admin-account-identity > div > span { color: #806f6a; font-size: 12px; overflow-wrap: anywhere; }
+.admin-account-status { margin-left: auto; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.admin-account-status.is-active { background: #eff8f0; color: #28663a; }
+.admin-account-status.is-inactive { background: #f4eeee; color: #75696d; }
+.admin-account-edit { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.admin-account-edit label:nth-child(3) { grid-column: 1 / -1; }
+.admin-account-actions { display: flex; align-items: end; }
+.admin-account-delete { display: flex; justify-content: flex-end; margin-top: 12px; }
+.admin-accounts-table { min-width: 900px; }
+.admin-accounts-table th:nth-child(1), .admin-accounts-table td:nth-child(1) { width: 22%; }
+.admin-accounts-table th:nth-child(2), .admin-accounts-table td:nth-child(2) { width: 30%; }
+.admin-accounts-table th:nth-child(3), .admin-accounts-table td:nth-child(3) { width: 20%; }
+.admin-accounts-table th:nth-child(4), .admin-accounts-table td:nth-child(4) { width: 12%; }
+.admin-accounts-table th:nth-child(5), .admin-accounts-table td:nth-child(5) { width: 16%; }
+.admin-accounts-table .admin-account-row[hidden] { display: none; }
+.admin-account-cell-input { width: 100%; min-width: 130px; min-height: 38px; padding: 8px 9px; border: 1px solid #d9ceca; border-radius: 5px; background: #fff; color: #302321; font: 13px Arial, sans-serif; }
+.admin-account-cell-input:focus { border-color: #8c2946; outline: 3px solid #8c29461c; }
+.admin-account-active { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; color: #473a37; font-size: 12px; }
+.admin-account-actions { gap: 8px; }
+.admin-account-actions button { min-width: 58px; cursor: pointer; }
+.admin-account-actions form:last-child button { color: #9b3549; }
+
+@media (max-width: 950px) {
+    .admin-account-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .admin-account-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+    .admin-account-create, .admin-account-card { padding: 17px; }
+    .admin-account-form, .admin-account-edit { grid-template-columns: 1fr; }
+    .admin-product-filters.admin-account-filters { grid-template-columns: 1fr 1fr; }
+    .admin-account-filters label:first-child { grid-column: 1 / -1; }
+    .admin-product-filters.admin-account-filters > .primary, .admin-account-filters .admin-filter-clear { width: 100%; }
+    .admin-account-edit label:nth-child(3) { grid-column: auto; }
+    .admin-account-actions { justify-content: stretch; }
+    .admin-account-actions button { width: 100%; }
+}
+
 @media (max-width: 480px) {
     .admin-login-card {
         padding: 30px 24px;
@@ -281,4 +349,3 @@
         display: none;
     }
 }
-

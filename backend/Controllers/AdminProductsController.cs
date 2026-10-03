@@ -10,7 +10,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/admin/products")]
 [Authorize(Roles = "Admin")]
-public class AdminProductsController(ApplicationDbContext db, IWebHostEnvironment env, IConfiguration config) : ControllerBase
+public class AdminProductsController(ApplicationDbContext db, IConfiguration config) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> All()
@@ -178,8 +178,7 @@ public class AdminProductsController(ApplicationDbContext db, IWebHostEnvironmen
         if (file is null || file.Length == 0 || file.Length > 100_000_000) return null;
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!new[] { ".mp4", ".webm", ".ogv", ".ogg" }.Contains(extension)) return null;
-        var root = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
-        var folder = Path.Combine(root, "uploads", "products", "videos");
+        var folder = Path.Combine(config["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads", "products", "videos");
         Directory.CreateDirectory(folder);
         var name = $"{Guid.NewGuid():N}{extension}";
         await using var stream = System.IO.File.Create(Path.Combine(folder, name));
@@ -223,8 +222,7 @@ public class AdminProductsController(ApplicationDbContext db, IWebHostEnvironmen
         if (file is null || file.Length == 0 || file.Length > 10000000) return null;
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!new[] { ".jpg", ".jpeg", ".png", ".webp" }.Contains(extension)) return null;
-        var root = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
-        var folder = Path.Combine(root, "uploads", "products", productId.ToString());
+        var folder = Path.Combine(config["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads", "products", productId.ToString());
         Directory.CreateDirectory(folder);
         var name = $"{Guid.NewGuid():N}{extension}";
         await using var stream = System.IO.File.Create(Path.Combine(folder, name));
@@ -258,8 +256,7 @@ public class AdminProductsController(ApplicationDbContext db, IWebHostEnvironmen
         if (!isCurrentProductImage && !isLegacyProductImage) return;
         if (segments.Any(segment => segment is "." or "..")) return;
 
-        var root = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
-        var productsFolder = Path.GetFullPath(Path.Combine(root, "uploads", "products"));
+        var productsFolder = Path.GetFullPath(Path.Combine(config["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads", "products"));
         var filePath = Path.GetFullPath(Path.Combine(productsFolder, Path.Combine(segments)));
         if (!filePath.StartsWith(productsFolder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return;
 

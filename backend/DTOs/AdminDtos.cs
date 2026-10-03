@@ -5,6 +5,14 @@ public record AdminLoginResponse(string Token, int Id, string Name, string Email
 public record AdminChangePasswordRequest(string CurrentPassword, string NewPassword);
 public record AdminForgotPasswordRequest(string Email);
 public record AdminResetPasswordRequest(string Email, string Token, string NewPassword);
+public class AdminAccountRequest
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? Password { get; set; }
+    public bool IsActive { get; set; } = true;
+}
 public class CategoryRequest { public string Name { get; set; } = string.Empty; public bool ShowOnHomePage { get; set; } public string? ImageUrl { get; set; } }
 
 public class AdminProductRequest

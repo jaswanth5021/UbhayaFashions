@@ -25,5 +25,8 @@ public class AdminApiService(IHttpClientFactory factory,IHttpContextAccessor acc
  public async Task<List<AdminInventoryItem>> Inventory()=>await Send<List<AdminInventoryItem>>(Request(HttpMethod.Get,"api/admin/inventory"))??[];
  public async Task<bool> AdjustStock(int id,string size,int quantity,string type,string? note){var r=Request(HttpMethod.Post,$"api/admin/inventory/{id}/adjust");r.Content=JsonContent.Create(new{size,quantity,type,note});var x=await Client.SendAsync(r);return x.IsSuccessStatusCode;}
  public async Task<List<AdminOrderViewModel>> Orders()=>await Send<List<AdminOrderViewModel>>(Request(HttpMethod.Get,"api/admin/orders"))??[];
+ public async Task<List<AdminAccountViewModel>> AdminAccounts()=>await Send<List<AdminAccountViewModel>>(Request(HttpMethod.Get,"api/admin/accounts"))??[];
+ public async Task SaveAdminAccount(AdminAccountInput account){var r=Request(account.Id==0?HttpMethod.Post:HttpMethod.Put,account.Id==0?"api/admin/accounts":$"api/admin/accounts/{account.Id}");r.Content=JsonContent.Create(account);var x=await Client.SendAsync(r);if(!x.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(x.Content));}
+ public async Task DeleteAdminAccount(int id){var x=await Client.SendAsync(Request(HttpMethod.Delete,$"api/admin/accounts/{id}"));if(!x.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(x.Content));}
  public async Task<bool> UpdateOrder(int id,string status,string paymentStatus){var r=Request(HttpMethod.Put,$"api/admin/orders/{id}/status");r.Content=JsonContent.Create(new{status,paymentStatus});var x=await Client.SendAsync(r);return x.IsSuccessStatusCode;}
 }

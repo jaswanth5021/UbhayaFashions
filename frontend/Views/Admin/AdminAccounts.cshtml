@@ -1,0 +1,92 @@
+@model List<AdminAccountViewModel>
+@{ ViewData["Title"] = "Admin accounts"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
+<div class="page-head"><div><h1>Admin accounts</h1><p><span id="adminAccountCount">@Model.Count</span> matching admin account@(Model.Count == 1 ? "" : "s")</p></div></div>
+@if (TempData["AccountMessage"] is string message) { <div class="category-notice success">@message</div> }
+@if (TempData["AccountError"] is string error) { <div class="category-notice error">@error</div> }
+@if (ViewBag.Error is string loadError) { <div class="category-notice error">Could not load admin accounts: @loadError</div> }
+
+<section class="category-card admin-account-create">
+    <div class="admin-account-section-head"><div><h2>Create admin account</h2><p>Add a staff member who can manage the store.</p></div></div>
+    <form class="admin-account-form" asp-action="SaveAdminAccount" method="post">
+        @Html.AntiForgeryToken()<input type="hidden" name="Id" value="0" />
+        <label>Name<input name="Name" required maxlength="100" placeholder="Staff member name" /></label>
+        <label>Email<input name="Email" type="email" required placeholder="name@example.com" /></label>
+        <label>Temporary password<input name="Password" type="password" required autocomplete="new-password" /></label>
+        <label class="category-home-choice"><input name="IsActive" type="checkbox" value="true" checked /><input name="IsActive" type="hidden" value="false" /> Active</label>
+        <button class="primary" type="submit">Create account</button>
+    </form>
+</section>
+
+<section class="admin-account-list">
+    <div class="admin-account-section-head"><div><h2>Existing admin accounts</h2><p>Update account details or remove access.</p></div></div>
+    @if (Model.Count > 0)
+    {
+        <form class="admin-product-filters admin-account-filters" id="adminAccountFilters" role="search">
+            <label>Search accounts<input id="adminAccountSearch" type="search" placeholder="Name or email" autocomplete="off" /></label>
+            <label>Status<select id="adminAccountStatus"><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
+            <button class="primary" type="submit">Apply filters</button>
+            <button class="admin-filter-clear" id="adminAccountReset" type="reset">Clear</button>
+        </form>
+    }
+    @if (Model.Count == 0)
+    {
+        <div class="admin-account-empty">No admin accounts were returned by the backend.</div>
+    }
+    else
+    {
+        <div class="table-wrap products-table-wrap">
+            <table class="products-table admin-accounts-table">
+                <thead><tr><th>Admin account</th><th>Email</th><th>New password</th><th>Status</th><th class="products-actions-heading">Actions</th></tr></thead>
+                <tbody>
+                @foreach (var account in Model)
+                {
+                    var formId = $"admin-account-{account.Id}";
+                    <tr class="admin-account-row" data-account-search="@($"{account.Name} {account.Email}".ToLowerInvariant())" data-account-status="@(account.IsActive ? "active" : "inactive")">
+                        <td><div class="product-cell"><span class="admin-account-avatar">@(string.IsNullOrEmpty(account.Name) ? "?" : account.Name.Substring(0, 1).ToUpperInvariant())</span><div><b>@account.Name</b><small>Admin #@account.Id</small></div></div></td>
+                        <td><input class="admin-account-cell-input" form="@formId" name="Email" type="email" value="@account.Email" required aria-label="Email for @account.Name" /></td>
+                        <td><input class="admin-account-cell-input" form="@formId" name="Password" type="password" autocomplete="new-password" placeholder="Leave blank to keep current" aria-label="New password for @account.Name" /></td>
+                        <td><label class="admin-account-active"><input form="@formId" name="IsActive" type="checkbox" value="true" checked="@account.IsActive" /> Active</label><input form="@formId" name="IsActive" type="hidden" value="false" /></td>
+                        <td class="actions products-actions"><div class="products-action-buttons admin-account-actions">
+                            <form id="@formId" asp-action="SaveAdminAccount" method="post">
+                                @Html.AntiForgeryToken()<input type="hidden" name="Id" value="@account.Id" /><input type="hidden" name="Name" value="@account.Name" />
+                                <button type="submit">Save</button>
+                            </form>
+                            <form asp-action="DeleteAdminAccount" method="post" onsubmit="return confirm('Delete this admin account?');">
+                                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@account.Id" /><button type="submit">Delete</button>
+                            </form>
+                        </div></td>
+                    </tr>
+                }
+                <tr id="adminAccountNoResults" hidden><td colspan="5" class="admin-account-empty">No accounts match these filters.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (Model.Count > 0)
+{
+    <script>
+        (() => {
+            const form = document.getElementById('adminAccountFilters');
+            const search = document.getElementById('adminAccountSearch');
+            const status = document.getElementById('adminAccountStatus');
+            const count = document.getElementById('adminAccountCount');
+            const noResults = document.getElementById('adminAccountNoResults');
+            const rows = [...document.querySelectorAll('.admin-account-row')];
+            const filter = () => {
+                const query = search.value.trim().toLocaleLowerCase();
+                let visible = 0;
+                rows.forEach(row => {
+                    const matches = row.dataset.accountSearch.includes(query) && (status.value === 'all' || row.dataset.accountStatus === status.value);
+                    row.hidden = !matches;
+                    if (matches) visible++;
+                });
+                count.textContent = visible;
+                noResults.hidden = visible !== 0;
+            };
+            form.addEventListener('submit', event => { event.preventDefault(); filter(); });
+            form.addEventListener('reset', () => requestAnimationFrame(filter));
+        })();
+    </script>
+}

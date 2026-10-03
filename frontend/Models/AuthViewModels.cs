@@ -153,7 +153,7 @@ public class AdminChangePasswordViewModel
     [Required, DataType(DataType.Password)]
     public string CurrentPassword { get; set; } = "";
 
-    [Required, MinLength(12), DataType(DataType.Password)]
+    [Required, DataType(DataType.Password)]
     public string NewPassword { get; set; } = "";
 
     [Required, Compare(nameof(NewPassword)), DataType(DataType.Password)]
@@ -174,7 +174,7 @@ public class AdminResetPasswordViewModel
     [Required]
     public string Token { get; set; } = "";
 
-    [Required, MinLength(12), DataType(DataType.Password)]
+    [Required, DataType(DataType.Password)]
     public string NewPassword { get; set; } = "";
 
     [Required, Compare(nameof(NewPassword)), DataType(DataType.Password)]
