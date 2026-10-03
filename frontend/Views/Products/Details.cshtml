@@ -23,7 +23,7 @@
         .Select(url => (url, false)));
     galleryItems.AddRange((Model.Videos ?? [])
         .OrderBy(video => video.SortOrder)
-        .Select(video => video.VideoUrl)
+        .Select(video => ImageUrlHelper.Resolve(video.VideoUrl, Configuration["ApiBaseUrl"]))
         .Where(url => !string.IsNullOrWhiteSpace(url))
         .Select(url => (url, true)));
 }

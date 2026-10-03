@@ -1,5 +1,6 @@
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -136,6 +137,19 @@ if (!app.Environment.IsDevelopment())
 // =====================================================
 
 app.UseStaticFiles();
+
+// Expose uploaded media from the shared upload directory under /uploads.
+// Configure UploadsPath to the same directory used by the API, especially on EC2.
+var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
+var fullUploadsPath = Path.GetFullPath(uploadsPath);
+if (Directory.Exists(fullUploadsPath))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(fullUploadsPath),
+        RequestPath = "/uploads"
+    });
+}
 
 // =====================================================
 // ROUTING

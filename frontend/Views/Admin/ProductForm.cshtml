@@ -89,9 +89,7 @@
             <div class="full admin-product-images">
                 <label for="image">Main product image</label>
                 <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" />
-                <label asp-for="NewImageUrl">Or use a new image URL</label>
-                <input asp-for="NewImageUrl" type="url" placeholder="https://example.com/product-image.jpg" />
-                <small>Leave blank to keep the current image. A selected file takes priority over this URL.</small>
+                <small>Upload an image file, or leave blank to keep the current image.</small>
                 @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
                 {
                     <img class="preview admin-main-image-preview" src="@ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"])" alt="Current main product image" />
@@ -128,7 +126,7 @@
                     <div class="admin-video-gallery">
                         @foreach (var video in Model.Videos.OrderBy(item => item.SortOrder))
                         {
-                            <video src="@video.VideoUrl" controls preload="metadata" aria-label="Product video for @Model.Name"></video>
+                            <video src="@ImageUrlHelper.Resolve(video.VideoUrl, Configuration["ApiBaseUrl"])" controls preload="metadata" aria-label="Product video for @Model.Name"></video>
                         }
                     </div>
                 }
