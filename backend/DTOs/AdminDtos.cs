@@ -22,6 +22,7 @@ public class AdminProductRequest
     public int CategoryId { get; set; }
     public string Colors { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
+    public bool IsBestSeller { get; set; }
     public List<AdminProductVariantRequest> Variants { get; set; } = [];
 }
 

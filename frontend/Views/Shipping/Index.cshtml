@@ -1,0 +1,296 @@
+@{
+    ViewData["Title"] = "Shipping Policy";
+}
+
+<link rel="stylesheet"
+      href="~/css/pages/shipping/index.css"
+      asp-append-version="true" />
+
+<main class="shipping-policy-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <section class="shipping-policy-hero">
+
+        <p class="shipping-policy-eyebrow">
+            UBHAYA FASHIONS
+        </p>
+
+        <h1>
+            Shipping Policy
+        </h1>
+
+        <p class="shipping-policy-intro">
+            Everything you need to know about delivery,
+            shipping charges and order dispatch.
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         SHIPPING POLICY CONTENT
+         ===================================================== -->
+
+    <section class="shipping-policy-content">
+
+        <!-- Shipping Charges -->
+
+        <article class="shipping-policy-card">
+
+            <div class="shipping-policy-icon">
+                🚚
+            </div>
+
+            <div>
+
+                <h2>
+                    Shipping Charges
+                </h2>
+
+                <p>
+                    We offer
+                    <strong>free shipping on orders above ₹999</strong>.
+                </p>
+
+                <p>
+                    Shipping charges may apply to orders below ₹999.
+                    The applicable shipping charge will be displayed
+                    during checkout before you place your order.
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <!-- Order Processing -->
+
+        <article class="shipping-policy-card">
+
+            <div class="shipping-policy-icon">
+                📦
+            </div>
+
+            <div>
+
+                <h2>
+                    Order Processing
+                </h2>
+
+                <p>
+                    Orders are generally processed and dispatched
+                    within <strong>24–48 hours</strong> after successful
+                    order confirmation and payment.
+                </p>
+
+                <p>
+                    Orders placed on Sundays or public holidays
+                    may be processed on the next working day.
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <!-- Delivery Time -->
+
+        <article class="shipping-policy-card">
+
+            <div class="shipping-policy-icon">
+                🛵
+            </div>
+
+            <div>
+
+                <h2>
+                    Delivery Time
+                </h2>
+
+                <p>
+                    After dispatch, delivery generally takes
+                    approximately <strong>3–7 business days</strong>,
+                    depending on the delivery location.
+                </p>
+
+                <p>
+                    Delivery timelines may vary for remote locations,
+                    during festivals, severe weather conditions,
+                    or other circumstances beyond our control.
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <!-- Order Tracking -->
+
+        <article class="shipping-policy-card">
+
+            <div class="shipping-policy-icon">
+                🔍
+            </div>
+
+            <div>
+
+                <h2>
+                    Order Tracking
+                </h2>
+
+                <p>
+                    Once your order has been dispatched, tracking
+                    information will be provided when available.
+                </p>
+
+                <p>
+                    You can use the tracking information to follow
+                    the progress of your shipment.
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <!-- Delivery Address -->
+
+        <article class="shipping-policy-card">
+
+            <div class="shipping-policy-icon">
+                📍
+            </div>
+
+            <div>
+
+                <h2>
+                    Delivery Address
+                </h2>
+
+                <p>
+                    Please make sure your delivery address, phone
+                    number and other contact details are correct
+                    before placing your order.
+                </p>
+
+                <p>
+                    We may not be able to change the delivery address
+                    after the order has been dispatched.
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <!-- Delayed Delivery -->
+
+        <article class="shipping-policy-card">
+
+            <div class="shipping-policy-icon">
+                ⏳
+            </div>
+
+            <div>
+
+                <h2>
+                    Delayed Deliveries
+                </h2>
+
+                <p>
+                    Occasionally, deliveries may take longer than
+                    the estimated timeframe due to courier delays,
+                    weather conditions, public holidays, festivals,
+                    or other unexpected circumstances.
+                </p>
+
+                <p>
+                    If your order appears to be significantly delayed,
+                    please contact us with your order number.
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <!-- Incorrect Address -->
+
+        <article class="shipping-policy-card">
+
+            <div class="shipping-policy-icon">
+                ⚠️
+            </div>
+
+            <div>
+
+                <h2>
+                    Incorrect or Incomplete Address
+                </h2>
+
+                <p>
+                    Customers are responsible for providing a complete
+                    and accurate delivery address.
+                </p>
+
+                <p>
+                    If an order is returned to us because of an
+                    incorrect or incomplete address, additional
+                    shipping charges may apply for re-delivery.
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <!-- Contact -->
+
+        <article class="shipping-policy-card shipping-policy-contact">
+
+            <div class="shipping-policy-icon">
+                💬
+            </div>
+
+            <div>
+
+                <h2>
+                    Need Help?
+                </h2>
+
+                <p>
+                    If you have questions about your shipment or
+                    delivery, please contact Ubhaya Fashions.
+                </p>
+
+                <a asp-controller="Contact"
+                   asp-action="Index"
+                   class="shipping-policy-button">
+
+                    Contact Us
+
+                </a>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         LAST UPDATED
+         ===================================================== -->
+
+    <section class="shipping-policy-footer">
+
+        <p>
+            Last updated: October 2026
+        </p>
+
+    </section>
+
+</main>

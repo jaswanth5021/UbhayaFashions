@@ -2,11 +2,12 @@
 
 @{
     var category = ViewBag.Category as string;
+    var bestSellersOnly = (bool?)ViewBag.BestSellersOnly == true;
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var productCount = (int)ViewBag.ProductCount;
     var currentPage = (int)ViewBag.CurrentPage;
     var pageCount = (int)ViewBag.PageCount;
-    ViewData["Title"] = string.IsNullOrWhiteSpace(category)
+    ViewData["Title"] = bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category)
         ? "Shop All"
         : category;
 }
@@ -15,7 +16,7 @@
     <header class="catalog-header">
         <div class="catalog-heading-copy">
             <p class="catalog-eyebrow">THE UBHAYA COLLECTION</p>
-            <h1>@(string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
+            <h1>@(bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
             <p class="catalog-count">@productCount @(productCount == 1 ? "style" : "styles")</p>
         </div>
         @if (!string.IsNullOrWhiteSpace(category))
@@ -81,7 +82,7 @@
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@product.Id" />
                             <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(product.Id) ? "true" : "false")" />
-                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Products", new { category, page = currentPage })" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Products", new { category, page = currentPage, bestSellers = bestSellersOnly })" />
                             <button class="wishlist-button @(wishlistedProductIds.Contains(product.Id) ? "is-saved" : string.Empty)"
                                     type="submit"
                                     aria-label="@(wishlistedProductIds.Contains(product.Id) ? $"Remove {product.Name} from wishlist" : $"Add {product.Name} to wishlist")"
@@ -146,7 +147,7 @@
             <nav class="catalog-pagination" aria-label="Product pages">
                 @if (currentPage > 1)
                 {
-                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-category="@category" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
+                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
                 }
                 else
                 {
@@ -161,13 +162,13 @@
                         }
                         else
                         {
-                            <a class="catalog-page-number" asp-action="Index" asp-route-category="@category" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
+                            <a class="catalog-page-number" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
                         }
                     }
                 </div>
                 @if (currentPage < pageCount)
                 {
-                    <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-category="@category" asp-route-page="@(currentPage + 1)" aria-label="Next page">Next →</a>
+                    <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@(currentPage + 1)" aria-label="Next page">Next →</a>
                 }
                 else
                 {

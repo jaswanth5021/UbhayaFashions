@@ -177,12 +177,14 @@ body.admin-body {
 
 .products-table {
     table-layout: fixed;
+    min-width: 1040px;
 }
 
-.products-col-product { width: 36%; }
-.products-col-category { width: 15%; }
-.products-col-variants { width: 37%; }
-.products-col-actions { width: 12%; }
+.products-col-product { width: 24%; }
+.products-col-category { width: 12%; }
+.products-col-variants { width: 29%; }
+.products-col-bestseller { width: 17%; }
+.products-col-actions { width: 18%; }
 
 .products-table th,
 .products-table td {
@@ -205,6 +207,41 @@ body.admin-body {
     display: table-cell;
     text-align: center;
     vertical-align: middle;
+}
+
+.admin-bestseller-toggle {
+    margin: 0;
+}
+
+.admin-bestseller-toggle label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.admin-bestseller-toggle input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #7e233d;
+}
+
+.bestseller-save-status {
+    display: block;
+    min-height: 1em;
+    margin: 4px 0 0 24px;
+    color: #487457;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.bestseller-save-status.is-error {
+    color: #a12638;
 }
 
 .products-action-buttons {
@@ -275,6 +312,30 @@ body.admin-body {
 .admin-product-filters input[type="search"] {
     min-width: 190px;
 }
+
+.inventory-stock-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: -6px 0 18px;
+    color: #685b57;
+    font-size: 12px;
+}
+
+.inventory-stock-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.stock-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.stock-legend-in { background: #356b3c; }
+.stock-legend-low { background: #a1263b; }
 
 .inventory-empty {
     padding: 32px !important;
@@ -384,13 +445,6 @@ body.admin-body {
         width: 100%;
     }
 
-    .products-table {
-        table-layout: auto;
-    }
-
-    .products-col-product { width: auto; }
-    .products-col-category { width: auto; }
-    .products-col-variants { width: auto; }
     .products-col-actions { width: 128px; }
 
     .products-table th,

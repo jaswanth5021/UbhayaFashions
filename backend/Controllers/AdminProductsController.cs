@@ -41,6 +41,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
             CategoryNavigation = category,
             Colors = request.Colors?.Trim() ?? string.Empty,
             ImageUrl = request.ImageUrl?.Trim() ?? string.Empty,
+            IsBestSeller = request.IsBestSeller,
             Variants = request.Variants.Select(ToVariant).ToList()
         };
         db.Products.Add(product);
@@ -74,6 +75,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         product.CategoryNavigation = category;
         product.Colors = request.Colors?.Trim() ?? string.Empty;
         product.ImageUrl = request.ImageUrl?.Trim() ?? string.Empty;
+        product.IsBestSeller = request.IsBestSeller;
         db.ProductVariants.RemoveRange(product.Variants);
         var updatedVariants = request.Variants.Select(ToVariant).ToList();
         db.ProductVariants.AddRange(updatedVariants);
@@ -90,6 +92,16 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         }
         await db.SaveChangesAsync();
         return Ok(await db.Products.AsNoTracking().Include(x => x.CategoryNavigation).Include(x => x.Images).Include(x => x.Videos).Include(x => x.Variants).FirstAsync(x => x.Id == id));
+    }
+
+    [HttpPost("{id:int}/bestseller")]
+    public async Task<IActionResult> SetBestSeller(int id, [FromBody] bool isBestSeller)
+    {
+        var product = await db.Products.FindAsync(id);
+        if (product is null) return NotFound();
+        product.IsBestSeller = isBestSeller;
+        await db.SaveChangesAsync();
+        return Ok(new { product.Id, product.IsBestSeller });
     }
 
     [HttpDelete("{id:int}")]

@@ -174,6 +174,13 @@ public class AccountController(ApiService api) : Controller
         var result =
             await api.GetMyProfileAsync();
 
+        if (result.StatusCode is 401 or 403 or 404 || (result.Success && result.Data is null))
+        {
+            Response.Cookies.Delete("access_token");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction(nameof(Login));
+        }
+
         if (!result.Success)
         {
             ViewBag.Error =

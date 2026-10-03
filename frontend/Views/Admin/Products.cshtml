@@ -1,6 +1,8 @@
 ﻿@model List<AdminProductInput>
 @{ var productCount = (int)ViewBag.ProductCount; var currentPage = (int)ViewBag.CurrentPage; var pageCount = (int)ViewBag.PageCount; var pageSize = (int)ViewBag.PageSize; var categories = ViewBag.Categories as List<CategoryViewModel> ?? []; var sizes = ViewBag.Sizes as List<string> ?? []; var discounts = ViewBag.Discounts as List<decimal> ?? []; var selectedCategoryId = (int)ViewBag.SelectedCategoryId; var selectedSize = ViewBag.SelectedSize as string; decimal? selectedDiscount = ViewBag.SelectedDiscount; ViewData["Title"] = "Products"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
 <div class="page-head"><div><h1>Products</h1><p>@productCount matching @(productCount == 1 ? "product" : "products") · Page @currentPage of @pageCount</p></div><a class="primary" asp-action="CreateProduct">+ Add product</a></div>
+@if (TempData["ProductMessage"] is string productMessage) { <p class="alert success" role="status">@productMessage</p> }
+@if (TempData["ProductError"] is string productError) { <p class="alert error" role="alert">@productError</p> }
 <form class="admin-product-filters" asp-action="Products" method="get">
     <label>Category
         <select name="categoryId">
@@ -23,13 +25,14 @@
     <button class="primary" type="submit">Apply filters</button>
     <a class="admin-filter-clear" asp-action="Products">Clear</a>
 </form>
-<div class="table-wrap products-table-wrap"><table class="products-table"><colgroup><col class="products-col-product" /><col class="products-col-category" /><col class="products-col-variants" /><col class="products-col-actions" /></colgroup><thead><tr><th>Product</th><th>Category</th><th>Size variants</th><th class="products-actions-heading">Actions</th></tr></thead><tbody>
+<div class="table-wrap products-table-wrap"><table class="products-table"><colgroup><col class="products-col-product" /><col class="products-col-category" /><col class="products-col-variants" /><col class="products-col-bestseller" /><col class="products-col-actions" /></colgroup><thead><tr><th>Product</th><th>Category</th><th>Size variants</th><th>Bestseller</th><th class="products-actions-heading">Actions</th></tr></thead><tbody>
 @foreach (var product in Model)
 {
     <tr>
         <td><div class="product-cell">@if (!string.IsNullOrWhiteSpace(product.ImageUrl)) { <img src="@ImageUrlHelper.Resolve(product.ImageUrl, Configuration["ApiBaseUrl"])" alt="" /> }<div><b>@product.Name</b><small>#@product.Id</small></div></div></td>
         <td>@product.Category</td>
         <td><div class="admin-variant-summary">@foreach (var variant in product.Variants.OrderBy(item => item.Size)) { <span><b>@variant.Size</b> · @variant.Stock in stock · ₹@variant.Price.ToString("N0") · @variant.Discount% off</span> }</div></td>
+        <td><form asp-action="SetBestSeller" method="post" class="admin-bestseller-toggle">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@product.Id" /><input type="hidden" name="page" value="@currentPage" /><input type="hidden" name="pageSize" value="@pageSize" /><input type="hidden" name="categoryId" value="@selectedCategoryId" /><input type="hidden" name="size" value="@selectedSize" /><input type="hidden" name="discount" value="@selectedDiscount" /><label><input type="checkbox" name="isBestSeller" value="true" checked="@product.IsBestSeller" /><span>Show in Bestsellers</span></label><small class="bestseller-save-status" role="status" aria-live="polite"></small></form></td>
         <td class="actions products-actions"><div class="products-action-buttons"><a asp-action="EditProduct" asp-route-id="@product.Id">Edit</a><form asp-action="DeleteProduct" method="post" onsubmit="return confirm('Delete this product?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@product.Id" /><input type="hidden" name="page" value="@currentPage" /><input type="hidden" name="pageSize" value="@pageSize" /><input type="hidden" name="categoryId" value="@selectedCategoryId" /><input type="hidden" name="size" value="@selectedSize" /><input type="hidden" name="discount" value="@selectedDiscount" /><button type="submit">Delete</button></form></div></td>
     </tr>
 }
@@ -66,3 +69,38 @@
         </select>
     </form>
 </div>
+<script>
+    document.querySelectorAll(".admin-bestseller-toggle").forEach((form) => {
+        const checkbox = form.querySelector('input[name="isBestSeller"]');
+        const status = form.querySelector(".bestseller-save-status");
+        let savedValue = checkbox.checked;
+
+        checkbox.addEventListener("change", async () => {
+            const formData = new FormData(form);
+            checkbox.disabled = true;
+            status.textContent = "Saving…";
+            status.classList.remove("is-error");
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    credentials: "same-origin"
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || !result.success || result.isBestSeller !== checkbox.checked) {
+                    throw new Error(result.message || `Save failed (${response.status}).`);
+                }
+                savedValue = checkbox.checked;
+                status.textContent = "Saved";
+            } catch (error) {
+                checkbox.checked = savedValue;
+                status.textContent = error.message || "Could not save this selection.";
+                status.classList.add("is-error");
+            } finally {
+                checkbox.disabled = false;
+            }
+        });
+    });
+</script>

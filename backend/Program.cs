@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +15,33 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste the admin JWT token returned by POST /api/admin/auth/login."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Razorpay REST client. The secret is supplied only by backend configuration.
 builder.Services.AddHttpClient("Razorpay", client =>
@@ -214,6 +241,9 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE dbo.Categories ADD ImageUrl nvarchar(2048) NOT NULL CONSTRAINT DF_Categories_ImageUrl DEFAULT N'';
         IF COL_LENGTH(N'dbo.Categories', N'ShowOnHomePage') IS NULL
             ALTER TABLE dbo.Categories ADD ShowOnHomePage bit NOT NULL CONSTRAINT DF_Categories_ShowOnHomePage DEFAULT 0;
+
+        IF COL_LENGTH(N'dbo.Products', N'IsBestSeller') IS NULL
+            ALTER TABLE dbo.Products ADD IsBestSeller bit NOT NULL CONSTRAINT DF_Products_IsBestSeller DEFAULT 0;
 
         IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Categories_Name' AND object_id = OBJECT_ID(N'dbo.Categories'))
             CREATE UNIQUE INDEX IX_Categories_Name ON dbo.Categories(Name);

@@ -26,6 +26,8 @@ public class ProductViewModel
 
     public string ImageUrl { get; set; } = string.Empty;
 
+    public bool IsBestSeller { get; set; }
+
     public List<ProductImageViewModel> Images { get; set; } = [];
 
     public List<ProductVideoViewModel> Videos { get; set; } = [];

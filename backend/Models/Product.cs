@@ -20,6 +20,7 @@ public class Product
     }
     public string Colors { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
+    public bool IsBestSeller { get; set; }
     public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
     public ICollection<ProductVideo> Videos { get; set; } = new List<ProductVideo>();
     public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();

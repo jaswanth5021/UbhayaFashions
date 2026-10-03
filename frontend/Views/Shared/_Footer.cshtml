@@ -49,7 +49,7 @@
                 <li><a href="#">Dresses</a></li>
                 <li><a href="#">2-piece sets</a></li>
                 <li><a href="#">3-piece sets</a></li>
-                <li><a href="#">Best sellers</a></li>
+                <li><a asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">Best sellers</a></li>
                 <li><a href="#">Offers</a></li>
             </ul>
 
@@ -125,7 +125,7 @@
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a asp-controller="Shipping" asp-action="Index">
                         Shipping Information
                     </a>
                 </li>
@@ -217,7 +217,7 @@
 
             <span>·</span>
 
-            <a href="#">
+            <a asp-controller="Shipping" asp-action="Index">
                 Shipping Policy
             </a>
 
@@ -238,3 +238,4 @@
     </div>
 
 </footer>
+

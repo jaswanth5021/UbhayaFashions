@@ -22,6 +22,10 @@
     <button class="primary" type="submit">Apply filters</button>
     <a class="admin-filter-clear" asp-action="Inventory">Clear</a>
 </form>
+<div class="inventory-stock-legend" aria-label="Current stock color key">
+    <span><i class="stock-legend-swatch stock-legend-in" aria-hidden="true"></i> Green: In stock (6+)</span>
+    <span><i class="stock-legend-swatch stock-legend-low" aria-hidden="true"></i> Red: Low or out of stock (0–5)</span>
+</div>
 <div class="table-wrap"><table><thead><tr><th>Product</th><th>Size</th><th>Price</th><th>Current stock</th><th>Adjustment</th></tr></thead><tbody>
 @foreach (var item in Model)
 {

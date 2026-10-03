@@ -11,9 +11,12 @@ public class ProductsController(ApiService api) : Controller
         return View(categories);
     }
 
-    public async Task<IActionResult> Index(string? category = null, int page = 1)
+    public async Task<IActionResult> Index(string? category = null, int page = 1, bool bestSellers = false)
     {
         var products = await api.GetProductsAsync();
+
+        if (bestSellers)
+            products = products.Where(product => product.IsBestSeller).ToList();
 
         if (!string.IsNullOrWhiteSpace(category))
         {
@@ -46,6 +49,7 @@ public class ProductsController(ApiService api) : Controller
         }
 
         ViewBag.Category = category;
+        ViewBag.BestSellersOnly = bestSellers;
         ViewBag.ProductCount = productCount;
         ViewBag.CurrentPage = page;
         ViewBag.PageCount = pageCount;
@@ -59,10 +63,20 @@ public class ProductsController(ApiService api) : Controller
 
         try
         {
-            ViewBag.BestSellers = (await api.GetProductsAsync())
+            var bestSellers = (await api.GetProductsAsync())
+                .Where(item => item.IsBestSeller)
+                .ToList();
+
+            var otherBestSellers = bestSellers
                 .Where(item => item.Id != id)
                 .Take(6)
                 .ToList();
+
+            // Keep the section visible when the current product is the only
+            // item marked as a best seller.
+            ViewBag.BestSellers = otherBestSellers.Count > 0
+                ? otherBestSellers
+                : bestSellers.Where(item => item.Id == id).Take(1).ToList();
         }
         catch (HttpRequestException)
         {
