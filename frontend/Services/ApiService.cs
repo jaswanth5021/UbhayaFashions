@@ -45,12 +45,18 @@ public class ApiService(
     // =====================================================
 
     public async Task<List<ProductViewModel>>
-        GetProductsAsync()
+        GetProductsAsync(string? search = null)
     {
+        var url = "api/products";
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            url += $"?search={Uri.EscapeDataString(search.Trim())}";
+        }
+
         return await Client
             .GetFromJsonAsync<
-                List<ProductViewModel>>(
-                "api/products")
+                List<ProductViewModel>>(url)
             ?? [];
     }
 
