@@ -4,6 +4,11 @@
     var search = ViewBag.Search as string;
     var category = ViewBag.Category as string;
     var bestSellersOnly = (bool?)ViewBag.BestSellersOnly == true;
+    var selectedSize = ViewBag.Size as string;
+    var minPrice = (decimal?)ViewBag.MinPrice;
+    var maxPrice = (decimal?)ViewBag.MaxPrice;
+    var selectedSort = ViewBag.Sort as string ?? "recommended";
+    var categories = ViewBag.Categories as List<CategoryViewModel> ?? new List<CategoryViewModel>();
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var productCount = (int)ViewBag.ProductCount;
     var currentPage = (int)ViewBag.CurrentPage;
@@ -40,7 +45,7 @@
         }
     </header>
 
-    <form asp-action="Index" method="get" class="catalog-search-form">
+    <form asp-action="Index" method="get" class="catalog-search-form catalog-filter-form">
         <label for="catalogSearch">Search our collection</label>
         <div class="catalog-search-row">
             <input id="catalogSearch"
@@ -63,6 +68,54 @@
                 <a asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly">CLEAR</a>
             }
         </div>
+    </form>
+
+    <form asp-action="Index" method="get" class="catalog-filters">
+        <input type="hidden" name="search" value="@search" />
+        @if (bestSellersOnly)
+        {
+            <input type="hidden" name="bestSellers" value="true" />
+        }
+        <label>
+            <span>Category</span>
+            <select name="category" aria-label="Filter by category">
+                <option value="">All categories</option>
+                @foreach (var item in categories)
+                {
+                    <option value="@item.Name" selected="@(string.Equals(item.Name, category, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item.Name</option>
+                }
+            </select>
+        </label>
+        <label>
+            <span>Size</span>
+            <select name="size" aria-label="Filter by size">
+                <option value="">All sizes</option>
+                @foreach (var item in new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" })
+                {
+                    <option value="@item" selected="@(string.Equals(item, selectedSize, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item</option>
+                }
+            </select>
+        </label>
+        <label>
+            <span>Min price</span>
+            <input name="minPrice" type="number" min="0" step="1" value="@minPrice" placeholder="₹ Min" />
+        </label>
+        <label>
+            <span>Max price</span>
+            <input name="maxPrice" type="number" min="0" step="1" value="@maxPrice" placeholder="₹ Max" />
+        </label>
+        <label>
+            <span>Sort</span>
+            <select name="sort" aria-label="Sort products">
+                <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Recommended</option>
+                <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Newest</option>
+                <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Price: Low to High</option>
+                <option value="price-high" selected="@(selectedSort == "price-high" ? "selected" : null)">Price: High to Low</option>
+                <option value="name" selected="@(selectedSort == "name" ? "selected" : null)">Name</option>
+            </select>
+        </label>
+        <button type="submit">APPLY FILTERS</button>
+        <a asp-action="Index">CLEAR</a>
     </form>
 
     <div class="catalog-quick-links" aria-label="Shop shortcuts">
@@ -239,7 +292,7 @@
             <nav class="catalog-pagination" aria-label="Product pages">
                 @if (currentPage > 1)
                 {
-                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
+                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-sort="@selectedSort" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
                 }
                 else
                 {
@@ -254,13 +307,13 @@
                         }
                         else
                         {
-                            <a class="catalog-page-number" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
+                            <a class="catalog-page-number" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-sort="@selectedSort" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
                         }
                     }
                 </div>
                 @if (currentPage < pageCount)
                 {
-                    <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@(currentPage + 1)" aria-label="Next page">Next →</a>
+                    <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-sort="@selectedSort" asp-route-page="@(currentPage + 1)" aria-label="Next page">Next →</a>
                 }
                 else
                 {
