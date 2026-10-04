@@ -424,3 +424,103 @@
         bottom: 9px;
     }
 }
+
+/* =========================================================
+   CATALOG DESKTOP POLISH
+   ========================================================= */
+
+.catalog-quick-links {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: -12px 0 34px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.catalog-quick-links::-webkit-scrollbar {
+    display: none;
+}
+
+.catalog-quick-links a {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    border: 1px solid #ded2ce;
+    background: #fff;
+    color: #5f4b4c;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all .2s ease;
+}
+
+.catalog-quick-links a:hover {
+    border-color: #68142e;
+    background: #68142e;
+    color: #fff;
+}
+
+@media (min-width: 901px) {
+    .catalog-page {
+        width: min(1500px, calc(100% - 80px));
+        padding-top: 58px;
+    }
+
+    .catalog-header {
+        margin-bottom: 28px;
+    }
+
+    .catalog-grid {
+        gap: 42px 22px;
+    }
+
+    .catalog-card {
+        padding-bottom: 8px;
+        transition: transform .25s ease;
+    }
+
+    .catalog-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .catalog-image-wrap {
+        box-shadow: 0 4px 20px rgba(48, 37, 34, .07);
+    }
+
+    .catalog-card .product-category {
+        margin-top: 16px;
+        color: #927b78;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+    }
+
+    .catalog-card .product-name {
+        margin-top: 7px;
+        line-height: 1.25;
+    }
+
+    .catalog-card .product-price {
+        margin-top: 8px;
+    }
+
+    .catalog-card .catalog-action {
+        opacity: .9;
+        transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .catalog-card:hover .catalog-action {
+        opacity: 1;
+        transform: translateX(3px);
+    }
+}
+
+@media (max-width: 600px) {
+    .catalog-quick-links {
+        margin-bottom: 24px;
+    }
+}
