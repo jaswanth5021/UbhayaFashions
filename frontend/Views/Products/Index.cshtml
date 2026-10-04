@@ -65,6 +65,12 @@
         </div>
     </form>
 
+    <div class="catalog-quick-links" aria-label="Shop shortcuts">
+        <a asp-action="Index">ALL STYLES</a>
+        <a asp-action="Index" asp-route-bestSellers="true">BEST SELLERS</a>
+        <a asp-action="Categories">CATEGORIES</a>
+    </div>
+
     @if (TempData["WishlistMessage"] is string wishlistMessage)
     {
         <div class="wishlist-notice" role="status">@wishlistMessage</div>
