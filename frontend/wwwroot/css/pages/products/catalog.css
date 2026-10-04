@@ -372,29 +372,8 @@
     background: #fff;
 }
 
-.catalog-image-wrap .product-image-count {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    z-index: 3;
-    padding: 4px 7px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, .42);
-    color: #fff;
-    font-size: 10px;
-    line-height: 1;
-    letter-spacing: .4px;
-    pointer-events: none;
-}
-
 @media (max-width: 600px) {
     .catalog-image-wrap .product-image-dots {
         bottom: 9px;
-    }
-
-    .catalog-image-wrap .product-image-count {
-        right: 8px;
-        bottom: 8px;
-        font-size: 9px;
     }
 }
