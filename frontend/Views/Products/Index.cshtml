@@ -121,6 +121,20 @@
 
                                     @if (productImages.Count > 1)
                                     {
+                                    <button type="button"
+                                            class="product-image-arrow product-image-arrow-prev"
+                                            data-carousel-prev
+                                            aria-label="Previous image">
+                                        ‹
+                                    </button>
+
+                                    <button type="button"
+                                            class="product-image-arrow product-image-arrow-next"
+                                            data-carousel-next
+                                            aria-label="Next image">
+                                        ›
+                                    </button>
+
                                         <div class="product-image-dots" aria-hidden="true">
                                             @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
                                             {
