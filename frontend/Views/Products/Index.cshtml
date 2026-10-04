@@ -84,15 +84,55 @@
                 <article class="catalog-card">
                     <div class="catalog-image-wrap">
                         <a asp-action="Details" asp-route-id="@product.Id" class="catalog-image-link" aria-label="View @product.Name">
-                            @if (hasImage)
+                            @{
+                                var productImages = new List<string>();
+
+                                if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                                {
+                                    productImages.Add(product.ImageUrl);
+                                }
+
+                                productImages.AddRange(
+                                    product.Images
+                                        .OrderBy(image => image.SortOrder)
+                                        .Select(image => image.ImageUrl)
+                                        .Where(url => !string.IsNullOrWhiteSpace(url))
+                                );
+
+                                productImages = productImages
+                                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                                    .ToList();
+                            }
+
+                            @if (productImages.Count > 0)
                             {
-                                <img src="@ImageUrlHelper.Resolve(product.ImageUrl, Configuration["ApiBaseUrl"])"
-                                     alt="@product.Name"
-                                     class="catalog-image"
-                                     onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" />
-                                <div class="catalog-image-fallback" hidden aria-label="Product image unavailable">
-                                    <span>UBHAYA</span>
-                                    <small>@product.Name</small>
+                                <div class="product-image-carousel"
+                                     data-product-carousel
+                                     data-image-count="@productImages.Count">
+                                    @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
+                                    {
+                                        <img src="@ImageUrlHelper.Resolve(productImages[imageIndex], Configuration["ApiBaseUrl"])"
+                                             alt="@product.Name - image @(imageIndex + 1)"
+                                             class="catalog-image product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
+                                             data-carousel-image="@imageIndex"
+                                             loading="@(imageIndex == 0 ? "eager" : "lazy")"
+                                             onerror="this.remove();" />
+                                    }
+
+                                    @if (productImages.Count > 1)
+                                    {
+                                        <div class="product-image-dots" aria-hidden="true">
+                                            @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
+                                            {
+                                                <span class="product-image-dot @(imageIndex == 0 ? "is-active" : string.Empty)"
+                                                      data-carousel-dot="@imageIndex"></span>
+                                            }
+                                        </div>
+
+                                        <span class="product-image-count" aria-hidden="true">
+                                            1/@productImages.Count
+                                        </span>
+                                    }
                                 </div>
                             }
                             else
