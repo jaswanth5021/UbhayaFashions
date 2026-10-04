@@ -80,6 +80,7 @@
     <link rel="stylesheet" href="~/css/pages/shared/responsive.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/home/new-arrivals.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/products/catalog.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/products/catalog-search.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/home/home-products.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/site-polish.css" asp-append-version="true" />
 
@@ -154,11 +155,12 @@
 
             <!-- SEARCH -->
 
-            <a asp-controller="Home"
-               asp-action="Index"
-               asp-fragment="products"
-               class="header-icon"
-               aria-label="Browse products">
+            <button type="button"
+                    class="header-icon header-search-button"
+                    id="headerSearchOpen"
+                    aria-label="Search products"
+                    aria-controls="headerSearchPanel"
+                    aria-expanded="false">
 
                 <svg width="22"
                      height="22"
@@ -177,7 +179,7 @@
 
                 </svg>
 
-            </a>
+            </button>
 
 
             <!-- ACCOUNT -->
@@ -283,6 +285,22 @@
         </div>
 
     </header>
+
+    <div class="header-search-panel" id="headerSearchPanel" aria-hidden="true">
+        <div class="header-search-backdrop" id="headerSearchBackdrop"></div>
+        <section class="header-search-dialog" role="dialog" aria-modal="true" aria-labelledby="headerSearchHeading">
+            <div class="header-search-dialog-inner">
+                <div class="header-search-heading">
+                    <span id="headerSearchHeading">Search our collection</span>
+                    <button type="button" class="header-search-close" id="headerSearchClose" aria-label="Close search">&times;</button>
+                </div>
+                <form asp-controller="Products" asp-action="Index" method="get" class="header-search-form" id="headerSearchForm" role="search">
+                    <input type="search" name="search" id="headerSearchInput" placeholder="Search sarees, kurtis, dresses..." autocomplete="off" />
+                    <button type="submit">SEARCH</button>
+                </form>
+            </div>
+        </section>
+    </div>
 
 
     <!-- =========================================
@@ -493,6 +511,7 @@
     <script src="~/js/cart-drawer.js" asp-append-version="true"></script>
     <script src="~/js/cart-update.js" asp-append-version="true"></script>
     <script src="~/js/checkout-address.js" asp-append-version="true"></script>
+    <script src="~/js/search.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync(
         "Scripts",

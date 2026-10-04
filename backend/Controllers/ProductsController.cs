@@ -10,8 +10,33 @@ namespace backend.Controllers;
 public class ProductsController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await db.Products.AsNoTracking().Include(x => x.CategoryNavigation).Include(x => x.Images).Include(x => x.Videos).Include(x => x.Variants).OrderByDescending(x => x.Id).ToListAsync());
+    public async Task<IActionResult> GetAll([FromQuery] string? search = null)
+    {
+        var query = db.Products
+            .AsNoTracking()
+            .Include(x => x.CategoryNavigation)
+            .Include(x => x.Images)
+            .Include(x => x.Videos)
+            .Include(x => x.Variants)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            var normalizedSearch = search.ToLowerInvariant();
+
+            query = query.Where(x =>
+                EF.Functions.Like(x.Name, $"%{search}%") ||
+                EF.Functions.Like(x.Description, $"%{search}%") ||
+                EF.Functions.Like(x.Colors, $"%{search}%") ||
+                EF.Functions.Like(x.CategoryNavigation.Name, $"%{search}%") ||
+                x.Variants.Any(variant => EF.Functions.Like(variant.Size.ToLower(), $"%{normalizedSearch}%")));
+        }
+
+        return Ok(await query
+            .OrderByDescending(x => x.Id)
+            .ToListAsync());
+    }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)

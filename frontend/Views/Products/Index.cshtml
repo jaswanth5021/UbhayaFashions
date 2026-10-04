@@ -1,13 +1,16 @@
 @model List<ProductViewModel>
 
 @{
+    var search = ViewBag.Search as string;
     var category = ViewBag.Category as string;
     var bestSellersOnly = (bool?)ViewBag.BestSellersOnly == true;
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var productCount = (int)ViewBag.ProductCount;
     var currentPage = (int)ViewBag.CurrentPage;
     var pageCount = (int)ViewBag.PageCount;
-    ViewData["Title"] = bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category)
+    ViewData["Title"] = !string.IsNullOrWhiteSpace(search)
+        ? $"Search: {search}"
+        : bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category)
         ? "Shop All"
         : category;
 }
@@ -16,7 +19,15 @@
     <header class="catalog-header">
         <div class="catalog-heading-copy">
             <p class="catalog-eyebrow">THE UBHAYA COLLECTION</p>
-            <h1>@(bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
+            @if (!string.IsNullOrWhiteSpace(search))
+            {
+                <h1>Search results</h1>
+                <p class="catalog-search-summary">Showing results for <strong>“@search”</strong></p>
+            }
+            else
+            {
+                <h1>@(bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
+            }
             <p class="catalog-count">@productCount @(productCount == 1 ? "style" : "styles")</p>
         </div>
         @if (!string.IsNullOrWhiteSpace(category))
@@ -28,6 +39,31 @@
             <a class="catalog-back-categories" asp-controller="Home" asp-action="Index">← Back to homepage</a>
         }
     </header>
+
+    <form asp-action="Index" method="get" class="catalog-search-form">
+        <label for="catalogSearch">Search our collection</label>
+        <div class="catalog-search-row">
+            <input id="catalogSearch"
+                   name="search"
+                   value="@search"
+                   type="search"
+                   placeholder="Search sarees, kurtis, dresses..."
+                   autocomplete="off" />
+            @if (!string.IsNullOrWhiteSpace(category))
+            {
+                <input type="hidden" name="category" value="@category" />
+            }
+            @if (bestSellersOnly)
+            {
+                <input type="hidden" name="bestSellers" value="true" />
+            }
+            <button type="submit">SEARCH</button>
+            @if (!string.IsNullOrWhiteSpace(search))
+            {
+                <a asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly">CLEAR</a>
+            }
+        </div>
+    </form>
 
     @if (TempData["WishlistMessage"] is string wishlistMessage)
     {
@@ -147,7 +183,7 @@
             <nav class="catalog-pagination" aria-label="Product pages">
                 @if (currentPage > 1)
                 {
-                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
+                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
                 }
                 else
                 {
@@ -162,7 +198,7 @@
                         }
                         else
                         {
-                            <a class="catalog-page-number" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
+                            <a class="catalog-page-number" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
                         }
                     }
                 </div>
@@ -179,6 +215,17 @@
     }
     else
     {
-        <div class="catalog-empty">No products are available in this collection yet.</div>
+        <div class="catalog-empty">
+            @if (!string.IsNullOrWhiteSpace(search))
+            {
+                <h2>No styles found</h2>
+                <p>We couldn't find anything matching “@search”. Try another search term.</p>
+                <a class="catalog-action" asp-action="Index">VIEW ALL PRODUCTS <span>→</span></a>
+            }
+            else
+            {
+                <p>No products are available in this collection yet.</p>
+            }
+        </div>
     }
 </section>
