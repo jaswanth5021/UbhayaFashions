@@ -1,5 +1,5 @@
 <footer class="site-footer">
-    <div class="footer-main">
+    <div class="footer-main footer-main-desktop">
         <div class="footer-column footer-about">
             <a class="footer-brand" asp-controller="Home" asp-action="Index" aria-label="Ubhaya Fashions home">
                 <img src="~/images/logo.png" alt="Ubhaya Fashions" />
@@ -32,6 +32,43 @@
             <p><a asp-controller="Contact" asp-action="Index">Questions about an order or our collection? Get in touch with our team.</a></p>
             <a class="footer-contact-link" asp-controller="Contact" asp-action="Index">Contact Ubhaya Fashions <span aria-hidden="true">→</span></a>
         </div>
+    </div>
+
+    <div class="footer-mobile">
+        <div class="footer-mobile-brand">
+            <a class="footer-brand" asp-controller="Home" asp-action="Index" aria-label="Ubhaya Fashions home">
+                <img src="~/images/logo.png" alt="Ubhaya Fashions" />
+            </a>
+            <p>Timeless elegance meets contemporary style. Discover thoughtfully curated women’s fashion for every occasion.</p>
+        </div>
+
+        <details class="footer-accordion">
+            <summary>Quick Links <span aria-hidden="true">+</span></summary>
+            <ul>
+                <li><a asp-controller="Products" asp-action="Index">Collections</a></li>
+                <li><a asp-controller="Products" asp-action="Index">Shop All</a></li>
+                <li><a asp-controller="Home" asp-action="Index">About Ubhaya</a></li>
+                <li><a asp-controller="Contact" asp-action="Index">Contact Us</a></li>
+            </ul>
+        </details>
+
+        <details class="footer-accordion">
+            <summary>Customer Info <span aria-hidden="true">+</span></summary>
+            <ul>
+                <li><a asp-controller="Shipping" asp-action="Index">Shipping Info</a></li>
+                <li><a asp-controller="Shipping" asp-action="Index">Returns &amp; Exchanges</a></li>
+                <li><a href="/Home/Privacy">Privacy Policy</a></li>
+                <li><a href="/Home/Terms">Terms and Conditions</a></li>
+            </ul>
+        </details>
+
+        <details class="footer-accordion">
+            <summary>Need Help? <span aria-hidden="true">+</span></summary>
+            <div class="footer-mobile-help">
+                <p>Questions about an order or our collection?</p>
+                <a asp-controller="Contact" asp-action="Index">Contact Ubhaya Fashions <span aria-hidden="true">→</span></a>
+            </div>
+        </details>
     </div>
 
     <div class="footer-benefits" aria-label="Shopping benefits">
