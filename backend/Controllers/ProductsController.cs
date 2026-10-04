@@ -23,12 +23,14 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         if (!string.IsNullOrWhiteSpace(search))
         {
             search = search.Trim();
+            var normalizedSearch = search.ToLowerInvariant();
 
             query = query.Where(x =>
                 EF.Functions.Like(x.Name, $"%{search}%") ||
                 EF.Functions.Like(x.Description, $"%{search}%") ||
                 EF.Functions.Like(x.Colors, $"%{search}%") ||
-                EF.Functions.Like(x.CategoryNavigation.Name, $"%{search}%"));
+                EF.Functions.Like(x.CategoryNavigation.Name, $"%{search}%") ||
+                x.Variants.Any(variant => EF.Functions.Like(variant.Size.ToLower(), $"%{normalizedSearch}%")));
         }
 
         return Ok(await query

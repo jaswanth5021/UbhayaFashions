@@ -1,241 +1,64 @@
 <footer class="site-footer">
-
-    <!-- =========================
-         FOOTER MAIN
-         ========================= -->
-
     <div class="footer-main">
-
-        <!-- BRAND / SUPPORT -->
         <div class="footer-column footer-about">
-
-            <h3>
-                <span class="footer-pin">📌</span>
-                Order &amp; Support Information
-            </h3>
-
-            <p>
-                We carefully inspect every order before
-                dispatch to ensure quality and accuracy.
-            </p>
-
-            <p>
-                If you receive a damaged or incorrect
-                item, our support team will help resolve
-                it quickly.
-            </p>
-
-            <p>
-                A parcel opening video is required
-                for verification.
-            </p>
-
-            <p>
-                Approved cases will receive a replacement
-                or refund based on product availability.
-            </p>
-
+            <a class="footer-brand" asp-controller="Home" asp-action="Index" aria-label="Ubhaya Fashions home">
+                <img src="~/images/logo.png" alt="Ubhaya Fashions" />
+            </a>
+            <p>Discover the Ubhaya Fashions collection, where timeless elegance meets contemporary style. Explore thoughtfully curated women’s fashion designed to make every occasion beautifully yours.</p>
         </div>
 
-
-        <!-- SHOP -->
         <div class="footer-column">
-
-            <h3>SHOP</h3>
-
+            <h3>Quick Links</h3>
             <ul>
-                <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-                <li><a href="#">New Arrivals</a></li>
-                <li><a href="#">Dresses</a></li>
-                <li><a href="#">2-piece sets</a></li>
-                <li><a href="#">3-piece sets</a></li>
-                <li><a asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">Best sellers</a></li>
-                <li><a href="#">Offers</a></li>
+                <li><a asp-controller="Products" asp-action="Index">Collections</a></li>
+                <li><a asp-controller="Products" asp-action="Index">Shop All</a></li>
+                <li><a asp-controller="Home" asp-action="Index">About Ubhaya</a></li>
+                <li><a asp-controller="Contact" asp-action="Index">Contact Us</a></li>
             </ul>
-
-            @* Previous SHOP options preserved:            <ul>
-
-                <li>
-                    <a asp-controller="Home"
-                       asp-action="Index">
-                        Home
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        New Arrivals
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        Best Sellers
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        Comfort Wear
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        Co-ord Sets
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        Ethnic Wear
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        Nighties
-                    </a>
-                </li>
-
-            </ul>            *@
-
         </div>
 
-
-        <!-- CUSTOMER CARE -->
         <div class="footer-column">
-
-            <h3>CUSTOMER CARE</h3>
-
+            <h3>Customer Info</h3>
             <ul>
-
-                <li>
-                    <a asp-controller="Cart"
-                       asp-action="Index">
-                        My Cart
-                    </a>
-                </li>
-
-                <li>
-                    <a asp-controller="Orders"
-                       asp-action="Index">
-                        My Orders
-                    </a>
-                </li>
-
-                <li>
-                    <a asp-controller="Shipping" asp-action="Index">
-                        Shipping Information
-                    </a>
-                </li>
-
-                @* <li>
-                    <a href="#">
-                        Refund Policy
-                    </a>
-                </li> *@
-
-                <li>
-                   <a asp-controller="Contact"
-   asp-action="Index">
-    Contact Us
-</a>
-                </li>
-
+                <li><a asp-controller="Shipping" asp-action="Index">Shipping Info</a></li>
+                <li><a asp-controller="Shipping" asp-action="Index">Returns &amp; Exchanges</a></li>
+                <li><a href="/Home/Privacy">Privacy Policy</a></li>
+                <li><a href="/Home/Terms">Terms and Conditions</a></li>
             </ul>
-
         </div>
 
-
-        <!-- NEWSLETTER -->
-        <div class="footer-column footer-newsletter">
-
-            <h3>
-                Join Our Newsletter
-            </h3>
-
-            <p>
-                Unlock exclusive deals and offers
-                by joining our newsletter.
-            </p>
-
-            <form class="newsletter-form"
-                  method="post"
-                  action="#">
-
-                <input type="email"
-                       name="email"
-                       placeholder="Email"
-                       autocomplete="email"
-                       required />
-
-                <button type="submit"
-                        aria-label="Subscribe">
-
-                    →
-
-                </button>
-
-            </form>
-
-            <small>
-                By subscribing, you agree to receive
-                updates and offers from Ubhaya Fashions.
-            </small>
-
+        <div class="footer-column footer-contact">
+            <h3>Contact Info</h3>
+            <p><a asp-controller="Contact" asp-action="Index">Questions about an order or our collection? Get in touch with our team.</a></p>
+            <a class="footer-contact-link" asp-controller="Contact" asp-action="Index">Contact Ubhaya Fashions <span aria-hidden="true">→</span></a>
         </div>
-
     </div>
 
-
-    <!-- =========================
-         FOOTER BOTTOM
-         ========================= -->
+    <div class="footer-benefits" aria-label="Shopping benefits">
+        <div class="footer-benefit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
+            <strong>Free Shipping</strong><span>Across India</span>
+        </div>
+        <div class="footer-benefit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="m8.5 12-1 9 4.5-2.5 4.5 2.5-1-9"/></svg>
+            <strong>Premium Quality</strong><span>Thoughtfully curated</span>
+        </div>
+        <div class="footer-benefit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <strong>Secure Payment</strong><span>Safe checkout</span>
+        </div>
+        <div class="footer-benefit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2.6 6.4M3 4v7h7"/></svg>
+            <strong>Easy Returns</strong><span>Hassle-free support</span>
+        </div>
+    </div>
 
     <div class="footer-bottom">
-
-        <div class="footer-copyright">
-
-            © @DateTime.Now.Year
-            <strong>UBHAYA FASHIONS</strong>
-
-        </div>
-
-
+        <div class="footer-copyright">© @DateTime.Now.Year <strong>UBHAYA FASHIONS</strong></div>
         <div class="footer-links">
-
-            <a href="#">
-                Privacy Policy
-            </a>
-
-            @* <span>·</span> *@
-
-            @* <a href="#">
-                Refund Policy
-            </a> *@
-
-            <span>·</span>
-
-            <a asp-controller="Shipping" asp-action="Index">
-                Shipping Policy
-            </a>
-
-            <span>·</span>
-
-            <a href="#">
-                Terms of Service
-            </a>
-
-            <span>·</span>
-
-            <a href="#">
-                Contact Information
-            </a>
-
+            <a href="/Home/Privacy">Privacy Policy</a><span>·</span>
+            <a asp-controller="Shipping" asp-action="Index">Shipping Info</a><span>·</span>
+            <a href="/Home/Terms">Terms and Conditions</a>
         </div>
-
     </div>
-
 </footer>
-

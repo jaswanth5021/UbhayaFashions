@@ -286,6 +286,22 @@
 
     </header>
 
+    <div class="header-search-panel" id="headerSearchPanel" aria-hidden="true">
+        <div class="header-search-backdrop" id="headerSearchBackdrop"></div>
+        <section class="header-search-dialog" role="dialog" aria-modal="true" aria-labelledby="headerSearchHeading">
+            <div class="header-search-dialog-inner">
+                <div class="header-search-heading">
+                    <span id="headerSearchHeading">Search our collection</span>
+                    <button type="button" class="header-search-close" id="headerSearchClose" aria-label="Close search">&times;</button>
+                </div>
+                <form asp-controller="Products" asp-action="Index" method="get" class="header-search-form" id="headerSearchForm" role="search">
+                    <input type="search" name="search" id="headerSearchInput" placeholder="Search sarees, kurtis, dresses..." autocomplete="off" />
+                    <button type="submit">SEARCH</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
 
     <!-- =========================================
          HAMBURGER SIDE MENU
@@ -495,6 +511,7 @@
     <script src="~/js/cart-drawer.js" asp-append-version="true"></script>
     <script src="~/js/cart-update.js" asp-append-version="true"></script>
     <script src="~/js/checkout-address.js" asp-append-version="true"></script>
+    <script src="~/js/search.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync(
         "Scripts",
