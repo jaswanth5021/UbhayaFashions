@@ -155,11 +155,12 @@
 
             <!-- SEARCH -->
 
-            <a asp-controller="Home"
-               asp-action="Index"
-               asp-fragment="products"
-               class="header-icon"
-               aria-label="Browse products">
+            <button type="button"
+                    class="header-icon header-search-button"
+                    id="headerSearchOpen"
+                    aria-label="Search products"
+                    aria-controls="headerSearchPanel"
+                    aria-expanded="false">
 
                 <svg width="22"
                      height="22"
