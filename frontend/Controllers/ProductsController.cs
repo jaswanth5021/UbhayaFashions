@@ -11,28 +11,24 @@ public class ProductsController(ApiService api) : Controller
         return View(categories);
     }
 
-    public async Task<IActionResult> Index(string? search = null, string? category = null, int page = 1, bool bestSellers = false)
+    public async Task<IActionResult> Index(
+        string? search = null,
+        string? category = null,
+        string? size = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null,
+        string? sort = null,
+        int page = 1,
+        bool bestSellers = false)
     {
-        var products = await api.GetProductsAsync(search);
-
-        if (bestSellers)
-            products = products.Where(product => product.IsBestSeller).ToList();
-
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            products = products
-                .Where(product => string.Equals(
-                    product.Category?.Trim(),
-                    category.Trim(),
-                    StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        const int pageSize = 12;
-        var productCount = products.Count;
-        var pageCount = Math.Max(1, (int)Math.Ceiling(productCount / (double)pageSize));
-        page = Math.Clamp(page, 1, pageCount);
-        products = products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        var products = await api.GetProductsAsync(
+            search,
+            category,
+            size,
+            minPrice,
+            maxPrice,
+            bestSellers,
+            sort);
 
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -48,12 +44,32 @@ public class ProductsController(ApiService api) : Controller
             }
         }
 
+        try
+        {
+            ViewBag.Categories = await api.GetCategoriesAsync();
+        }
+        catch (HttpRequestException)
+        {
+            ViewBag.Categories = new List<CategoryViewModel>();
+        }
+
+        const int pageSize = 12;
+        var productCount = products.Count;
+        var pageCount = Math.Max(1, (int)Math.Ceiling(productCount / (double)pageSize));
+        page = Math.Clamp(page, 1, pageCount);
+        products = products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
         ViewBag.Search = search;
         ViewBag.Category = category;
+        ViewBag.Size = size;
+        ViewBag.MinPrice = minPrice;
+        ViewBag.MaxPrice = maxPrice;
+        ViewBag.Sort = sort;
         ViewBag.BestSellersOnly = bestSellers;
         ViewBag.ProductCount = productCount;
         ViewBag.CurrentPage = page;
         ViewBag.PageCount = pageCount;
+
         return View(products);
     }
 
@@ -73,8 +89,6 @@ public class ProductsController(ApiService api) : Controller
                 .Take(6)
                 .ToList();
 
-            // Keep the section visible when the current product is the only
-            // item marked as a best seller.
             ViewBag.BestSellers = otherBestSellers.Count > 0
                 ? otherBestSellers
                 : bestSellers.Where(item => item.Id == id).Take(1).ToList();
