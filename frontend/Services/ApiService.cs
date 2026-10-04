@@ -44,20 +44,35 @@ public class ApiService(
     // PRODUCTS
     // =====================================================
 
-    public async Task<List<ProductViewModel>>
-        GetProductsAsync(string? search = null)
+    public async Task<List<ProductViewModel>> GetProductsAsync(
+        string? search = null,
+        string? category = null,
+        string? size = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null,
+        bool bestSellers = false,
+        string? sort = null)
     {
-        var url = "api/products";
+        var query = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(search))
-        {
-            url += $"?search={Uri.EscapeDataString(search.Trim())}";
-        }
+            query.Add($"search={Uri.EscapeDataString(search.Trim())}");
+        if (!string.IsNullOrWhiteSpace(category))
+            query.Add($"category={Uri.EscapeDataString(category.Trim())}");
+        if (!string.IsNullOrWhiteSpace(size))
+            query.Add($"size={Uri.EscapeDataString(size.Trim())}");
+        if (minPrice.HasValue)
+            query.Add($"minPrice={minPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        if (maxPrice.HasValue)
+            query.Add($"maxPrice={maxPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        if (bestSellers)
+            query.Add("bestSellers=true");
+        if (!string.IsNullOrWhiteSpace(sort))
+            query.Add($"sort={Uri.EscapeDataString(sort.Trim())}");
 
-        return await Client
-            .GetFromJsonAsync<
-                List<ProductViewModel>>(url)
-            ?? [];
+        var url = "api/products" + (query.Count > 0 ? "?" + string.Join("&", query) : "");
+
+        return await Client.GetFromJsonAsync<List<ProductViewModel>>(url) ?? [];
     }
 
 
