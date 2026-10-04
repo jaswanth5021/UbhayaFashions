@@ -2,6 +2,81 @@
     const section = document.querySelector('.featured-products');
     if (!section) return;
 
+    const carousels = [...section.querySelectorAll('[data-product-carousel]')];
+
+    carousels.forEach(carousel => {
+        const images = [...carousel.querySelectorAll('[data-carousel-image]')];
+        const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
+
+        if (images.length < 2) return;
+
+        let current = 0;
+        let timer = null;
+
+        const showImage = index => {
+            current = (index + images.length) % images.length;
+
+            images.forEach((image, imageIndex) => {
+                image.classList.toggle('is-active', imageIndex === current);
+            });
+
+            dots.forEach((dot, dotIndex) => {
+                dot.classList.toggle('is-active', dotIndex === current);
+            });
+
+            const count = carousel.querySelector('.product-image-count');
+            if (count) count.textContent = `${current + 1}/${images.length}`;
+        };
+
+        const nextImage = () => showImage(current + 1);
+
+        const start = () => {
+            if (timer) return;
+            timer = window.setInterval(nextImage, 1600);
+        };
+
+        const stop = () => {
+            if (!timer) return;
+            window.clearInterval(timer);
+            timer = null;
+            showImage(0);
+        };
+
+        // Desktop: start the automatic image rotation when the product is hovered,
+        // similar to fashion marketplaces such as Myntra.
+        carousel.closest('.product-card')?.addEventListener('mouseenter', start);
+        carousel.closest('.product-card')?.addEventListener('mouseleave', stop);
+
+        // Mobile/touch: allow swiping through every product image and also
+        // rotate automatically while the card is visible.
+        let touchStartX = 0;
+
+        carousel.addEventListener('touchstart', event => {
+            touchStartX = event.changedTouches[0]?.clientX ?? 0;
+        }, { passive: true });
+
+        carousel.addEventListener('touchend', event => {
+            const touchEndX = event.changedTouches[0]?.clientX ?? 0;
+            const distance = touchEndX - touchStartX;
+
+            if (Math.abs(distance) < 35) return;
+
+            showImage(distance < 0 ? current + 1 : current - 1);
+        }, { passive: true });
+
+        if (window.matchMedia('(hover: none)').matches) {
+            start();
+        }
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                showImage(index);
+            });
+        });
+    });
+
     let feedback = document.querySelector('.new-arrivals-toast');
     if (!feedback) {
         feedback = document.createElement('div');
