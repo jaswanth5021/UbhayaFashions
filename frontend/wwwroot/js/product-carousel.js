@@ -6,6 +6,8 @@
 
         const images = [...carousel.querySelectorAll('[data-carousel-image]')];
         const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
+        const previousButton = carousel.querySelector('[data-carousel-prev]');
+        const nextButton = carousel.querySelector('[data-carousel-next]');
 
         if (images.length < 2) return;
 
@@ -32,6 +34,19 @@
         };
 
         const nextImage = () => showImage(current + 1);
+        const previousImage = () => showImage(current - 1);
+
+        previousButton?.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            previousImage();
+        });
+
+        nextButton?.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            nextImage();
+        });
 
         const start = () => {
             if (timer || document.hidden || isPointerOver) return;
