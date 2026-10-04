@@ -11,9 +11,9 @@ public class ProductsController(ApiService api) : Controller
         return View(categories);
     }
 
-    public async Task<IActionResult> Index(string? category = null, int page = 1, bool bestSellers = false)
+    public async Task<IActionResult> Index(string? search = null, string? category = null, int page = 1, bool bestSellers = false)
     {
-        var products = await api.GetProductsAsync();
+        var products = await api.GetProductsAsync(search);
 
         if (bestSellers)
             products = products.Where(product => product.IsBestSeller).ToList();
@@ -48,6 +48,7 @@ public class ProductsController(ApiService api) : Controller
             }
         }
 
+        ViewBag.Search = search;
         ViewBag.Category = category;
         ViewBag.BestSellersOnly = bestSellers;
         ViewBag.ProductCount = productCount;
