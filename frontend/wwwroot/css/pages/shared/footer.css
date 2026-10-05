@@ -332,19 +332,25 @@
 
     .mobile-bottom-nav-shop-icon {
         display: grid;
-        width: 43px;
-        height: 43px;
-        margin-top: -22px;
+        width: 44px;
+        height: 44px;
+        margin-top: -23px;
         place-items: center;
+        border: 3px solid #fff;
         border-radius: 50%;
         background: #11112b;
         color: #fff;
-        box-shadow: 0 5px 14px rgba(17, 17, 43, .22);
+        box-shadow: 0 5px 16px rgba(17, 17, 43, .24);
     }
 
     .mobile-bottom-nav-shop-icon svg {
-        width: 22px;
-        height: 22px;
+        width: 23px;
+        height: 23px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.55;
+        stroke-linecap: round;
+        stroke-linejoin: round;
     }
 
     .mobile-bottom-nav-shop {
