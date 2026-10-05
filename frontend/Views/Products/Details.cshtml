@@ -431,10 +431,8 @@
 
                             @foreach (var size in standardSizes)
                             {
-                                if (!availableSizes.Contains(size))
-                                {
-                                    continue;
-                                }
+                                var isAvailable =
+                                    availableSizes.Contains(size);
 
                                 var variant =
                                     variants.FirstOrDefault(item =>
@@ -444,21 +442,31 @@
 
 
                                 <button type="button"
-                                        class="product-size-option available"
+                                        class="product-size-option @(isAvailable ? "available" : "unavailable")"
                                         data-size="@size"
                                         data-price="@((variant?.Price ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
                                         data-discount="@((variant?.Discount ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
-                                        data-stock="@variant!.Stock"
+                                        data-stock="@(variant?.Stock ?? 0)"
                                         aria-pressed="false"
-                                        title="@size available">
+                                        disabled="@(!isAvailable)"
+                                        title="@(isAvailable ? size : "Out of stock")">
 
                                     <span class="product-size-label">
                                         @size
                                     </span>
 
-                                    <span class="product-size-price">
-                                        ₹@variant.Price.ToString("N0")
-                                    </span>
+                                    @if (!isAvailable)
+                                    {
+                                        <span class="product-size-stock">
+                                            Out of stock
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="product-size-price">
+                                            ₹@variant!.Price.ToString("N0")
+                                        </span>
+                                    }
 
                                 </button>
                             }
