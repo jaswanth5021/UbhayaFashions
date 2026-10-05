@@ -225,6 +225,22 @@
                 </form>
                 <div class="catalog-mobile-toolbar-actions">
                     <span class="catalog-mobile-count">@productCount @(productCount == 1 ? "style" : "styles")</span>
+                    <form asp-action="Index" method="get" class="catalog-mobile-sort">
+                        <input type="hidden" name="search" value="@search" />
+                        <input type="hidden" name="category" value="@category" />
+                        <input type="hidden" name="size" value="@selectedSize" />
+                        <input type="hidden" name="color" value="@selectedColor" />
+                        <input type="hidden" name="minPrice" value="@minPrice" />
+                        <input type="hidden" name="maxPrice" value="@maxPrice" />
+                        <input type="hidden" name="availability" value="@availability" />
+                        @if (bestSellersOnly) { <input type="hidden" name="bestSellers" value="true" /> }
+                        <select name="sort" aria-label="Sort products" onchange="this.form.submit()">
+                            <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Sort: Recommended</option>
+                            <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Sort: Newest</option>
+                            <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Sort: Low price</option>
+                            <option value="price-high" selected="@(selectedSort == "price-high" ? "selected" : null)">Sort: High price</option>
+                        </select>
+                    </form>
                     <button class="catalog-mobile-filter-toggle" type="button" data-mobile-filter-toggle aria-expanded="false"><span>☰</span> FILTERS</button>
                 </div>
             </div>
