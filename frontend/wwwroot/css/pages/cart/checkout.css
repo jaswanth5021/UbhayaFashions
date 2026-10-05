@@ -1235,3 +1235,246 @@
         transition: none;
     }
 }
+
+
+/* =========================================================
+   TEST PAYMENT CONTROLS + ORDER RESULT PAGES
+   Uses the existing Ubhaya Fashions checkout palette.
+   ========================================================= */
+
+.checkout-test-payment-panel {
+    margin-top: 24px;
+    padding: 18px;
+    border: 1px dashed #cbb8b1;
+    background: #fcfaf8;
+}
+
+.checkout-test-payment-label {
+    display: inline-block;
+    margin-bottom: 7px;
+    color: #68142e;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+}
+
+.checkout-test-payment-panel > strong {
+    display: block;
+    color: #302522;
+    font-size: 14px;
+}
+
+.checkout-test-payment-panel > p {
+    margin: 6px 0 14px;
+    color: #80645f;
+    font-size: 11px;
+}
+
+.checkout-test-payment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.checkout-test-payment-button {
+    min-height: 40px;
+    padding: 9px 13px;
+    border: 1px solid #68142e;
+    background: #fff;
+    color: #68142e;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    cursor: pointer;
+}
+
+.checkout-test-payment-button.success {
+    background: #68142e;
+    color: #fff;
+}
+
+.checkout-test-payment-button.failure {
+    border-color: #b68b91;
+    color: #8f2638;
+}
+
+.checkout-test-payment-button:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+.order-result-page {
+    min-height: 65vh;
+    display: grid;
+    place-items: center;
+    padding: 60px 20px 90px;
+    background: #fcfaf8;
+}
+
+.order-result-card {
+    width: min(620px, 100%);
+    padding: 48px 42px;
+    border: 1px solid #eadfda;
+    background: #fff;
+    text-align: center;
+    box-shadow: 0 18px 50px rgba(48, 37, 34, .08);
+}
+
+.order-result-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 28px;
+    font-weight: 500;
+}
+
+.order-result-icon.success {
+    background: #edf6ee;
+    color: #356b3c;
+}
+
+.order-result-icon.failure {
+    background: #faeeee;
+    color: #a4263e;
+}
+
+.order-result-eyebrow {
+    color: #80645f;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.order-result-card h1 {
+    margin: 10px 0 12px;
+    color: #302522;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 400;
+}
+
+.order-result-message {
+    max-width: 470px;
+    margin: 0 auto;
+    color: #80645f;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.order-result-number {
+    margin: 24px auto 18px;
+    padding: 14px;
+    border: 1px solid #eee5e1;
+    background: #fcfaf8;
+}
+
+.order-result-number span {
+    display: block;
+    margin-bottom: 4px;
+    color: #9a8983;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+}
+
+.order-result-number strong {
+    color: #68142e;
+    font-size: 17px;
+}
+
+.order-result-status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid #eee5e1;
+    border-bottom: 1px solid #eee5e1;
+}
+
+.order-result-status div {
+    padding: 14px;
+}
+
+.order-result-status div + div {
+    border-left: 1px solid #eee5e1;
+}
+
+.order-result-status span {
+    display: block;
+    margin-bottom: 5px;
+    color: #9a8983;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.order-result-status strong {
+    color: #302522;
+    font-size: 12px;
+}
+
+.order-result-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+}
+
+.order-result-actions .button {
+    min-height: 44px;
+    padding: 13px 20px;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.order-result-primary {
+    background: #68142e;
+    border: 1px solid #68142e;
+    color: #fff;
+}
+
+.order-result-secondary {
+    background: #fff;
+    border: 1px solid #68142e;
+    color: #68142e;
+}
+
+@media (max-width: 600px) {
+    .checkout-test-payment-actions {
+        flex-direction: column;
+    }
+
+    .checkout-test-payment-button {
+        width: 100%;
+    }
+
+    .order-result-page {
+        padding: 36px 16px 80px;
+    }
+
+    .order-result-card {
+        padding: 34px 20px;
+    }
+
+    .order-result-status {
+        grid-template-columns: 1fr;
+    }
+
+    .order-result-status div + div {
+        border-left: 0;
+        border-top: 1px solid #eee5e1;
+    }
+
+    .order-result-actions {
+        flex-direction: column;
+    }
+
+    .order-result-actions .button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
