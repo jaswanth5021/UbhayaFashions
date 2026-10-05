@@ -98,6 +98,15 @@ public class ProductsController(ApiService api) : Controller
             ViewBag.RelatedProducts = new List<RelatedProductViewModel>();
         }
 
+        try
+        {
+            ViewBag.ProductReviews = await api.GetProductReviewsAsync(id);
+        }
+        catch (HttpRequestException)
+        {
+            ViewBag.ProductReviews = new ProductReviewsViewModel();
+        }
+
         if (User.Identity?.IsAuthenticated == true)
         {
             try
@@ -114,4 +123,29 @@ public class ProductsController(ApiService api) : Controller
 
         return View(product);
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SubmitReview(
+        int productId,
+        ProductReviewSubmissionViewModel model)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+            return RedirectToAction("Login", "Account", new { returnUrl = Url.Action(nameof(Details), new { id = productId }) });
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ReviewError"] = "Please provide a rating and a review of at least 10 characters.";
+            return RedirectToAction(nameof(Details), new { id = productId });
+        }
+
+        var result = await api.SubmitProductReviewAsync(productId, model);
+        if (result.Success)
+            TempData["ReviewMessage"] = "Thank you. Your review has been submitted.";
+        else
+            TempData["ReviewError"] = result.Message.Trim('"');
+
+        return RedirectToAction(nameof(Details), new { id = productId });
+    }
+
 }
