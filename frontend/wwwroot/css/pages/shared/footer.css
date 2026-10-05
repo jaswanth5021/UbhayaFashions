@@ -382,3 +382,49 @@
         display: grid;
     }
 }
+
+@media (max-width: 600px) {
+    /* Keep the mobile header focused: menu, logo, search and cart. */
+    .header-actions .wishlist-header-icon,
+    .header-actions .header-icon[aria-label="My account"],
+    .header-actions .header-icon[aria-label="Login"] {
+        display: none;
+    }
+
+    .mobile-bottom-nav-item {
+        transition: color .18s ease, transform .18s ease;
+    }
+
+    .mobile-bottom-nav-item.is-active {
+        color: #68142e;
+    }
+
+    .mobile-bottom-nav-item.is-active svg {
+        stroke-width: 2;
+    }
+
+    .mobile-bottom-nav-shop.is-active .mobile-bottom-nav-shop-icon {
+        background: #68142e;
+        box-shadow: 0 6px 16px rgba(104, 20, 46, .25);
+    }
+
+    .mobile-bottom-nav-item:active {
+        transform: scale(.96);
+    }
+
+    .mobile-bottom-nav-item:focus-visible {
+        outline: 2px solid #68142e;
+        outline-offset: -3px;
+        border-radius: 8px;
+    }
+
+    .mobile-bottom-nav-badge {
+        background: #68142e;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mobile-bottom-nav-item {
+        transition: none;
+    }
+}
