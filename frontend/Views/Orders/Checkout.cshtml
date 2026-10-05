@@ -191,6 +191,27 @@
                         <span>Your payment is processed securely by Razorpay.</span>
                     </div>
 
+                    @if (Configuration.GetValue<bool>("PaymentTesting:Enabled"))
+                    {
+                        <div class="checkout-test-payment-panel">
+                            <span class="checkout-test-payment-label">TEST MODE</span>
+                            <strong>Preview the complete order flow without opening Razorpay</strong>
+                            <p>These buttons are for the feature/test environment only.</p>
+                            <div class="checkout-test-payment-actions">
+                                <button type="button"
+                                        class="checkout-test-payment-button success"
+                                        data-test-payment="success">
+                                    ✓ Simulate Successful Payment
+                                </button>
+                                <button type="button"
+                                        class="checkout-test-payment-button failure"
+                                        data-test-payment="failure">
+                                    × Simulate Failed Payment
+                                </button>
+                            </div>
+                        </div>
+                    }
+
                     <div class="checkout-screen-actions">
                         <button type="button" class="checkout-screen-back" data-checkout-screen-back="2">← Back to Address</button>
                         <button type="button" class="checkout-screen-primary" data-checkout-screen-next="4">CONTINUE TO ORDER REVIEW</button>
@@ -394,6 +415,59 @@
                 originalShowStep(step);
                 updateMobileCheckoutLabel();
             };
+
+            document.querySelectorAll('[data-test-payment]').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const mode = button.dataset.testPayment;
+                    const address = addressText?.value.trim() || '';
+
+                    if (!address) {
+                        showStep(2);
+                        alert('Please enter or select a shipping address first.');
+                        addressText?.focus();
+                        return;
+                    }
+
+                    const form = document.getElementById('checkoutScreenForm');
+                    const token = form?.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    if (!token) return;
+
+                    document.querySelectorAll('[data-test-payment]').forEach(x => x.disabled = true);
+
+                    if (mode === 'failure') {
+                        window.location.href =
+                            '@Url.Action("Failure", "Orders")' +
+                            '?message=' +
+                            encodeURIComponent('Test payment failed. No payment was captured and your cart is still available.');
+                        return;
+                    }
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('ShippingAddress', address);
+                        formData.append('__RequestVerificationToken', token);
+
+                        const response = await fetch('@Url.Action("TestPaymentSuccess", "Orders")', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin'
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success && result.redirectUrl) {
+                            window.location.href = result.redirectUrl;
+                            return;
+                        }
+
+                        alert(result.message || 'Test payment could not be completed.');
+                    } catch {
+                        alert('Unable to run the test payment. Please try again.');
+                    } finally {
+                        document.querySelectorAll('[data-test-payment]').forEach(x => x.disabled = false);
+                    }
+                });
+            });
 
             document.getElementById('checkoutScreenForm')?.addEventListener('submit', event => {
                 syncAddress();
