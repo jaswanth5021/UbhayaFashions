@@ -116,6 +116,59 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         return item is null ? NotFound() : Ok(item);
     }
 
+    [HttpGet("{id:int}/related")]
+    public async Task<IActionResult> GetRelated(int id)
+    {
+        var product = await db.Products.AsNoTracking()
+            .Where(item => item.Id == id)
+            .Select(item => new { item.CategoryId, item.Colors })
+            .FirstOrDefaultAsync();
+
+        if (product is null) return NotFound();
+
+        var categoryProducts = await db.Products.AsNoTracking()
+            .Where(item => item.Id != id && item.CategoryId == product.CategoryId
+                && item.Variants.Any(variant => variant.Stock > 0))
+            .OrderByDescending(item => item.IsBestSeller)
+            .ThenByDescending(item => item.Id)
+            .Select(item => new RelatedProductResponse(
+                item.Id, item.Name, item.CategoryNavigation.Name, item.ImageUrl,
+                item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Price).FirstOrDefault() ?? 0,
+                item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Discount).FirstOrDefault() ?? 0,
+                item.IsBestSeller, item.Colors))
+            .Take(6)
+            .ToListAsync();
+
+        var results = categoryProducts.ToList();
+        if (results.Count < 4)
+        {
+            var existingIds = results.Select(item => item.Id).Append(id).ToList();
+            var fallback = await db.Products.AsNoTracking()
+                .Where(item => !existingIds.Contains(item.Id) && item.Variants.Any(variant => variant.Stock > 0))
+                .OrderByDescending(item => item.IsBestSeller)
+                .ThenByDescending(item => item.Id)
+                .Select(item => new RelatedProductResponse(
+                    item.Id, item.Name, item.CategoryNavigation.Name, item.ImageUrl,
+                    item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Price).FirstOrDefault() ?? 0,
+                    item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Discount).FirstOrDefault() ?? 0,
+                    item.IsBestSeller, item.Colors))
+                .Take(6 - results.Count)
+                .ToListAsync();
+
+            results.AddRange(fallback);
+        }
+
+        return Ok(results.Select(item => new
+        {
+            item.Id, item.Name, item.Category, item.ImageUrl, item.Price, item.Discount,
+            item.IsBestSeller
+        }));
+    }
+
+    private sealed record RelatedProductResponse(
+        int Id, string Name, string Category, string ImageUrl, decimal Price,
+        decimal Discount, bool IsBestSeller, string Colors);
+
     [HttpGet("GetNewarrivals")]
     public async Task<IActionResult> GetNewarrivals()
         => Ok(await db.Products.AsNoTracking()

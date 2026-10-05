@@ -45,8 +45,10 @@
 
     var galleryItems = new List<(string Url, bool IsVideo)>();
 
-    var bestSellers =
-        ViewBag.BestSellers as List<ProductViewModel> ?? [];
+    var relatedProducts =
+        ViewBag.RelatedProducts as List<RelatedProductViewModel> ?? [];
+    var wishlistedProductIds =
+        ViewBag.WishlistedProductIds as HashSet<int> ?? [];
 
     if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
@@ -362,7 +364,7 @@
         </p>
 
 
-        @if (Model.Stock > 0)
+        @if (variants.Count > 0)
         {
             <div class="product-stock-panel"
                  id="productStockPanel"
@@ -754,10 +756,10 @@
 
 
 <!-- =============================================================
-     BESTSELLERS
+     YOU MAY ALSO LIKE
      ============================================================= -->
 
-@if (bestSellers.Count > 0)
+@if (relatedProducts.Count > 0)
 {
     <section class="product-bestsellers"
              aria-labelledby="productBestsellersTitle">
@@ -765,17 +767,17 @@
         <div class="product-bestsellers-inner">
 
             <p class="catalog-eyebrow">
-                CUSTOMER FAVORITES
+                DISCOVER MORE
             </p>
 
             <h2 id="productBestsellersTitle">
-                Bestsellers
+                You may also like
             </h2>
 
 
             <div class="product-bestsellers-grid">
 
-                @foreach (var item in bestSellers)
+                @foreach (var item in relatedProducts)
                 {
                     var hasDiscount =
                         item.Discount > 0 &&
@@ -788,7 +790,8 @@
                             : item.Price;
 
 
-                    <a class="product-bestseller-card"
+                    <article class="product-bestseller-card">
+                    <a class="product-bestseller-link"
                        asp-action="Details"
                        asp-route-id="@item.Id">
 
@@ -798,7 +801,11 @@
                             {
                                 <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])"
                                      alt="@item.Name"
-                                     loading="lazy" />
+                                     loading="lazy"
+                                     onerror="this.hidden=true; this.nextElementSibling.hidden=false" />
+                                <div class="product-bestseller-image-fallback" hidden>
+                                    UBHAYA
+                                </div>
                             }
                             else
                             {
@@ -808,7 +815,7 @@
                             }
 
 
-                            @if (item.Discount > 0)
+                            @if (item.Discount > 0 && item.Discount < 100)
                             {
                                 <span class="product-bestseller-discount">
                                     -@item.Discount% OFF
@@ -817,7 +824,23 @@
 
                         </div>
 
+                    </a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            var isRelatedWishlisted = wishlistedProductIds.Contains(item.Id);
+                            <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="product-related-wishlist-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@item.Id" />
+                                <input type="hidden" name="isWishlisted" value="@isRelatedWishlisted.ToString().ToLowerInvariant()" />
+                                <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Products", new { id = Model.Id })" />
+                                <button type="submit" class="product-related-wishlist @(isRelatedWishlisted ? "is-saved" : string.Empty)" aria-label="@(isRelatedWishlisted ? "Remove from wishlist" : "Add to wishlist")" title="@(isRelatedWishlisted ? "Remove from wishlist" : "Add to wishlist")" aria-pressed="@isRelatedWishlisted.ToString().ToLowerInvariant()">
+                                    <span aria-hidden="true">♡</span>
+                                </button>
+                            </form>
+                        }
 
+
+                    <a class="product-bestseller-link" asp-action="Details" asp-route-id="@item.Id">
                         <span class="product-bestseller-category">
                             @item.Category
                         </span>
@@ -843,8 +866,9 @@
                             }
 
                         </div>
-
                     </a>
+
+                    </article>
                 }
 
             </div>

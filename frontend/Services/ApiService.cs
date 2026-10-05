@@ -91,6 +91,11 @@ public class ApiService(
                 $"api/products/{id}");
     }
 
+    public async Task<List<RelatedProductViewModel>> GetRelatedProductsAsync(int id)
+    {
+        return await Client.GetFromJsonAsync<List<RelatedProductViewModel>>($"api/products/{id}/related") ?? [];
+    }
+
 
     public async Task<List<ProductViewModel>>
         GetNewarrivalsAsync()

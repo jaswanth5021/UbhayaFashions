@@ -87,29 +87,24 @@ public class ProductsController(ApiService api) : Controller
 
         try
         {
-            var bestSellers = (await api.GetProductsAsync())
-                .Where(item => item.IsBestSeller)
-                .ToList();
-
-            var otherBestSellers = bestSellers
+            ViewBag.RelatedProducts = (await api.GetRelatedProductsAsync(id))
                 .Where(item => item.Id != id)
+                .DistinctBy(item => item.Id)
                 .Take(6)
                 .ToList();
-
-            ViewBag.BestSellers = otherBestSellers.Count > 0
-                ? otherBestSellers
-                : bestSellers.Where(item => item.Id == id).Take(1).ToList();
         }
         catch (HttpRequestException)
         {
-            ViewBag.BestSellers = new List<LadiesDressStore.Web.Models.ProductViewModel>();
+            ViewBag.RelatedProducts = new List<RelatedProductViewModel>();
         }
 
         if (User.Identity?.IsAuthenticated == true)
         {
             try
             {
-                ViewBag.IsWishlisted = (await api.GetWishlistAsync()).Any(item => item.Id == id);
+                var wishlistIds = (await api.GetWishlistAsync()).Select(item => item.Id).ToHashSet();
+                ViewBag.WishlistedProductIds = wishlistIds;
+                ViewBag.IsWishlisted = wishlistIds.Contains(id);
             }
             catch (HttpRequestException)
             {

@@ -6,12 +6,14 @@ public static class ImageUrlHelper
     {
         if (string.IsNullOrWhiteSpace(imagePath)) return string.Empty;
 
-        // Media is served by the site from its stored path. Ignore legacy
-        // external URLs so they are not mistaken for local /photo-... paths.
+        // Uploaded media is served by the site from its stored /uploads path.
         if (Uri.TryCreate(imagePath, UriKind.Absolute, out var absoluteUri))
         {
-            return absoluteUri.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase)
-                ? absoluteUri.PathAndQuery + absoluteUri.Fragment
+            if (absoluteUri.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+                return absoluteUri.PathAndQuery + absoluteUri.Fragment;
+
+            return absoluteUri.Scheme is "http" or "https"
+                ? absoluteUri.AbsoluteUri
                 : "data:,";
         }
 
