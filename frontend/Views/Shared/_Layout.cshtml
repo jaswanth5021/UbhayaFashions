@@ -513,7 +513,7 @@
             <p>Taxes, discounts and shipping calculated at checkout.</p>
             @if (cartItems.Count > 0 && User.Identity?.IsAuthenticated == true)
             {
-                <button class="cart-drawer-checkout" type="button" id="cartDrawerBeginCheckout">Checkout</button>
+                <a class="cart-drawer-checkout" asp-controller="Orders" asp-action="Checkout">Checkout</a>
             }
             else if (cartItems.Count > 0)
             {
