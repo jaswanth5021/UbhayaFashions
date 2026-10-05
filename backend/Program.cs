@@ -242,6 +242,26 @@ using (var scope = app.Services.CreateScope())
         IF COL_LENGTH(N'dbo.Categories', N'ShowOnHomePage') IS NULL
             ALTER TABLE dbo.Categories ADD ShowOnHomePage bit NOT NULL CONSTRAINT DF_Categories_ShowOnHomePage DEFAULT 0;
 
+        IF OBJECT_ID(N'dbo.ProductReviews', N'U') IS NULL
+        BEGIN
+            CREATE TABLE dbo.ProductReviews
+            (
+                Id int IDENTITY(1,1) NOT NULL CONSTRAINT PK_ProductReviews PRIMARY KEY,
+                ProductId int NOT NULL,
+                CustomerId int NOT NULL,
+                Rating int NOT NULL,
+                Title nvarchar(100) NOT NULL,
+                Comment nvarchar(2000) NOT NULL,
+                CreatedDate datetime2 NOT NULL CONSTRAINT DF_ProductReviews_CreatedDate DEFAULT SYSUTCDATETIME(),
+                UpdatedDate datetime2 NOT NULL CONSTRAINT DF_ProductReviews_UpdatedDate DEFAULT SYSUTCDATETIME(),
+                CONSTRAINT CK_ProductReviews_Rating CHECK (Rating BETWEEN 1 AND 5),
+                CONSTRAINT FK_ProductReviews_Products_ProductId FOREIGN KEY (ProductId) REFERENCES dbo.Products(Id) ON DELETE CASCADE,
+                CONSTRAINT FK_ProductReviews_Customers_CustomerId FOREIGN KEY (CustomerId) REFERENCES dbo.Customers(Id) ON DELETE CASCADE
+            );
+            CREATE UNIQUE INDEX UX_ProductReviews_Customer_Product ON dbo.ProductReviews(CustomerId, ProductId);
+            CREATE INDEX IX_ProductReviews_Product_CreatedDate ON dbo.ProductReviews(ProductId, CreatedDate DESC);
+        END;
+
         IF COL_LENGTH(N'dbo.Products', N'IsBestSeller') IS NULL
             ALTER TABLE dbo.Products ADD IsBestSeller bit NOT NULL CONSTRAINT DF_Products_IsBestSeller DEFAULT 0;
 
