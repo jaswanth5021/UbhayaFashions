@@ -2536,3 +2536,70 @@
 .product-inline-rating:hover {
     color: #68142e;
 }
+
+
+/* =========================================================
+   PRODUCT DETAIL — SIZE / QUANTITY COMPACT CONTROLS
+   Keeps the existing typography and Ubhaya Fashions palette.
+   ========================================================= */
+
+@media (min-width: 761px) {
+    .product-size-options {
+        grid-template-columns: repeat(4, 96px);
+        width: max-content;
+        max-width: 100%;
+        gap: 8px;
+    }
+
+    .product-size-option {
+        min-height: 62px;
+        padding: 7px 5px;
+    }
+
+    .product-size-label {
+        font-size: 12px;
+    }
+
+    .product-size-price,
+    .product-size-option.unavailable .product-size-stock {
+        font-size: 9px;
+    }
+
+    .product-quantity-control {
+        width: 120px;
+        min-height: 40px;
+        grid-template-columns: 34px 1fr 34px;
+    }
+
+    .product-quantity-control input {
+        min-height: 38px;
+        font-size: 12px;
+    }
+
+    .product-quantity-control button {
+        font-size: 17px;
+    }
+}
+
+.product-review-eligibility-notice {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 9px 13px;
+    border: 1px solid #e7deda;
+    background: #fcfaf8;
+    color: #80645f;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.product-review-eligibility-notice[hidden] {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    .product-review-eligibility-notice {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
