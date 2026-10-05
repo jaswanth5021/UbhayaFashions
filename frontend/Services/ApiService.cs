@@ -495,6 +495,46 @@ public class ApiService(
         return data is null ? (false, "Invalid payment response from server.", null) : (true, "", data);
     }
 
+
+    public async Task<(bool Success, string Message, int OrderId)>
+        CreateTestSuccessfulPaymentAsync(
+            List<CartItemViewModel> cart,
+            string address)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/payments/test-success");
+        AddToken(request);
+        request.Content = JsonContent.Create(new
+        {
+            shippingAddress = address,
+            items = cart.Select(x => new
+            {
+                productId = x.ProductId,
+                quantity = x.Quantity,
+                size = x.Size,
+                color = (string?)null
+            })
+        });
+
+        var response = await Client.SendAsync(request);
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            return (false, content, 0);
+
+        var data = JsonSerializer.Deserialize<JsonElement>(
+            content,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        var orderId = data.TryGetProperty("orderId", out var id)
+            ? id.GetInt32()
+            : 0;
+
+        return orderId > 0
+            ? (true, "", orderId)
+            : (false, "Invalid test payment response.", 0);
+    }
+
+
     public async Task<(bool Success, string Message, int OrderId)>
         VerifyRazorpayPaymentAsync(PaymentVerifyViewModel model)
     {
