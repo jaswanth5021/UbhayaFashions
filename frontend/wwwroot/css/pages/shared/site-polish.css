@@ -1034,3 +1034,145 @@ body.header-search-open {
         padding: 0 12px;
     }
 }
+
+
+/* =========================================================
+   MOBILE HEADER - CLEAN STORE NAVIGATION
+   Desktop header remains unchanged.
+   ========================================================= */
+@media (max-width: 600px) {
+    .announcement-bar {
+        display: none;
+    }
+
+    .header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 64px;
+        min-height: 64px;
+        padding: 0 14px;
+        box-sizing: border-box;
+        background: #fffdfb;
+        border-top: 2px solid #68142e;
+        border-bottom: 1px solid #eee5e3;
+        z-index: 900;
+    }
+
+    .header > .menu-button {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        place-items: center;
+        margin: 0;
+        padding: 0;
+        color: #68142e;
+        font-size: 0;
+    }
+
+    .header > .menu-button::before,
+    .header > .menu-button::after {
+        content: "";
+        position: absolute;
+        left: 11px;
+        width: 21px;
+        height: 2px;
+        border-radius: 2px;
+        background: currentColor;
+    }
+
+    .header > .menu-button::before { top: 15px; box-shadow: 0 7px 0 currentColor; }
+    .header > .menu-button::after { display: none; }
+
+    .header > .brand {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 116px;
+        height: 56px;
+        margin: 0;
+        transform: translate(-50%, -50%);
+        text-decoration: none;
+        z-index: 1;
+    }
+
+    .header > .brand img {
+        display: block;
+        width: 108px;
+        height: 52px;
+        max-width: 108px;
+        max-height: 52px;
+        object-fit: contain;
+    }
+
+    .desktop-primary-nav,
+    .desktop-header-search {
+        display: none !important;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 2px;
+        margin-left: auto;
+        min-width: 84px;
+        height: 100%;
+    }
+
+    .header-actions .header-icon {
+        display: none !important;
+        position: relative;
+        width: 40px;
+        height: 42px;
+        flex: 0 0 40px;
+        align-items: center;
+        justify-content: center;
+        color: #68142e;
+    }
+
+    .header-actions .header-search-button,
+    .header-actions .cart-icon {
+        display: inline-flex !important;
+    }
+
+    .header-actions .header-search-button svg,
+    .header-actions .cart-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .header-actions .header-search-button:hover,
+    .header-actions .cart-icon:hover {
+        color: #851c3c;
+    }
+
+    .header-icon-count {
+        top: 3px;
+        right: 2px;
+        min-width: 15px;
+        height: 15px;
+        padding: 0 4px;
+        border-radius: 20px;
+        background: #68142e;
+        color: #fff;
+        font-size: 9px;
+        line-height: 15px;
+    }
+}
+
+@media (max-width: 380px) {
+    .header { padding: 0 10px; }
+    .header > .brand { width: 104px; }
+    .header > .brand img { width: 98px; height: 49px; }
+    .header-actions { min-width: 80px; }
+    .header-actions .header-icon { width: 38px; flex-basis: 38px; }
+}
