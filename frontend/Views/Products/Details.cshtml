@@ -687,15 +687,22 @@
                 </div>
             }
 
-            @if (User.Identity?.IsAuthenticated == true && productReviews.CanReview)
+            @if (User.Identity?.IsAuthenticated == true && !productReviews.HasReviewed)
             {
                 <button class="product-review-button"
                         type="button"
-                        id="writeReviewButton">
+                        id="writeReviewButton"
+                        data-can-review="@productReviews.CanReview.ToString().ToLowerInvariant()">
                     Write a review
                 </button>
             }
-            else if (User.Identity?.IsAuthenticated != true)
+            else if (User.Identity?.IsAuthenticated == true && productReviews.HasReviewed)
+            {
+                <span class="product-review-eligibility-notice">
+                    You have already reviewed this product.
+                </span>
+            }
+            else
             {
                 <a class="product-review-button"
                    asp-controller="Account"
@@ -807,14 +814,6 @@
                     <p>Share your experience and help other customers choose the right style.</p>
                 }
 
-                @if (User.Identity?.IsAuthenticated == true && productReviews.CanReview)
-                {
-                    <button class="product-review-button"
-                            type="button"
-                            id="writeReviewButton">
-                        Write a review
-                    </button>
-                }
             </div>
         }
 
@@ -1377,15 +1376,50 @@
             "click",
             () => {
 
+                const reviewButton =
+                    document.getElementById(
+                        "writeReviewButton"
+                    );
+
                 const reviewForm =
                     document.getElementById(
                         "productReviewForm"
                     );
 
+                if (
+                    reviewButton?.dataset.canReview !== "true"
+                ) {
+                    let notice =
+                        document.getElementById(
+                            "reviewEligibilityNotice"
+                        );
+
+                    if (!notice) {
+                        notice =
+                            document.createElement("div");
+                        notice.id =
+                            "reviewEligibilityNotice";
+                        notice.className =
+                            "product-review-eligibility-notice";
+                        notice.textContent =
+                            "Purchase this product to unlock the review form.";
+                        reviewButton
+                            .closest(".product-reviews-heading")
+                            ?.after(notice);
+                    }
+
+                    notice.hidden = false;
+                    notice.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                    return;
+                }
+
+                if (!reviewForm) return;
 
                 reviewForm.hidden =
                     !reviewForm.hidden;
-
 
                 if (!reviewForm.hidden) {
 
@@ -1394,12 +1428,11 @@
                         block: "center"
                     });
 
-
                     document
                         .getElementById(
                             "reviewRating"
                         )
-                        .focus();
+                        ?.focus();
 
                 }
 
