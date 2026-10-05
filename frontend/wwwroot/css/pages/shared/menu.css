@@ -315,3 +315,69 @@ body.menu-open { overflow: hidden; }
         max-height: 52px;
     }
 }
+
+
+/* =========================================================
+   FINAL MOBILE MENU LOGO OVERFLOW FIX
+   The logo artwork is overflowing out of its header box on
+   some browsers/local builds. Keep the mobile menu header
+   clean and prevent the image from affecting menu content.
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .side-menu-header {
+        position: relative;
+        min-height: 112px !important;
+        height: 112px !important;
+        overflow: hidden !important;
+    }
+
+    .side-menu-brand {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 76px !important;
+        min-height: 76px !important;
+        max-height: 76px !important;
+        overflow: hidden !important;
+        z-index: 2;
+    }
+
+    .side-menu-brand img {
+        position: static !important;
+        inset: auto !important;
+        transform: none !important;
+        display: block !important;
+        width: 115px !important;
+        max-width: 115px !important;
+        height: 48px !important;
+        max-height: 48px !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        object-fit: contain !important;
+        object-position: center center !important;
+    }
+
+    .side-menu-tagline {
+        position: relative;
+        z-index: 3;
+    }
+
+    .menu-navigation {
+        position: relative;
+        z-index: 4;
+    }
+}
+
+@media (max-width: 370px) {
+    .side-menu-brand img {
+        width: 100px !important;
+        max-width: 100px !important;
+        height: 42px !important;
+        max-height: 42px !important;
+    }
+}
