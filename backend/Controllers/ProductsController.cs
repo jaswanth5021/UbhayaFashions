@@ -17,6 +17,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         [FromQuery] string? color = null,
         [FromQuery] decimal? minPrice = null,
         [FromQuery] decimal? maxPrice = null,
+        [FromQuery] string? availability = null,
         [FromQuery] bool bestSellers = false,
         [FromQuery] string? sort = null)
     {
@@ -68,6 +69,20 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         if (maxPrice.HasValue)
         {
             query = query.Where(x => x.Variants.Any(variant => variant.Price <= maxPrice.Value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(availability))
+        {
+            var normalizedAvailability = availability.Trim().ToLowerInvariant();
+
+            if (normalizedAvailability == "in-stock")
+            {
+                query = query.Where(x => x.Variants.Any(variant => variant.Stock > 0));
+            }
+            else if (normalizedAvailability == "out-of-stock")
+            {
+                query = query.Where(x => !x.Variants.Any(variant => variant.Stock > 0));
+            }
         }
 
         if (bestSellers)
