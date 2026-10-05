@@ -123,21 +123,22 @@
 
 @media (max-width: 600px) {
     .ubhaya-promise {
-        padding: 70px 20px 60px;
+        padding: 48px 20px 42px;
     }
 
     .promise-header {
-        margin-bottom: 45px;
+        margin-bottom: 30px;
     }
 
     .promise-eyebrow {
-        font-size: 10px;
-        letter-spacing: 2px;
-        margin-bottom: 18px;
+        font-size: 9px;
+        letter-spacing: 1.8px;
+        margin-bottom: 12px;
     }
 
     .promise-header h2 {
-        font-size: 43px;
+        font-size: 32px;
+        line-height: 1.12;
     }
 
     .promise-grid {
@@ -147,7 +148,7 @@
     .promise-item,
     .promise-item:first-child {
         min-height: auto;
-        padding: 30px 0;
+        padding: 24px 0;
         border-right: none;
         border-bottom: 1px solid #ddd7d3;
     }
@@ -162,16 +163,18 @@
     }
 
     .promise-number {
-        margin-bottom: 20px;
+        margin-bottom: 12px;
+        font-size: 16px;
     }
 
     .promise-item h3 {
-        font-size: 25px;
+        margin-bottom: 10px;
+        font-size: 22px;
     }
 
     .promise-item p {
-        font-size: 15px;
-        line-height: 1.6;
+        font-size: 13px;
+        line-height: 1.55;
     }
 }
 
