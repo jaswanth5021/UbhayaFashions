@@ -348,18 +348,38 @@
 
                     @if (p.Variants.Count > 0)
                     {
-                        <div class="size-options">
-                            @foreach (var variant in p.Variants.OrderBy(variant => variant.Size))
+                        var standardSizes = new[]
+                        {
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL"
+                        };
+
+                        var availableSizes = new HashSet<string>(
+                            p.Variants
+                                .Where(variant => variant.Stock > 0)
+                                .Select(variant => variant.Size),
+                            StringComparer.OrdinalIgnoreCase);
+
+                        <div class="size-options" aria-label="Available sizes">
+                            @foreach (var size in standardSizes)
                             {
-                                <button type="button" class="@(variant.Stock > 0 ? "size-available" : "size-unavailable")" data-size="@variant.Size" disabled="@(variant.Stock < 1)" title="@(variant.Stock > 0 ? variant.Size : "Out of stock")" aria-pressed="false">
-                                    @variant.Size
-                                    @if (variant.Stock < 1)
-                                    {
-                                        <span class="size-cross" aria-hidden="true">×</span>
-                                    }
+                                if (!availableSizes.Contains(size))
+                                {
+                                    continue;
+                                }
+
+                                <button type="button"
+                                        class="size-available"
+                                        data-size="@size"
+                                        title="@size available"
+                                        aria-pressed="false">
+                                    @size
                                 </button>
                             }
-
                         </div>
                     }
 
