@@ -903,11 +903,19 @@
 
     .checkout-screen-summary {
         order: -1;
+        align-self: stretch;
+        width: 100%;
+        box-sizing: border-box;
         padding: 17px 16px;
         border: 1px solid #eee4df;
         border-radius: 14px;
         background: #fff;
         box-shadow: 0 5px 18px rgba(53,31,35,.05);
+    }
+
+    .checkout-screen-main {
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .checkout-screen-summary h2 {
