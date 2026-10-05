@@ -86,6 +86,47 @@ public class OrdersController(ApiService api) : Controller
         return View("Payment", result.Data);
     }
 
+    [HttpGet]
+    public IActionResult Success(int id)
+    {
+        ViewBag.OrderId = id;
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult Failure(int? id, string? message)
+    {
+        ViewBag.OrderId = id;
+        ViewBag.FailureMessage = string.IsNullOrWhiteSpace(message)
+            ? "Your payment was not completed."
+            : message;
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TestPaymentSuccess()
+    {
+        var cart = ReadCart();
+        if (cart.Count == 0)
+            return Json(new { success = false, message = "Your cart is empty." });
+
+        var address = Request.Form["ShippingAddress"].ToString().Trim();
+        if (string.IsNullOrWhiteSpace(address))
+            return Json(new { success = false, message = "Delivery address is required." });
+
+        var result = await api.CreateTestSuccessfulPaymentAsync(cart, address);
+        if (!result.Success)
+            return Json(new { success = false, message = result.Message });
+
+        Response.Cookies.Delete("cart");
+        return Json(new
+        {
+            success = true,
+            redirectUrl = Url.Action(nameof(Success), new { id = result.OrderId })
+        });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Verify(PaymentVerifyViewModel model)
@@ -99,7 +140,7 @@ public class OrdersController(ApiService api) : Controller
             return BadRequest(new { success = false, message = result.Message });
 
         Response.Cookies.Delete("cart");
-        return Json(new { success = true, redirectUrl = Url.Action(nameof(Index)) });
+        return Json(new { success = true, redirectUrl = Url.Action(nameof(Success), new { id = model.OrderId }) });
     }
 
     private List<CartItemViewModel> ReadCart()
