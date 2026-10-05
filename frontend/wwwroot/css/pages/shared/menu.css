@@ -261,3 +261,57 @@ body.menu-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .menu-overlay, .side-menu, .menu-item, .menu-item-arrow { transition: none; }
 }
+
+/* =========================================================
+   MOBILE SIDE-MENU LOGO FIX - feature/product-search
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .side-menu-header {
+        min-height: 112px;
+        height: 112px;
+        padding: 12px 14px 4px;
+        overflow: hidden;
+    }
+
+    .side-menu-brand {
+        width: 100%;
+        height: 76px;
+        min-height: 76px;
+        max-height: 76px;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .side-menu-brand img {
+        display: block;
+        width: min(125px, 100%);
+        height: 58px;
+        max-height: 58px;
+        object-fit: contain;
+        object-position: center;
+    }
+
+    .side-menu-tagline {
+        padding-top: 2px;
+    }
+}
+
+@media (max-width: 370px) {
+    .side-menu-header {
+        min-height: 104px;
+        height: 104px;
+    }
+
+    .side-menu-brand {
+        height: 70px;
+        min-height: 70px;
+        max-height: 70px;
+    }
+
+    .side-menu-brand img {
+        width: 110px;
+        height: 52px;
+        max-height: 52px;
+    }
+}
