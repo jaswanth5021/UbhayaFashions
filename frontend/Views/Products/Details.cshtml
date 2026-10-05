@@ -38,6 +38,11 @@
                 2)
             : startingVariant?.Price ?? 0;
 
+    var productColors = (Model.Colors ?? "")
+        .Split(new[] { ',', '|', '/' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
     var galleryItems = new List<(string Url, bool IsVideo)>();
 
     var bestSellers =
@@ -359,12 +364,24 @@
 
         @if (Model.Stock > 0)
         {
-            <p class="product-details-stock"
-               id="productStockMessage">
+            <div class="product-stock-panel"
+                 id="productStockPanel"
+                 aria-live="polite">
 
-                Select a size to see availability
+                <div class="product-stock-row">
+                    <span id="productStockMessage">Select a size to see availability</span>
+                    <span id="productStockCount"></span>
+                </div>
 
-            </p>
+                <div class="product-stock-meter"
+                     aria-hidden="true">
+                    <span id="productStockMeter"></span>
+                </div>
+
+                <small id="productStockHint">
+                    Select your size to check live availability.
+                </small>
+            </div>
 
 
             <form asp-controller="Cart"
@@ -471,14 +488,30 @@
                      COLOR
                      ================================================= -->
 
-                @if (!string.IsNullOrWhiteSpace(Model.Colors))
+                @if (productColors.Count > 0)
                 {
-                    <p class="product-details-colors">
+                    <fieldset class="product-color-fieldset">
+                        <legend>
+                            Color
+                            <span id="selectedColorLabel">@productColors[0]</span>
+                        </legend>
 
-                        <strong>Color:</strong>
-                        @Model.Colors
-
-                    </p>
+                        <div class="product-color-options" role="radiogroup" aria-label="Choose color">
+                            @foreach (var color in productColors)
+                            {
+                                <button type="button"
+                                        class="product-color-option @(color.Equals(productColors[0], StringComparison.OrdinalIgnoreCase) ? "selected" : "")"
+                                        data-color="@color"
+                                        aria-label="@color"
+                                        aria-pressed="@(color.Equals(productColors[0], StringComparison.OrdinalIgnoreCase) ? "true" : "false")">
+                                    <span class="product-color-swatch"
+                                          data-color-name="@color"
+                                          aria-hidden="true"></span>
+                                    <span class="product-color-name">@color</span>
+                                </button>
+                            }
+                        </div>
+                    </fieldset>
                 }
 
 
@@ -1501,6 +1534,46 @@
 
 
     /* =========================================================
+       COLOR SELECTION
+       ========================================================= */
+
+    (() => {
+        const buttons = document.querySelectorAll(".product-color-option");
+        const label = document.getElementById("selectedColorLabel");
+
+        buttons.forEach(button => {
+            button.addEventListener("click", () => {
+                buttons.forEach(item => {
+                    const selected = item === button;
+                    item.classList.toggle("selected", selected);
+                    item.setAttribute("aria-pressed", selected ? "true" : "false");
+                });
+
+                if (label) {
+                    label.textContent = button.dataset.color || "";
+                }
+            });
+        });
+
+        document.querySelectorAll(".product-color-swatch").forEach(swatch => {
+            const name = (swatch.dataset.colorName || "").toLowerCase();
+            const palette = {
+                red: "#c73b4d", maroon: "#68142e", burgundy: "#68142e",
+                pink: "#ec4f8a", rose: "#d98c9b", blue: "#2d75b6",
+                navy: "#183b63", green: "#5d8069", teal: "#2b8b87",
+                yellow: "#e4bd43", mustard: "#c89d2e", orange: "#d97836",
+                brown: "#7a513b", beige: "#dfc5a7", cream: "#f3e4c8",
+                white: "#ffffff", black: "#171717", grey: "#8f8f8f",
+                gray: "#8f8f8f", purple: "#7a55a8"
+            };
+
+            const key = Object.keys(palette).find(color => name.includes(color));
+            swatch.style.backgroundColor = key ? palette[key] : "#c8b7b0";
+        });
+    })();
+
+
+    /* =========================================================
        SIZE GUIDE
        ========================================================= */
 
@@ -1689,27 +1762,42 @@
                             );
 
 
+                        const stockCount = document.getElementById("productStockCount");
+                        const stockMeter = document.getElementById("productStockMeter");
+                        const stockHint = document.getElementById("productStockHint");
+
                         if (stockMessage) {
-
                             if (stock <= 0) {
-
-                                stockMessage.textContent =
-                                    "Out of stock";
-
+                                stockMessage.textContent = "Out of stock";
+                                stockMessage.classList.add("is-out");
+                            } else if (stock <= 3) {
+                                stockMessage.textContent = `Hurry! Only ${stock} left`;
+                                stockMessage.classList.remove("is-out");
+                            } else {
+                                stockMessage.textContent = `Size ${option.dataset.size} is available`;
+                                stockMessage.classList.remove("is-out");
                             }
-                            else if (stock === 1) {
+                        }
 
-                                stockMessage.textContent =
-                                    "Hurry! Only 1 left in stock";
+                        if (stockCount) {
+                            stockCount.textContent =
+                                stock > 0 ? `${stock} available` : "Unavailable";
+                        }
 
-                            }
-                            else {
+                        if (stockMeter) {
+                            const percentage = stock <= 0
+                                ? 0
+                                : Math.min(100, Math.max(12, stock <= 3 ? stock * 25 : 100));
+                            stockMeter.style.width = percentage + "%";
+                        }
 
-                                stockMessage.textContent =
-                                    `Size ${option.dataset.size} is available`;
-
-                            }
-
+                        if (stockHint) {
+                            stockHint.textContent =
+                                stock <= 0
+                                    ? "Please choose another size."
+                                    : stock <= 3
+                                        ? "Popular size — order soon before it sells out."
+                                        : "Available to order now."; 
                         }
 
 
