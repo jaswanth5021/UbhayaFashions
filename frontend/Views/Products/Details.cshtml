@@ -431,8 +431,10 @@
 
                             @foreach (var size in standardSizes)
                             {
-                                var isAvailable =
-                                    availableSizes.Contains(size);
+                                if (!availableSizes.Contains(size))
+                                {
+                                    continue;
+                                }
 
                                 var variant =
                                     variants.FirstOrDefault(item =>
@@ -442,7 +444,7 @@
 
 
                                 <button type="button"
-                                        class="product-size-option @(isAvailable ? "available" : "unavailable")"
+                                        class="product-size-option available"
                                         data-size="@size"
                                         data-price="@((variant?.Price ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
                                         data-discount="@((variant?.Discount ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
