@@ -8,6 +8,7 @@
     var selectedColor = ViewBag.Color as string;
     var minPrice = (decimal?)ViewBag.MinPrice;
     var maxPrice = (decimal?)ViewBag.MaxPrice;
+    var availability = ViewBag.Availability as string;
     var selectedSort = ViewBag.Sort as string ?? "recommended";
     var categories = ViewBag.Categories as List<CategoryViewModel> ?? new List<CategoryViewModel>();
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
@@ -36,17 +37,42 @@
             }
             <p class="catalog-count">@productCount @(productCount == 1 ? "style" : "styles")</p>
         </div>
-        @if (!string.IsNullOrWhiteSpace(category))
-        {
-            <a class="catalog-back-categories" asp-action="Categories">← Back to categories</a>
-        }
-        else
-        {
-            <a class="catalog-back-categories" asp-controller="Home" asp-action="Index">← Back to homepage</a>
-        }
+
+        <div class="catalog-header-actions">
+            <form asp-action="Index" method="get" class="catalog-sort-form">
+                <input type="hidden" name="search" value="@search" />
+                <input type="hidden" name="category" value="@category" />
+                <input type="hidden" name="size" value="@selectedSize" />
+                <input type="hidden" name="color" value="@selectedColor" />
+                <input type="hidden" name="minPrice" value="@minPrice" />
+                <input type="hidden" name="maxPrice" value="@maxPrice" />
+                <input type="hidden" name="availability" value="@availability" />
+                @if (bestSellersOnly)
+                {
+                    <input type="hidden" name="bestSellers" value="true" />
+                }
+                <label for="catalogSort">Sort by:</label>
+                <select id="catalogSort" name="sort" onchange="this.form.submit()">
+                    <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Recommended</option>
+                    <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Newest</option>
+                    <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Price: Low to High</option>
+                    <option value="price-high" selected="@(selectedSort == "price-high" ? "selected" : null)">Price: High to Low</option>
+                    <option value="name" selected="@(selectedSort == "name" ? "selected" : null)">Name</option>
+                </select>
+            </form>
+
+            @if (!string.IsNullOrWhiteSpace(category))
+            {
+                <a class="catalog-back-categories" asp-action="Categories">← Back to categories</a>
+            }
+            else
+            {
+                <a class="catalog-back-categories" asp-controller="Home" asp-action="Index">← Back to homepage</a>
+            }
+        </div>
     </header>
 
-    <form asp-action="Index" method="get" class="catalog-search-form catalog-filter-form">
+    <form asp-action="Index" method="get" class="catalog-search-form">
         <label for="catalogSearch">Search our collection</label>
         <div class="catalog-search-row">
             <input id="catalogSearch"
@@ -71,281 +97,368 @@
         </div>
     </form>
 
-    <form asp-action="Index" method="get" class="catalog-filters">
-        <input type="hidden" name="search" value="@search" />
-        @if (bestSellersOnly)
-        {
-            <input type="hidden" name="bestSellers" value="true" />
-        }
-        <label>
-            <span>Category</span>
-            <select name="category" aria-label="Filter by category">
-                <option value="">All categories</option>
-                @foreach (var item in categories)
+    <div class="catalog-layout">
+        <aside class="catalog-sidebar">
+            <div class="catalog-sidebar-header">
+                <span>FILTERS</span>
+                <a asp-action="Index"
+                   asp-route-search="@search"
+                   asp-route-bestSellers="@bestSellersOnly">Clear All</a>
+            </div>
+
+            <form asp-action="Index" method="get" class="catalog-sidebar-form">
+                <input type="hidden" name="search" value="@search" />
+                @if (bestSellersOnly)
                 {
-                    <option value="@item.Name" selected="@(string.Equals(item.Name, category, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item.Name</option>
+                    <input type="hidden" name="bestSellers" value="true" />
                 }
-            </select>
-        </label>
-        <label>
-            <span>Size</span>
-            <select name="size" aria-label="Filter by size">
-                <option value="">All sizes</option>
-                @foreach (var item in new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" })
-                {
-                    <option value="@item" selected="@(string.Equals(item, selectedSize, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item</option>
-                }
-            </select>
-        </label>
-        <label>
-            <span>Color</span>
-            <select name="color" aria-label="Filter by color">
-                <option value="">All colors</option>
-                @foreach (var item in new[] { "Black", "White", "Red", "Pink", "Green", "Blue", "Yellow", "Maroon", "Purple", "Beige", "Orange" })
-                {
-                    <option value="@item" selected="@(string.Equals(item, selectedColor, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item</option>
-                }
-            </select>
-        </label>
-        <label>
-            <span>Min price</span>
-            <input name="minPrice" type="number" min="0" step="1" value="@minPrice" placeholder="₹ Min" />
-        </label>
-        <label>
-            <span>Max price</span>
-            <input name="maxPrice" type="number" min="0" step="1" value="@maxPrice" placeholder="₹ Max" />
-        </label>
-        <label>
-            <span>Sort</span>
-            <select name="sort" aria-label="Sort products">
-                <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Recommended</option>
-                <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Newest</option>
-                <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Price: Low to High</option>
-                <option value="price-high" selected="@(selectedSort == "price-high" ? "selected" : null)">Price: High to Low</option>
-                <option value="name" selected="@(selectedSort == "name" ? "selected" : null)">Name</option>
-            </select>
-        </label>
-        <button type="submit">APPLY FILTERS</button>
-        <a asp-action="Index">CLEAR</a>
-    </form>
 
-    <div class="catalog-quick-links" aria-label="Shop shortcuts">
-        <a asp-action="Index">ALL STYLES</a>
-        <a asp-action="Index" asp-route-bestSellers="true">BEST SELLERS</a>
-        <a asp-action="Categories">CATEGORIES</a>
-    </div>
+                <section class="filter-section">
+                    <h3>Category</h3>
+                    <div class="filter-radio-list">
+                        <label class="filter-radio">
+                            <input type="radio" name="category" value="" checked="@string.IsNullOrWhiteSpace(category)" />
+                            <span>All categories</span>
+                        </label>
+                        @foreach (var item in categories)
+                        {
+                            <label class="filter-radio">
+                                <input type="radio" name="category" value="@item.Name" checked="@string.Equals(item.Name, category, StringComparison.OrdinalIgnoreCase)" />
+                                <span>@item.Name</span>
+                            </label>
+                        }
+                    </div>
+                </section>
 
-    @if (TempData["WishlistMessage"] is string wishlistMessage)
-    {
-        <div class="wishlist-notice" role="status">@wishlistMessage</div>
-    }
-    @if (TempData["WishlistError"] is string wishlistError)
-    {
-        <div class="wishlist-notice error" role="alert">@wishlistError</div>
-    }
+                <section class="filter-section">
+                    <h3>Size</h3>
+                    <div class="filter-size-list">
+                        @{
+                            var filterSizes = new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" };
+                        }
+                        @foreach (var item in filterSizes)
+                        {
+                            <label class="filter-size-option @(string.Equals(item, selectedSize, StringComparison.OrdinalIgnoreCase) ? "is-selected" : "")">
+                                <input type="radio" name="size" value="@item" checked="@string.Equals(item, selectedSize, StringComparison.OrdinalIgnoreCase)" />
+                                <span>@item</span>
+                            </label>
+                        }
+                    </div>
+                </section>
 
-    @if (Model.Count > 0)
-    {
-        <div class="catalog-grid">
-            @foreach (var product in Model)
-            {
-                var hasImage = !string.IsNullOrWhiteSpace(product.ImageUrl);
-                var hasPriceRange = product.Variants.Select(variant => variant.Price).Distinct().Count() > 1;
-                <article class="catalog-card">
-                    <div class="catalog-image-wrap">
-                        <a asp-action="Details" asp-route-id="@product.Id" class="catalog-image-link" aria-label="View @product.Name">
-                            @{
-                                var productImages = new List<string>();
-
-                                if (!string.IsNullOrWhiteSpace(product.ImageUrl))
-                                {
-                                    productImages.Add(product.ImageUrl);
-                                }
-
-                                productImages.AddRange(
-                                    product.Images
-                                        .OrderBy(image => image.SortOrder)
-                                        .Select(image => image.ImageUrl)
-                                        .Where(url => !string.IsNullOrWhiteSpace(url))
-                                );
-
-                                productImages = productImages
-                                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                                    .ToList();
-                            }
-
-                            @if (productImages.Count > 0)
+                <section class="filter-section">
+                    <h3>Color</h3>
+                    <div class="filter-color-list">
+                        @{
+                            var filterColors = new[]
                             {
-                                <div class="product-image-carousel"
-                                     data-product-carousel
-                                     data-image-count="@productImages.Count">
-                                    @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
-                                    {
-                                        <img src="@ImageUrlHelper.Resolve(productImages[imageIndex], Configuration["ApiBaseUrl"])"
-                                             alt="@product.Name - image @(imageIndex + 1)"
-                                             class="catalog-image product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
-                                             data-carousel-image="@imageIndex"
-                                             loading="@(imageIndex == 0 ? "eager" : "lazy")"
-                                             onerror="this.remove();" />
+                                ("Black", "#171717"),
+                                ("White", "#ffffff"),
+                                ("Red", "#b3263b"),
+                                ("Pink", "#e98aa9"),
+                                ("Green", "#72a66a"),
+                                ("Blue", "#6288c8"),
+                                ("Yellow", "#e7b84c"),
+                                ("Maroon", "#68142e"),
+                                ("Purple", "#8b68ad"),
+                                ("Beige", "#d8c2a7"),
+                                ("Orange", "#e77932")
+                            };
+                        }
+                        @foreach (var item in filterColors)
+                        {
+                            <label class="filter-color-option @(string.Equals(item.Item1, selectedColor, StringComparison.OrdinalIgnoreCase) ? "is-selected" : "")" title="@item.Item1">
+                                <input type="radio" name="color" value="@item.Item1" checked="@string.Equals(item.Item1, selectedColor, StringComparison.OrdinalIgnoreCase)" />
+                                <span style="--filter-color:@item.Item2"></span>
+                            </label>
+                        }
+                    </div>
+                </section>
+
+                <section class="filter-section">
+                    <h3>Price</h3>
+                    <div class="filter-price-values">
+                        <span id="priceMinLabel">₹@(minPrice ?? 0)</span>
+                        <span id="priceMaxLabel">₹@(maxPrice ?? 10000)</span>
+                    </div>
+                    <div class="filter-range-wrap">
+                        <input id="minPriceRange" type="range" min="0" max="10000" step="100" value="@(minPrice ?? 0)" aria-label="Minimum price" />
+                        <input id="maxPriceRange" type="range" min="0" max="10000" step="100" value="@(maxPrice ?? 10000)" aria-label="Maximum price" />
+                    </div>
+                    <div class="filter-price-inputs">
+                        <input id="minPriceInput" name="minPrice" type="number" min="0" max="10000" step="100" value="@minPrice" placeholder="₹ Min" />
+                        <input id="maxPriceInput" name="maxPrice" type="number" min="0" max="10000" step="100" value="@maxPrice" placeholder="₹ Max" />
+                    </div>
+                </section>
+
+                <section class="filter-section">
+                    <h3>Availability</h3>
+                    <div class="filter-radio-list">
+                        <label class="filter-radio">
+                            <input type="radio" name="availability" value="" checked="@string.IsNullOrWhiteSpace(availability)" />
+                            <span>All products</span>
+                        </label>
+                        <label class="filter-radio">
+                            <input type="radio" name="availability" value="in-stock" checked="@string.Equals(availability, "in-stock", StringComparison.OrdinalIgnoreCase)" />
+                            <span>In stock</span>
+                        </label>
+                        <label class="filter-radio">
+                            <input type="radio" name="availability" value="out-of-stock" checked="@string.Equals(availability, "out-of-stock", StringComparison.OrdinalIgnoreCase)" />
+                            <span>Out of stock</span>
+                        </label>
+                    </div>
+                </section>
+
+                <button class="catalog-apply-filters" type="submit">APPLY FILTERS</button>
+            </form>
+        </aside>
+
+        <main class="catalog-results">
+            <div class="catalog-results-toolbar">
+                <span>@productCount @(productCount == 1 ? "style" : "styles")</span>
+                <button class="catalog-mobile-filter-toggle" type="button" data-mobile-filter-toggle aria-expanded="false">
+                    FILTERS
+                </button>
+            </div>
+
+            @if (TempData["WishlistMessage"] is string wishlistMessage)
+            {
+                <div class="wishlist-notice" role="status">@wishlistMessage</div>
+            }
+            @if (TempData["WishlistError"] is string wishlistError)
+            {
+                <div class="wishlist-notice error" role="alert">@wishlistError</div>
+            }
+
+            @if (Model.Count > 0)
+            {
+                <div class="catalog-grid">
+                    @foreach (var product in Model)
+                    {
+                        var hasPriceRange = product.Variants.Select(variant => variant.Price).Distinct().Count() > 1;
+                        <article class="catalog-card">
+                            <div class="catalog-image-wrap">
+                                <a asp-action="Details" asp-route-id="@product.Id" class="catalog-image-link" aria-label="View @product.Name">
+                                    @{
+                                        var productImages = new List<string>();
+
+                                        if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                                        {
+                                            productImages.Add(product.ImageUrl);
+                                        }
+
+                                        productImages.AddRange(
+                                            product.Images
+                                                .OrderBy(image => image.SortOrder)
+                                                .Select(image => image.ImageUrl)
+                                                .Where(url => !string.IsNullOrWhiteSpace(url))
+                                        );
+
+                                        productImages = productImages
+                                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                                            .ToList();
                                     }
 
-                                    @if (productImages.Count > 1)
+                                    @if (productImages.Count > 0)
                                     {
-                                    <button type="button"
-                                            class="product-image-arrow product-image-arrow-prev"
-                                            data-carousel-prev
-                                            aria-label="Previous image">
-                                        ‹
-                                    </button>
-
-                                    <button type="button"
-                                            class="product-image-arrow product-image-arrow-next"
-                                            data-carousel-next
-                                            aria-label="Next image">
-                                        ›
-                                    </button>
-
-                                        <div class="product-image-dots" aria-hidden="true">
+                                        <div class="product-image-carousel"
+                                             data-product-carousel
+                                             data-image-count="@productImages.Count">
                                             @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
                                             {
-                                                <span class="product-image-dot @(imageIndex == 0 ? "is-active" : string.Empty)"
-                                                      data-carousel-dot="@imageIndex"></span>
+                                                <img src="@ImageUrlHelper.Resolve(productImages[imageIndex], Configuration["ApiBaseUrl"])"
+                                                     alt="@product.Name - image @(imageIndex + 1)"
+                                                     class="catalog-image product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
+                                                     data-carousel-image="@imageIndex"
+                                                     loading="@(imageIndex == 0 ? "eager" : "lazy")"
+                                                     onerror="this.remove();" />
+                                            }
+
+                                            @if (productImages.Count > 1)
+                                            {
+                                                <button type="button" class="product-image-arrow product-image-arrow-prev" data-carousel-prev aria-label="Previous image">‹</button>
+                                                <button type="button" class="product-image-arrow product-image-arrow-next" data-carousel-next aria-label="Next image">›</button>
+                                                <div class="product-image-dots" aria-hidden="true">
+                                                    @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
+                                                    {
+                                                        <span class="product-image-dot @(imageIndex == 0 ? "is-active" : string.Empty)" data-carousel-dot="@imageIndex"></span>
+                                                    }
+                                                </div>
                                             }
                                         </div>
                                     }
-                                </div>
+                                    else
+                                    {
+                                        <div class="catalog-image-fallback" aria-label="Product image unavailable">
+                                            <span>UBHAYA</span>
+                                            <small>@product.Name</small>
+                                        </div>
+                                    }
+                                </a>
+
+                                @if (product.Discount > 0)
+                                {
+                                    <span class="discount-badge">-@product.Discount%</span>
+                                }
+
+                                @if (product.Stock <= 0)
+                                {
+                                    <span class="catalog-stock-label sold-out">OUT OF STOCK</span>
+                                }
+
+                                <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(product.Id) ? "true" : "false")" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Products", new { search, category, size = selectedSize, color = selectedColor, minPrice, maxPrice, availability, sort = selectedSort, page = currentPage, bestSellers = bestSellersOnly })" />
+                                    <button class="wishlist-button @(wishlistedProductIds.Contains(product.Id) ? "is-saved" : string.Empty)"
+                                            type="submit"
+                                            aria-label="@(wishlistedProductIds.Contains(product.Id) ? $"Remove {product.Name} from wishlist" : $"Add {product.Name} to wishlist")"
+                                            title="@(wishlistedProductIds.Contains(product.Id) ? "Remove from wishlist" : "Add to wishlist")">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" /></svg>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <p class="product-category">@product.Category</p>
+                            <h2 class="product-name">
+                                <a asp-action="Details" asp-route-id="@product.Id">@product.Name</a>
+                            </h2>
+
+                            <div class="product-price">
+                                <span class="current-price">@(hasPriceRange ? "From " : "")₹@product.Price.ToString("N0")</span>
+                                @if (product.Discount > 0 && product.Discount < 100)
+                                {
+                                    var originalPrice = product.Price / (1 - (product.Discount / 100));
+                                    <span class="old-price">₹@Math.Round(originalPrice).ToString("N0")</span>
+                                }
+                            </div>
+
+                            @{
+                                var standardSizes = new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" };
+                                var availableSizes = new HashSet<string>(
+                                    product.Variants.Where(variant => variant.Stock > 0).Select(variant => variant.Size),
+                                    StringComparer.OrdinalIgnoreCase);
+                            }
+                            <div class="size-options catalog-size-options" aria-label="Available sizes">
+                                @foreach (var size in standardSizes)
+                                {
+                                    var isAvailable = availableSizes.Contains(size);
+                                    <span class="@(isAvailable ? "size-available" : "size-unavailable")"
+                                          aria-label="@size: @(isAvailable ? "available" : "unavailable")"
+                                          title="@(isAvailable ? $"{size} available" : $"{size} unavailable")">
+                                        @size
+                                        @if (!isAvailable)
+                                        {
+                                            <span class="size-cross" aria-hidden="true">×</span>
+                                        }
+                                    </span>
+                                }
+                            </div>
+
+                            @if (product.Stock > 0)
+                            {
+                                <p class="catalog-stock-label in-stock">@product.Stock in stock</p>
+                                <a class="catalog-action" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
                             }
                             else
                             {
-                                <div class="catalog-image-fallback" aria-label="Product image unavailable">
-                                    <span>UBHAYA</span>
-                                    <small>@product.Name</small>
-                                </div>
+                                <p class="catalog-stock-label sold-out-text">Out of stock</p>
+                                <button class="catalog-action disabled" type="button" disabled>OUT OF STOCK</button>
                             }
-                        </a>
-
-                        @if (product.Discount > 0)
-                        {
-                            <span class="discount-badge">-@product.Discount%</span>
-                        }
-
-                        @if (product.Stock <= 0)
-                        {
-                            <span class="catalog-stock-label sold-out">OUT OF STOCK</span>
-                        }
-
-                        <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="productId" value="@product.Id" />
-                            <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(product.Id) ? "true" : "false")" />
-                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Products", new { search, category, size = selectedSize, color = selectedColor, minPrice, maxPrice, sort = selectedSort, page = currentPage, bestSellers = bestSellersOnly })" />
-                            <button class="wishlist-button @(wishlistedProductIds.Contains(product.Id) ? "is-saved" : string.Empty)"
-                                    type="submit"
-                                    aria-label="@(wishlistedProductIds.Contains(product.Id) ? $"Remove {product.Name} from wishlist" : $"Add {product.Name} to wishlist")"
-                                    title="@(wishlistedProductIds.Contains(product.Id) ? "Remove from wishlist" : "Add to wishlist")">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" /></svg>
-                            </button>
-                        </form>
-                    </div>
-
-                    <p class="product-category">@product.Category</p>
-                    <h2 class="product-name">
-                        <a asp-action="Details" asp-route-id="@product.Id">@product.Name</a>
-                    </h2>
-
-                    <div class="product-price">
-                        <span class="current-price">@(hasPriceRange ? "From " : "")₹@product.Price.ToString("N0")</span>
-                        @if (product.Discount > 0 && product.Discount < 100)
-                        {
-                            var originalPrice = product.Price / (1 - (product.Discount / 100));
-                            <span class="old-price">₹@Math.Round(originalPrice).ToString("N0")</span>
-                        }
-                    </div>
-
-                    @{
-                        var standardSizes = new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" };
-                        var availableSizes = new HashSet<string>(
-                            product.Variants.Where(variant => variant.Stock > 0).Select(variant => variant.Size),
-                            StringComparer.OrdinalIgnoreCase);
+                        </article>
                     }
-                    <div class="size-options catalog-size-options" aria-label="Available sizes">
-                        @foreach (var size in standardSizes)
-                        {
-                            var isAvailable = availableSizes.Contains(size);
-                            <span class="@(isAvailable ? "size-available" : "size-unavailable")"
-                                  aria-label="@size: @(isAvailable ? "available" : "unavailable")"
-                                  title="@(isAvailable ? $"{size} available" : $"{size} unavailable")">
-                                @size
-                                @if (!isAvailable)
-                                {
-                                    <span class="size-cross" aria-hidden="true">×</span>
-                                }
-                            </span>
-                        }
-                    </div>
+                </div>
 
-                    @if (product.Stock > 0)
-                    {
-                        <p class="catalog-stock-label in-stock">@product.Stock in stock</p>
-                        <a class="catalog-action" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
-                    }
-                    else
-                    {
-                        <p class="catalog-stock-label sold-out-text">Out of stock</p>
-                        <button class="catalog-action disabled" type="button" disabled>OUT OF STOCK</button>
-                    }
-                </article>
-            }
-        </div>
-
-        @if (pageCount > 1)
-        {
-            <nav class="catalog-pagination" aria-label="Product pages">
-                @if (currentPage > 1)
+                @if (pageCount > 1)
                 {
-                    <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-sort="@selectedSort" asp-route-page="@(currentPage - 1)" aria-label="Previous page">← Previous</a>
-                }
-                else
-                {
-                    <span class="catalog-page-link catalog-page-previous is-disabled" aria-disabled="true">← Previous</span>
-                }
-                <div class="catalog-page-numbers">
-                    @for (var pageNumber = 1; pageNumber <= pageCount; pageNumber++)
-                    {
-                        if (pageNumber == currentPage)
+                    <nav class="catalog-pagination" aria-label="Product pages">
+                        @if (currentPage > 1)
                         {
-                            <span class="catalog-page-number is-current" aria-current="page">@pageNumber</span>
+                            <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@(currentPage - 1)">← Previous</a>
                         }
                         else
                         {
-                            <a class="catalog-page-number" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-sort="@selectedSort" asp-route-page="@pageNumber" aria-label="Page @pageNumber">@pageNumber</a>
+                            <span class="catalog-page-link catalog-page-previous is-disabled">← Previous</span>
                         }
-                    }
-                </div>
-                @if (currentPage < pageCount)
-                {
-                    <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-sort="@selectedSort" asp-route-page="@(currentPage + 1)" aria-label="Next page">Next →</a>
+
+                        <div class="catalog-page-numbers">
+                            @for (var pageNumber = 1; pageNumber <= pageCount; pageNumber++)
+                            {
+                                if (pageNumber == currentPage)
+                                {
+                                    <span class="catalog-page-number is-current">@pageNumber</span>
+                                }
+                                else
+                                {
+                                    <a class="catalog-page-number" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@pageNumber">@pageNumber</a>
+                                }
+                            }
+                        </div>
+
+                        @if (currentPage < pageCount)
+                        {
+                            <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@(currentPage + 1)">Next →</a>
+                        }
+                        else
+                        {
+                            <span class="catalog-page-link catalog-page-next is-disabled">Next →</span>
+                        }
+                    </nav>
                 }
-                else
-                {
-                    <span class="catalog-page-link catalog-page-next is-disabled" aria-disabled="true">Next →</span>
-                }
-            </nav>
-        }
-    }
-    else
-    {
-        <div class="catalog-empty">
-            @if (!string.IsNullOrWhiteSpace(search))
-            {
-                <h2>No styles found</h2>
-                <p>We couldn't find anything matching “@search”. Try another search term.</p>
-                <a class="catalog-action" asp-action="Index">VIEW ALL PRODUCTS <span>→</span></a>
             }
             else
             {
-                <p>No products are available in this collection yet.</p>
+                <div class="catalog-empty">
+                    @if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        <h2>No styles found</h2>
+                        <p>We couldn't find anything matching “@search”. Try another search term.</p>
+                        <a class="catalog-action" asp-action="Index">VIEW ALL PRODUCTS <span>→</span></a>
+                    }
+                    else
+                    {
+                        <p>No products are available in this collection yet.</p>
+                    }
+                </div>
             }
-        </div>
-    }
+        </main>
+    </div>
 </section>
+
+<script>
+(function () {
+    const minRange = document.getElementById('minPriceRange');
+    const maxRange = document.getElementById('maxPriceRange');
+    const minInput = document.getElementById('minPriceInput');
+    const maxInput = document.getElementById('maxPriceInput');
+    const minLabel = document.getElementById('priceMinLabel');
+    const maxLabel = document.getElementById('priceMaxLabel');
+
+    if (!minRange || !maxRange) return;
+
+    function sync(source) {
+        let min = Number(minRange.value);
+        let max = Number(maxRange.value);
+
+        if (min > max - 100) {
+            if (source === minRange) min = max - 100;
+            else max = min + 100;
+        }
+
+        min = Math.max(0, min);
+        max = Math.min(10000, max);
+
+        minRange.value = min;
+        maxRange.value = max;
+        minInput.value = min > 0 ? min : '';
+        maxInput.value = max < 10000 ? max : '';
+        minLabel.textContent = '₹' + min.toLocaleString('en-IN');
+        maxLabel.textContent = '₹' + max.toLocaleString('en-IN');
+    }
+
+    minRange.addEventListener('input', () => sync(minRange));
+    maxRange.addEventListener('input', () => sync(maxRange));
+    sync(minRange);
+})();
+</script>
