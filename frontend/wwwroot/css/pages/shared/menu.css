@@ -350,10 +350,10 @@ body.menu-open { overflow: hidden; }
         inset: auto !important;
         transform: none !important;
         display: block !important;
-        width: 115px !important;
-        max-width: 115px !important;
-        height: 48px !important;
-        max-height: 48px !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 125px !important;
+        max-height: 58px !important;
         min-width: 0 !important;
         min-height: 0 !important;
         margin: 0 auto !important;
@@ -375,9 +375,9 @@ body.menu-open { overflow: hidden; }
 
 @media (max-width: 370px) {
     .side-menu-brand img {
-        width: 100px !important;
-        max-width: 100px !important;
-        height: 42px !important;
-        max-height: 42px !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 110px !important;
+        max-height: 52px !important;
     }
 }
