@@ -272,6 +272,17 @@
             </aside>
         </div>
     </form>
+
+    <div class="checkout-mobile-sticky-bar" aria-label="Checkout action">
+        <div class="checkout-mobile-sticky-total">
+            <span>Total</span>
+            <strong>₹@total.ToString("N0")</strong>
+        </div>
+        <button type="button" class="checkout-mobile-sticky-button" data-mobile-checkout-next>
+            <span data-mobile-checkout-label>Continue to Address</span>
+            <span aria-hidden="true">→</span>
+        </button>
+    </div>
 </section>
 
 @section Scripts {
@@ -347,6 +358,42 @@
 
             addressText?.addEventListener('input', syncAddress);
             name?.addEventListener('input', syncAddress);
+
+            document.querySelector('[data-mobile-checkout-next]')?.addEventListener('click', () => {
+                const activePanel = document.querySelector('[data-checkout-screen-step].is-visible');
+                const currentStep = Number(activePanel?.dataset.checkoutScreenStep || 1);
+                const button = document.querySelector(
+                    '[data-checkout-screen-next="' + (currentStep + 1) + '"]'
+                );
+
+                if (currentStep < 4) {
+                    button?.click();
+                    return;
+                }
+
+                document.getElementById('checkoutScreenForm')?.requestSubmit();
+            });
+
+            const updateMobileCheckoutLabel = () => {
+                const activePanel = document.querySelector('[data-checkout-screen-step].is-visible');
+                const step = Number(activePanel?.dataset.checkoutScreenStep || 1);
+                const label = document.querySelector('[data-mobile-checkout-label]');
+                if (!label) return;
+
+                label.textContent = step === 1
+                    ? 'Continue to Address'
+                    : step === 2
+                        ? 'Continue to Payment'
+                        : step === 3
+                            ? 'Review Order'
+                            : 'Pay ₹@total.ToString("N0")';
+            };
+
+            const originalShowStep = showStep;
+            showStep = step => {
+                originalShowStep(step);
+                updateMobileCheckoutLabel();
+            };
 
             document.getElementById('checkoutScreenForm')?.addEventListener('submit', event => {
                 syncAddress();
