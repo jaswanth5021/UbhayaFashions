@@ -1,3 +1,4 @@
+using LadiesDressStore.Web.Models;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ public class ProductsController(ApiService api) : Controller
         string? color = null,
         decimal? minPrice = null,
         decimal? maxPrice = null,
+        string? availability = null,
         string? sort = null,
         int page = 1,
         bool bestSellers = false)
@@ -29,6 +31,7 @@ public class ProductsController(ApiService api) : Controller
             color,
             minPrice,
             maxPrice,
+            availability,
             bestSellers,
             sort);
 
@@ -67,6 +70,7 @@ public class ProductsController(ApiService api) : Controller
         ViewBag.Color = color;
         ViewBag.MinPrice = minPrice;
         ViewBag.MaxPrice = maxPrice;
+        ViewBag.Availability = availability;
         ViewBag.Sort = sort;
         ViewBag.BestSellersOnly = bestSellers;
         ViewBag.ProductCount = productCount;
