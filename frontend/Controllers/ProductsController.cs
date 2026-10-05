@@ -15,6 +15,7 @@ public class ProductsController(ApiService api) : Controller
         string? search = null,
         string? category = null,
         string? size = null,
+        string? color = null,
         decimal? minPrice = null,
         decimal? maxPrice = null,
         string? sort = null,
@@ -25,6 +26,7 @@ public class ProductsController(ApiService api) : Controller
             search,
             category,
             size,
+            color,
             minPrice,
             maxPrice,
             bestSellers,
@@ -62,6 +64,7 @@ public class ProductsController(ApiService api) : Controller
         ViewBag.Search = search;
         ViewBag.Category = category;
         ViewBag.Size = size;
+        ViewBag.Color = color;
         ViewBag.MinPrice = minPrice;
         ViewBag.MaxPrice = maxPrice;
         ViewBag.Sort = sort;
