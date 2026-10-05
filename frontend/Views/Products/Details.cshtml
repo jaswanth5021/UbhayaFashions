@@ -81,7 +81,9 @@
 
     <section class="product-gallery" aria-label="Product images">
 
-        <div class="product-gallery-main">
+        <div class="product-gallery-main"
+             data-product-detail-gallery
+             data-gallery-count="@galleryItems.Count">
 
             @if (galleryItems.Count > 0)
             {
@@ -109,6 +111,13 @@
                 </div>
             }
 
+            @if (galleryItems.Count > 1)
+            {
+                <button type="button" class="product-gallery-arrow product-gallery-arrow-prev" data-gallery-prev aria-label="Previous product image">‹</button>
+                <button type="button" class="product-gallery-arrow product-gallery-arrow-next" data-gallery-next aria-label="Next product image">›</button>
+                <span class="product-gallery-counter" data-gallery-counter aria-live="polite">1/@galleryItems.Count</span>
+                <button type="button" class="product-gallery-expand" data-gallery-expand aria-label="Open product image viewer">⤢</button>
+            }
         </div>
 
         @if (galleryItems.Count > 1)
@@ -389,6 +398,10 @@
                                 Select a size
                             </span>
 
+                            <button type="button" class="product-size-guide-link" data-size-guide-open>
+                                Size Guide
+                            </button>
+
                         </legend>
 
 
@@ -568,6 +581,38 @@
     </section>
 
 </main>
+
+<div class="product-mobile-sticky-bar" id="productMobileStickyBar" aria-label="Quick purchase">
+    <div class="product-mobile-sticky-price">
+        <span>₹<span data-sticky-price>@Model.Price.ToString("N0")</span></span>
+        <small data-sticky-stock>Select size</small>
+    </div>
+    <button type="button" class="product-mobile-sticky-button" data-sticky-add>ADD TO BAG</button>
+</div>
+
+<dialog class="product-size-guide" id="productSizeGuide" aria-labelledby="productSizeGuideTitle">
+    <div class="product-size-guide-card">
+        <div class="product-size-guide-header">
+            <div>
+                <p>UBHAYA FIT GUIDE</p>
+                <h2 id="productSizeGuideTitle">Find your size</h2>
+            </div>
+            <button type="button" data-size-guide-close aria-label="Close size guide">×</button>
+        </div>
+        <p class="product-size-guide-intro">Choose the size that normally fits you best. If you prefer a relaxed fit, consider going one size up.</p>
+        <div class="product-size-guide-table">
+            <div><strong>Size</strong><strong>Suggested fit</strong></div>
+            <div><span>S</span><span>Small / regular fit</span></div>
+            <div><span>M</span><span>Medium / regular fit</span></div>
+            <div><span>L</span><span>Large / regular fit</span></div>
+            <div><span>XL</span><span>Extra large / regular fit</span></div>
+            <div><span>XXL</span><span>Relaxed fit</span></div>
+            <div><span>3XL</span><span>Relaxed fit</span></div>
+            <div><span>FREE SIZE</span><span>One-size style</span></div>
+        </div>
+        <p class="product-size-guide-note">For the most accurate choice, compare your measurements with the garment details shown on the product or contact us before ordering.</p>
+    </div>
+</dialog>
 
 
 <!-- =============================================================
@@ -826,6 +871,45 @@
 
 
 <script>
+
+    /* =========================================================
+       PRODUCT DETAIL GALLERY
+       ========================================================= */
+
+    (() => {
+        const gallery = document.querySelector("[data-product-detail-gallery]");
+        if (!gallery) return;
+        const thumbnails = Array.from(document.querySelectorAll(".product-gallery-thumbnail"));
+        const counter = gallery.querySelector("[data-gallery-counter]");
+        let currentIndex = 0;
+        let touchStartX = 0;
+
+        const render = index => {
+            if (!thumbnails.length) return;
+            currentIndex = (index + thumbnails.length) % thumbnails.length;
+            thumbnails[currentIndex].click();
+            if (counter) counter.textContent = (currentIndex + 1) + "/" + thumbnails.length;
+        };
+
+        gallery.querySelector("[data-gallery-prev]")?.addEventListener("click", () => render(currentIndex - 1));
+        gallery.querySelector("[data-gallery-next]")?.addEventListener("click", () => render(currentIndex + 1));
+
+        gallery.addEventListener("touchstart", event => {
+            touchStartX = event.changedTouches[0]?.screenX ?? 0;
+        }, { passive: true });
+
+        gallery.addEventListener("touchend", event => {
+            const endX = event.changedTouches[0]?.screenX ?? 0;
+            const delta = endX - touchStartX;
+            if (Math.abs(delta) < 45) return;
+            render(currentIndex + (delta < 0 ? 1 : -1));
+        }, { passive: true });
+
+        gallery.querySelector("[data-gallery-expand]")?.addEventListener("click", () => {
+            document.querySelector(".product-gallery-main img")?.click();
+        });
+    })();
+
 
     /* =========================================================
        IMAGE ZOOM
@@ -1417,6 +1501,22 @@
 
 
     /* =========================================================
+       SIZE GUIDE
+       ========================================================= */
+
+    (() => {
+        const dialog = document.getElementById("productSizeGuide");
+        const openButton = document.querySelector("[data-size-guide-open]");
+        const closeButton = dialog?.querySelector("[data-size-guide-close]");
+        openButton?.addEventListener("click", () => dialog?.showModal());
+        closeButton?.addEventListener("click", () => dialog?.close());
+        dialog?.addEventListener("click", event => {
+            if (event.target === dialog) dialog.close();
+        });
+    })();
+
+
+    /* =========================================================
        SIZE SELECTION
        ========================================================= */
 
@@ -1638,6 +1738,16 @@
                            Mark selected size
                            ----------------------------------------- */
 
+                        const stickyPrice = document.querySelector("[data-sticky-price]");
+                        if (stickyPrice) {
+                            stickyPrice.textContent = price.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+                        }
+
+                        const stickyStock = document.querySelector("[data-sticky-stock]");
+                        if (stickyStock) {
+                            stickyStock.textContent = stock === 1 ? "Only 1 left" : (stock + " available");
+                        }
+
                         document
                             .querySelectorAll(
                                 ".product-size-option"
@@ -1667,6 +1777,28 @@
                     });
 
             });
+
+
+    /* =========================================================
+       MOBILE STICKY ADD TO BAG
+       ========================================================= */
+
+    (() => {
+        const stickyButton = document.querySelector("[data-sticky-add]");
+        const form = document.getElementById("productPurchaseForm");
+        if (!stickyButton || !form) return;
+
+        stickyButton.addEventListener("click", () => {
+            const size = document.getElementById("productSize");
+            const sizeFieldset = document.querySelector(".product-size-fieldset");
+            if (sizeFieldset && !size?.value) {
+                document.getElementById("productSizeError").textContent = "Please select an available size.";
+                sizeFieldset.scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+            }
+            form.querySelector('[name="buyNow"][value="false"]')?.click();
+        });
+    })();
 
 
     /* =========================================================
