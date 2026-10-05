@@ -49,6 +49,8 @@
         ViewBag.RelatedProducts as List<RelatedProductViewModel> ?? [];
     var wishlistedProductIds =
         ViewBag.WishlistedProductIds as HashSet<int> ?? [];
+    var productReviews =
+        ViewBag.ProductReviews as ProductReviewsViewModel ?? new ProductReviewsViewModel();
 
     if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
@@ -658,97 +660,213 @@
 
     <div class="product-reviews-inner">
 
-        <h2 id="productReviewsTitle">
-            Customer Reviews
-        </h2>
+        <div class="product-reviews-heading">
+            <div>
+                <p class="product-reviews-eyebrow">REAL CUSTOMER FEEDBACK</p>
+                <h2 id="productReviewsTitle">Customer Reviews</h2>
+            </div>
 
-        <div class="product-reviews-empty">
+            @if (productReviews.ReviewCount > 0)
+            {
+                <div class="product-reviews-score" aria-label="@productReviews.AverageRating out of 5 stars from @productReviews.ReviewCount reviews">
+                    <strong>@productReviews.AverageRating.ToString("0.0")</strong>
+                    <span class="product-review-stars" aria-hidden="true">★★★★★</span>
+                    <small>@productReviews.ReviewCount review@(productReviews.ReviewCount == 1 ? "" : "s")</small>
+                </div>
+            }
 
-            <p>
-                Be the first to write a review
-            </p>
-
-            <button class="product-review-button"
-                    type="button"
-                    id="writeReviewButton">
-
-                Write a review
-
-            </button>
-
+            @if (User.Identity?.IsAuthenticated == true && productReviews.CanReview)
+            {
+                <button class="product-review-button"
+                        type="button"
+                        id="writeReviewButton">
+                    Write a review
+                </button>
+            }
+            else if (User.Identity?.IsAuthenticated != true)
+            {
+                <a class="product-review-button"
+                   asp-controller="Account"
+                   asp-action="Login"
+                   asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString">
+                    Write a review
+                </a>
+            }
         </div>
 
+        @if (TempData["ReviewMessage"] is string reviewMessage)
+        {
+            <div class="product-review-notice success" role="status">
+                <span aria-hidden="true">✓</span>
+                @reviewMessage
+            </div>
+        }
 
-        <form class="product-review-form"
-              id="productReviewForm"
-              hidden>
+        @if (TempData["ReviewError"] is string reviewError)
+        {
+            <div class="product-review-notice error" role="alert">
+                <span aria-hidden="true">!</span>
+                @reviewError
+            </div>
+        }
 
-            <h3>
-                Write a review for @Model.Name
-            </h3>
+        @if (productReviews.ReviewCount > 0)
+        {
+            <div class="product-reviews-layout">
 
-            <label for="reviewRating">
-                Rating
-            </label>
+                <aside class="product-review-summary">
+                    <div class="product-review-average">
+                        <strong>@productReviews.AverageRating.ToString("0.0")</strong>
+                        <span class="product-review-stars" aria-hidden="true">★★★★★</span>
+                        <small>Based on @productReviews.ReviewCount review@(productReviews.ReviewCount == 1 ? "" : "s")</small>
+                    </div>
 
-            <select id="reviewRating"
-                    name="rating"
-                    required>
+                    <div class="product-review-breakdown">
+                        @for (var rating = 5; rating >= 1; rating--)
+                        {
+                            var ratingCount = productReviews.RatingBreakdown.TryGetValue(rating, out var count) ? count : 0;
+                            var percentage = productReviews.ReviewCount == 0
+                                ? 0
+                                : (int)Math.Round(ratingCount * 100d / productReviews.ReviewCount);
 
-                <option value="">
-                    Choose a rating
-                </option>
+                            <div class="product-review-breakdown-row">
+                                <span>@rating ★</span>
+                                <span class="product-review-breakdown-track">
+                                    <span style="width:@percentage%"></span>
+                                </span>
+                                <small>@percentage%</small>
+                            </div>
+                        }
+                    </div>
+                </aside>
 
-                <option value="5">
-                    ★★★★★ - Excellent
-                </option>
+                <div class="product-review-list">
+                    @foreach (var review in productReviews.Reviews)
+                    {
+                        <article class="product-review-card">
+                            <div class="product-review-card-top">
+                                <div>
+                                    <span class="product-review-card-stars" aria-label="@review.Rating out of 5 stars">
+                                        @("★★★★★".Substring(0, review.Rating))
+                                    </span>
+                                    @if (!string.IsNullOrWhiteSpace(review.Title))
+                                    {
+                                        <h3>@review.Title</h3>
+                                    }
+                                </div>
 
-                <option value="4">
-                    ★★★★ - Good
-                </option>
+                                @if (review.VerifiedPurchase)
+                                {
+                                    <span class="product-review-verified">✓ Verified Purchase</span>
+                                }
+                            </div>
 
-                <option value="3">
-                    ★★★ - Average
-                </option>
+                            <p class="product-review-comment">@review.Comment</p>
 
-                <option value="2">
-                    ★★ - Below average
-                </option>
+                            <div class="product-review-meta">
+                                <strong>@review.CustomerName</strong>
+                                <span>·</span>
+                                <time datetime="@review.CreatedDate.ToString("yyyy-MM-dd")">
+                                    @review.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")
+                                </time>
+                            </div>
+                        </article>
+                    }
+                </div>
 
-                <option value="1">
-                    ★ - Poor
-                </option>
+            </div>
+        }
+        else
+        {
+            <div class="product-reviews-empty">
+                <div class="product-reviews-empty-icon" aria-hidden="true">★</div>
+                <h3>Be the first to write a review</h3>
 
-            </select>
+                @if (User.Identity?.IsAuthenticated == true && productReviews.HasReviewed)
+                {
+                    <p>Thank you for sharing your experience with this product.</p>
+                }
+                else if (User.Identity?.IsAuthenticated == true && !productReviews.CanReview)
+                {
+                    <p>Reviews are available after you purchase this product.</p>
+                }
+                else
+                {
+                    <p>Share your experience and help other customers choose the right style.</p>
+                }
 
+                @if (User.Identity?.IsAuthenticated == true && productReviews.CanReview)
+                {
+                    <button class="product-review-button"
+                            type="button"
+                            id="writeReviewButton">
+                        Write a review
+                    </button>
+                }
+            </div>
+        }
 
-            <label for="reviewTitle">
-                Review title
-            </label>
+        @if (User.Identity?.IsAuthenticated == true && productReviews.CanReview)
+        {
+            <form asp-controller="Products"
+                  asp-action="SubmitReview"
+                  method="post"
+                  class="product-review-form"
+                  id="productReviewForm"
+                  hidden>
 
-            <input id="reviewTitle"
-                   name="title"
-                   type="text"
-                   maxlength="100"
-                   required />
+                @Html.AntiForgeryToken()
 
+                <input type="hidden" name="productId" value="@Model.Id" />
 
-            <label for="reviewBody">
-                Your review
-            </label>
+                <div class="product-review-form-header">
+                    <div>
+                        <p class="product-reviews-eyebrow">SHARE YOUR EXPERIENCE</p>
+                        <h3>Write a review for @Model.Name</h3>
+                    </div>
+                </div>
 
-            <textarea id="reviewBody"
-                      name="body"
-                      rows="5"
-                      maxlength="2000"
-                      required></textarea>
+                <div class="product-review-form-grid">
+                    <div>
+                        <label for="reviewRating">Your rating</label>
+                        <select id="reviewRating" name="Rating" required>
+                            <option value="">Choose a rating</option>
+                            <option value="5">★★★★★ — Excellent</option>
+                            <option value="4">★★★★ — Good</option>
+                            <option value="3">★★★ — Average</option>
+                            <option value="2">★★ — Below average</option>
+                            <option value="1">★ — Poor</option>
+                        </select>
+                    </div>
 
+                    <div>
+                        <label for="reviewTitle">Review title <span>(optional)</span></label>
+                        <input id="reviewTitle"
+                               name="Title"
+                               type="text"
+                               maxlength="100"
+                               placeholder="What stood out to you?" />
+                    </div>
+                </div>
 
-            <p class="product-review-note">
-                Review submission is not available yet.
-            </p>
+                <label for="reviewBody">Your review</label>
+                <textarea id="reviewBody"
+                          name="Comment"
+                          rows="5"
+                          maxlength="2000"
+                          minlength="10"
+                          required
+                          placeholder="Tell us about the fit, fabric, quality and overall experience."></textarea>
 
-        </form>
+                <div class="product-review-form-footer">
+                    <p>Only customers who purchased this product can submit a review.</p>
+                    <button class="product-review-submit"
+                            type="submit">
+                        Submit review
+                    </button>
+                </div>
+            </form>
+        }
 
     </div>
 
