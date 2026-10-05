@@ -315,6 +315,17 @@
 
 </p>
 
+        @if (productReviews.ReviewCount > 0)
+        {
+            <a class="product-inline-rating"
+               href="#productReviews"
+               aria-label="View @productReviews.ReviewCount customer reviews">
+                <span aria-hidden="true">★★★★★</span>
+                <strong>@productReviews.AverageRating.ToString("0.0")</strong>
+                <span>(@productReviews.ReviewCount review@(productReviews.ReviewCount == 1 ? "" : "s"))</span>
+            </a>
+        }
+
 
         <!-- =====================================================
              SHIPPING PROMOTIONS
@@ -656,6 +667,7 @@
      ============================================================= -->
 
 <section class="product-reviews"
+         id="productReviews"
          aria-labelledby="productReviewsTitle">
 
     <div class="product-reviews-inner">
@@ -688,7 +700,7 @@
                 <a class="product-review-button"
                    asp-controller="Account"
                    asp-action="Login"
-                   asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString">
+                   asp-route-returnUrl="@($"{Context.Request.Path}{Context.Request.QueryString}")">
                     Write a review
                 </a>
             }
