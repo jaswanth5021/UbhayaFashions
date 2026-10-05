@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+<title id="title">The Ubhaya Edit</title>
+<desc id="desc">Elegant women's fashion banner for Ubhaya Fashions.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8e8dc"/><stop offset="1" stop-color="#e7b59e"/></linearGradient>
+  <radialGradient id="glow"><stop offset="0" stop-color="#fff8f2" stop-opacity=".9"/><stop offset="1" stop-color="#fff8f2" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1200" height="700" fill="url(#bg)"/>
+<circle cx="980" cy="180" r="260" fill="url(#glow)"/>
+<path d="M875 700 C865 585 870 470 900 365 C918 302 945 250 990 215 C1035 250 1062 302 1080 365 C1110 470 1115 585 1105 700Z" fill="#e85d72"/>
+<path d="M955 240 C925 210 920 170 948 140 C976 110 1017 112 1042 142 C1067 172 1062 211 1030 240 C1004 263 980 263 955 240Z" fill="#f1c5a8"/>
+<path d="M935 315 C900 360 875 440 865 520 L925 505 L955 350Z" fill="#d84f67"/>
+<path d="M1045 315 C1080 360 1105 440 1115 520 L1055 505 L1025 350Z" fill="#d84f67"/>
+<path d="M910 370 C965 410 1035 410 1090 370 L1110 430 C1045 475 955 475 890 430Z" fill="#f4d0b5" opacity=".8"/>
+<path d="M875 520 C950 555 1030 555 1105 520 L1135 700 L845 700Z" fill="#b51f4a" opacity=".9"/>
+<circle cx="1000" cy="250" r="9" fill="#8b1738"/>
+<path d="M1000 260 l-20 30 20 20 20-20z" fill="#d2a24c"/>
+<text x="90" y="145" font-family="Georgia,serif" font-size="28" letter-spacing="7" fill="#8b1738">THE UBHAYA EDIT</text>
+<text x="90" y="225" font-family="Georgia,serif" font-size="66" fill="#1e1a1a">Timeless elegance.</text>
+<text x="90" y="300" font-family="Georgia,serif" font-size="66" font-style="italic" fill="#1e1a1a">Contemporary style.</text>
+<text x="90" y="355" font-family="Arial,sans-serif" font-size="23" fill="#4d4542">New-season women's fashion, curated for every moment.</text>
+<rect x="90" y="405" width="300" height="68" rx="4" fill="#8b1738"/>
+<text x="240" y="448" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" font-weight="700" letter-spacing="1.5" fill="white">SHOP NEW ARRIVALS →</text>
+</svg>
