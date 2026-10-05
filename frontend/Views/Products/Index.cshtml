@@ -5,6 +5,7 @@
     var category = ViewBag.Category as string;
     var bestSellersOnly = (bool?)ViewBag.BestSellersOnly == true;
     var selectedSize = ViewBag.Size as string;
+    var selectedColor = ViewBag.Color as string;
     var minPrice = (decimal?)ViewBag.MinPrice;
     var maxPrice = (decimal?)ViewBag.MaxPrice;
     var selectedSort = ViewBag.Sort as string ?? "recommended";
@@ -93,6 +94,16 @@
                 @foreach (var item in new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" })
                 {
                     <option value="@item" selected="@(string.Equals(item, selectedSize, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item</option>
+                }
+            </select>
+        </label>
+        <label>
+            <span>Color</span>
+            <select name="color" aria-label="Filter by color">
+                <option value="">All colors</option>
+                @foreach (var item in new[] { "Black", "White", "Red", "Pink", "Green", "Blue", "Yellow", "Maroon", "Purple", "Beige", "Orange" })
+                {
+                    <option value="@item" selected="@(string.Equals(item, selectedColor, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item</option>
                 }
             </select>
         </label>
@@ -227,7 +238,7 @@
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@product.Id" />
                             <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(product.Id) ? "true" : "false")" />
-                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Products", new { category, page = currentPage, bestSellers = bestSellersOnly })" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Products", new { search, category, size = selectedSize, color = selectedColor, minPrice, maxPrice, sort = selectedSort, page = currentPage, bestSellers = bestSellersOnly })" />
                             <button class="wishlist-button @(wishlistedProductIds.Contains(product.Id) ? "is-saved" : string.Empty)"
                                     type="submit"
                                     aria-label="@(wishlistedProductIds.Contains(product.Id) ? $"Remove {product.Name} from wishlist" : $"Add {product.Name} to wishlist")"
