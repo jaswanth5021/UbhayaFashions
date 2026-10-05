@@ -98,8 +98,9 @@
     </form>
 
     <div class="catalog-layout">
-        <aside class="catalog-sidebar">
+        <aside class="catalog-sidebar" data-mobile-filter-panel>
             <div class="catalog-sidebar-header">
+                <button type="button" class="catalog-mobile-filter-close" data-mobile-filter-close aria-label="Close filters">×</button>
                 <span>FILTERS</span>
                 <a asp-action="Index"
                    asp-route-search="@search"
@@ -214,11 +215,21 @@
         </aside>
 
         <main class="catalog-results">
+            <div class="catalog-mobile-toolbar">
+                <form asp-action="Index" method="get" class="catalog-mobile-search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+                    <input name="search" value="@search" type="search" placeholder="Search dresses, kurtis..." autocomplete="off" />
+                    @if (!string.IsNullOrWhiteSpace(category)) { <input type="hidden" name="category" value="@category" /> }
+                    @if (bestSellersOnly) { <input type="hidden" name="bestSellers" value="true" /> }
+                    <button type="submit">SEARCH</button>
+                </form>
+                <div class="catalog-mobile-toolbar-actions">
+                    <span class="catalog-mobile-count">@productCount @(productCount == 1 ? "style" : "styles")</span>
+                    <button class="catalog-mobile-filter-toggle" type="button" data-mobile-filter-toggle aria-expanded="false"><span>☰</span> FILTERS</button>
+                </div>
+            </div>
             <div class="catalog-results-toolbar">
                 <span>@productCount @(productCount == 1 ? "style" : "styles")</span>
-                <button class="catalog-mobile-filter-toggle" type="button" data-mobile-filter-toggle aria-expanded="false">
-                    FILTERS
-                </button>
             </div>
 
             @if (TempData["WishlistMessage"] is string wishlistMessage)
@@ -428,6 +439,23 @@
 
 <script>
 (function () {
+    const toggle = document.querySelector("[data-mobile-filter-toggle]");
+    const panel = document.querySelector("[data-mobile-filter-panel]");
+    const close = document.querySelector("[data-mobile-filter-close]");
+    if (toggle && panel) {
+        const setOpen = (open) => {
+            panel.classList.toggle("is-mobile-open", open);
+            document.body.classList.toggle("catalog-filter-open", open);
+            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        };
+        toggle.addEventListener("click", () => setOpen(true));
+        close?.addEventListener("click", () => setOpen(false));
+        panel.addEventListener("click", (event) => {
+            if (event.target === panel) setOpen(false);
+        });
+        panel.querySelector("form")?.addEventListener("submit", () => setOpen(false));
+    }
+
     const minRange = document.getElementById('minPriceRange');
     const maxRange = document.getElementById('maxPriceRange');
     const minInput = document.getElementById('minPriceInput');
