@@ -2511,3 +2511,28 @@
         padding-bottom: 60px;
     }
 }
+
+
+.product-inline-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 2px 0 12px;
+    color: #80645f;
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.product-inline-rating span:first-child {
+    color: #68142e;
+    letter-spacing: 1px;
+}
+
+.product-inline-rating strong {
+    color: #302522;
+    font-size: 12px;
+}
+
+.product-inline-rating:hover {
+    color: #68142e;
+}
