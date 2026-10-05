@@ -381,3 +381,53 @@ body.menu-open { overflow: hidden; }
         max-height: 52px !important;
     }
 }
+
+
+/* =========================================================
+   CLEAN MOBILE MENU WORDMARK
+   Avoid using the large artwork in logo.png inside the
+   slide-out menu. Keep the existing desktop logo unchanged.
+   ========================================================= */
+
+.side-menu-brand-text {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .side-menu-brand {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+        text-decoration: none;
+    }
+
+    .side-menu-brand-image {
+        display: none !important;
+    }
+
+    .side-menu-brand-text {
+        display: block !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #68142e !important;
+        font-family: Georgia, "Times New Roman", serif !important;
+        font-size: 27px !important;
+        font-weight: 700 !important;
+        letter-spacing: .18em !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        text-align: center !important;
+    }
+}
+
+@media (max-width: 370px) {
+    .side-menu-brand-text {
+        font-size: 23px !important;
+        letter-spacing: .14em !important;
+    }
+}
