@@ -435,9 +435,9 @@
     width: 100%;
     min-width: 0;
 
-    min-height: 72px;
+    min-height: 58px;
 
-    padding: 10px 8px;
+    padding: 6px 5px;
 
     border: 1px solid #d8ccc8;
 
@@ -1274,7 +1274,7 @@
         grid-template-columns:
             repeat(4, minmax(76px, 1fr));
 
-        max-width: 390px;
+        max-width: 350px;
     }
 
 }
@@ -1311,7 +1311,8 @@
     }
 
     .product-size-option {
-        min-height: 68px;
+        min-height: 54px;
+        padding: 5px 4px;
     }
 
     .product-bestsellers {
@@ -1507,8 +1508,8 @@
     }
 
     .product-size-option {
-        min-height: 62px;
-        padding: 7px 5px;
+        min-height: 54px;
+        padding: 5px 4px;
     }
 
     .product-size-label {
@@ -2552,8 +2553,8 @@
     }
 
     .product-size-option {
-        min-height: 62px;
-        padding: 7px 5px;
+        min-height: 54px;
+        padding: 5px 4px;
     }
 
     .product-size-label {
