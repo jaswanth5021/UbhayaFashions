@@ -383,15 +383,46 @@
                                 }
                             </div>
 
+                            @{
+                                var hasVariants = product.Variants.Any();
+                                var hasAvailableVariant = product.Variants.Any(variant => variant.Stock > 0);
+                            }
+
+                            @* Desktop keeps the existing product-level stock behavior. *@
                             @if (product.Stock > 0)
                             {
-                                <p class="catalog-stock-label in-stock">@product.Stock in stock</p>
-                                <a class="catalog-action" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
+                                <p class="catalog-stock-label in-stock catalog-stock-desktop">@product.Stock in stock</p>
+                                <a class="catalog-action catalog-action-desktop" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
                             }
                             else
                             {
-                                <p class="catalog-stock-label sold-out-text">Out of stock</p>
-                                <button class="catalog-action disabled" type="button" disabled>OUT OF STOCK</button>
+                                <p class="catalog-stock-label sold-out-text catalog-stock-desktop">Out of stock</p>
+                                <button class="catalog-action disabled catalog-action-desktop" type="button" disabled>OUT OF STOCK</button>
+                            }
+
+                            @* Mobile stock must respect size/variant inventory. *@
+                            @if (hasVariants)
+                            {
+                                if (hasAvailableVariant)
+                                {
+                                    <p class="catalog-stock-label in-stock catalog-stock-mobile">Stock Available</p>
+                                    <a class="catalog-action catalog-action-mobile" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
+                                }
+                                else
+                                {
+                                    <p class="catalog-stock-label sold-out-text catalog-stock-mobile">Out of stock</p>
+                                    <button class="catalog-action disabled catalog-action-mobile" type="button" disabled>OUT OF STOCK</button>
+                                }
+                            }
+                            else if (product.Stock > 0)
+                            {
+                                <p class="catalog-stock-label in-stock catalog-stock-mobile">Stock Available</p>
+                                <a class="catalog-action catalog-action-mobile" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
+                            }
+                            else
+                            {
+                                <p class="catalog-stock-label sold-out-text catalog-stock-mobile">Out of stock</p>
+                                <button class="catalog-action disabled catalog-action-mobile" type="button" disabled>OUT OF STOCK</button>
                             }
                         </article>
                     }
