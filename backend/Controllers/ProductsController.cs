@@ -14,6 +14,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         [FromQuery] string? search = null,
         [FromQuery] string? category = null,
         [FromQuery] string? size = null,
+        [FromQuery] string? color = null,
         [FromQuery] decimal? minPrice = null,
         [FromQuery] decimal? maxPrice = null,
         [FromQuery] bool bestSellers = false,
@@ -51,6 +52,12 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         {
             var normalizedSize = size.Trim();
             query = query.Where(x => x.Variants.Any(variant => variant.Size == normalizedSize && variant.Stock > 0));
+        }
+
+        if (!string.IsNullOrWhiteSpace(color))
+        {
+            var normalizedColor = color.Trim();
+            query = query.Where(x => EF.Functions.Like(x.Colors, $"%{normalizedColor}%"));
         }
 
         if (minPrice.HasValue)
