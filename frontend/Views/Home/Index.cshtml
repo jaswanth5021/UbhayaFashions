@@ -18,43 +18,66 @@
      HERO
      ===================================================== -->
 
-<section class="home-hero">
+<section class="home-hero" data-hero-slider>
+    <div class="home-hero-slides">
+        <div class="home-hero-slide is-active" data-hero-slide>
+            <img src="/images/dress-banner.jpeg"
+                 alt="The Ubhaya Edit"
+                 class="home-hero-image" />
+            <div class="home-hero-overlay"></div>
+            <div class="home-hero-content">
+                <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
+                <h1>Timeless elegance.<br /><em>Contemporary style.</em></h1>
+                <p class="hero-description">Thoughtfully curated women’s fashion for every occasion.</p>
+                <a asp-controller="Products" asp-action="Index" class="hero-shop-button">
+                    <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
+                </a>
+            </div>
+        </div>
 
-    <!-- Hero Image -->
-    <img src="/images/dress-banner.jpeg"
-         alt="Ubhaya Fashions"
-         class="home-hero-image" />
-
-    <!-- Dark Overlay -->
-    <div class="home-hero-overlay"></div>
-
-    <!-- Hero Content -->
-    <div class="home-hero-content">
-
-        <p class="hero-location">
-            THE UBHAYA EDIT · HYDERABAD
-        </p>
-
-        <h1>Timeless elegance.<br /><em>Contemporary style.</em></h1>
-
-        <p class="hero-description">
-            Thoughtfully curated women’s fashion for every occasion.
-        </p>
-
-        <a asp-controller="Products"
-           asp-action="Index"
-           class="hero-shop-button">
-
-            <span>SHOP NEW ARRIVALS</span>
-
-            <span class="hero-arrow">
-                →
-            </span>
-
-        </a>
-
+        <div class="home-hero-slide" data-hero-slide>
+            <img src="/images/dress-banner-2.jpeg"
+                 alt="Ubhaya Fashions new collection"
+                 class="home-hero-image"
+                 onerror="this.src='/images/dress-banner.jpeg';" />
+            <div class="home-hero-overlay"></div>
+            <div class="home-hero-content">
+                <p class="hero-location">THE UBHAYA COLLECTION</p>
+                <h1>Made for every<br /><em>beautiful moment.</em></h1>
+                <p class="hero-description">Discover elegant silhouettes, effortless styles and new-season favourites.</p>
+                <a asp-controller="Products" asp-action="Index" class="hero-shop-button">
+                    <span>EXPLORE COLLECTION</span><span class="hero-arrow">→</span>
+                </a>
+            </div>
+        </div>
     </div>
 
+    <button type="button" class="home-hero-arrow home-hero-arrow-prev" data-hero-prev aria-label="Previous banner">‹</button>
+    <button type="button" class="home-hero-arrow home-hero-arrow-next" data-hero-next aria-label="Next banner">›</button>
+
+    <div class="home-hero-dots" aria-label="Hero banners">
+        <button type="button" class="is-active" data-hero-dot="0" aria-label="Banner 1"></button>
+        <button type="button" data-hero-dot="1" aria-label="Banner 2"></button>
+    </div>
+</section>
+
+<section class="home-benefits" aria-label="Ubhaya Fashions benefits">
+    <div class="home-benefit">
+        <span class="home-benefit-icon">🚚</span>
+        <div><strong>Free Shipping</strong><small>Across India</small></div>
+    </div>
+    <div class="home-benefit">
+        <span class="home-benefit-icon">✿</span>
+        <div><strong>Premium Quality</strong><small>Handpicked Collection</small></div>
+    </div>
+    <div class="home-benefit">
+        <span class="home-benefit-icon">▣</span>
+        <div><strong>Secure Payment</strong><small>100% Safe &amp; Secure</small></div>
+    </div>
+    <div class="home-benefit">
+        <span class="home-benefit-icon">♧</span>
+        <div><strong>Easy Returns</strong><small>Hassle-free returns</small></div>
+    </div>
 </section>
 
 
