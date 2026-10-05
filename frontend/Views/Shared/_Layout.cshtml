@@ -541,7 +541,14 @@
             <span>Account</span>
         </a>
         <a asp-controller="Products" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-shop @(currentController == "Products" ? "is-active" : "")">
-            <span class="mobile-bottom-nav-shop-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-1 13H5L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg></span>
+            <span class="mobile-bottom-nav-shop-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 10.5h16l-1.4-5H5.4L4 10.5Z"/>
+                    <path d="M5 10.5V20h14v-9.5"/>
+                    <path d="M4 10.5c0 1.4 1.1 2.5 2.5 2.5S9 11.9 9 10.5c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5"/>
+                    <path d="M9 20v-4h6v4"/>
+                </svg>
+            </span>
             <span>Shop</span>
         </a>
         <a asp-controller="Cart" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-cart @(currentController == "Cart" ? "is-active" : "")">
