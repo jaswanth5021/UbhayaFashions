@@ -186,6 +186,11 @@
     font-weight: 700;
 }
 
+.catalog-stock-mobile,
+.catalog-action-mobile {
+    display: none;
+}
+
 .catalog-image-wrap .catalog-stock-label {
     position: absolute;
     right: 12px;
@@ -1587,5 +1592,20 @@
 
     .catalog-card .catalog-action {
         margin-top: 8px;
+    }
+
+    /* Mobile uses variant-aware stock status. */
+    .catalog-stock-desktop,
+    .catalog-action-desktop {
+        display: none !important;
+    }
+
+    .catalog-stock-mobile,
+    .catalog-action-mobile {
+        display: inline-flex;
+    }
+
+    .catalog-stock-mobile {
+        display: block;
     }
 }
