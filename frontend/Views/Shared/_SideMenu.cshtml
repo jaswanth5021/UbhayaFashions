@@ -4,11 +4,9 @@
 <aside class="side-menu" id="sideMenu" aria-label="Ubhaya navigation">
     <div class="side-menu-header">
         <button id="menuClose" type="button" class="menu-close" aria-label="Close menu">×</button>
-        <div class="side-menu-brand" aria-hidden="true">
-            <span class="side-menu-brand-mark">◇</span>
-            <span class="side-menu-brand-name">UBHAYA</span>
-            <span class="side-menu-brand-subtitle">COLLECTIONS</span>
-        </div>
+        <a class="side-menu-brand" asp-controller="Home" asp-action="Index" aria-label="Ubhaya Fashions home">
+            <img src="~/images/logo.png" alt="UBHAYA FASHIONS" />
+        </a>
         <button type="button" class="search-button" aria-label="Search" id="sideMenuSearch">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
         </button>
