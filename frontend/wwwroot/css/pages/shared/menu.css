@@ -1,304 +1,560 @@
-/* =========================================
-   HAMBURGER
-   ========================================= */
-
+/* Hamburger button */
 .menu-button {
     border: none;
     background: transparent;
-
     font-size: 26px;
-
     cursor: pointer;
-
     padding: 8px;
-
     line-height: 1;
-
     color: #222;
-
     display: flex;
     align-items: center;
     justify-content: center;
 }
+.menu-button:hover { opacity: .65; }
 
-.menu-button:hover {
-    opacity: 0.65;
-}
-
-
-/* =========================================
-   OVERLAY
-   ========================================= */
-
+/* Overlay */
 .menu-overlay {
     position: fixed;
-
     inset: 0;
-
-    background: rgba(0, 0, 0, 0.35);
-
+    background: rgba(0,0,0,.35);
     z-index: 999;
-
     opacity: 0;
-
     visibility: hidden;
-
-    transition:
-        opacity 0.3s ease,
-        visibility 0.3s ease;
+    transition: opacity .3s ease, visibility .3s ease;
 }
+.menu-overlay.active { opacity: 1; visibility: visible; }
 
-.menu-overlay.active {
-    opacity: 1;
-
-    visibility: visible;
-}
-
-
-/* =========================================
-   SIDE MENU
-   ========================================= */
-
+/* Desktop/default side menu - preserve existing UI */
 .side-menu {
     position: fixed;
-
     top: 0;
     left: 0;
-
     width: 380px;
-
     max-width: 90vw;
-
     height: 100vh;
-
     background: #c9b8a8;
-
     z-index: 1000;
-
     transform: translateX(-100%);
-
-    transition: transform 0.3s ease;
-
+    transition: transform .3s ease;
     overflow-y: auto;
 }
-
-.side-menu.active {
-    transform: translateX(0);
-}
-
-
-/* =========================================
-   MENU HEADER
-   ========================================= */
+.side-menu.active { transform: translateX(0); }
 
 .side-menu-header {
     height: 150px;
-
     display: flex;
-
     align-items: center;
-
     gap: 25px;
-
     padding: 30px 24px;
 }
-
+.side-menu-brand {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-decoration: none;
+}
+.side-menu-brand-image {
+    display: block;
+    width: min(122px, 100%);
+    height: 122px;
+    object-fit: contain;
+    object-position: center;
+}
+.side-menu-brand-text { display: none; }
+.side-menu-header > .search-button {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 9px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #68142e;
+    text-align: center;
+    display: grid;
+    place-items: center;
+}
+.side-menu-header > .search-button svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.side-menu-tagline {
+    padding: 9px 16px 15px;
+    background: #fffdfb;
+    color: #805d5c;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .2em;
+}
+.menu-navigation { padding: 8px 14px 24px; background: #fffdfb; }
+.menu-item {
+    min-height: 54px;
+    padding: 7px 10px;
+    border-bottom: 1px solid #eee8e7;
+    box-sizing: border-box;
+}
+.menu-item-icon { flex: 0 0 40px; width: 40px; height: 40px; }
+.menu-item-icon {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff1f4;
+    color: #68142e;
+}
+.menu-item-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.65;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.menu-item-label { flex: 1; padding-left: 12px; }
+.menu-item-arrow { flex: 0 0 24px; }
 .side-menu-header button {
     border: none;
-
     background: transparent;
-
     cursor: pointer;
-
     color: #111;
 }
-
-.menu-close {
-    font-size: 38px;
-
-    font-weight: 300;
-
-    line-height: 1;
-}
-
-.search-button {
-    font-size: 32px;
-
-    font-weight: 300;
-
-    line-height: 1;
-}
-
-
-/* =========================================
-   MENU LIST
-   ========================================= */
-
-.menu-list {
-    list-style: none;
-
-    padding: 0;
-
-    margin: 0;
-}
-
-.menu-list li {
-    margin: 0;
-
-    padding: 0;
-}
-
-
-/* =========================================
-   MENU ITEM
-   ========================================= */
-
+.menu-close { font-size: 38px; font-weight: 300; line-height: 1; }
+.search-button { font-size: 32px; font-weight: 300; line-height: 1; }
+.menu-list { list-style: none; padding: 0; margin: 0; }
+.menu-list li { margin: 0; padding: 0; }
 .menu-item {
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
-
     width: 100%;
-
     min-height: 48px;
-
     padding: 11px 24px;
-
     color: #111;
-
     text-decoration: none;
-
     font-size: 19px;
-
     line-height: 1.4;
-
     cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        padding-left 0.2s ease;
 }
-
-.menu-item:hover {
-    background: rgba(255, 255, 255, 0.12);
-
-    padding-left: 28px;
-}
-
-
-/* =========================================
-   BEST SELLERS
-   ========================================= */
-
-.menu-item.highlight {
-    background: rgba(160, 145, 130, 0.35);
-}
-
-
-/* =========================================
-   DETAILS
-   ========================================= */
-
-.menu-list details {
-    margin: 0;
-    padding: 0;
-}
-
-.menu-list summary {
-    list-style: none;
-}
-
-.menu-list summary::-webkit-details-marker {
-    display: none;
-}
-
-
-/* =========================================
-   ARROW
-   ========================================= */
-
-.menu-arrow {
-    font-size: 20px;
-
-    margin-left: 12px;
-
-    transition: transform 0.25s ease;
-}
-
-.menu-list details[open] .menu-arrow {
-    transform: rotate(90deg);
-}
-
-
-/* =========================================
-   SUB MENU
-   ========================================= */
-
-.submenu {
-    background: rgba(255, 255, 255, 0.08);
-
-    padding: 5px 0 10px;
-}
-
+.menu-item:hover { background: rgba(255,255,255,.12); }
+.menu-list details { margin: 0; padding: 0; }
+.menu-list summary { list-style: none; }
+.menu-list summary::-webkit-details-marker { display: none; }
+.menu-arrow { font-size: 20px; margin-left: 12px; }
+.submenu { background: rgba(255,255,255,.08); padding: 5px 0 10px; }
 .submenu a {
     display: block;
-
     padding: 9px 24px 9px 42px;
-
     color: #222;
-
     text-decoration: none;
-
     font-size: 16px;
-
-    line-height: 1.4;
 }
+body.menu-open { overflow: hidden; }
 
-.submenu a:hover {
-    background: rgba(255, 255, 255, 0.12);
+/* Premium mobile-only menu */
+@media (max-width: 600px) {
+    .menu-button { color: #68142e; }
 
-    padding-left: 47px;
-}
-
-
-/* =========================================
-   BODY
-   ========================================= */
-
-body.menu-open {
-    overflow: hidden;
-}
-
-
-/* =========================================
-   MOBILE
-   ========================================= */
-
-@media (max-width: 800px) {
+    .menu-overlay {
+        background: rgba(24,15,18,.52);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+    }
 
     .side-menu {
-        width: 380px;
-
-        max-width: 92vw;
+        width: min(390px, 92vw);
+        max-width: none;
+        height: 100vh;
+        height: 100dvh;
+        background: #fffdfb;
+        color: #211b1d;
+        box-shadow: 14px 0 40px rgba(35,18,24,.18);
+        scrollbar-width: thin;
+        scrollbar-color: #d8a9b7 transparent;
+        transition: transform .34s cubic-bezier(.22,.61,.36,1);
     }
 
     .side-menu-header {
-        height: 130px;
+        min-height: 142px;
+        height: auto;
+        padding: 18px 18px 6px;
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        align-items: start;
+        gap: 8px;
+        background: linear-gradient(135deg,#fff9f7 0%,#f9e8ed 100%);
+    }
 
-        padding: 25px 22px;
+    .side-menu-header button {
+        width: 44px;
+        height: 44px;
+        padding: 8px;
+        border-radius: 50%;
+        color: #68142e;
+        display: grid;
+        place-items: center;
+    }
+
+    .side-menu-header button:hover { background: rgba(104,20,46,.07); }
+    .menu-close { font-size: 38px; }
+    .search-button svg {
+        width: 27px;
+        height: 27px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .side-menu-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        height: 100%;
+        padding-top: 4px;
+        text-decoration: none;
+    }
+
+    .side-menu-brand img {
+        display: block;
+        width: min(190px,100%);
+        height: 92px;
+        object-fit: contain;
+    }
+
+    .side-menu-tagline {
+        padding: 3px 18px 15px;
+        background: linear-gradient(135deg,#fff9f7 0%,#f9e8ed 100%);
+        color: #805d5c;
+        text-align: center;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: .28em;
+    }
+
+    .menu-navigation {
+        padding: 14px 14px 30px;
+        background: #fffdfb;
     }
 
     .menu-item {
-        font-size: 18px;
-
-        padding: 11px 24px;
+        position: relative;
+        display: grid;
+        grid-template-columns: 54px 1fr 24px;
+        align-items: center;
+        width: 100%;
+        min-height: 68px;
+        padding: 8px;
+        box-sizing: border-box;
+        color: #252126;
+        font-family: Arial,sans-serif;
+        font-size: 17px;
+        font-weight: 500;
+        letter-spacing: -.01em;
+        line-height: 1.25;
+        border-bottom: 1px solid #eee8e7;
+        transition: background .2s ease,color .2s ease,transform .2s ease;
     }
 
-    .submenu a {
-        font-size: 16px;
+    .menu-item:hover {
+        background: #fff5f7;
+        color: #68142e;
+    }
 
-        padding-left: 40px;
+    .menu-item.is-current {
+        margin-bottom: 4px;
+        padding-left: 8px;
+        border-bottom-color: transparent;
+        border-radius: 18px;
+        background: linear-gradient(135deg,#fae5eb,#f8eef0);
+        color: #68142e;
+        font-weight: 700;
+        box-shadow: inset 3px 0 0 #68142e;
+    }
+
+    .menu-item-icon {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border-radius: 50%;
+        background: #fff1f4;
+        color: #68142e;
+    }
+
+    .menu-item.is-current .menu-item-icon { background: #f9dce5; }
+
+    .menu-item-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.65;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .menu-item-label { padding-left: 8px; }
+
+    .menu-item-arrow {
+        color: #6b686d;
+        font-family: Arial,sans-serif;
+        font-size: 30px;
+        font-weight: 300;
+        line-height: 1;
+        text-align: center;
+        transition: transform .2s ease,color .2s ease;
+    }
+
+    .menu-item:hover .menu-item-arrow,
+    .menu-item.is-current .menu-item-arrow {
+        color: #68142e;
+        transform: translateX(2px);
+    }
+
+    @media (max-width: 370px) {
+        .side-menu { width: 94vw; }
+        .side-menu-brand img { width: 155px; height: 82px; }
+        .menu-item { min-height: 62px; font-size: 16px; }
+        .menu-item-icon { width: 40px; height: 40px; }
+        .menu-item-icon svg { width: 22px; height: 22px; }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu-overlay, .side-menu, .menu-item, .menu-item-arrow { transition: none; }
+}
+
+/* =========================================================
+   MOBILE SIDE-MENU LOGO FIX - feature/product-search
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .side-menu {
+        width: min(360px, 88vw) !important;
+        max-width: 88vw !important;
+        background: #fffdfb !important;
+        color: #211b1d !important;
+    }
+
+    .menu-navigation {
+        background: #fffdfb !important;
+    }
+
+    .menu-item {
+        border-bottom: 1px solid #eee8e7 !important;
+        background: transparent;
+    }
+
+    .side-menu-header {
+        min-height: 112px;
+        height: 112px;
+        padding: 12px 14px 4px;
+        overflow: hidden;
+    }
+
+    .side-menu-brand {
+        width: 100%;
+        height: 76px;
+        min-height: 76px;
+        max-height: 76px;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .side-menu-brand img {
+        display: block;
+        width: min(125px, 100%);
+        height: 58px;
+        max-height: 58px;
+        object-fit: contain;
+        object-position: center;
+    }
+
+    .side-menu-tagline {
+        padding-top: 2px;
+    }
+}
+
+@media (max-width: 370px) {
+    .side-menu-header {
+        min-height: 104px;
+        height: 104px;
+    }
+
+    .side-menu-brand {
+        height: 70px;
+        min-height: 70px;
+        max-height: 70px;
+    }
+
+    .side-menu-brand img {
+        width: 110px;
+        height: 52px;
+        max-height: 52px;
+    }
+}
+
+
+/* =========================================================
+   FINAL MOBILE MENU LOGO OVERFLOW FIX
+   The logo artwork is overflowing out of its header box on
+   some browsers/local builds. Keep the mobile menu header
+   clean and prevent the image from affecting menu content.
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .side-menu-header {
+        position: relative;
+        min-height: 112px !important;
+        height: 112px !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        display: grid !important;
+        grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 10px 14px !important;
+        background: #fff9f7 !important;
+        border-bottom: 1px solid #eee3e5 !important;
+    }
+
+    .side-menu-header > button {
+        position: relative !important;
+        z-index: 3 !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        margin: 0 !important;
+        padding: 8px !important;
+        border: 0 !important;
+        border-radius: 50% !important;
+        background: transparent !important;
+        color: #68142e !important;
+        display: grid !important;
+        place-items: center !important;
+        box-shadow: none !important;
+    }
+
+    .side-menu-header > .search-button {
+        width: 44px !important;
+        height: 44px !important;
+        padding: 8px !important;
+    }
+
+    .side-menu-header > .search-button svg {
+        display: block !important;
+        width: 24px !important;
+        height: 24px !important;
+        fill: none !important;
+        stroke: #68142e !important;
+        stroke-width: 1.8 !important;
+    }
+
+    .side-menu-brand {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 76px !important;
+        min-height: 76px !important;
+        max-height: 76px !important;
+        overflow: hidden !important;
+        z-index: 2;
+    }
+
+    .side-menu-brand img {
+        position: static !important;
+        inset: auto !important;
+        transform: none !important;
+        display: block !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 96px !important;
+        max-height: 96px !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        object-fit: contain !important;
+        object-position: center center !important;
+    }
+
+    .side-menu-tagline {
+        position: relative;
+        z-index: 3;
+    }
+
+    .menu-navigation {
+        position: relative;
+        z-index: 4;
+    }
+}
+
+@media (max-width: 370px) {
+    .side-menu-brand img {
+        width: auto !important;
+        height: auto !important;
+        max-width: 88px !important;
+        max-height: 88px !important;
+    }
+}
+
+
+/* =========================================================
+   CLEAN MOBILE MENU WORDMARK
+   Avoid using the large artwork in logo.png inside the
+   slide-out menu. Keep the existing desktop logo unchanged.
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .side-menu-brand {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+        text-decoration: none;
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+
+    .side-menu-brand-text {
+        display: block !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #68142e !important;
+        font-family: Georgia, "Times New Roman", serif !important;
+        font-size: 27px !important;
+        font-weight: 700 !important;
+        letter-spacing: .18em !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        text-align: center !important;
+    }
+}
+
+@media (max-width: 370px) {
+    .side-menu-brand-text {
+        font-size: 23px !important;
+        letter-spacing: .14em !important;
     }
 }

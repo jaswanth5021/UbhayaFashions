@@ -1,3 +1,4 @@
+using LadiesDressStore.Web.Models;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,28 +12,28 @@ public class ProductsController(ApiService api) : Controller
         return View(categories);
     }
 
-    public async Task<IActionResult> Index(string? search = null, string? category = null, int page = 1, bool bestSellers = false)
+    public async Task<IActionResult> Index(
+        string? search = null,
+        string? category = null,
+        string? size = null,
+        string? color = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null,
+        string? availability = null,
+        string? sort = null,
+        int page = 1,
+        bool bestSellers = false)
     {
-        var products = await api.GetProductsAsync(search);
-
-        if (bestSellers)
-            products = products.Where(product => product.IsBestSeller).ToList();
-
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            products = products
-                .Where(product => string.Equals(
-                    product.Category?.Trim(),
-                    category.Trim(),
-                    StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        const int pageSize = 12;
-        var productCount = products.Count;
-        var pageCount = Math.Max(1, (int)Math.Ceiling(productCount / (double)pageSize));
-        page = Math.Clamp(page, 1, pageCount);
-        products = products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        var products = await api.GetProductsAsync(
+            search,
+            category,
+            size,
+            color,
+            minPrice,
+            maxPrice,
+            availability,
+            bestSellers,
+            sort);
 
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -48,12 +49,34 @@ public class ProductsController(ApiService api) : Controller
             }
         }
 
+        try
+        {
+            ViewBag.Categories = await api.GetCategoriesAsync();
+        }
+        catch (HttpRequestException)
+        {
+            ViewBag.Categories = new List<CategoryViewModel>();
+        }
+
+        const int pageSize = 12;
+        var productCount = products.Count;
+        var pageCount = Math.Max(1, (int)Math.Ceiling(productCount / (double)pageSize));
+        page = Math.Clamp(page, 1, pageCount);
+        products = products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
         ViewBag.Search = search;
         ViewBag.Category = category;
+        ViewBag.Size = size;
+        ViewBag.Color = color;
+        ViewBag.MinPrice = minPrice;
+        ViewBag.MaxPrice = maxPrice;
+        ViewBag.Availability = availability;
+        ViewBag.Sort = sort;
         ViewBag.BestSellersOnly = bestSellers;
         ViewBag.ProductCount = productCount;
         ViewBag.CurrentPage = page;
         ViewBag.PageCount = pageCount;
+
         return View(products);
     }
 
@@ -64,31 +87,33 @@ public class ProductsController(ApiService api) : Controller
 
         try
         {
-            var bestSellers = (await api.GetProductsAsync())
-                .Where(item => item.IsBestSeller)
-                .ToList();
-
-            var otherBestSellers = bestSellers
+            ViewBag.RelatedProducts = (await api.GetRelatedProductsAsync(id))
                 .Where(item => item.Id != id)
+                .DistinctBy(item => item.Id)
                 .Take(6)
                 .ToList();
-
-            // Keep the section visible when the current product is the only
-            // item marked as a best seller.
-            ViewBag.BestSellers = otherBestSellers.Count > 0
-                ? otherBestSellers
-                : bestSellers.Where(item => item.Id == id).Take(1).ToList();
         }
         catch (HttpRequestException)
         {
-            ViewBag.BestSellers = new List<LadiesDressStore.Web.Models.ProductViewModel>();
+            ViewBag.RelatedProducts = new List<RelatedProductViewModel>();
+        }
+
+        try
+        {
+            ViewBag.ProductReviews = await api.GetProductReviewsAsync(id);
+        }
+        catch (HttpRequestException)
+        {
+            ViewBag.ProductReviews = new ProductReviewsViewModel();
         }
 
         if (User.Identity?.IsAuthenticated == true)
         {
             try
             {
-                ViewBag.IsWishlisted = (await api.GetWishlistAsync()).Any(item => item.Id == id);
+                var wishlistIds = (await api.GetWishlistAsync()).Select(item => item.Id).ToHashSet();
+                ViewBag.WishlistedProductIds = wishlistIds;
+                ViewBag.IsWishlisted = wishlistIds.Contains(id);
             }
             catch (HttpRequestException)
             {
@@ -98,4 +123,29 @@ public class ProductsController(ApiService api) : Controller
 
         return View(product);
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SubmitReview(
+        int productId,
+        ProductReviewSubmissionViewModel model)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+            return RedirectToAction("Login", "Account", new { returnUrl = Url.Action(nameof(Details), new { id = productId }) });
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ReviewError"] = "Please provide a rating and a review of at least 10 characters.";
+            return RedirectToAction(nameof(Details), new { id = productId });
+        }
+
+        var result = await api.SubmitProductReviewAsync(productId, model);
+        if (result.Success)
+            TempData["ReviewMessage"] = "Thank you. Your review has been submitted.";
+        else
+            TempData["ReviewError"] = result.Message.Trim('"');
+
+        return RedirectToAction(nameof(Details), new { id = productId });
+    }
+
 }

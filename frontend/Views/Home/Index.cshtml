@@ -18,37 +18,69 @@
      HERO
      ===================================================== -->
 
-<section class="home-hero">
+<section class="home-hero" data-hero-slider>
+    <div class="home-hero-slides">
+        <div class="home-hero-slide is-active" data-hero-slide>
+            <img src="/images/dress-banner.jpeg"
+                 alt="The Ubhaya Edit"
+                 class="home-hero-image" />
+            <div class="home-hero-overlay"></div>
+            <div class="home-hero-content">
+                <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
+                @* <h1>Timeless elegance.<br /><em>Contemporary style.</em></h1>
+                <p class="hero-description">Thoughtfully curated women’s fashion for every occasion.</p> *@
+                <a asp-controller="Products" asp-action="Index" class="hero-shop-button">
+                    <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
+                </a>
+            </div>
+        </div>
 
-    <!-- Hero Image -->
-    <img src="/images/dress-banner.jpeg"
-         alt="Ubhaya Fashions"
-         class="home-hero-image" />
-
-    <!-- Dark Overlay -->
-    <div class="home-hero-overlay"></div>
-
-    <!-- Hero Content -->
-    <div class="home-hero-content">
-
-        <p class="hero-location">
-            THE UBHAYA EDIT · HYDERABAD
-        </p>
-
-        <a asp-controller="Products"
-           asp-action="Index"
-           class="hero-shop-button">
-
-            <span>SHOP NEW ARRIVALS</span>
-
-            <span class="hero-arrow">
-                →
-            </span>
-
-        </a>
-
+        <div class="home-hero-slide" data-hero-slide>
+            <img src="/images/dress-banner-2.png"
+                 alt="The Ubhaya Edit"
+                 class="home-hero-image" />
+            <div class="home-hero-overlay"></div>
+            <div class="home-hero-content">
+                @* <p class="hero-location">THE UBHAYA COLLECTION</p> *@
+                  <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
+                @* <h1>Made for every<br /><em>beautiful moment.</em></h1>
+                <p class="hero-description">Discover elegant silhouettes, effortless styles and new-season favourites.</p>
+                <a asp-controller="Products" asp-action="Index" class="hero-shop-button">
+                    <span>EXPLORE COLLECTION</span><span class="hero-arrow">→</span>
+                </a> *@
+                 <a asp-controller="Products" asp-action="Index" class="hero-shop-button">
+                    <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
+                </a>
+            </div>
+        </div>
     </div>
 
+    <button type="button" class="home-hero-arrow home-hero-arrow-prev" data-hero-prev aria-label="Previous banner">‹</button>
+    <button type="button" class="home-hero-arrow home-hero-arrow-next" data-hero-next aria-label="Next banner">›</button>
+
+    <div class="home-hero-dots" aria-label="Hero banners">
+        <button type="button" class="is-active" data-hero-dot="0" aria-label="Banner 1"></button>
+        <button type="button" data-hero-dot="1" aria-label="Banner 2"></button>
+    </div>
+</section>
+
+<section class="home-benefits" aria-label="Ubhaya Fashions benefits">
+    <div class="home-benefit">
+        <span class="home-benefit-icon">🚚</span>
+        <div><strong>Free Shipping</strong><small>Across India</small></div>
+    </div>
+    <div class="home-benefit">
+        <span class="home-benefit-icon">✿</span>
+        <div><strong>Premium Quality</strong><small>Handpicked Collection</small></div>
+    </div>
+    <div class="home-benefit">
+        <span class="home-benefit-icon">▣</span>
+        <div><strong>Secure Payment</strong><small>100% Safe &amp; Secure</small></div>
+    </div>
+    @* <div class="home-benefit">
+        <span class="home-benefit-icon">♧</span>
+        <div><strong>Easy Returns</strong><small>Hassle-free returns</small></div>
+    </div> *@
 </section>
 
 
@@ -186,15 +218,65 @@
                            asp-action="Details"
                            asp-route-id="@p.Id">
 
-                            @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
+                            @{
+                                var productImages = new List<string>();
+
+                                if (!string.IsNullOrWhiteSpace(p.ImageUrl))
+                                {
+                                    productImages.Add(p.ImageUrl);
+                                }
+
+                                productImages.AddRange(
+                                    p.Images
+                                        .OrderBy(image => image.SortOrder)
+                                        .Select(image => image.ImageUrl)
+                                        .Where(url => !string.IsNullOrWhiteSpace(url))
+                                );
+
+                                productImages = productImages
+                                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                                    .ToList();
+                            }
+
+                            @if (productImages.Count > 0)
                             {
-                                <img src="@ImageUrlHelper.Resolve(p.ImageUrl, Configuration["ApiBaseUrl"])"
-                                     alt="@p.Name"
-                                     class="product-image"
-                                     onerror="this.hidden=true; this.nextElementSibling.hidden=false;" />
-                                <div class="product-image-fallback" hidden aria-label="Product image unavailable">
-                                    <span>UBHAYA</span>
-                                    <small>@p.Name</small>
+                                <div class="product-image-carousel"
+                                     data-product-carousel
+                                     data-image-count="@productImages.Count">
+                                    @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
+                                    {
+                                        <img src="@ImageUrlHelper.Resolve(productImages[imageIndex], Configuration["ApiBaseUrl"])"
+                                             alt="@p.Name - image @(imageIndex + 1)"
+                                             class="product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
+                                             data-carousel-image="@imageIndex"
+                                             loading="@(imageIndex == 0 ? "eager" : "lazy")"
+                                             onerror="this.remove();" />
+                                    }
+
+                                    @if (productImages.Count > 1)
+                                    {
+                                    <button type="button"
+                                            class="product-image-arrow product-image-arrow-prev"
+                                            data-carousel-prev
+                                            aria-label="Previous image">
+                                        ‹
+                                    </button>
+
+                                    <button type="button"
+                                            class="product-image-arrow product-image-arrow-next"
+                                            data-carousel-next
+                                            aria-label="Next image">
+                                        ›
+                                    </button>
+
+                                        <div class="product-image-dots" aria-hidden="true">
+                                            @for (var imageIndex = 0; imageIndex < productImages.Count; imageIndex++)
+                                            {
+                                                <span class="product-image-dot @(imageIndex == 0 ? "is-active" : string.Empty)"
+                                                      data-carousel-dot="@imageIndex"></span>
+                                            }
+                                        </div>
+                                    }
                                 </div>
                             }
                             else
@@ -266,18 +348,38 @@
 
                     @if (p.Variants.Count > 0)
                     {
-                        <div class="size-options">
-                            @foreach (var variant in p.Variants.OrderBy(variant => variant.Size))
+                        var standardSizes = new[]
+                        {
+                            "S",
+                            "M",
+                            "L",
+                            "XL",
+                            "XXL",
+                            "3XL"
+                        };
+
+                        var availableSizes = new HashSet<string>(
+                            p.Variants
+                                .Where(variant => variant.Stock > 0)
+                                .Select(variant => variant.Size),
+                            StringComparer.OrdinalIgnoreCase);
+
+                        <div class="size-options" aria-label="Available sizes">
+                            @foreach (var size in standardSizes)
                             {
-                                <button type="button" class="@(variant.Stock > 0 ? "size-available" : "size-unavailable")" data-size="@variant.Size" disabled="@(variant.Stock < 1)" title="@(variant.Stock > 0 ? variant.Size : "Out of stock")" aria-pressed="false">
-                                    @variant.Size
-                                    @if (variant.Stock < 1)
-                                    {
-                                        <span class="size-cross" aria-hidden="true">×</span>
-                                    }
+                                if (!availableSizes.Contains(size))
+                                {
+                                    continue;
+                                }
+
+                                <button type="button"
+                                        class="size-available"
+                                        data-size="@size"
+                                        title="@size available"
+                                        aria-pressed="false">
+                                    @size
                                 </button>
                             }
-
                         </div>
                     }
 
@@ -315,6 +417,7 @@
 </section>
 
 @section Scripts {
+    <script src="~/js/home-hero-slider.js" asp-append-version="true"></script>
     <script src="~/js/new-arrivals.js" asp-append-version="true"></script>
 }
 

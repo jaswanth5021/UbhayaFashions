@@ -1,0 +1,410 @@
+@model List<CartItemViewModel>
+@{
+    ViewData["Title"] = "Checkout";
+    var total = Model.Sum(x => x.Price * x.Quantity);
+    var itemCount = Model.Sum(x => x.Quantity);
+    var savedAddresses = ViewBag.SavedAddresses as List<SavedAddressViewModel> ?? [];
+}
+
+<section class="checkout-screen checkout-four-step">
+    <header class="checkout-screen-header">
+        <div class="checkout-screen-steps" aria-label="Checkout progress">
+            <div class="checkout-screen-step is-active" data-checkout-screen-indicator="1">
+                <span>1</span><strong>Cart</strong>
+            </div>
+            <i></i>
+            <div class="checkout-screen-step" data-checkout-screen-indicator="2">
+                <span>2</span><strong>Address</strong>
+            </div>
+            <i></i>
+            <div class="checkout-screen-step" data-checkout-screen-indicator="3">
+                <span>3</span><strong>Payment</strong>
+            </div>
+            <i></i>
+            <div class="checkout-screen-step" data-checkout-screen-indicator="4">
+                <span>4</span><strong>Order Review</strong>
+            </div>
+        </div>
+    </header>
+
+    <form asp-controller="Orders" asp-action="Checkout" method="post" id="checkoutScreenForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ShippingAddress" id="checkoutShippingAddress" />
+
+        <div class="checkout-screen-layout">
+            <main class="checkout-screen-main">
+
+                <!-- STEP 1: CART / ORDER DETAILS -->
+                <section class="checkout-screen-panel checkout-step-cart is-visible" data-checkout-screen-step="1">
+                    <div class="checkout-screen-title-row">
+                        <div>
+                            <span>STEP 1</span>
+                            <h1>Your Shopping Bag <small>(@itemCount @(itemCount == 1 ? "item" : "items"))</small></h1>
+                        </div>
+                        <a class="checkout-continue-shopping" asp-controller="Products" asp-action="Index">Continue Shopping</a>
+                    </div>
+
+                    <div class="checkout-bag-items">
+                        @foreach (var item in Model)
+                        {
+                            <article class="checkout-bag-item">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" class="checkout-bag-image">
+                                    <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
+                                </a>
+                                <div class="checkout-bag-info">
+                                    <h2>@item.Name</h2>
+                                    <p>@(string.IsNullOrWhiteSpace(item.Size) ? "Size not selected" : $"Size: {item.Size}")</p>
+                                    <strong>₹@item.Price.ToString("N0")</strong>
+                                </div>
+                                <div class="checkout-bag-quantity">
+                                    <span>−</span>
+                                    <strong>@item.Quantity</strong>
+                                    <span>+</span>
+                                </div>
+                                <div class="checkout-bag-line-total">
+                                    ₹@((item.Price * item.Quantity).ToString("N0"))
+                                </div>
+                            </article>
+                        }
+                    </div>
+
+                    <div class="checkout-free-shipping">
+                        <div>
+                            <strong>@(total >= 3000 ? "FREE SHIPPING UNLOCKED" : "Add ₹" + Math.Max(0, 3000 - total).ToString("N0") + " more to unlock FREE SHIPPING")</strong>
+                            <span>@(total >= 3000 ? "Your order qualifies for free shipping." : "Free shipping on orders of ₹3,000 or more.")</span>
+                        </div>
+                        <div class="checkout-shipping-progress">
+                            <span style="width:@Math.Min(100, (double)total / 3000 * 100)%"></span>
+                        </div>
+                        <strong>₹@total.ToString("N0") / ₹3,000</strong>
+                    </div>
+
+                    <div class="checkout-bag-totals">
+                        <div><span>Subtotal</span><strong>₹@total.ToString("N0")</strong></div>
+                        <div><span>Shipping</span><strong class="free">@(total >= 3000 ? "FREE" : "₹0 (Free)")</strong></div>
+                        <div class="grand"><span>Estimated Total</span><strong>₹@total.ToString("N0")</strong></div>
+                    </div>
+
+                    <button type="button" class="checkout-screen-primary" data-checkout-screen-next="2">
+                        PROCEED TO ADDRESS
+                    </button>
+                </section>
+
+                <!-- STEP 2: ADDRESS -->
+                <section class="checkout-screen-panel" data-checkout-screen-step="2" hidden>
+                    <div class="checkout-screen-title-row">
+                        <div>
+                            <span>STEP 2</span>
+                            <h1>Shipping Address</h1>
+                        </div>
+                        <span class="checkout-saved-label">Use saved address</span>
+                    </div>
+
+                    @if (savedAddresses.Count > 0)
+                    {
+                        <div class="checkout-screen-saved-list">
+                            @foreach (var address in savedAddresses)
+                            {
+                                <button type="button"
+                                        class="checkout-screen-saved-card"
+                                        data-saved-address="@address.FullAddress"
+                                        data-saved-name="@address.Name"
+                                        data-saved-mobile="@address.Mobile">
+                                    <strong>@address.Name</strong>
+                                    <span>@address.FullAddress</span>
+                                    @if (!string.IsNullOrWhiteSpace(address.Mobile))
+                                    {
+                                        <small>@address.Mobile</small>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    <div class="checkout-screen-fields">
+                        <label>
+                            Full Name
+                            <input id="checkoutName" type="text" value="@(savedAddresses.FirstOrDefault()?.Name ?? "")" autocomplete="name" required />
+                        </label>
+                        <label>
+                            Phone Number
+                            <input id="checkoutPhone" type="tel" value="@(savedAddresses.FirstOrDefault()?.Mobile ?? "")" autocomplete="tel" required />
+                        </label>
+                        <label class="full">
+                            Address
+                            <textarea id="checkoutAddressText" placeholder="House / Flat / Street / Area" required>@(savedAddresses.FirstOrDefault()?.FullAddress ?? "")</textarea>
+                        </label>
+                        <label>
+                            Pincode
+                            <input id="checkoutPincode" type="text" inputmode="numeric" autocomplete="postal-code" />
+                        </label>
+                        <label>
+                            City
+                            <input id="checkoutCity" type="text" autocomplete="address-level2" />
+                        </label>
+                        <label>
+                            State
+                            <input id="checkoutState" type="text" value="Telangana" autocomplete="address-level1" />
+                        </label>
+                        <label>
+                            Country
+                            <select id="checkoutCountry">
+                                <option selected>India</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label class="checkout-save-address">
+                        <input type="checkbox" checked />
+                        <span>Save this address for future orders</span>
+                    </label>
+
+                    <div class="checkout-screen-actions">
+                        <button type="button" class="checkout-screen-back" data-checkout-screen-back="1">← Back to Cart</button>
+                        <button type="button" class="checkout-screen-primary" data-checkout-screen-next="3">CONTINUE TO PAYMENT</button>
+                    </div>
+                </section>
+
+                <!-- STEP 3: PAYMENT -->
+                <section class="checkout-screen-panel" data-checkout-screen-step="3" hidden>
+                    <div class="checkout-screen-title-row">
+                        <div>
+                            <span>STEP 3</span>
+                            <h1>Payment</h1>
+                        </div>
+                        <button type="button" class="checkout-screen-back" data-checkout-screen-back="2">← Address</button>
+                    </div>
+
+                    <div class="checkout-payment-options">
+                        <label class="checkout-payment-option is-selected">
+                            <input type="radio" name="PaymentMethod" value="Razorpay" checked />
+                            <span class="checkout-radio"></span>
+                            <span>
+                                <strong>Razorpay Secure Payment</strong>
+                                <small>UPI, Credit/Debit Cards, Net Banking & Wallets</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="checkout-secure-note">
+                        <strong>🔒 Secure Checkout</strong>
+                        <span>Your payment is processed securely by Razorpay.</span>
+                    </div>
+
+                    <div class="checkout-screen-actions">
+                        <button type="button" class="checkout-screen-back" data-checkout-screen-back="2">← Back to Address</button>
+                        <button type="button" class="checkout-screen-primary" data-checkout-screen-next="4">CONTINUE TO ORDER REVIEW</button>
+                    </div>
+                </section>
+
+                <!-- STEP 4: ORDER REVIEW -->
+                <section class="checkout-screen-panel" data-checkout-screen-step="4" hidden>
+                    <div class="checkout-screen-title-row">
+                        <div>
+                            <span>STEP 4</span>
+                            <h1>Order Review</h1>
+                        </div>
+                        <button type="button" class="checkout-screen-back" data-checkout-screen-back="2">← Change Address</button>
+                    </div>
+
+                    <div class="checkout-review-address">
+                        <span>SHIPPING ADDRESS</span>
+                        <strong id="reviewName"></strong>
+                        <p id="reviewAddress"></p>
+                    </div>
+
+                    <div class="checkout-review-payment">
+                        <span>PAYMENT METHOD</span>
+                        <strong>Razorpay Secure Payment</strong>
+                        <p>UPI, cards, net banking and wallets.</p>
+                    </div>
+
+                    <div class="checkout-review-items">
+                        <span>ORDER ITEMS</span>
+                        @foreach (var item in Model)
+                        {
+                            <div>
+                                <span>@item.Name × @item.Quantity</span>
+                                <strong>₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="checkout-review-total">
+                        <span>Total Payable</span>
+                        <strong>₹@total.ToString("N0")</strong>
+                    </div>
+
+                    <div class="checkout-screen-actions">
+                        <button type="button" class="checkout-screen-back" data-checkout-screen-back="3">← Back to Payment</button>
+                        <button type="submit" class="checkout-screen-primary">PAY ₹@total.ToString("N0") WITH RAZORPAY</button>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="checkout-screen-summary">
+                <h2>Order Summary</h2>
+                <div class="checkout-screen-products">
+                    @foreach (var item in Model)
+                    {
+                        <article>
+                            <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
+                            <div>
+                                <strong>@item.Name</strong>
+                                <span>Size: @item.Size × @item.Quantity</span>
+                            </div>
+                            <b>₹@((item.Price * item.Quantity).ToString("N0"))</b>
+                        </article>
+                    }
+                </div>
+                <div class="checkout-screen-total-lines">
+                    <div><span>Subtotal</span><strong>₹@total.ToString("N0")</strong></div>
+                    <div><span>Shipping</span><strong class="free">FREE</strong></div>
+                    <div class="grand"><span>Total</span><strong>₹@total.ToString("N0")</strong></div>
+                </div>
+                <div class="checkout-screen-trust">
+                    <strong>🔒 Secure Checkout</strong>
+                    <p>We use Razorpay for secure payments.</p>
+                    <div class="checkout-screen-payment-brands">
+                        <b>Razorpay</b><span>VISA</span><span>●●</span><span>UPI</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </form>
+
+    <div class="checkout-mobile-sticky-bar" aria-label="Checkout action">
+        <div class="checkout-mobile-sticky-total">
+            <span>Total</span>
+            <strong>₹@total.ToString("N0")</strong>
+        </div>
+        <button type="button" class="checkout-mobile-sticky-button" data-mobile-checkout-next>
+            <span data-mobile-checkout-label>Continue to Address</span>
+            <span aria-hidden="true">→</span>
+        </button>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const panels = [...document.querySelectorAll('[data-checkout-screen-step]')];
+            const indicators = [...document.querySelectorAll('[data-checkout-screen-indicator]')];
+            const shipping = document.getElementById('checkoutShippingAddress');
+            const addressText = document.getElementById('checkoutAddressText');
+            const name = document.getElementById('checkoutName');
+            const phone = document.getElementById('checkoutPhone');
+
+            const syncAddress = () => {
+                if (!shipping) return;
+                shipping.value = addressText?.value.trim() || '';
+                const reviewName = document.getElementById('reviewName');
+                const reviewAddress = document.getElementById('reviewAddress');
+                if (reviewName) reviewName.textContent = name?.value.trim() || 'Customer';
+                if (reviewAddress) reviewAddress.textContent = shipping.value;
+            };
+
+            let showStep = step => {
+                panels.forEach(panel => {
+                    const active = Number(panel.dataset.checkoutScreenStep) === step;
+                    panel.hidden = !active;
+                    panel.classList.toggle('is-visible', active);
+                });
+
+                indicators.forEach(indicator => {
+                    const current = Number(indicator.dataset.checkoutScreenIndicator);
+                    indicator.classList.toggle('is-active', current === step);
+                    indicator.classList.toggle('is-complete', current < step);
+                });
+
+                syncAddress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            document.querySelectorAll('[data-saved-address]').forEach(button => {
+                button.addEventListener('click', () => {
+                    addressText.value = button.dataset.savedAddress || '';
+                    name.value = button.dataset.savedName || '';
+                    phone.value = button.dataset.savedMobile || '';
+                    document.querySelectorAll('[data-saved-address]').forEach(x => x.classList.remove('is-selected'));
+                    button.classList.add('is-selected');
+                    syncAddress();
+                });
+            });
+
+            document.querySelectorAll('[data-checkout-screen-next]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const step = Number(button.dataset.checkoutScreenNext);
+
+                    if (step === 2) {
+                        showStep(2);
+                        return;
+                    }
+
+                    if (step === 3 && !addressText?.value.trim()) {
+                        alert('Please enter or select a shipping address.');
+                        addressText?.focus();
+                        return;
+                    }
+
+                    syncAddress();
+                    showStep(step);
+                });
+            });
+
+            document.querySelectorAll('[data-checkout-screen-back]').forEach(button => {
+                button.addEventListener('click', () => showStep(Number(button.dataset.checkoutScreenBack)));
+            });
+
+            addressText?.addEventListener('input', syncAddress);
+            name?.addEventListener('input', syncAddress);
+
+            document.querySelector('[data-mobile-checkout-next]')?.addEventListener('click', () => {
+                const activePanel = document.querySelector('[data-checkout-screen-step].is-visible');
+                const currentStep = Number(activePanel?.dataset.checkoutScreenStep || 1);
+                const button = document.querySelector(
+                    '[data-checkout-screen-next="' + (currentStep + 1) + '"]'
+                );
+
+                if (currentStep < 4) {
+                    button?.click();
+                    return;
+                }
+
+                document.getElementById('checkoutScreenForm')?.requestSubmit();
+            });
+
+            const updateMobileCheckoutLabel = () => {
+                const activePanel = document.querySelector('[data-checkout-screen-step].is-visible');
+                const step = Number(activePanel?.dataset.checkoutScreenStep || 1);
+                const label = document.querySelector('[data-mobile-checkout-label]');
+                if (!label) return;
+
+                label.textContent = step === 1
+                    ? 'Continue to Address'
+                    : step === 2
+                        ? 'Continue to Payment'
+                        : step === 3
+                            ? 'Review Order'
+                            : 'Pay ₹@total.ToString("N0")';
+            };
+
+            const originalShowStep = showStep;
+            showStep = step => {
+                originalShowStep(step);
+                updateMobileCheckoutLabel();
+            };
+
+            document.getElementById('checkoutScreenForm')?.addEventListener('submit', event => {
+                syncAddress();
+                if (!shipping?.value.trim()) {
+                    event.preventDefault();
+                    showStep(2);
+                    alert('Please enter your shipping address.');
+                }
+            });
+
+            showStep(1);
+        })();
+    </script>
+}

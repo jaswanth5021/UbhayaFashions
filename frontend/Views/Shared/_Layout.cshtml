@@ -4,6 +4,8 @@
 @inject IMemoryCache ProductCache
 @{
     var pageTitle = ViewData["Title"]?.ToString() ?? "Home";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
     var cartItems = new List<LadiesDressStore.Web.Models.CartItemViewModel>();
     var cartCookie = Context.Request.Cookies["cart"];
     if (!string.IsNullOrWhiteSpace(cartCookie))
@@ -102,6 +104,10 @@
     <link rel="stylesheet"
       href="~/css/pages/account/profile.css"
       asp-append-version="true" />      
+
+    <link rel="stylesheet"
+          href="~/css/pages/cart/checkout.css"
+          asp-append-version="true" />
 </head>
 
 <body>
@@ -111,7 +117,11 @@
          ========================================= -->
 
     <div class="announcement-bar">
-        ✦ NEW COLLECTIONS ARE COMING ✦
+        <span>FREE SHIPPING ACROSS INDIA</span>
+        <i aria-hidden="true">·</i>
+        @* <span>EASY RETURNS</span> *@
+        <i aria-hidden="true">·</i>
+        <span>SECURE PAYMENTS</span>
     </div>
 
 
@@ -145,6 +155,26 @@
                  alt="UBHAYA FASHIONS" />
 
         </a>
+
+        <nav class="desktop-primary-nav" aria-label="Main navigation">
+            <a asp-controller="Products" asp-action="Index">NEW ARRIVALS</a>
+            <a asp-controller="Products" asp-action="Index">DRESSES</a>
+            <a asp-controller="Products" asp-action="Index">KURTIS</a>
+            <a asp-controller="Products" asp-action="Categories">COLLECTIONS</a>
+            <a asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">BEST SELLERS</a>
+            <a asp-controller="Home" asp-action="Index">ABOUT</a>
+            <a asp-controller="Contact" asp-action="Index">CONTACT</a>
+        </nav>
+
+        <form class="desktop-header-search" asp-controller="Products" asp-action="Index" method="get" role="search">
+            <input type="search" name="search" placeholder="Search sarees, kurtis, dresses..." aria-label="Search products" autocomplete="off" />
+            <button type="submit" aria-label="Search">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-4-4"></path>
+                </svg>
+            </button>
+        </form>
 
 
         <!-- =====================================
@@ -188,7 +218,7 @@
             {
                 <a asp-controller="Account"
                    asp-action="Profile"
-                   class="header-icon"
+                   class="header-icon header-account-icon"
                    aria-label="My account">
 
                     <svg width="22"
@@ -214,7 +244,7 @@
             {
                 <a asp-controller="Account"
                    asp-action="Login"
-                   class="header-icon"
+                   class="header-icon header-account-icon"
                    aria-label="Login">
 
                     <svg width="22"
@@ -483,7 +513,7 @@
             <p>Taxes, discounts and shipping calculated at checkout.</p>
             @if (cartItems.Count > 0 && User.Identity?.IsAuthenticated == true)
             {
-                <button class="cart-drawer-checkout" type="button" id="cartDrawerBeginCheckout">Checkout</button>
+                <a class="cart-drawer-checkout" asp-controller="Orders" asp-action="Checkout">Checkout</a>
             }
             else if (cartItems.Count > 0)
             {
@@ -500,6 +530,37 @@
 
     @await Html.PartialAsync("_Footer")
 
+    <!-- Mobile bottom navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+        <a asp-controller="Home" asp-action="Index" class="mobile-bottom-nav-item @(currentController == "Home" ? "is-active" : "")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg>
+            <span>Home</span>
+        </a>
+        <a asp-controller="Account" asp-action="@(User.Identity?.IsAuthenticated == true ? "Profile" : "Login")" class="mobile-bottom-nav-item @(currentController == "Account" ? "is-active" : "")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+            <span>Account</span>
+        </a>
+        <a asp-controller="Products" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-shop @(currentController == "Products" ? "is-active" : "")">
+            <span class="mobile-bottom-nav-shop-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 10.5h16l-1.4-5H5.4L4 10.5Z"/>
+                    <path d="M5 10.5V20h14v-9.5"/>
+                    <path d="M4 10.5c0 1.4 1.1 2.5 2.5 2.5S9 11.9 9 10.5c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5"/>
+                    <path d="M9 20v-4h6v4"/>
+                </svg>
+            </span>
+            <span>Shop</span>
+        </a>
+        <a asp-controller="Cart" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-cart @(currentController == "Cart" ? "is-active" : "")">
+            @if (cartCount > 0)
+            {
+                <span class="mobile-bottom-nav-badge">@cartCount</span>
+            }
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-1 13H5L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+            <span>Cart</span>
+        </a>
+    </nav>
+
 
     <!-- =========================================
          JAVASCRIPT
@@ -512,6 +573,7 @@
     <script src="~/js/cart-update.js" asp-append-version="true"></script>
     <script src="~/js/checkout-address.js" asp-append-version="true"></script>
     <script src="~/js/search.js" asp-append-version="true"></script>
+    <script src="~/js/product-carousel.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync(
         "Scripts",

@@ -16,6 +16,25 @@ public class OrdersController(ApiService api) : Controller
         return View();
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Checkout()
+    {
+        var cart = ReadCart();
+        if (cart.Count == 0)
+            return RedirectToAction("Index", "Cart");
+
+        var savedAddresses = new List<SavedAddressViewModel>();
+        try
+        {
+            savedAddresses = await api.GetMyAddressesAsync();
+        }
+        catch (HttpRequestException) { }
+        catch (JsonException) { }
+
+        ViewBag.SavedAddresses = savedAddresses;
+        return View(cart);
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateOrderViewModel model)

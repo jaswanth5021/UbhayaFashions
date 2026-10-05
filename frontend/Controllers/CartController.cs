@@ -19,41 +19,14 @@ public class CartController : Controller
         this.productCache = productCache;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        var cart = GetCart();
-        var cartVariants = new Dictionary<int, List<ProductVariantViewModel>>();
-        var productTasks = cart.Select(item => item.ProductId).Distinct().Select(async productId =>
+        if (User.Identity?.IsAuthenticated != true)
         {
-            try
-            {
-                var product = await productCache.GetOrCreateAsync($"cart-product:{productId}", async entry =>
-                {
-                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60);
-                    return await api.GetProductAsync(productId);
-                });
-                return (Id: productId, Variants: product?.Variants);
-            }
-            catch (HttpRequestException) { return (Id: productId, Variants: (List<ProductVariantViewModel>?)null); }
-            catch (JsonException) { return (Id: productId, Variants: (List<ProductVariantViewModel>?)null); }
-        });
-        foreach (var productData in await Task.WhenAll(productTasks))
-            if (productData.Variants is not null) cartVariants[productData.Id] = productData.Variants;
-        ViewBag.CartVariants = cartVariants;
-
-        var savedAddresses = new List<SavedAddressViewModel>();
-        if (User.Identity?.IsAuthenticated == true)
-        {
-            try
-            {
-                savedAddresses = await api.GetMyAddressesAsync();
-            }
-            catch (HttpRequestException) { }
-            catch (JsonException) { }
+            return RedirectToAction("Login", "Account", new { returnUrl = "/Orders/Checkout" });
         }
 
-        ViewBag.SavedAddresses = savedAddresses;
-        return View(cart);
+        return RedirectToAction("Checkout", "Orders");
     }
 
     [HttpPost]

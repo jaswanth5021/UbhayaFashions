@@ -1,107 +1,327 @@
 @model List<CartItemViewModel>
 @{
-    ViewData["Title"] = "Cart";
+    ViewData["Title"] = "Checkout";
     var total = Model.Sum(x => x.Price * x.Quantity);
     var savedAddresses = ViewBag.SavedAddresses as List<SavedAddressViewModel> ?? [];
     var cartVariants = ViewBag.CartVariants as Dictionary<int, List<ProductVariantViewModel>> ?? new();
 }
-<h1>Your Cart</h1>
 
-@if (TempData["CartMessage"] is string cartMessage)
-{
-    <p class="cart-message">@cartMessage</p>
-}
-@if (TempData["CartError"] is string cartError)
-{
-    <p class="cart-message cart-message-error" role="alert">@cartError</p>
-}
+<section class="checkout-page">
+    <header class="checkout-header">
+        <p class="checkout-eyebrow">UBHAYA FASHIONS</p>
+        <h1>Checkout</h1>
 
-@if (Model.Count == 0)
-{
-    <p>Your cart is empty.</p>
-}
-else
-{
-    @foreach (var item in Model)
-    {
-        <div class="cart-row">
-            <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
-            <div>
-                <h3>@item.Name</h3>
-                <form asp-action="Update" method="post" class="cart-item-update" data-cart-update>
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="productId" value="@item.ProductId" />
-                    <input type="hidden" name="currentSize" value="@item.Size" />
-                    <input type="hidden" name="returnUrl" value="/Cart" />
-                    <label>Size <select name="size" data-cart-size>
-                        @foreach (var variant in cartVariants.GetValueOrDefault(item.ProductId, []).Where(variant => variant.Stock > 0).OrderBy(variant => variant.Size))
-                        {
-                            <option value="@variant.Size" data-stock="@variant.Stock" selected="@(string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@variant.Size</option>
-                        }
-                    </select></label>
-                    @{ var selectedVariant = cartVariants.GetValueOrDefault(item.ProductId, []).FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase)); }
-                    <label>Qty <select name="quantity" data-cart-quantity>
-                        @for (var qty = 1; qty <= Math.Max(1, selectedVariant?.Stock ?? item.Quantity); qty++)
-                        {
-                            <option value="@qty" selected="@(qty == item.Quantity ? "selected" : null)">@qty</option>
-                        }
-                    </select></label>
-                </form>
-                <strong>₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+        <div class="checkout-steps" aria-label="Checkout progress">
+            <div class="checkout-step is-active" data-step-indicator="1">
+                <span>1</span><strong>Bag</strong>
             </div>
-            <form asp-action="Remove" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="productId" value="@item.ProductId" />
-                <input type="hidden" name="size" value="@item.Size" />
-                <button type="submit">Remove</button>
-            </form>
+            <span class="checkout-step-line"></span>
+            <div class="checkout-step" data-step-indicator="2">
+                <span>2</span><strong>Address</strong>
+            </div>
+            <span class="checkout-step-line"></span>
+            <div class="checkout-step" data-step-indicator="3">
+                <span>3</span><strong>Payment</strong>
+            </div>
         </div>
+    </header>
+
+    @if (TempData["CartMessage"] is string cartMessage)
+    {
+        <p class="checkout-message success" role="status">@cartMessage</p>
+    }
+    @if (TempData["CartError"] is string cartError)
+    {
+        <p class="checkout-message error" role="alert">@cartError</p>
+    }
+    @if (TempData["Error"] is string orderError)
+    {
+        <p class="checkout-message error" role="alert">@orderError</p>
     }
 
-    <h2>Total: ₹@total.ToString("N0")</h2>
-
-    @if (User.Identity?.IsAuthenticated == true)
+    @if (Model.Count == 0)
     {
-        <form asp-controller="Orders" asp-action="Checkout" method="post" class="checkout">
-            @Html.AntiForgeryToken()
-            @if (savedAddresses.Count > 0)
-            {
-                <fieldset class="saved-address-list">
-                    <legend>Select a delivery address</legend>
-                    @for (var index = 0; index < savedAddresses.Count; index++)
-                    {
-                        var savedAddress = savedAddresses[index];
-                        <label class="saved-address-option">
-                            <input type="radio" name="savedAddressChoice" value="@index" data-address="@savedAddress.FullAddress" @(index == 0 ? "checked" : null) />
-                            <span class="saved-address-marker" aria-hidden="true"></span>
-                            <span class="saved-address-copy">
-                                <strong>@savedAddress.Name</strong>
-                                <span>@savedAddress.FullAddress</span>
-                                @if (!string.IsNullOrWhiteSpace(savedAddress.Mobile))
-                                {
-                                    <span>@savedAddress.Mobile</span>
-                                }
-                            </span>
-                        </label>
-                    }
-                </fieldset>
-            }
-            <button type="button" class="add-new-address" id="addNewAddress">＋ Add new address</button>
-            <p class="address-autocomplete-label">Find your address</p>
-            <div id="shippingAddressAutocomplete" data-google-maps-key="@Configuration["Google:MapsApiKey"]"></div>
-            <p class="address-autocomplete-hint">Search and select a Google suggestion, or enter your full address below.</p>
-            <label for="shippingAddress">Delivery Address</label>
-            <textarea id="shippingAddress" name="ShippingAddress" required placeholder="Full delivery address"></textarea>
-            <button class="button" type="submit">Pay Online with Razorpay</button>
-        </form>
+        <div class="checkout-empty">
+            <h2>Your bag is empty</h2>
+            <p>Add something beautiful to your bag before checkout.</p>
+            <a class="checkout-primary-link" asp-controller="Products" asp-action="Index">CONTINUE SHOPPING</a>
+        </div>
     }
     else
     {
-        <a class="button" asp-controller="Account" asp-action="Login">Login to Checkout</a>
+        <div class="checkout-layout">
+
+            <div class="checkout-main">
+
+                <!-- STEP 1: BAG -->
+                <section class="checkout-panel checkout-panel-step is-visible" data-checkout-step="1">
+                    <div class="checkout-panel-heading">
+                        <div>
+                            <span class="checkout-panel-kicker">STEP 1</span>
+                            <h2>Your Bag</h2>
+                        </div>
+                        <span class="checkout-item-count">@Model.Sum(x => x.Quantity) item(s)</span>
+                    </div>
+
+                    <div class="checkout-cart-list">
+                        @foreach (var item in Model)
+                        {
+                            var selectedVariant = cartVariants.GetValueOrDefault(item.ProductId, []).FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase));
+                            <article class="checkout-cart-item">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" class="checkout-cart-image">
+                                    <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
+                                </a>
+
+                                <div class="checkout-cart-info">
+                                    <p class="checkout-cart-category">UBHAYA COLLECTION</p>
+                                    <h3><a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId">@item.Name</a></h3>
+                                    <p class="checkout-cart-meta">Size: <strong>@item.Size</strong></p>
+
+                                    <form asp-action="Update" method="post" class="checkout-cart-update" data-cart-update>
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <input type="hidden" name="currentSize" value="@item.Size" />
+                                        <input type="hidden" name="returnUrl" value="/Cart" />
+
+                                        <label>Size
+                                            <select name="size" data-cart-size>
+                                                @foreach (var variant in cartVariants.GetValueOrDefault(item.ProductId, []).Where(v => v.Stock > 0).OrderBy(v => v.Size))
+                                                {
+                                                    <option value="@variant.Size" data-stock="@variant.Stock" selected="@(string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@variant.Size</option>
+                                                }
+                                            </select>
+                                        </label>
+
+                                        <label>Qty
+                                            <select name="quantity" data-cart-quantity>
+                                                @for (var qty = 1; qty <= Math.Max(1, selectedVariant?.Stock ?? item.Quantity); qty++)
+                                                {
+                                                    <option value="@qty" selected="@(qty == item.Quantity ? "selected" : null)">@qty</option>
+                                                }
+                                            </select>
+                                        </label>
+                                    </form>
+                                </div>
+
+                                <div class="checkout-cart-price">
+                                    <strong>₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+                                    <form asp-action="Remove" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <input type="hidden" name="size" value="@item.Size" />
+                                        <button type="submit">Remove</button>
+                                    </form>
+                                </div>
+                            </article>
+                        }
+                    </div>
+
+                    <div class="checkout-panel-footer">
+                        <a class="checkout-back-shopping" asp-controller="Products" asp-action="Index">← Continue shopping</a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a class="checkout-next-button" asp-controller="Orders" asp-action="Checkout">CONTINUE TO CHECKOUT</a>
+                        }
+                        else
+                        {
+                            <a class="checkout-next-button" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Cart">LOGIN TO CHECKOUT</a>
+                        }
+                    </div>
+                </section>
+
+                <!-- STEP 2: ADDRESS -->
+                <section class="checkout-panel checkout-panel-step" data-checkout-step="2" hidden>
+                    <div class="checkout-panel-heading">
+                        <div>
+                            <span class="checkout-panel-kicker">STEP 2</span>
+                            <h2>Delivery Address</h2>
+                        </div>
+                        <button type="button" class="checkout-step-back" data-go-step="1">← Back to bag</button>
+                    </div>
+
+                    <form asp-controller="Orders" asp-action="Checkout" method="post" class="checkout-address-form" id="checkoutForm">
+                        @Html.AntiForgeryToken()
+
+                        @if (savedAddresses.Count > 0)
+                        {
+                            <fieldset class="checkout-saved-addresses">
+                                <legend>Select a delivery address</legend>
+
+                                @for (var index = 0; index < savedAddresses.Count; index++)
+                                {
+                                    var savedAddress = savedAddresses[index];
+                                    <label class="checkout-address-card">
+                                        <input type="radio"
+                                               name="savedAddressChoice"
+                                               value="@index"
+                                               data-address="@savedAddress.FullAddress"
+                                               @(index == 0 ? "checked" : null) />
+                                        <span class="checkout-address-radio" aria-hidden="true"></span>
+                                        <span class="checkout-address-copy">
+                                            <strong>@savedAddress.Name</strong>
+                                            <span>@savedAddress.FullAddress</span>
+                                            @if (!string.IsNullOrWhiteSpace(savedAddress.Mobile))
+                                            {
+                                                <small>@savedAddress.Mobile</small>
+                                            }
+                                        </span>
+                                    </label>
+                                }
+                            </fieldset>
+                        }
+
+                        <button type="button" class="checkout-add-address" id="addNewAddress">＋ Add new address</button>
+
+                        <div class="checkout-new-address">
+                            <p class="checkout-form-label">Delivery Address</p>
+                            <div id="shippingAddressAutocomplete" data-google-maps-key="@Configuration["Google:MapsApiKey"]"></div>
+                            <p class="address-autocomplete-hint">Search and select a Google suggestion, or enter your full address below.</p>
+                            <textarea id="shippingAddress" name="ShippingAddress" required placeholder="Full delivery address"></textarea>
+                        </div>
+
+                        <div class="checkout-panel-footer">
+                            <button type="button" class="checkout-step-back" data-go-step="1">← Back to bag</button>
+                            <button type="button" class="checkout-next-button" data-next-step="3" id="continueToPayment">CONTINUE TO PAYMENT</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- STEP 3: PAYMENT -->
+                <section class="checkout-panel checkout-panel-step" data-checkout-step="3" hidden>
+                    <div class="checkout-panel-heading">
+                        <div>
+                            <span class="checkout-panel-kicker">STEP 3</span>
+                            <h2>Payment</h2>
+                        </div>
+                        <button type="button" class="checkout-step-back" data-go-step="2">← Back to address</button>
+                    </div>
+
+                    <div class="checkout-payment-card">
+                        <div class="checkout-payment-method">
+                            <span class="checkout-payment-icon">₹</span>
+                            <div>
+                                <strong>Razorpay Secure Payment</strong>
+                                <p>Pay securely using UPI, cards, net banking or supported wallets.</p>
+                            </div>
+                        </div>
+
+                        <div class="checkout-payment-summary">
+                            <div><span>Items</span><strong>@Model.Sum(x => x.Quantity)</strong></div>
+                            <div><span>Subtotal</span><strong>₹@total.ToString("N0")</strong></div>
+                            <div><span>Shipping</span><strong>FREE</strong></div>
+                            <div class="checkout-payment-total"><span>Total</span><strong>₹@total.ToString("N0")</strong></div>
+                        </div>
+
+                        <div class="checkout-selected-address" id="checkoutSelectedAddress">
+                            <span>DELIVERING TO</span>
+                            <strong></strong>
+                            <p></p>
+                        </div>
+                    </div>
+
+                    <div class="checkout-panel-footer">
+                        <button type="button" class="checkout-step-back" data-go-step="2">← Change address</button>
+                        <button type="submit" form="checkoutForm" class="checkout-pay-button">PAY ₹@total.ToString("N0") WITH RAZORPAY</button>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="checkout-summary">
+                <p class="checkout-summary-kicker">ORDER SUMMARY</p>
+                <div class="checkout-summary-line"><span>Subtotal</span><strong>₹@total.ToString("N0")</strong></div>
+                <div class="checkout-summary-line"><span>Shipping</span><strong class="checkout-free">FREE</strong></div>
+                <div class="checkout-summary-divider"></div>
+                <div class="checkout-summary-total"><span>Total</span><strong>₹@total.ToString("N0")</strong></div>
+                <div class="checkout-trust">
+                    <span>✓ Secure checkout</span>
+                    @* <span>✓ Easy returns</span> *@
+                    <span>✓ Fast dispatch</span>
+                </div>
+            </aside>
+        </div>
     }
-}
+</section>
 
 @section Scripts {
     <script src="~/js/address-autocomplete.js" asp-append-version="true"></script>
     <script src="~/js/saved-addresses.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            const panels = [...document.querySelectorAll('[data-checkout-step]')];
+            const indicators = [...document.querySelectorAll('[data-step-indicator]')];
+            const form = document.getElementById('checkoutForm');
+            const address = document.getElementById('shippingAddress');
+            const selectedAddressBox = document.getElementById('checkoutSelectedAddress');
+
+            const selectedOption = () => document.querySelector('input[name="savedAddressChoice"]:checked');
+
+            const updateSelectedAddress = () => {
+                const option = selectedOption();
+                if (!selectedAddressBox || !option) return;
+                const strong = selectedAddressBox.querySelector('strong');
+                const text = selectedAddressBox.querySelector('p');
+                if (strong) strong.textContent = 'Selected delivery address';
+                if (text) text.textContent = option.dataset.address || address?.value || '';
+            };
+
+            const showStep = step => {
+                panels.forEach(panel => {
+                    const active = Number(panel.dataset.checkoutStep) === step;
+                    panel.hidden = !active;
+                    panel.classList.toggle('is-visible', active);
+                });
+
+                indicators.forEach(indicator => {
+                    const current = Number(indicator.dataset.stepIndicator);
+                    indicator.classList.toggle('is-active', current === step);
+                    indicator.classList.toggle('is-complete', current < step);
+                });
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (step === 3) updateSelectedAddress();
+            };
+
+            document.querySelectorAll('[data-next-step]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const step = Number(button.dataset.nextStep);
+
+                    if (step === 3) {
+                        if (!address?.value.trim()) {
+                            alert('Please select or enter a delivery address.');
+                            return;
+                        }
+                        updateSelectedAddress();
+                    }
+
+                    showStep(step);
+                });
+            });
+
+            document.querySelectorAll('[data-go-step]').forEach(button => {
+                button.addEventListener('click', () => showStep(Number(button.dataset.goStep)));
+            });
+
+            document.querySelectorAll('input[name="savedAddressChoice"]').forEach(option => {
+                option.addEventListener('change', () => {
+                    if (address) address.value = option.dataset.address || '';
+                    updateSelectedAddress();
+                });
+            });
+
+            address?.addEventListener('input', () => {
+                document.querySelectorAll('input[name="savedAddressChoice"]').forEach(option => option.checked = false);
+                updateSelectedAddress();
+            });
+
+            form?.addEventListener('submit', event => {
+                if (!address?.value.trim()) {
+                    event.preventDefault();
+                    showStep(2);
+                    alert('Please select or enter a delivery address.');
+                }
+            });
+
+            showStep(1);
+        })();
+    </script>
 }

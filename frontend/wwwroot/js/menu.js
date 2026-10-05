@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const menuOverlay =
         document.getElementById("menuOverlay");
 
+    const sideMenuSearch =
+        document.getElementById("sideMenuSearch");
+
+    const headerSearchOpen =
+        document.getElementById("headerSearchOpen");
+
 
     function openMenu() {
 
@@ -68,6 +74,15 @@ document.addEventListener("DOMContentLoaded", function () {
             closeMenu
         );
 
+    }
+
+    if (sideMenuSearch && headerSearchOpen) {
+        sideMenuSearch.addEventListener("click", function () {
+            closeMenu();
+            window.setTimeout(function () {
+                headerSearchOpen.click();
+            }, 180);
+        });
     }
 
 

@@ -1,5 +1,5 @@
 <footer class="site-footer">
-    <div class="footer-main">
+    <div class="footer-main footer-main-desktop">
         <div class="footer-column footer-about">
             <a class="footer-brand" asp-controller="Home" asp-action="Index" aria-label="Ubhaya Fashions home">
                 <img src="~/images/logo.png" alt="Ubhaya Fashions" />
@@ -34,6 +34,43 @@
         </div>
     </div>
 
+    <div class="footer-mobile">
+        <div class="footer-mobile-brand">
+            <a class="footer-brand" asp-controller="Home" asp-action="Index" aria-label="Ubhaya Fashions home">
+                <img src="~/images/logo.png" alt="Ubhaya Fashions" />
+            </a>
+            <p>Discover the Ubhaya Fashions collection, where timeless elegance meets contemporary style. Explore thoughtfully curated women’s fashion designed to make every occasion beautifully yours.</p>
+        </div>
+
+        <details class="footer-accordion">
+            <summary>Quick Links <span aria-hidden="true">+</span></summary>
+            <ul>
+                <li><a asp-controller="Products" asp-action="Index">Collections</a></li>
+                <li><a asp-controller="Products" asp-action="Index">Shop All</a></li>
+                <li><a asp-controller="Home" asp-action="Index">About Ubhaya</a></li>
+                <li><a asp-controller="Contact" asp-action="Index">Contact Us</a></li>
+            </ul>
+        </details>
+
+        <details class="footer-accordion">
+            <summary>Customer Info <span aria-hidden="true">+</span></summary>
+            <ul>
+                <li><a asp-controller="Shipping" asp-action="Index">Shipping Info</a></li>
+                <li><a asp-controller="Shipping" asp-action="Index">Returns &amp; Exchanges</a></li>
+                <li><a href="/Home/Privacy">Privacy Policy</a></li>
+                <li><a href="/Home/Terms">Terms and Conditions</a></li>
+            </ul>
+        </details>
+
+        <details class="footer-accordion">
+            <summary>Need Help? <span aria-hidden="true">+</span></summary>
+            <div class="footer-mobile-help">
+                <p>Questions about an order or our collection?</p>
+                <a asp-controller="Contact" asp-action="Index">Contact Ubhaya Fashions <span aria-hidden="true">→</span></a>
+            </div>
+        </details>
+    </div>
+
     <div class="footer-benefits" aria-label="Shopping benefits">
         <div class="footer-benefit">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
@@ -47,10 +84,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
             <strong>Secure Payment</strong><span>Safe checkout</span>
         </div>
-        <div class="footer-benefit">
+        @* <div class="footer-benefit">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2.6 6.4M3 4v7h7"/></svg>
             <strong>Easy Returns</strong><span>Hassle-free support</span>
-        </div>
+        </div> *@
     </div>
 
     <div class="footer-bottom">

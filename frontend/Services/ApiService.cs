@@ -44,20 +44,41 @@ public class ApiService(
     // PRODUCTS
     // =====================================================
 
-    public async Task<List<ProductViewModel>>
-        GetProductsAsync(string? search = null)
+    public async Task<List<ProductViewModel>> GetProductsAsync(
+        string? search = null,
+        string? category = null,
+        string? size = null,
+        string? color = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null,
+        string? availability = null,
+        bool bestSellers = false,
+        string? sort = null)
     {
-        var url = "api/products";
+        var query = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(search))
-        {
-            url += $"?search={Uri.EscapeDataString(search.Trim())}";
-        }
+            query.Add($"search={Uri.EscapeDataString(search.Trim())}");
+        if (!string.IsNullOrWhiteSpace(category))
+            query.Add($"category={Uri.EscapeDataString(category.Trim())}");
+        if (!string.IsNullOrWhiteSpace(size))
+            query.Add($"size={Uri.EscapeDataString(size.Trim())}");
+        if (!string.IsNullOrWhiteSpace(color))
+            query.Add($"color={Uri.EscapeDataString(color.Trim())}");
+        if (minPrice.HasValue)
+            query.Add($"minPrice={minPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        if (maxPrice.HasValue)
+            query.Add($"maxPrice={maxPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        if (!string.IsNullOrWhiteSpace(availability))
+            query.Add($"availability={Uri.EscapeDataString(availability.Trim())}");
+        if (bestSellers)
+            query.Add("bestSellers=true");
+        if (!string.IsNullOrWhiteSpace(sort))
+            query.Add($"sort={Uri.EscapeDataString(sort.Trim())}");
 
-        return await Client
-            .GetFromJsonAsync<
-                List<ProductViewModel>>(url)
-            ?? [];
+        var url = "api/products" + (query.Count > 0 ? "?" + string.Join("&", query) : "");
+
+        return await Client.GetFromJsonAsync<List<ProductViewModel>>(url) ?? [];
     }
 
 
@@ -68,6 +89,47 @@ public class ApiService(
             .GetFromJsonAsync<
                 ProductViewModel>(
                 $"api/products/{id}");
+    }
+
+    public async Task<ProductReviewsViewModel> GetProductReviewsAsync(int productId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/products/{productId}/reviews");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Reviews API returned {(int)response.StatusCode} ({response.StatusCode}).", null, response.StatusCode);
+
+        return await response.Content.ReadFromJsonAsync<ProductReviewsViewModel>()
+            ?? new ProductReviewsViewModel();
+    }
+
+    public async Task<(bool Success, string Message)> SubmitProductReviewAsync(
+        int productId,
+        ProductReviewSubmissionViewModel model)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/products/{productId}/reviews");
+        AddToken(request);
+        request.Content = JsonContent.Create(new
+        {
+            rating = model.Rating,
+            title = model.Title,
+            comment = model.Comment
+        });
+
+        using var response = await Client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+
+        return response.IsSuccessStatusCode
+            ? (true, string.Empty)
+            : (false, string.IsNullOrWhiteSpace(body)
+                ? $"Review submission failed ({(int)response.StatusCode})."
+                : body);
+    }
+
+
+    public async Task<List<RelatedProductViewModel>> GetRelatedProductsAsync(int id)
+    {
+        return await Client.GetFromJsonAsync<List<RelatedProductViewModel>>($"api/products/{id}/related") ?? [];
     }
 
 
