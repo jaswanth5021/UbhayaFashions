@@ -4,6 +4,8 @@
 @inject IMemoryCache ProductCache
 @{
     var pageTitle = ViewData["Title"]?.ToString() ?? "Home";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
     var cartItems = new List<LadiesDressStore.Web.Models.CartItemViewModel>();
     var cartCookie = Context.Request.Cookies["cart"];
     if (!string.IsNullOrWhiteSpace(cartCookie))
@@ -526,19 +528,19 @@
 
     <!-- Mobile bottom navigation -->
     <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
-        <a asp-controller="Home" asp-action="Index" class="mobile-bottom-nav-item">
+        <a asp-controller="Home" asp-action="Index" class="mobile-bottom-nav-item @(currentController == "Home" ? "is-active" : "")">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg>
             <span>Home</span>
         </a>
-        <a asp-controller="Account" asp-action="@(User.Identity?.IsAuthenticated == true ? "Profile" : "Login")" class="mobile-bottom-nav-item">
+        <a asp-controller="Account" asp-action="@(User.Identity?.IsAuthenticated == true ? "Profile" : "Login")" class="mobile-bottom-nav-item @(currentController == "Account" ? "is-active" : "")">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
             <span>Account</span>
         </a>
-        <a asp-controller="Products" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-shop">
+        <a asp-controller="Products" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-shop @(currentController == "Products" ? "is-active" : "")">
             <span class="mobile-bottom-nav-shop-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-1 13H5L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg></span>
             <span>Shop</span>
         </a>
-        <a asp-controller="Cart" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-cart">
+        <a asp-controller="Cart" asp-action="Index" class="mobile-bottom-nav-item mobile-bottom-nav-cart @(currentController == "Cart" ? "is-active" : "")">
             @if (cartCount > 0)
             {
                 <span class="mobile-bottom-nav-badge">@cartCount</span>
