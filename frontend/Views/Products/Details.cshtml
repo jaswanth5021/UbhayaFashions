@@ -448,28 +448,17 @@
                                         data-size="@size"
                                         data-price="@((variant?.Price ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
                                         data-discount="@((variant?.Discount ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
-                                        data-stock="@(variant?.Stock ?? 0)"
+                                        data-stock="@variant!.Stock"
                                         aria-pressed="false"
-                                        disabled="@(!isAvailable)"
-                                        title="@(isAvailable ? size : "Out of stock")">
+                                        title="@size available">
 
                                     <span class="product-size-label">
                                         @size
                                     </span>
 
-
-                                    @if (!isAvailable)
-                                    {
-                                        <span class="product-size-stock">
-                                            Out of stock
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="product-size-price">
-                                            ₹@variant!.Price.ToString("N0")
-                                        </span>
-                                    }
+                                    <span class="product-size-price">
+                                        ₹@variant.Price.ToString("N0")
+                                    </span>
 
                                 </button>
                             }
