@@ -336,11 +336,11 @@
         height: 44px;
         margin-top: -23px;
         place-items: center;
-        border: 3px solid #fff;
+        border: 2px solid #e7d9dd;
         border-radius: 50%;
-        background: #11112b;
-        color: #fff;
-        box-shadow: 0 5px 16px rgba(17, 17, 43, .24);
+        background: #fff;
+        color: #68142e;
+        box-shadow: 0 5px 16px rgba(17, 17, 43, .16);
     }
 
     .mobile-bottom-nav-shop-icon svg {
