@@ -51,6 +51,7 @@ public class ApiService(
         string? color = null,
         decimal? minPrice = null,
         decimal? maxPrice = null,
+        string? availability = null,
         bool bestSellers = false,
         string? sort = null)
     {
@@ -68,6 +69,8 @@ public class ApiService(
             query.Add($"minPrice={minPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
         if (maxPrice.HasValue)
             query.Add($"maxPrice={maxPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        if (!string.IsNullOrWhiteSpace(availability))
+            query.Add($"availability={Uri.EscapeDataString(availability.Trim())}");
         if (bestSellers)
             query.Add("bestSellers=true");
         if (!string.IsNullOrWhiteSpace(sort))
