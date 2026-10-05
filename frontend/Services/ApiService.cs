@@ -91,6 +91,42 @@ public class ApiService(
                 $"api/products/{id}");
     }
 
+    public async Task<ProductReviewsViewModel> GetProductReviewsAsync(int productId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/products/{productId}/reviews");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Reviews API returned {(int)response.StatusCode} ({response.StatusCode}).", null, response.StatusCode);
+
+        return await response.Content.ReadFromJsonAsync<ProductReviewsViewModel>()
+            ?? new ProductReviewsViewModel();
+    }
+
+    public async Task<(bool Success, string Message)> SubmitProductReviewAsync(
+        int productId,
+        ProductReviewSubmissionViewModel model)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/products/{productId}/reviews");
+        AddToken(request);
+        request.Content = JsonContent.Create(new
+        {
+            rating = model.Rating,
+            title = model.Title,
+            comment = model.Comment
+        });
+
+        using var response = await Client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+
+        return response.IsSuccessStatusCode
+            ? (true, string.Empty)
+            : (false, string.IsNullOrWhiteSpace(body)
+                ? $"Review submission failed ({(int)response.StatusCode})."
+                : body);
+    }
+
+
     public async Task<List<RelatedProductViewModel>> GetRelatedProductsAsync(int id)
     {
         return await Client.GetFromJsonAsync<List<RelatedProductViewModel>>($"api/products/{id}/related") ?? [];
