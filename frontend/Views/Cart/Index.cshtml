@@ -120,7 +120,7 @@
                         <a class="checkout-back-shopping" asp-controller="Products" asp-action="Index">← Continue shopping</a>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <button type="button" class="checkout-next-button" data-next-step="2">CONTINUE TO ADDRESS</button>
+                            <a class="checkout-next-button" asp-controller="Orders" asp-action="Checkout">CONTINUE TO CHECKOUT</a>
                         }
                         else
                         {
