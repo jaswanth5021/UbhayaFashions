@@ -8,6 +8,7 @@
 /backend/appsettings.json
 /backend/appsettings.*.json
 !/backend/appsettings.example.json
+!/backend/appsettings.Development.json
 **/secrets.json
 **/secrets.*.json
 
