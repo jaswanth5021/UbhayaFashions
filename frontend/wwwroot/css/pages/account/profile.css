@@ -370,6 +370,37 @@
 .profile-reset-note a,.auth-forgot-link a { color:#68142e; font-weight:650; }
 .auth-forgot-link { margin:-8px 0 18px; text-align:right; font-size:13px; }
 
+.profile-orders-panel { min-height:0; }
+.profile-orders-list { display:grid; gap:14px; }
+.profile-order-card { overflow:hidden; border:1px solid #e7dfe1; border-radius:12px; background:#fff; }
+.profile-order-header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 20px; }
+.profile-order-header > div { display:grid; gap:5px; }
+.profile-order-header > div span { color:#68142e; font-size:11px; font-weight:750; letter-spacing:.08em; }
+.profile-order-header time { color:#74666a; font-size:13px; }
+.profile-order-header > strong { color:#321e25; font-size:18px; white-space:nowrap; }
+.profile-order-badges { display:flex; flex-wrap:wrap; gap:8px; padding:12px 20px; background:#fcfaf8; }
+.profile-order-badges .order-status-pill,.profile-order-badges .order-payment-pill { min-height:28px; border-radius:99px; font-size:10px; letter-spacing:.03em; }
+.profile-order-details { border-top:1px solid #eee8e6; }
+.profile-order-details[hidden] { display:none; }
+.profile-order-items { padding:4px 20px; }
+.profile-order-items > div { display:grid; grid-template-columns:56px minmax(0,1fr) auto; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid #f0ebec; }
+.profile-order-items > div:last-child { border-bottom:0; }
+.profile-order-item > img,.profile-order-image-placeholder { display:block; width:56px; height:68px; border-radius:5px; background:#f7f1f3; object-fit:cover; }
+.profile-order-image-placeholder { display:grid; place-items:center; color:#8e6572; font-family:Georgia,"Times New Roman",serif; font-size:22px; }
+.profile-order-item-info { display:grid; gap:5px; min-width:0; }
+.profile-order-items > div > span strong { color:#302529; font-size:13px; }
+.profile-order-items small { color:#74666a; font-size:12px; }
+.profile-order-item-price { color:#302529; font-size:13px; white-space:nowrap; }
+.profile-order-footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px 20px; padding:14px 20px; border-top:1px solid #eee8e6; color:#51474a; font-size:12px; line-height:1.5; }
+.profile-order-footer > span { display:grid; gap:3px; }
+.profile-order-footer small { color:#74666a; font-size:11px; }
+.profile-orders-empty { display:grid; justify-items:center; padding:50px 20px; border:1px dashed #dfd5d8; border-radius:12px; background:#fcfafb; text-align:center; }
+.profile-orders-empty > span { color:#b48b98; font-size:36px; }
+.profile-orders-empty h3 { margin:10px 0 0; color:#321e25; font-family:Georgia,"Times New Roman",serif; font-size:22px; font-weight:400; }
+.profile-orders-empty p { margin:8px 0 18px; color:#74666a; font-size:13px; }
+.profile-orders-shop { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 17px; border-radius:6px; background:#68142e; color:#fff; font-size:12px; font-weight:700; text-decoration:none; }
+.profile-orders-shop:hover { background:#4f0d23; }
+
 @media (max-width:600px) {
     .profile-tabs { gap:3px; }
     .profile-tabs a { padding:10px 11px; font-size:12px; }
@@ -380,6 +411,8 @@
     .profile-address-card .profile-save-button { max-width:none; }
     .profile-add-address[open] { grid-column:auto; }
     .profile-address-editor .profile-form-grid { grid-template-columns:1fr; }
+    .profile-order-header,.profile-order-badges,.profile-order-items { padding-left:14px; padding-right:14px; }
+    .profile-order-footer { padding-left:14px; padding-right:14px; }
 }
 @media (min-width:601px) and (max-width:900px) { .profile-address-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .profile-email-verification {

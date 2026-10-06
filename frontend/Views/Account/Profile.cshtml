@@ -13,8 +13,8 @@
             <div class="profile-avatar">@firstLetter</div>
             <div class="profile-heading">
                 <span class="profile-eyebrow">ACCOUNT</span>
-                <h1>@(activeTab == "addresses" ? "Your Addresses" : "My Profile")</h1>
-                <p>@(activeTab == "addresses" ? "Manage the addresses you use for delivery." : "Manage your personal information, delivery addresses, and password.")</p>
+                <h1>@(activeTab == "addresses" ? "Your Addresses" : activeTab == "orders" ? "My Orders" : "My Profile")</h1>
+                <p>@(activeTab == "addresses" ? "Manage the addresses you use for delivery." : activeTab == "orders" ? "Track your purchases and review your order history." : "Manage your personal information, delivery addresses, and password.")</p>
             </div>
         </header>
 
@@ -25,6 +25,7 @@
         <nav class="profile-tabs" aria-label="Profile sections">
             <a class="@(activeTab == "details" ? "is-active" : "")" asp-action="Profile" asp-route-tab="details">Personal details</a>
             <a class="@(activeTab == "addresses" ? "is-active" : "")" asp-action="Profile" asp-route-tab="addresses">My addresses</a>
+            <a class="@(activeTab == "orders" ? "is-active" : "")" asp-action="Profile" asp-route-tab="orders">My orders</a>
             <a class="@(activeTab == "security" ? "is-active" : "")" asp-action="Profile" asp-route-tab="security">Password &amp; security</a>
         </nav>
 
@@ -123,6 +124,110 @@
                 </div>
             </section>
         }
+        else if (activeTab == "orders")
+        {
+            var orders = ViewBag.MyOrders as List<MyOrderViewModel> ?? [];
+            <section class="profile-tab-panel profile-orders-panel">
+                <div class="profile-panel-heading"><h2>Order history</h2><p>Review your purchases, order status, and payment details.</p></div>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.OrderLoadError))
+                {
+                    <div class="profile-error">@ViewBag.OrderLoadError</div>
+                }
+                else if (orders.Count == 0)
+                {
+                    <div class="profile-orders-empty">
+                        <span aria-hidden="true">♡</span>
+                        <h3>No orders yet</h3>
+                        <p>Once you place an order, its status and details will appear here.</p>
+                        <a asp-controller="Products" asp-action="Index" class="profile-orders-shop">Explore the collection</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="orders-toolbar" aria-label="Order filters and sorting">
+                        <div class="orders-filter-tabs" role="group" aria-label="Filter orders">
+                            <button type="button" class="orders-filter-tab is-active" data-order-filter="all" aria-pressed="true">All <span>@orders.Count</span></button>
+                            <button type="button" class="orders-filter-tab" data-order-filter="paid" aria-pressed="false">Paid</button>
+                            <button type="button" class="orders-filter-tab" data-order-filter="pending" aria-pressed="false">Pending</button>
+                            <button type="button" class="orders-filter-tab" data-order-filter="processing" aria-pressed="false">Processing</button>
+                            <button type="button" class="orders-filter-tab" data-order-filter="delivered" aria-pressed="false">Delivered</button>
+                        </div>
+                        <label class="orders-sort" for="profileOrdersSort"><span>Sort</span>
+                            <select id="profileOrdersSort">
+                                <option value="newest">Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                                <option value="high">Highest amount</option>
+                                <option value="low">Lowest amount</option>
+                            </select>
+                        </label>
+                        <span class="profile-orders-match-count" id="profileOrdersMatchCount" aria-live="polite">@orders.Count orders</span>
+                    </div>
+
+                    <div class="orders-list profile-orders-list" id="profileOrdersList">
+                        @foreach (var order in orders)
+                        {
+                            var statusClass = (order.Status ?? "").ToLowerInvariant().Replace(" ", "-");
+                            var paymentClass = (order.PaymentStatus ?? "").ToLowerInvariant().Replace(" ", "-");
+                            var canReviewOrder = string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(order.Status, "Delivered", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase);
+                            <article class="profile-order-card order-card"
+                                     data-profile-order-card
+                                     data-order-status="@((order.Status ?? "").ToLowerInvariant())"
+                                     data-payment-status="@((order.PaymentStatus ?? "").ToLowerInvariant())"
+                                     data-order-date="@order.CreatedDate.UtcDateTime.Ticks"
+                                     data-order-total="@order.TotalAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                <header class="profile-order-header">
+                                    <div><span>ORDER #@order.Id</span><time datetime="@order.CreatedDate.ToString("O")">@order.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</time></div>
+                                    <div class="order-card-heading-right">
+                                        <strong class="order-card-total">₹@order.TotalAmount.ToString("N0")</strong>
+                                        <button type="button" class="order-view-toggle" data-profile-order-toggle aria-expanded="false">View details <span aria-hidden="true">⌄</span></button>
+                                    </div>
+                                </header>
+                                <div class="profile-order-badges">
+                                    <span class="order-status-pill @statusClass">@order.Status</span>
+                                    <span class="order-payment-pill @paymentClass">Payment: @order.PaymentStatus</span>
+                                </div>
+                                <div class="profile-order-details" data-profile-order-details hidden>
+                                    <div class="profile-order-items">
+                                        @foreach (var item in order.Items)
+                                        {
+                                            <div class="profile-order-item">
+                                                @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                                {
+                                                    <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.ProductName" loading="lazy" />
+                                                }
+                                                else
+                                                {
+                                                    <span class="profile-order-image-placeholder" aria-hidden="true">U</span>
+                                                }
+                                                <span class="profile-order-item-info"><strong>@item.ProductName</strong><small>Size: @item.Size · Qty: @item.Quantity</small></span>
+                                                <div class="order-item-actions">
+                                                    <strong class="profile-order-item-price">₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+                                                    @if (canReviewOrder)
+                                                    {
+                                                        <a class="order-review-button" asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" asp-fragment="productReviews"><span aria-hidden="true">☆</span> Review</a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <footer class="profile-order-footer">
+                                        <span><small>Delivery address</small>@order.ShippingAddress</span>
+                                        @if (!string.IsNullOrWhiteSpace(order.RazorpayOrderId)) { <small>Payment reference: @order.RazorpayOrderId</small> }
+                                    </footer>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                    <div class="orders-filter-empty" id="profileOrdersFilterEmpty" hidden>
+                        <span aria-hidden="true">⌕</span>
+                        <h2>No matching orders</h2>
+                        <p>Try another filter to see more of your order history.</p>
+                    </div>
+                }
+            </section>
+        }
         else if (activeTab == "security")
         {
             <section class="profile-tab-panel">
@@ -187,3 +292,72 @@
         </div>
     </section>
 </div>
+
+@if (activeTab == "orders")
+{
+    <script>
+        (() => {
+            const list = document.getElementById('profileOrdersList');
+            if (!list) return;
+
+            const cards = [...list.querySelectorAll('[data-profile-order-card]')];
+            const filterButtons = [...document.querySelectorAll('[data-order-filter]')];
+            const sort = document.getElementById('profileOrdersSort');
+            const matchCount = document.getElementById('profileOrdersMatchCount');
+            const emptyState = document.getElementById('profileOrdersFilterEmpty');
+            let activeFilter = 'all';
+
+            const matches = card => {
+                const orderStatus = (card.dataset.orderStatus || '').trim().toLowerCase();
+                const paymentStatus = (card.dataset.paymentStatus || '').trim().toLowerCase();
+                switch (activeFilter) {
+                    case 'paid': return paymentStatus === 'paid';
+                    case 'pending': return paymentStatus === 'pending' || orderStatus === 'pending';
+                    case 'processing': return orderStatus === 'processing';
+                    case 'delivered': return orderStatus === 'delivered';
+                    default: return true;
+                }
+            };
+
+            const apply = () => {
+                const visible = cards.filter(matches);
+                visible.sort((a, b) => {
+                    if (sort?.value === 'oldest') return Number(a.dataset.orderDate) - Number(b.dataset.orderDate);
+                    if (sort?.value === 'high') return Number(b.dataset.orderTotal) - Number(a.dataset.orderTotal);
+                    if (sort?.value === 'low') return Number(a.dataset.orderTotal) - Number(b.dataset.orderTotal);
+                    return Number(b.dataset.orderDate) - Number(a.dataset.orderDate);
+                });
+
+                visible.forEach(card => list.appendChild(card));
+                cards.forEach(card => { card.hidden = !visible.includes(card); });
+                if (matchCount) matchCount.textContent = visible.length === 1 ? '1 order' : `${visible.length} orders`;
+                if (emptyState) emptyState.hidden = visible.length !== 0;
+            };
+
+            filterButtons.forEach(button => button.addEventListener('click', () => {
+                activeFilter = button.dataset.orderFilter || 'all';
+                filterButtons.forEach(item => {
+                    const selected = item === button;
+                    item.classList.toggle('is-active', selected);
+                    item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+                });
+                apply();
+            }));
+
+            sort?.addEventListener('change', apply);
+            list.addEventListener('click', event => {
+                const button = event.target.closest('[data-profile-order-toggle]');
+                if (!button) return;
+                const card = button.closest('[data-profile-order-card]');
+                const details = card?.querySelector('[data-profile-order-details]');
+                if (!details) return;
+                const open = details.hidden;
+                details.hidden = !open;
+                button.setAttribute('aria-expanded', open ? 'true' : 'false');
+                button.innerHTML = open ? 'Hide details <span aria-hidden="true">⌃</span>' : 'View details <span aria-hidden="true">⌄</span>';
+            });
+
+            apply();
+        })();
+    </script>
+}

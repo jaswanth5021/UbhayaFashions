@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace LadiesDressStore.Web.Controllers;
 
@@ -189,7 +190,10 @@ public class AccountController(ApiService api) : Controller
             return View(new ProfileViewModel());
         }
 
-        ViewBag.ActiveTab = tab;
+        var activeTab = tab is "details" or "addresses" or "security" or "orders"
+            ? tab
+            : "details";
+        ViewBag.ActiveTab = activeTab;
         try
         {
             ViewBag.SavedAddresses = await api.GetMyAddressesAsync();
@@ -200,6 +204,62 @@ public class AccountController(ApiService api) : Controller
             ViewBag.AddressLoadError = ex.StatusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden
                 ? "Your session may have expired. Please sign out and sign in again."
                 : $"The address service could not load your saved addresses ({(int?)ex.StatusCode ?? 0}). Please try again later.";
+        }
+
+        if (activeTab == "orders")
+        {
+            try
+            {
+                var json = await api.GetMyOrdersAsync();
+                var orderList = JsonSerializer.Deserialize<List<MyOrderViewModel>>(
+                    json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+                ViewBag.MyOrders = orderList;
+
+                if (orderList.SelectMany(order => order.Items).Any(item => string.IsNullOrWhiteSpace(item.ImageUrl)))
+                {
+                    try
+                    {
+                        var imageByProductId = (await api.GetProductsAsync())
+                            .Where(product => !string.IsNullOrWhiteSpace(product.ImageUrl) ||
+                                product.Images.Any(image => !string.IsNullOrWhiteSpace(image.ImageUrl)))
+                            .GroupBy(product => product.Id)
+                            .ToDictionary(group => group.Key, group =>
+                            {
+                                var product = group.First();
+                                return !string.IsNullOrWhiteSpace(product.ImageUrl)
+                                    ? product.ImageUrl
+                                    : product.Images.OrderBy(image => image.SortOrder)
+                                        .Select(image => image.ImageUrl)
+                                        .FirstOrDefault() ?? "";
+                            });
+
+                        foreach (var item in orderList.SelectMany(order => order.Items))
+                        {
+                            if (string.IsNullOrWhiteSpace(item.ImageUrl) && imageByProductId.TryGetValue(item.ProductId, out var imageUrl))
+                                item.ImageUrl = imageUrl;
+                        }
+                    }
+                    catch (HttpRequestException)
+                    {
+                        // Keep showing order details when the product image lookup is unavailable.
+                    }
+                    catch (JsonException)
+                    {
+                        // Keep showing order details if the catalog response cannot be read.
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+                ViewBag.MyOrders = new List<MyOrderViewModel>();
+                ViewBag.OrderLoadError = "Your order history could not be read. Please try again later.";
+            }
+            catch (HttpRequestException)
+            {
+                ViewBag.MyOrders = new List<MyOrderViewModel>();
+                ViewBag.OrderLoadError = "We couldn't connect to the order service. Please try again later.";
+            }
         }
         return View(result.Data);
     }

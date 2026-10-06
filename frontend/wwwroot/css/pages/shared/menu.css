@@ -558,3 +558,61 @@ body.menu-open { overflow: hidden; }
         letter-spacing: .14em !important;
     }
 }
+
+
+/* =========================================================
+   MOBILE MENU — UNIFIED PREMIUM SURFACE
+   Keep the drawer visually consistent: no beige/pink header
+   block against a white navigation area.
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .side-menu {
+        background: #fffdfb !important;
+        color: #211b1d !important;
+        box-shadow: 12px 0 36px rgba(35, 18, 24, .14) !important;
+    }
+
+    .side-menu-header {
+        background: #fffdfb !important;
+        border-bottom: 1px solid #eee8e7 !important;
+    }
+
+    .side-menu-tagline {
+        background: #fffdfb !important;
+        color: #80645f !important;
+        border-bottom: 0 !important;
+    }
+
+    .menu-navigation {
+        background: #fffdfb !important;
+    }
+
+    .menu-item {
+        background: transparent !important;
+        color: #252126 !important;
+    }
+
+    .menu-item:hover {
+        background: #fff7f8 !important;
+    }
+
+    .menu-item.is-current {
+        background: #fff1f4 !important;
+        color: #68142e !important;
+        box-shadow: inset 3px 0 0 #68142e !important;
+    }
+
+    .menu-item-icon {
+        background: #fff1f4 !important;
+        color: #68142e !important;
+    }
+
+    .menu-item.is-current .menu-item-icon {
+        background: #f9dce5 !important;
+    }
+
+    .side-menu-header > button:hover {
+        background: #fff1f4 !important;
+    }
+}

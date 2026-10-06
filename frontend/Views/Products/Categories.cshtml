@@ -6,9 +6,9 @@
 <section class="all-categories-page">
     <header class="all-categories-header">
         <div>
-            <p class="category-eyebrow">FIND YOUR NEXT FAVORITE</p>
+            <p class="category-eyebrow">CURATED FOR YOUR STYLE</p>
             <h1>Shop by category</h1>
-            <p>Browse all @Model.Count categories in our collection.</p>
+            <p class="all-categories-intro">Browse all @Model.Count categories in our collection.</p>
         </div>
         <a class="all-categories-home-link" asp-controller="Home" asp-action="Index">← Back to homepage</a>
     </header>
@@ -18,10 +18,17 @@
         <div class="category-grid">
             @foreach (var category in Model)
             {
-                <a class="category-tile" asp-action="Index" asp-route-category="@category.Name">
+                <a class="category-tile @(string.IsNullOrWhiteSpace(category.ImageUrl) ? "is-image-unavailable" : string.Empty)" asp-action="Index" asp-route-category="@category.Name">
+                    <div class="category-tile-fallback" aria-hidden="true">
+                        <span class="category-fallback-mark">✦</span>
+                        <span class="category-fallback-name">UBHAYA EDIT</span>
+                    </div>
                     @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
                     {
-                        <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])" alt="@category.Name" />
+                        <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])"
+                             alt="@category.Name collection"
+                             loading="lazy"
+                             onerror="this.closest('.category-tile').classList.add('is-image-unavailable');" />
                     }
                     <div class="category-tile-content">
                         <h3>@category.Name</h3>

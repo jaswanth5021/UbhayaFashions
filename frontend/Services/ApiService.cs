@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net;
 using System.Text.Json;
 using LadiesDressStore.Web.Models;
 
@@ -91,9 +92,14 @@ public class ApiService(
                 $"api/products/{id}");
     }
 
-    public async Task<ProductReviewsViewModel> GetProductReviewsAsync(int productId)
+    public async Task<ProductReviewsViewModel> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 2, int? rating = null, string? sort = null)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/products/{productId}/reviews");
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 20);
+        var query = $"page={page}&pageSize={pageSize}";
+        if (rating is >= 1 and <= 5) query += $"&rating={rating}";
+        if (!string.IsNullOrWhiteSpace(sort)) query += $"&sort={Uri.EscapeDataString(sort)}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/products/{productId}/reviews?{query}");
         AddToken(request);
         using var response = await Client.SendAsync(request);
         if (!response.IsSuccessStatusCode)
@@ -109,22 +115,129 @@ public class ApiService(
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, $"api/products/{productId}/reviews");
         AddToken(request);
-        request.Content = JsonContent.Create(new
+        var content = new MultipartFormDataContent
         {
-            rating = model.Rating,
-            title = model.Title,
-            comment = model.Comment
-        });
+            { new StringContent(model.Rating.ToString()), "Rating" },
+            { new StringContent(model.Title ?? string.Empty), "Title" },
+            { new StringContent(model.Comment ?? string.Empty), "Comment" }
+        };
+        foreach (var image in model.Images)
+        {
+            var imageContent = new StreamContent(image.OpenReadStream());
+            imageContent.Headers.ContentType = new MediaTypeHeaderValue(
+                string.IsNullOrWhiteSpace(image.ContentType) ? "application/octet-stream" : image.ContentType);
+            content.Add(imageContent, "Images", image.FileName);
+        }
+        request.Content = content;
 
         using var response = await Client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
 
         return response.IsSuccessStatusCode
             ? (true, string.Empty)
-            : (false, string.IsNullOrWhiteSpace(body)
-                ? $"Review submission failed ({(int)response.StatusCode})."
-                : body);
+            : (false, FormatReviewError(response.StatusCode, body));
     }
+
+    public async Task<(bool Success, ProductReviewVoteResultViewModel? Result, HttpStatusCode Status)> VoteForProductReviewAsync(int reviewId, int voteType)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/products/reviews/{reviewId}/vote")
+        {
+            Content = JsonContent.Create(new { voteType })
+        };
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        if (!response.IsSuccessStatusCode)
+            return (false, null, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<ProductReviewVoteResultViewModel>();
+        return (result is not null, result, response.StatusCode);
+    }
+
+    private static string FormatReviewError(HttpStatusCode statusCode, string body)
+    {
+        if (statusCode == HttpStatusCode.Unauthorized)
+            return "Please sign in again before submitting a review.";
+        if (statusCode == HttpStatusCode.Forbidden)
+            return "Please purchase this product before submitting a review.";
+        if (statusCode == HttpStatusCode.Conflict)
+            return "You have already reviewed this product.";
+        if (statusCode == HttpStatusCode.NotFound)
+            return "This product is no longer available, so we couldn't submit your review.";
+
+        var message = body.Trim();
+        if (message.StartsWith('{') || message.StartsWith('"'))
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(message);
+                if (document.RootElement.ValueKind == JsonValueKind.String)
+                {
+                    message = document.RootElement.GetString() ?? string.Empty;
+                }
+                else if (document.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    message = ReadString(document.RootElement, "detail")
+                        ?? ReadString(document.RootElement, "message")
+                        ?? string.Empty;
+
+                    if (string.IsNullOrWhiteSpace(message) &&
+                        document.RootElement.TryGetProperty("errors", out var errors) &&
+                        errors.ValueKind == JsonValueKind.Object)
+                    {
+                        foreach (var error in errors.EnumerateObject())
+                        {
+                            if (error.Value.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var value in error.Value.EnumerateArray())
+                                {
+                                    if (value.ValueKind == JsonValueKind.String &&
+                                        !string.IsNullOrWhiteSpace(value.GetString()))
+                                    {
+                                        message = value.GetString()!;
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (error.Value.ValueKind == JsonValueKind.String)
+                            {
+                                message = error.Value.GetString() ?? string.Empty;
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(message))
+                                break;
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(message))
+                        message = ReadString(document.RootElement, "title") ?? string.Empty;
+                }
+            }
+            catch (JsonException)
+            {
+                message = string.Empty;
+            }
+        }
+
+        var normalized = message.Trim().Trim('"').ToLowerInvariant();
+        if (normalized.Contains("already reviewed", StringComparison.Ordinal))
+            return "You have already reviewed this product.";
+        if (normalized.Contains("purchase", StringComparison.Ordinal) ||
+            normalized.Contains("eligible", StringComparison.Ordinal))
+            return "Please purchase this product before submitting a review.";
+        if (normalized.Contains("rating", StringComparison.Ordinal))
+            return "Please choose a rating from 1 to 5 stars.";
+        if (normalized.Contains("too long", StringComparison.Ordinal))
+            return "Please shorten your review and try again.";
+
+        if (statusCode == HttpStatusCode.BadRequest)
+            return "Please check your rating and review, then try again.";
+
+        return "We couldn't submit your review right now. Please try again.";
+    }
+
+    private static string? ReadString(JsonElement element, string propertyName) =>
+        element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
 
 
     public async Task<List<RelatedProductViewModel>> GetRelatedProductsAsync(int id)
@@ -494,6 +607,46 @@ public class ApiService(
 
         return data is null ? (false, "Invalid payment response from server.", null) : (true, "", data);
     }
+
+
+    public async Task<(bool Success, string Message, int OrderId)>
+        CreateTestSuccessfulPaymentAsync(
+            List<CartItemViewModel> cart,
+            string address)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/payments/test-success");
+        AddToken(request);
+        request.Content = JsonContent.Create(new
+        {
+            shippingAddress = address,
+            items = cart.Select(x => new
+            {
+                productId = x.ProductId,
+                quantity = x.Quantity,
+                size = x.Size,
+                color = (string?)null
+            })
+        });
+
+        var response = await Client.SendAsync(request);
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            return (false, content, 0);
+
+        var data = JsonSerializer.Deserialize<JsonElement>(
+            content,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        var orderId = data.TryGetProperty("orderId", out var id)
+            ? id.GetInt32()
+            : 0;
+
+        return orderId > 0
+            ? (true, "", orderId)
+            : (false, "Invalid test payment response.", 0);
+    }
+
 
     public async Task<(bool Success, string Message, int OrderId)>
         VerifyRazorpayPaymentAsync(PaymentVerifyViewModel model)

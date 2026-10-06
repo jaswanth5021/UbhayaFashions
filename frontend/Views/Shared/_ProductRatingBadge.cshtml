@@ -1,0 +1,16 @@
+@model ProductViewModel
+
+@if (Model.ReviewCount.GetValueOrDefault() > 0 && Model.AverageRating.HasValue)
+{
+    <a class="product-rating-badge"
+       asp-controller="Products"
+       asp-action="Details"
+       asp-route-id="@Model.Id"
+       asp-fragment="productReviews"
+       aria-label="@Model.AverageRating.Value.ToString("0.0") out of 5 stars from @Model.ReviewCount reviews">
+        <span class="product-rating-value">@Model.AverageRating.Value.ToString("0.0")</span>
+        <span class="product-rating-star" aria-hidden="true">&#9733;</span>
+        <span class="product-rating-divider" aria-hidden="true">|</span>
+        <span class="product-rating-count">@Model.ReviewCount</span>
+    </a>
+}

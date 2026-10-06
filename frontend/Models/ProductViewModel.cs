@@ -4,6 +4,10 @@ public class ProductViewModel
 {
     public int Id { get; set; }
 
+    public decimal? AverageRating { get; set; }
+
+    public int? ReviewCount { get; set; }
+
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
@@ -78,6 +82,15 @@ public class ProductReviewsViewModel
     public List<ProductReviewViewModel> Reviews { get; set; } = [];
     public bool CanReview { get; set; }
     public bool HasReviewed { get; set; }
+    public int VerifiedPurchaseCount { get; set; }
+    public int CustomerPhotoCount { get; set; }
+    public List<string> CustomerPhotos { get; set; } = [];
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 2;
+    public int TotalPages { get; set; }
+    public int FilteredReviewCount { get; set; }
+    public string Sort { get; set; } = "helpful";
+    public int? Rating { get; set; }
 }
 
 public class ProductReviewViewModel
@@ -89,6 +102,18 @@ public class ProductReviewViewModel
     public string CustomerName { get; set; } = string.Empty;
     public bool VerifiedPurchase { get; set; }
     public DateTime CreatedDate { get; set; }
+    public List<string> Images { get; set; } = [];
+    public List<string> ReviewPhotos { get; set; } = [];
+    public int HelpfulCount { get; set; }
+    public int NotHelpfulCount { get; set; }
+    public int? CurrentUserVote { get; set; }
+}
+
+public class ProductReviewVoteResultViewModel
+{
+    public int HelpfulCount { get; set; }
+    public int NotHelpfulCount { get; set; }
+    public int CurrentUserVote { get; set; }
 }
 
 public class ProductReviewSubmissionViewModel
@@ -97,9 +122,10 @@ public class ProductReviewSubmissionViewModel
     public int Rating { get; set; }
 
     [System.ComponentModel.DataAnnotations.StringLength(100)]
-    public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; }
 
-    [System.ComponentModel.DataAnnotations.Required]
-    [System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 10)]
-    public string Comment { get; set; } = string.Empty;
+    [System.ComponentModel.DataAnnotations.StringLength(2000)]
+    public string? Comment { get; set; }
+
+    public List<Microsoft.AspNetCore.Http.IFormFile> Images { get; set; } = [];
 }

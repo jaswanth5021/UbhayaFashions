@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Order Successful";
+    var orderId = (int?)ViewBag.OrderId;
+}
+<section class="order-result-page order-success-page">
+    <div class="order-result-card">
+        <div class="order-result-icon success" aria-hidden="true">✓</div>
+        <span class="order-result-eyebrow">ORDER CONFIRMED</span>
+        <h1>Thank you for your order</h1>
+        <p class="order-result-message">Your order has been placed successfully. We have received your payment and your order is now being processed.</p>
+        @if (orderId.HasValue)
+        {
+            <div class="order-result-number"><span>ORDER NUMBER</span><strong>#@orderId.Value</strong></div>
+        }
+        <div class="order-result-status">
+            <div><span>Payment</span><strong>Paid</strong></div>
+            <div><span>Order status</span><strong>Processing</strong></div>
+        </div>
+        <div class="order-result-actions">
+            <a class="button order-result-primary" asp-action="Index">View My Orders</a>
+            <a class="button order-result-secondary" asp-controller="Products" asp-action="Index">Continue Shopping</a>
+        </div>
+    </div>
+</section>

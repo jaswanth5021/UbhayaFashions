@@ -21,6 +21,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<CustomerAddress> CustomerAddresses => Set<CustomerAddress>();
     public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
+    public DbSet<ProductReviewImage> ProductReviewImages => Set<ProductReviewImage>();
+    public DbSet<ProductReviewVote> ProductReviewVotes => Set<ProductReviewVote>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -66,6 +68,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ProductReview>().Property(x => x.Comment).HasMaxLength(2000).IsRequired();
         modelBuilder.Entity<ProductReview>().HasIndex(x => new { x.CustomerId, x.ProductId }).IsUnique();
         modelBuilder.Entity<ProductReview>().HasIndex(x => new { x.ProductId, x.CreatedDate });
+        modelBuilder.Entity<ProductReview>().HasMany(x => x.Images).WithOne().HasForeignKey(x => x.ProductReviewId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductReviewImage>().Property(x => x.ImageUrl).HasMaxLength(2048).IsRequired();
+        modelBuilder.Entity<ProductReviewImage>().HasIndex(x => new { x.ProductReviewId, x.CreatedDate });
+        modelBuilder.Entity<ProductReviewVote>().HasIndex(x => new { x.CustomerId, x.ProductReviewId }).IsUnique();
+        modelBuilder.Entity<ProductReviewVote>().HasOne<ProductReview>().WithMany().HasForeignKey(x => x.ProductReviewId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductReviewVote>().HasOne<Customer>().WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.NoAction);
         modelBuilder.Entity<Category>().Property(x => x.Name).HasMaxLength(250).IsRequired();
         modelBuilder.Entity<Category>().Property(x => x.ImageUrl).HasMaxLength(2048).IsRequired();
         modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique();

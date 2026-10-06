@@ -102,21 +102,31 @@
 
                     @if (savedAddresses.Count > 0)
                     {
-                        <div class="checkout-screen-saved-list">
-                            @foreach (var address in savedAddresses)
+                        <div class="checkout-screen-saved-list" role="radiogroup" aria-label="Saved shipping addresses">
+                            @for (var addressIndex = 0; addressIndex < savedAddresses.Count; addressIndex++)
                             {
-                                <button type="button"
-                                        class="checkout-screen-saved-card"
-                                        data-saved-address="@address.FullAddress"
-                                        data-saved-name="@address.Name"
-                                        data-saved-mobile="@address.Mobile">
-                                    <strong>@address.Name</strong>
-                                    <span>@address.FullAddress</span>
-                                    @if (!string.IsNullOrWhiteSpace(address.Mobile))
-                                    {
-                                        <small>@address.Mobile</small>
-                                    }
-                                </button>
+                                var address = savedAddresses[addressIndex];
+                                var isFirstAddress = addressIndex == 0;
+
+                                <label class="checkout-screen-saved-card @(isFirstAddress ? "is-selected" : "")"
+                                       data-saved-address="@address.FullAddress"
+                                       data-saved-name="@address.Name"
+                                       data-saved-mobile="@address.Mobile">
+                                    <input type="radio"
+                                           name="SavedShippingAddress"
+                                           value="@addressIndex"
+                                           class="checkout-saved-address-radio"
+                                           @(isFirstAddress ? "checked" : null)
+                                           aria-label="Select address for @address.Name" />
+                                    <span class="checkout-saved-card-content">
+                                        <strong>@address.Name</strong>
+                                        <span>@address.FullAddress</span>
+                                        @if (!string.IsNullOrWhiteSpace(address.Mobile))
+                                        {
+                                            <small>@address.Mobile</small>
+                                        }
+                                    </span>
+                                </label>
                             }
                         </div>
                     }
@@ -190,6 +200,27 @@
                         <strong>🔒 Secure Checkout</strong>
                         <span>Your payment is processed securely by Razorpay.</span>
                     </div>
+
+                    @if (Configuration.GetValue<bool>("PaymentTesting:Enabled"))
+                    {
+                        <div class="checkout-test-payment-panel">
+                            <span class="checkout-test-payment-label">TEST MODE</span>
+                            <strong>Preview the complete order flow without opening Razorpay</strong>
+                            <p>These buttons are for the feature/test environment only.</p>
+                            <div class="checkout-test-payment-actions">
+                                <button type="button"
+                                        class="checkout-test-payment-button success"
+                                        data-test-payment="success">
+                                    ✓ Simulate Successful Payment
+                                </button>
+                                <button type="button"
+                                        class="checkout-test-payment-button failure"
+                                        data-test-payment="failure">
+                                    × Simulate Failed Payment
+                                </button>
+                            </div>
+                        </div>
+                    }
 
                     <div class="checkout-screen-actions">
                         <button type="button" class="checkout-screen-back" data-checkout-screen-back="2">← Back to Address</button>
@@ -321,16 +352,41 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
-            document.querySelectorAll('[data-saved-address]').forEach(button => {
-                button.addEventListener('click', () => {
-                    addressText.value = button.dataset.savedAddress || '';
-                    name.value = button.dataset.savedName || '';
-                    phone.value = button.dataset.savedMobile || '';
-                    document.querySelectorAll('[data-saved-address]').forEach(x => x.classList.remove('is-selected'));
-                    button.classList.add('is-selected');
-                    syncAddress();
+            const selectSavedAddress = card => {
+                addressText.value = card.dataset.savedAddress || '';
+                name.value = card.dataset.savedName || '';
+                phone.value = card.dataset.savedMobile || '';
+
+                document.querySelectorAll('[data-saved-address]').forEach(x => {
+                    x.classList.remove('is-selected');
+                    const radio = x.querySelector('.checkout-saved-address-radio');
+                    if (radio) radio.checked = false;
+                });
+
+                card.classList.add('is-selected');
+                const selectedRadio = card.querySelector('.checkout-saved-address-radio');
+                if (selectedRadio) selectedRadio.checked = true;
+
+                syncAddress();
+            };
+
+            document.querySelectorAll('[data-saved-address]').forEach(card => {
+                card.addEventListener('click', event => {
+                    if (event.target.closest('.checkout-saved-address-radio')) {
+                        selectSavedAddress(card);
+                        return;
+                    }
+
+                    selectSavedAddress(card);
                 });
             });
+
+            // Keep the first saved address selected when Step 2 opens.
+            const initiallySelectedAddress =
+                document.querySelector('.checkout-screen-saved-card.is-selected');
+            if (initiallySelectedAddress) {
+                selectSavedAddress(initiallySelectedAddress);
+            }
 
             document.querySelectorAll('[data-checkout-screen-next]').forEach(button => {
                 button.addEventListener('click', () => {
@@ -394,6 +450,59 @@
                 originalShowStep(step);
                 updateMobileCheckoutLabel();
             };
+
+            document.querySelectorAll('[data-test-payment]').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const mode = button.dataset.testPayment;
+                    const address = addressText?.value.trim() || '';
+
+                    if (!address) {
+                        showStep(2);
+                        alert('Please enter or select a shipping address first.');
+                        addressText?.focus();
+                        return;
+                    }
+
+                    const form = document.getElementById('checkoutScreenForm');
+                    const token = form?.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    if (!token) return;
+
+                    document.querySelectorAll('[data-test-payment]').forEach(x => x.disabled = true);
+
+                    if (mode === 'failure') {
+                        window.location.href =
+                            '@Url.Action("Failure", "Orders")' +
+                            '?message=' +
+                            encodeURIComponent('Test payment failed. No payment was captured and your cart is still available.');
+                        return;
+                    }
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('ShippingAddress', address);
+                        formData.append('__RequestVerificationToken', token);
+
+                        const response = await fetch('@Url.Action("TestPaymentSuccess", "Orders")', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin'
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success && result.redirectUrl) {
+                            window.location.href = result.redirectUrl;
+                            return;
+                        }
+
+                        alert(result.message || 'Test payment could not be completed.');
+                    } catch {
+                        alert('Unable to run the test payment. Please try again.');
+                    } finally {
+                        document.querySelectorAll('[data-test-payment]').forEach(x => x.disabled = false);
+                    }
+                });
+            });
 
             document.getElementById('checkoutScreenForm')?.addEventListener('submit', event => {
                 syncAddress();

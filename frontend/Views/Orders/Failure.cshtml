@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Payment Failed";
+    var orderId = (int?)ViewBag.OrderId;
+    var message = ViewBag.FailureMessage as string ?? "Your payment was not completed.";
+}
+<section class="order-result-page order-failure-page">
+    <div class="order-result-card">
+        <div class="order-result-icon failure" aria-hidden="true">×</div>
+        <span class="order-result-eyebrow">PAYMENT NOT COMPLETED</span>
+        <h1>We couldn't complete your payment</h1>
+        <p class="order-result-message">@message</p>
+        @if (orderId.HasValue)
+        {
+            <div class="order-result-number"><span>ORDER REFERENCE</span><strong>#@orderId.Value</strong></div>
+        }
+        <div class="order-result-status">
+            <div><span>Payment</span><strong>Not captured</strong></div>
+            <div><span>Cart</span><strong>Still available</strong></div>
+        </div>
+        <div class="order-result-actions">
+            <a class="button order-result-primary" asp-action="Checkout">Try Payment Again</a>
+            <a class="button order-result-secondary" asp-controller="Cart" asp-action="Index">Return to Cart</a>
+        </div>
+    </div>
+</section>

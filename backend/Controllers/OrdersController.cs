@@ -68,9 +68,36 @@ public class OrdersController(ApplicationDbContext db) : ControllerBase
     public async Task<IActionResult> MyOrders()
     {
         var customerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var orders = await db.Orders.AsNoTracking().Include(order => order.Items)
+        var orders = await db.Orders.AsNoTracking()
             .Where(order => order.CustomerId == customerId)
-            .OrderByDescending(order => order.CreatedDate).ToListAsync();
+            .OrderByDescending(order => order.CreatedDate)
+            .Select(order => new
+            {
+                order.Id,
+                order.CustomerId,
+                order.TotalAmount,
+                order.Status,
+                order.PaymentStatus,
+                order.ShippingAddress,
+                order.CreatedDate,
+                order.RazorpayOrderId,
+                Items = order.Items.Select(item => new
+                {
+                    item.Id,
+                    item.OrderId,
+                    item.ProductId,
+                    item.ProductName,
+                    ImageUrl = db.Products
+                        .Where(product => product.Id == item.ProductId)
+                        .Select(product => product.ImageUrl)
+                        .FirstOrDefault(),
+                    item.Price,
+                    item.Quantity,
+                    item.Size,
+                    item.Color
+                })
+            })
+            .ToListAsync();
         return Ok(orders);
     }
 }
