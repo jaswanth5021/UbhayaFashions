@@ -1478,3 +1478,27 @@
         box-sizing: border-box;
     }
 }
+
+
+/* Compact desktop checkout action buttons */
+@media (min-width: 601px) {
+    .checkout-screen-actions .checkout-screen-primary {
+        width: min(300px, 100%);
+        min-height: 44px;
+        justify-self: end;
+        padding: 0 22px;
+    }
+
+    .checkout-screen-actions {
+        grid-template-columns: auto 1fr;
+    }
+
+    .checkout-screen-actions .checkout-screen-back {
+        justify-self: start;
+    }
+
+    .checkout-four-step .checkout-screen-panel > .checkout-screen-primary {
+        width: min(300px, 100%);
+        margin-left: auto;
+    }
+}
