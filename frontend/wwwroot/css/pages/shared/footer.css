@@ -71,7 +71,7 @@
     padding: 22px 0 20px;
     border-top: 1px solid rgb(255 255 255 / 12%);
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: center;
     gap: 20px;
     box-sizing: border-box;
