@@ -102,21 +102,31 @@
 
                     @if (savedAddresses.Count > 0)
                     {
-                        <div class="checkout-screen-saved-list">
-                            @foreach (var address in savedAddresses)
+                        <div class="checkout-screen-saved-list" role="radiogroup" aria-label="Saved shipping addresses">
+                            @for (var addressIndex = 0; addressIndex < savedAddresses.Count; addressIndex++)
                             {
-                                <button type="button"
-                                        class="checkout-screen-saved-card"
-                                        data-saved-address="@address.FullAddress"
-                                        data-saved-name="@address.Name"
-                                        data-saved-mobile="@address.Mobile">
-                                    <strong>@address.Name</strong>
-                                    <span>@address.FullAddress</span>
-                                    @if (!string.IsNullOrWhiteSpace(address.Mobile))
-                                    {
-                                        <small>@address.Mobile</small>
-                                    }
-                                </button>
+                                var address = savedAddresses[addressIndex];
+                                var isFirstAddress = addressIndex == 0;
+
+                                <label class="checkout-screen-saved-card @(isFirstAddress ? "is-selected" : "")"
+                                       data-saved-address="@address.FullAddress"
+                                       data-saved-name="@address.Name"
+                                       data-saved-mobile="@address.Mobile">
+                                    <input type="radio"
+                                           name="SavedShippingAddress"
+                                           value="@addressIndex"
+                                           class="checkout-saved-address-radio"
+                                           @(isFirstAddress ? "checked" : null)
+                                           aria-label="Select address for @address.Name" />
+                                    <span class="checkout-saved-card-content">
+                                        <strong>@address.Name</strong>
+                                        <span>@address.FullAddress</span>
+                                        @if (!string.IsNullOrWhiteSpace(address.Mobile))
+                                        {
+                                            <small>@address.Mobile</small>
+                                        }
+                                    </span>
+                                </label>
                             }
                         </div>
                     }
@@ -342,16 +352,41 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
-            document.querySelectorAll('[data-saved-address]').forEach(button => {
-                button.addEventListener('click', () => {
-                    addressText.value = button.dataset.savedAddress || '';
-                    name.value = button.dataset.savedName || '';
-                    phone.value = button.dataset.savedMobile || '';
-                    document.querySelectorAll('[data-saved-address]').forEach(x => x.classList.remove('is-selected'));
-                    button.classList.add('is-selected');
-                    syncAddress();
+            const selectSavedAddress = card => {
+                addressText.value = card.dataset.savedAddress || '';
+                name.value = card.dataset.savedName || '';
+                phone.value = card.dataset.savedMobile || '';
+
+                document.querySelectorAll('[data-saved-address]').forEach(x => {
+                    x.classList.remove('is-selected');
+                    const radio = x.querySelector('.checkout-saved-address-radio');
+                    if (radio) radio.checked = false;
+                });
+
+                card.classList.add('is-selected');
+                const selectedRadio = card.querySelector('.checkout-saved-address-radio');
+                if (selectedRadio) selectedRadio.checked = true;
+
+                syncAddress();
+            };
+
+            document.querySelectorAll('[data-saved-address]').forEach(card => {
+                card.addEventListener('click', event => {
+                    if (event.target.closest('.checkout-saved-address-radio')) {
+                        selectSavedAddress(card);
+                        return;
+                    }
+
+                    selectSavedAddress(card);
                 });
             });
+
+            // Keep the first saved address selected when Step 2 opens.
+            const initiallySelectedAddress =
+                document.querySelector('.checkout-screen-saved-card.is-selected');
+            if (initiallySelectedAddress) {
+                selectSavedAddress(initiallySelectedAddress);
+            }
 
             document.querySelectorAll('[data-checkout-screen-next]').forEach(button => {
                 button.addEventListener('click', () => {
