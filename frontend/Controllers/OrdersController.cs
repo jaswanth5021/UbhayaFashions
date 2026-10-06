@@ -12,8 +12,24 @@ public class OrdersController(ApiService api) : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        ViewBag.OrdersJson = await api.GetMyOrdersAsync();
-        return View();
+        var orders = new List<MyOrderViewModel>();
+        try
+        {
+            var json = await api.GetMyOrdersAsync();
+            orders = JsonSerializer.Deserialize<List<MyOrderViewModel>>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+        }
+        catch (JsonException)
+        {
+            TempData["Error"] = "We couldn't load your orders right now. Please try again.";
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Error"] = "We couldn't connect to the order service. Please try again.";
+        }
+
+        return View(orders);
     }
 
     [HttpGet]
