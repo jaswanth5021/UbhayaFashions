@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using System.Data;
 
 namespace backend.Controllers;
 
@@ -14,7 +15,8 @@ namespace backend.Controllers;
 public class ProductReviewsController(ApplicationDbContext db, IConfiguration config) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetReviews(int productId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetReviews(int productId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10,
+        [FromQuery] int? rating = null, [FromQuery] string? sort = null)
     {
         if (!await db.Products.AsNoTracking().AnyAsync(x => x.Id == productId))
             return NotFound();
@@ -31,10 +33,20 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
             .Select(x => new { Rating = x.Key, Count = x.Count() })
             .ToDictionaryAsync(x => x.Rating, x => x.Count);
 
-        var reviews = await (
-            from review in query
+        var normalizedSort = (sort ?? "helpful").Trim().ToLowerInvariant();
+        if (normalizedSort is not ("helpful" or "newest" or "oldest" or "highest" or "lowest" or "rating")) normalizedSort = "helpful";
+        var filteredQuery = rating is >= 1 and <= 5 ? query.Where(review => review.Rating == rating) : query;
+        var filteredCount = await filteredQuery.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(filteredCount / (double)pageSize));
+        page = Math.Min(page, totalPages);
+
+        var currentCustomerId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var signedInCustomerId)
+            ? signedInCustomerId
+            : (int?)null;
+
+        var reviewQuery = (
+            from review in filteredQuery
             join customer in db.Customers.AsNoTracking() on review.CustomerId equals customer.Id
-            orderby review.CreatedDate descending
             select new
             {
                 review.Id,
@@ -43,22 +55,54 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
                 review.Comment,
                 CustomerName = customer.Name,
                 review.CreatedDate,
-                Images = db.ProductReviewImages.Where(image => image.ProductReviewId == review.Id).Select(image => image.ImageUrl).ToList(),
+                Images = db.ProductReviewImages.Where(image => image.ProductReviewId == review.Id).OrderByDescending(image => image.CreatedDate).Select(image => image.ImageUrl).ToList(),
+                ReviewPhotos = db.ProductReviewImages.Where(image => image.ProductReviewId == review.Id).OrderByDescending(image => image.CreatedDate).Select(image => image.ImageUrl).ToList(),
+                HelpfulCount = db.ProductReviewVotes.Count(vote => vote.ProductReviewId == review.Id && vote.VoteType == 1),
+                NotHelpfulCount = db.ProductReviewVotes.Count(vote => vote.ProductReviewId == review.Id && vote.VoteType == -1),
+                CurrentUserVote = currentCustomerId.HasValue
+                    ? db.ProductReviewVotes.Where(vote => vote.ProductReviewId == review.Id && vote.CustomerId == currentCustomerId.Value).Select(vote => (int?)vote.VoteType).FirstOrDefault()
+                    : null,
                 VerifiedPurchase = db.Orders.Any(order =>
                     order.CustomerId == review.CustomerId &&
                     (order.PaymentStatus == "Paid" ||
                      order.Status == "Delivered" ||
                      order.Status == "Completed") &&
                     order.Items.Any(item => item.ProductId == productId))
-            })
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+            });
+
+        var orderedQuery = normalizedSort switch
+        {
+            "newest" => reviewQuery.OrderByDescending(review => review.CreatedDate),
+            "oldest" => reviewQuery.OrderBy(review => review.CreatedDate),
+            "highest" => reviewQuery.OrderByDescending(review => review.Rating).ThenByDescending(review => review.CreatedDate),
+            "lowest" => reviewQuery.OrderBy(review => review.Rating).ThenByDescending(review => review.CreatedDate),
+            "rating" => reviewQuery.OrderByDescending(review => review.VerifiedPurchase).ThenByDescending(review => review.Rating).ThenByDescending(review => review.CreatedDate),
+            _ => reviewQuery.OrderByDescending(review => review.HelpfulCount - review.NotHelpfulCount).ThenByDescending(review => review.CreatedDate)
+        };
+        var reviews = await orderedQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        if (page == 1 && pageSize == 2 && rating is null)
+        {
+            var preferred = await orderedQuery.Where(review => review.Rating == 5).Take(1).ToListAsync();
+            preferred.AddRange(await orderedQuery.Where(review => review.Rating == 4).Take(1).ToListAsync());
+            if (preferred.Count > 0)
+            {
+                if (preferred.Count < pageSize)
+                {
+                    var selectedIds = preferred.Select(review => review.Id).ToArray();
+                    preferred.AddRange(await reviewQuery.Where(review => !selectedIds.Contains(review.Id))
+                        .Take(pageSize - preferred.Count).ToListAsync());
+                }
+                reviews = preferred
+                    .OrderByDescending(review => review.VerifiedPurchase)
+                    .ThenByDescending(review => review.Rating).ThenByDescending(review => review.CreatedDate)
+                    .ToList();
+            }
+        }
 
         var canReview = false;
         var hasReviewed = false;
 
-        if (int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
+        if (currentCustomerId is int customerId)
         {
             hasReviewed = await db.ProductReviews.AnyAsync(x => x.ProductId == productId && x.CustomerId == customerId);
             canReview = !hasReviewed && await db.Orders.AnyAsync(order =>
@@ -69,6 +113,20 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
                 order.Items.Any(item => item.ProductId == productId));
         }
 
+        var verifiedPurchaseCount = await query.CountAsync(review => db.Orders.Any(order =>
+            order.CustomerId == review.CustomerId &&
+            (order.PaymentStatus == "Paid" || order.Status == "Delivered" || order.Status == "Completed") &&
+            order.Items.Any(item => item.ProductId == productId)));
+        var customerPhotoCount = await db.ProductReviewImages.CountAsync(image =>
+            db.ProductReviews.Any(review => review.Id == image.ProductReviewId && review.ProductId == productId));
+        var customerPhotos = await (
+            from image in db.ProductReviewImages.AsNoTracking()
+            join review in query on image.ProductReviewId equals review.Id
+            orderby image.CreatedDate descending, image.Id descending
+            select image.ImageUrl)
+            .Take(8)
+            .ToListAsync();
+
         return Ok(new
         {
             averageRating = average,
@@ -77,10 +135,53 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
             reviews,
             canReview,
             hasReviewed,
+            verifiedPurchaseCount,
+            customerPhotoCount,
+            customerPhotos,
             page,
             pageSize,
-            totalPages = Math.Max(1, (int)Math.Ceiling(count / (double)pageSize))
+            totalPages,
+            filteredReviewCount = filteredCount,
+            sort = normalizedSort,
+            rating
         });
+    }
+
+    [Authorize]
+    [HttpPost("~/api/products/reviews/{reviewId:int}/vote")]
+    public async Task<IActionResult> Vote(int reviewId, [FromBody] ProductReviewVoteRequest request)
+    {
+        if (request.VoteType is not (1 or -1))
+            return BadRequest("Vote type must be 1 (helpful) or -1 (not helpful).");
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
+            return Unauthorized();
+        if (!await db.ProductReviews.AnyAsync(review => review.Id == reviewId))
+            return NotFound("Review not found.");
+
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        var vote = await db.ProductReviewVotes.FirstOrDefaultAsync(item =>
+            item.ProductReviewId == reviewId && item.CustomerId == customerId);
+        if (vote is null)
+        {
+            db.ProductReviewVotes.Add(new ProductReviewVote
+            {
+                ProductReviewId = reviewId,
+                CustomerId = customerId,
+                VoteType = request.VoteType
+            });
+        }
+        else if (vote.VoteType != request.VoteType)
+        {
+            vote.VoteType = request.VoteType;
+            vote.UpdatedDate = DateTime.UtcNow;
+        }
+
+        await db.SaveChangesAsync();
+        var helpfulCount = await db.ProductReviewVotes.CountAsync(item => item.ProductReviewId == reviewId && item.VoteType == 1);
+        var notHelpfulCount = await db.ProductReviewVotes.CountAsync(item => item.ProductReviewId == reviewId && item.VoteType == -1);
+        await transaction.CommitAsync();
+
+        return Ok(new { helpfulCount, notHelpfulCount, currentUserVote = request.VoteType });
     }
 
     [Authorize]
@@ -110,8 +211,11 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
 
         images ??= [];
         if (images.Count > 5) return BadRequest("Upload no more than five review images.");
-        if (images.Any(file => file.Length == 0 || file.Length > 5_000_000 || !IsAllowedImage(file)))
-            return BadRequest("Review images must be JPG, PNG, or WebP files under 5 MB each.");
+        foreach (var image in images)
+        {
+            if (image.Length == 0 || image.Length > 5_000_000 || !await IsValidImageAsync(image))
+                return BadRequest("Review images must contain valid JPG, PNG, or WebP image data and be under 5 MB each.");
+        }
 
         var purchased = await db.Orders.AnyAsync(order =>
             order.CustomerId == customerId &&
@@ -171,6 +275,17 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
         return Created(string.Empty, new { success = true });
     }
 
-    private static bool IsAllowedImage(IFormFile file)
-        => new[] { ".jpg", ".jpeg", ".png", ".webp" }.Contains(Path.GetExtension(file.FileName).ToLowerInvariant());
+    private static async Task<bool> IsValidImageAsync(IFormFile file)
+    {
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var header = new byte[12];
+        await using var stream = file.OpenReadStream();
+        var read = await stream.ReadAsync(header);
+        var isJpeg = (extension is ".jpg" or ".jpeg") && read >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
+        var isPng = extension == ".png" && read >= 8 && header.AsSpan(0, 8).SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
+        var isWebp = extension == ".webp" && read >= 12 && header.AsSpan(0, 4).SequenceEqual("RIFF"u8) && header.AsSpan(8, 4).SequenceEqual("WEBP"u8);
+        return isJpeg || isPng || isWebp;
+    }
 }
+
+public sealed record ProductReviewVoteRequest(int VoteType);

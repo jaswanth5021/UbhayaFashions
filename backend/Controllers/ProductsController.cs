@@ -99,7 +99,8 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             _ => query.OrderByDescending(x => x.IsBestSeller).ThenByDescending(x => x.Id)
         };
 
-        return Ok(await query.ToListAsync());
+        var products = await query.ToListAsync();
+        return Ok(await AttachReviewSummariesAsync(products));
     }
 
     [HttpGet("{id:int}")]
@@ -171,14 +172,44 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
 
     [HttpGet("GetNewarrivals")]
     public async Task<IActionResult> GetNewarrivals()
-        => Ok(await db.Products.AsNoTracking()
+    {
+        var products = await db.Products.AsNoTracking()
             .Include(x => x.CategoryNavigation)
             .Include(x => x.Images)
             .Include(x => x.Videos)
             .Include(x => x.Variants)
             .OrderByDescending(x => x.Id)
             .Take(4)
-            .ToListAsync());
+            .ToListAsync();
+
+        return Ok(await AttachReviewSummariesAsync(products));
+    }
+
+    private async Task<List<Product>> AttachReviewSummariesAsync(List<Product> products)
+    {
+        if (products.Count == 0) return products;
+
+        var productIds = products.Select(product => product.Id).ToArray();
+        var summaries = await db.ProductReviews.AsNoTracking()
+            .Where(review => productIds.Contains(review.ProductId))
+            .GroupBy(review => review.ProductId)
+            .Select(group => new
+            {
+                ProductId = group.Key,
+                AverageRating = group.Average(review => (decimal)review.Rating),
+                ReviewCount = group.Count()
+            })
+            .ToDictionaryAsync(summary => summary.ProductId);
+
+        foreach (var product in products)
+        {
+            if (!summaries.TryGetValue(product.Id, out var summary)) continue;
+            product.AverageRating = Math.Round(summary.AverageRating, 1);
+            product.ReviewCount = summary.ReviewCount;
+        }
+
+        return products;
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(Product product)

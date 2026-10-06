@@ -123,10 +123,10 @@
 
             @if (galleryItems.Count > 1)
             {
-                <button type="button" class="product-gallery-arrow product-gallery-arrow-prev" data-gallery-prev aria-label="Previous product image">‹</button>
-                <button type="button" class="product-gallery-arrow product-gallery-arrow-next" data-gallery-next aria-label="Next product image">›</button>
+                <button type="button" class="product-gallery-arrow product-gallery-arrow-prev" data-gallery-prev aria-label="Previous product image">&#8249;</button>
+                <button type="button" class="product-gallery-arrow product-gallery-arrow-next" data-gallery-next aria-label="Next product image">&#8250;</button>
                 <span class="product-gallery-counter" data-gallery-counter aria-live="polite">1/@galleryItems.Count</span>
-                <button type="button" class="product-gallery-expand" data-gallery-expand aria-label="Open product image viewer">⤢</button>
+                <button type="button" class="product-gallery-expand" data-gallery-expand aria-label="Open product image viewer">&#x2922;</button>
             }
         </div>
 
@@ -281,14 +281,14 @@
                   id="productRegularPrice"
                   style="@(Model.Discount > 0 ? null : "display:none")">
 
-                ₹@regularPrice.ToString("N0")
+                &#8377;@regularPrice.ToString("N0")
 
             </span>
 
             <span class="product-details-price"
                   id="productSalePrice">
 
-                ₹@Model.Price.ToString("N0")
+                &#8377;@Model.Price.ToString("N0")
 
             </span>
 
@@ -321,7 +321,7 @@
             <a class="product-inline-rating"
                href="#productReviews"
                aria-label="View @productReviews.ReviewCount customer reviews">
-                <span aria-hidden="true">★★★★★</span>
+                <span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                 <strong>@productReviews.AverageRating.ToString("0.0")</strong>
                 <span>(@productReviews.ReviewCount review@(productReviews.ReviewCount == 1 ? "" : "s"))</span>
             </a>
@@ -335,17 +335,17 @@
         @* <div class="product-shipping-promos">
 
             <p>
-                🚚 <strong>Free Shipping</strong> above ₹999
+                🚚 <strong>Free Shipping</strong> above &#8377;999
             </p>
 
             <p>
                 🔥 <strong>Most Loved:</strong>
-                Buy any 2 &amp; save ₹99
+                Buy any 2 &amp; save &#8377;99
             </p>
 
             <p>
                 💛 <strong>Best Value:</strong>
-                Buy any 3 &amp; save ₹199
+                Buy any 3 &amp; save &#8377;199
             </p>
 
         </div> *@
@@ -365,7 +365,7 @@
                         class="product-toast-close"
                         aria-label="Dismiss warning">
 
-                    ×
+                    &#215;
 
                 </button>
 
@@ -480,7 +480,7 @@
                                     else
                                     {
                                         <span class="product-size-price">
-                                            ₹@variant!.Price.ToString("N0")
+                                            &#8377;@variant!.Price.ToString("N0")
                                         </span>
                                     }
 
@@ -545,7 +545,7 @@
                             data-quantity-step="-1"
                             aria-label="Decrease quantity">
 
-                        −
+                        &#8722;
 
                     </button>
 
@@ -608,11 +608,11 @@
                 <div class="product-checkout-assurances">
 
                     <p>
-                        ✔ Secure checkout
+                        &#10004; Secure checkout
                     </p>
 
                     <p>
-                        ✔ Fast dispatch within 24–48 hours
+                        &#10004; Fast dispatch within 24&ndash;48 hours
                     </p>
 
                 </div>
@@ -632,7 +632,7 @@
 
 <div class="product-mobile-sticky-bar" id="productMobileStickyBar" aria-label="Quick purchase">
     <div class="product-mobile-sticky-price">
-        <span>₹<span data-sticky-price>@Model.Price.ToString("N0")</span></span>
+        <span>&#8377;<span data-sticky-price>@Model.Price.ToString("N0")</span></span>
         <small data-sticky-stock>Select size</small>
     </div>
     <button type="button" class="product-mobile-sticky-button" data-sticky-add>ADD TO BAG</button>
@@ -645,7 +645,7 @@
                 <p>UBHAYA FIT GUIDE</p>
                 <h2 id="productSizeGuideTitle">Find your size</h2>
             </div>
-            <button type="button" data-size-guide-close aria-label="Close size guide">×</button>
+            <button type="button" data-size-guide-close aria-label="Close size guide">&#215;</button>
         </div>
         <p class="product-size-guide-intro">Choose the size that normally fits you best. If you prefer a relaxed fit, consider going one size up.</p>
         <div class="product-size-guide-table">
@@ -669,6 +669,8 @@
 
 <section class="product-reviews"
          id="productReviews"
+         data-product-id="@Model.Id"
+         data-vote-url="@Url.Action("VoteReview", "Products")"
          aria-labelledby="productReviewsTitle">
 
     <div class="product-reviews-inner">
@@ -676,14 +678,15 @@
         <div class="product-reviews-heading">
             <div>
                 <p class="product-reviews-eyebrow">REAL CUSTOMER FEEDBACK</p>
-                <h2 id="productReviewsTitle">Customer Reviews</h2>
+                <h2 id="productReviewsTitle">Customer Reviews (@productReviews.ReviewCount)</h2>
             </div>
 
+            <div class="product-review-heading-meta">
             @if (productReviews.ReviewCount > 0)
             {
                 <div class="product-reviews-score" aria-label="@productReviews.AverageRating out of 5 stars from @productReviews.ReviewCount reviews">
                     <strong>@productReviews.AverageRating.ToString("0.0")</strong>
-                    <span class="product-review-stars" aria-hidden="true">★★★★★</span>
+                    <span class="product-review-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                     <small>@productReviews.ReviewCount review@(productReviews.ReviewCount == 1 ? "" : "s")</small>
                 </div>
             }
@@ -692,14 +695,20 @@
             {
                 <span class="product-review-eligibility-notice">Review options are temporarily unavailable.</span>
             }
-            else if (User.Identity?.IsAuthenticated == true && !productReviews.HasReviewed)
+            else if (User.Identity?.IsAuthenticated == true && !productReviews.HasReviewed && productReviews.CanReview)
             {
                 <button class="product-review-button"
                         type="button"
                         id="writeReviewButton"
                         data-can-review="@productReviews.CanReview.ToString().ToLowerInvariant()">
-                    Write a review
+                    Write a Review
                 </button>
+            }
+            else if (User.Identity?.IsAuthenticated == true && !productReviews.HasReviewed)
+            {
+                <span class="product-review-eligibility-notice">
+                    Reviews are available after you purchase this product.
+                </span>
             }
             else if (User.Identity?.IsAuthenticated == true && productReviews.HasReviewed)
             {
@@ -713,9 +722,10 @@
                    asp-controller="Account"
                    asp-action="Login"
                    asp-route-returnUrl="@($"{Context.Request.Path}{Context.Request.QueryString}#productReviews")">
-                    Write a review
+                    Write a Review
                 </a>
             }
+            </div>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(productReviewsError))
@@ -729,7 +739,7 @@
         @if (TempData["ReviewMessage"] is string reviewMessage)
         {
             <div class="product-review-notice success" role="status">
-                <span aria-hidden="true">✓</span>
+                <span aria-hidden="true">&#10003;</span>
                 @reviewMessage
             </div>
         }
@@ -746,11 +756,12 @@
         {
             <div class="product-reviews-layout">
 
-                <aside class="product-review-summary">
+                <aside class="product-review-summary" aria-label="Product ratings summary">
+                    <p class="product-reviews-eyebrow">RATINGS <span aria-hidden="true">&#9734;</span></p>
                     <div class="product-review-average">
                         <strong>@productReviews.AverageRating.ToString("0.0")</strong>
-                        <span class="product-review-stars" aria-hidden="true">★★★★★</span>
-                        <small>Based on @productReviews.ReviewCount review@(productReviews.ReviewCount == 1 ? "" : "s")</small>
+                        <span class="product-review-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                        <small>@productReviews.VerifiedPurchaseCount Verified Buyer@(productReviews.VerifiedPurchaseCount == 1 ? "" : "s")</small>
                     </div>
 
                     <div class="product-review-breakdown">
@@ -762,15 +773,59 @@
                                 : (int)Math.Round(ratingCount * 100d / productReviews.ReviewCount);
 
                             <div class="product-review-breakdown-row">
-                                <span>@rating ★</span>
+                                <span>@rating &#9733;</span>
                                 <span class="product-review-breakdown-track">
                                     <span style="width:@percentage%"></span>
                                 </span>
-                                <small>@percentage%</small>
+                                <small>@ratingCount</small>
                             </div>
                         }
                     </div>
                 </aside>
+
+                @if (productReviews.CustomerPhotoCount > 0 && productReviews.CustomerPhotos.Count > 0)
+                {
+                    var previewPhotoLimit = productReviews.CustomerPhotoCount > productReviews.CustomerPhotos.Count
+                        ? Math.Min(7, productReviews.CustomerPhotos.Count)
+                        : productReviews.CustomerPhotos.Count;
+                    <section class="product-customer-photos" aria-labelledby="customerPhotosTitle">
+                        <div class="product-review-section-heading">
+                            <div>
+                                <p class="product-reviews-eyebrow">FROM OUR COMMUNITY</p>
+                                <h3 id="customerPhotosTitle">Customer Photos (@productReviews.CustomerPhotoCount)</h3>
+                            </div>
+                        </div>
+                        <div class="product-customer-photo-strip">
+                            @foreach (var imageUrl in productReviews.CustomerPhotos.Take(previewPhotoLimit))
+                            {
+                                var resolvedImageUrl = ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"]);
+                                <button type="button" class="product-customer-photo" data-review-photo="@resolvedImageUrl" aria-label="View customer photo">
+                                    <img src="@resolvedImageUrl" alt="Photo shared by a customer" loading="lazy" />
+                                </button>
+                            }
+                            @if (productReviews.CustomerPhotoCount > previewPhotoLimit)
+                            {
+                                var extraPhoto = productReviews.CustomerPhotos.Skip(previewPhotoLimit).FirstOrDefault()
+                                    ?? productReviews.CustomerPhotos.Last();
+                                var extraPhotoUrl = ImageUrlHelper.Resolve(extraPhoto, Configuration["ApiBaseUrl"]);
+                                <button type="button" class="product-customer-photo product-customer-photo-more"
+                                        data-review-photo="@extraPhotoUrl"
+                                        aria-label="View @productReviews.CustomerPhotoCount - @previewPhotoLimit more customer photos">
+                                    <img src="@extraPhotoUrl" alt="" loading="lazy" />
+                                    <span>+@(productReviews.CustomerPhotoCount - previewPhotoLimit)</span>
+                                </button>
+                            }
+                        </div>
+                    </section>
+                }
+
+                <div class="product-review-list-heading">
+                    <div>
+                        <p class="product-reviews-eyebrow">CUSTOMER REVIEWS</p>
+                        <h3>Customer Reviews (@productReviews.ReviewCount)</h3>
+                    </div>
+                    <span>Showing @Math.Min(2, productReviews.Reviews.Count) of @productReviews.ReviewCount</span>
+                </div>
 
                 <div class="product-review-list">
             @foreach (var review in productReviews.Reviews)
@@ -779,7 +834,7 @@
                             <div class="product-review-card-top">
                                 <div>
                                     <span class="product-review-card-stars" aria-label="@review.Rating out of 5 stars">
-                                        @("★★★★★".Substring(0, review.Rating))
+                                        @Html.Raw(new string((char)9733, review.Rating))
                                     </span>
                                     @if (!string.IsNullOrWhiteSpace(review.Title))
                                     {
@@ -789,7 +844,7 @@
 
                                 @if (review.VerifiedPurchase)
                                 {
-                                    <span class="product-review-verified">✓ Verified Purchase</span>
+                                    <span class="product-review-verified">&#10003; Verified Purchase</span>
                                 }
                             </div>
 
@@ -800,30 +855,39 @@
                                 <div class="product-review-images" aria-label="Customer review photos">
                                     @foreach (var imageUrl in review.Images)
                                     {
-                                        <a href="@ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"])" target="_blank" rel="noopener">
+                                        <button type="button" data-review-photo="@ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"])" aria-label="View customer review photo">
                                             <img src="@ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"])" alt="Photo shared in a customer review" loading="lazy" />
-                                        </a>
+                                        </button>
                                     }
                                 </div>
                             }
 
-                            <div class="product-review-meta">
-                                <strong>@review.CustomerName</strong>
-                                <span>·</span>
-                                <time datetime="@review.CreatedDate.ToString("yyyy-MM-dd")">
-                                    @review.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")
-                                </time>
-                            </div>
-                        </article>
+                            <div class="review-meta-row">
+                                <div class="product-review-meta">
+                                    <strong>@review.CustomerName</strong>
+                                    <span>�</span>
+                                    <time datetime="@review.CreatedDate.ToString("yyyy-MM-dd")">@review.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</time>
+                                </div>
+                                <div class="product-review-votes" data-review-vote-group="@review.Id">
+                                    <button type="button" class="product-review-vote @(review.CurrentUserVote == 1 ? "is-selected" : "")" data-review-vote="1" data-review-id="@review.Id" aria-label="Mark this review as helpful" aria-pressed="@(review.CurrentUserVote == 1 ? "true" : "false")"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 3a3.13 3.13 0 0 1 3 2.88Z" /></svg><span data-helpful-count>@review.HelpfulCount</span></button>
+                                    <button type="button" class="product-review-vote @(review.CurrentUserVote == -1 ? "is-selected" : "")" data-review-vote="-1" data-review-id="@review.Id" aria-label="Mark this review as not helpful" aria-pressed="@(review.CurrentUserVote == -1 ? "true" : "false")"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 3a3.13 3.13 0 0 1 3 2.88Z" transform="rotate(180 12 12)" /></svg><span data-not-helpful-count>@review.NotHelpfulCount</span></button>
+                                </div>
+                            </div>                        </article>
                     }
                 </div>
 
             </div>
+            @if (productReviews.ReviewCount > 2)
+            {
+                <a class="product-review-view-all" id="viewAllReviewsButton" href="@Url.Action("Reviews", "Products", new { productId = Model.Id })">
+                    View all @productReviews.ReviewCount reviews <span aria-hidden="true">&#8594;</span>
+                </a>
+            }
         }
         else if (string.IsNullOrWhiteSpace(productReviewsError))
         {
             <div class="product-reviews-empty">
-                <div class="product-reviews-empty-icon" aria-hidden="true">★</div>
+                <div class="product-reviews-empty-icon" aria-hidden="true">&#9733;</div>
                 <h3>Be the first to write a review</h3>
 
                 @if (User.Identity?.IsAuthenticated == true && productReviews.HasReviewed)
@@ -868,11 +932,11 @@
                         <label for="reviewRating">Your rating</label>
                         <select id="reviewRating" name="Rating" required>
                             <option value="">Choose a rating</option>
-                            <option value="5">★★★★★ — Excellent</option>
-                            <option value="4">★★★★ — Good</option>
-                            <option value="3">★★★ — Average</option>
-                            <option value="2">★★ — Below average</option>
-                            <option value="1">★ — Poor</option>
+                            <option value="5">&#9733;&#9733;&#9733;&#9733;&#9733; &mdash; Excellent</option>
+                            <option value="4">&#9733;&#9733;&#9733;&#9733; &mdash; Good</option>
+                            <option value="3">&#9733;&#9733;&#9733; &mdash; Average</option>
+                            <option value="2">&#9733;&#9733; &mdash; Below average</option>
+                            <option value="1">&#9733; &mdash; Poor</option>
                         </select>
                     </div>
 
@@ -911,6 +975,13 @@
     </div>
 
 </section>
+
+
+<dialog class="product-review-lightbox" id="productReviewLightbox" aria-label="Customer photo preview">
+    <button type="button" class="product-review-lightbox-close" data-review-lightbox-close aria-label="Close photo preview">&#215;</button>
+    <img id="productReviewLightboxImage" alt="Customer shared photo" />
+</dialog>
+
 
 
 <!-- =============================================================
@@ -992,7 +1063,7 @@
                                 <input type="hidden" name="isWishlisted" value="@isRelatedWishlisted.ToString().ToLowerInvariant()" />
                                 <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Products", new { id = Model.Id })" />
                                 <button type="submit" class="product-related-wishlist @(isRelatedWishlisted ? "is-saved" : string.Empty)" aria-label="@(isRelatedWishlisted ? "Remove from wishlist" : "Add to wishlist")" title="@(isRelatedWishlisted ? "Remove from wishlist" : "Add to wishlist")" aria-pressed="@isRelatedWishlisted.ToString().ToLowerInvariant()">
-                                    <span aria-hidden="true">♡</span>
+                                    <span aria-hidden="true">&#9825;</span>
                                 </button>
                             </form>
                         }
@@ -1012,14 +1083,14 @@
                         <div class="product-bestseller-pricing">
 
                             <span class="product-bestseller-price">
-                                ₹@item.Price.ToString("N0")
+                                &#8377;@item.Price.ToString("N0")
                             </span>
 
 
                             @if (hasDiscount)
                             {
                                 <span class="product-bestseller-original-price">
-                                    ₹@Math.Round(originalPrice).ToString("N0")
+                                    &#8377;@Math.Round(originalPrice).ToString("N0")
                                 </span>
                             }
 
@@ -1050,7 +1121,7 @@
         <button type="button"
                 id="zoomOutButton"
                 aria-label="Zoom out">
-            −
+            &#8722;
         </button>
 
         <button type="button"
@@ -1068,7 +1139,7 @@
                 id="closeZoomButton"
                 class="product-image-zoom-close"
                 aria-label="Close image viewer">
-            ×
+            &#215;
         </button>
 
     </div>
@@ -1525,7 +1596,7 @@
                     '<button type="button" ' +
                     'class="product-toast-close" ' +
                     'aria-label="Dismiss warning">' +
-                    '×' +
+                    '&#215;' +
                     '</button>';
 
 
@@ -2029,7 +2100,7 @@
                                 stock <= 0
                                     ? "Please choose another size."
                                     : stock <= 3
-                                        ? "Popular size — order soon before it sells out."
+                                        ? "Popular size &mdash; order soon before it sells out."
                                         : "Available to order now."; 
                         }
 
@@ -2304,5 +2375,74 @@
                 }
 
             });
+
+    const reviewSection = document.getElementById("productReviews");
+    const reviewLightbox = document.getElementById("productReviewLightbox");
+    const reviewLightboxImage = document.getElementById("productReviewLightboxImage");
+
+    document.addEventListener("click", event => {
+        const photoButton = event.target.closest("[data-review-photo]");
+        if (photoButton) {
+            reviewLightboxImage.src = photoButton.dataset.reviewPhoto;
+            reviewLightbox.showModal();
+            return;
+        }
+
+        const voteButton = event.target.closest("[data-review-vote]");
+        if (voteButton) submitReviewVote(voteButton);
+    });
+
+    document.querySelector("[data-review-lightbox-close]")?.addEventListener("click", () => reviewLightbox.close());
+    reviewLightbox?.addEventListener("click", event => {
+        if (event.target === reviewLightbox) reviewLightbox.close();
+    });
+
+    async function submitReviewVote(button) {
+        if (button.disabled) return;
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const body = new URLSearchParams({
+            __RequestVerificationToken: token || "",
+            productId: reviewSection.dataset.productId,
+            reviewId: button.dataset.reviewId,
+            voteType: button.dataset.reviewVote
+        });
+        button.disabled = true;
+        try {
+            const response = await fetch(reviewSection.dataset.voteUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+                body
+            });
+            const data = await response.json();
+            if (response.status === 401 && data.loginUrl) {
+                window.location.assign(data.loginUrl);
+                return;
+            }
+            if (!response.ok) throw new Error(data.message || "Your vote could not be saved.");
+            document.querySelectorAll(`[data-review-vote-group="${button.dataset.reviewId}"]`).forEach(group => {
+                group.querySelector("[data-helpful-count]").textContent = data.helpfulCount;
+                group.querySelector("[data-not-helpful-count]").textContent = data.notHelpfulCount;
+                group.querySelectorAll("[data-review-vote]").forEach(item => {
+                    const selected = Number(item.dataset.reviewVote) === data.currentUserVote;
+                    item.classList.toggle("is-selected", selected);
+                    item.setAttribute("aria-pressed", selected ? "true" : "false");
+                });
+            });
+            const localGroup = button.closest(".product-review-votes");
+            if (localGroup) {
+                localGroup.querySelector("[data-helpful-count]").textContent = data.helpfulCount;
+                localGroup.querySelector("[data-not-helpful-count]").textContent = data.notHelpfulCount;
+                localGroup.querySelectorAll("[data-review-vote]").forEach(item => {
+                    const selected = Number(item.dataset.reviewVote) === data.currentUserVote;
+                    item.classList.toggle("is-selected", selected);
+                    item.setAttribute("aria-pressed", selected ? "true" : "false");
+                });
+            }
+        } catch (error) {
+            window.alert(error.message || "Your vote could not be saved.");
+        } finally {
+            button.disabled = false;
+        }
+    }
 
 </script>

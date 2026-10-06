@@ -269,9 +269,34 @@ using (var scope = app.Services.CreateScope())
                 Id int IDENTITY(1,1) NOT NULL CONSTRAINT PK_ProductReviewImages PRIMARY KEY,
                 ProductReviewId int NOT NULL,
                 ImageUrl nvarchar(2048) NOT NULL,
+                CreatedDate datetime2 NOT NULL CONSTRAINT DF_ProductReviewImages_CreatedDate DEFAULT SYSUTCDATETIME(),
                 CONSTRAINT FK_ProductReviewImages_ProductReviews_ProductReviewId FOREIGN KEY (ProductReviewId) REFERENCES dbo.ProductReviews(Id) ON DELETE CASCADE
             );
             CREATE INDEX IX_ProductReviewImages_ProductReviewId ON dbo.ProductReviewImages(ProductReviewId);
+        END;
+
+        IF COL_LENGTH(N'dbo.ProductReviewImages', N'CreatedDate') IS NULL
+            ALTER TABLE dbo.ProductReviewImages ADD CreatedDate datetime2 NOT NULL CONSTRAINT DF_ProductReviewImages_CreatedDate DEFAULT SYSUTCDATETIME();
+
+        IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_ProductReviewImages_ProductReviewId_CreatedDate' AND object_id = OBJECT_ID(N'dbo.ProductReviewImages'))
+            CREATE INDEX IX_ProductReviewImages_ProductReviewId_CreatedDate ON dbo.ProductReviewImages(ProductReviewId, CreatedDate DESC);
+
+        IF OBJECT_ID(N'dbo.ProductReviewVotes', N'U') IS NULL
+        BEGIN
+            CREATE TABLE dbo.ProductReviewVotes
+            (
+                Id int IDENTITY(1,1) NOT NULL CONSTRAINT PK_ProductReviewVotes PRIMARY KEY,
+                ProductReviewId int NOT NULL,
+                CustomerId int NOT NULL,
+                VoteType int NOT NULL,
+                CreatedDate datetime2 NOT NULL CONSTRAINT DF_ProductReviewVotes_CreatedDate DEFAULT SYSUTCDATETIME(),
+                UpdatedDate datetime2 NOT NULL CONSTRAINT DF_ProductReviewVotes_UpdatedDate DEFAULT SYSUTCDATETIME(),
+                CONSTRAINT CK_ProductReviewVotes_VoteType CHECK (VoteType IN (-1, 1)),
+                CONSTRAINT FK_ProductReviewVotes_ProductReviews_ProductReviewId FOREIGN KEY (ProductReviewId) REFERENCES dbo.ProductReviews(Id) ON DELETE CASCADE,
+                CONSTRAINT FK_ProductReviewVotes_Customers_CustomerId FOREIGN KEY (CustomerId) REFERENCES dbo.Customers(Id)
+            );
+            CREATE UNIQUE INDEX UX_ProductReviewVotes_Customer_Review ON dbo.ProductReviewVotes(CustomerId, ProductReviewId);
+            CREATE INDEX IX_ProductReviewVotes_ProductReviewId_VoteType ON dbo.ProductReviewVotes(ProductReviewId, VoteType);
         END;
 
         IF COL_LENGTH(N'dbo.Products', N'IsBestSeller') IS NULL

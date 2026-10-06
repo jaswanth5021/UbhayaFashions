@@ -80,7 +80,7 @@
    PRODUCT IMAGE CAROUSEL
    ===================================================== */
 
-.product-image-wrapper > a {
+.product-image-wrapper > a:not(.product-rating-badge) {
     display: block;
     width: 100%;
 }

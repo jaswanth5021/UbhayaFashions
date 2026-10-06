@@ -77,6 +77,10 @@
     <!-- Shared and page feature styles, in cascade order -->
     <link rel="stylesheet" href="~/css/pages/home/index.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/products/details.css" asp-append-version="true" />
+    @if (ViewContext.RouteData.Values["action"]?.ToString() == "Reviews")
+    {
+        <link rel="stylesheet" href="~/css/pages/products/reviews.css" asp-append-version="true" />
+    }
     <link rel="stylesheet" href="~/css/pages/shared/components.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/contact-footer.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/responsive.css" asp-append-version="true" />

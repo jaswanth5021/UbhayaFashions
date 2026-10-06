@@ -2,6 +2,7 @@ using LadiesDressStore.Web.Models;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Net;
 
 namespace LadiesDressStore.Web.Controllers;
 
@@ -137,6 +138,71 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
         }
 
         return View(product);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VoteReview(int productId, int reviewId, int voteType, string? returnUrl = null)
+    {
+        var safeReturnUrl = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+            ? returnUrl
+            : $"{Url.Action(nameof(Details), new { id = productId })}#productReviews";
+        var loginUrl = Url.Action("Login", "Account", new
+        {
+            returnUrl = safeReturnUrl
+        });
+
+        if (User.Identity?.IsAuthenticated != true)
+            return Unauthorized(new { requiresLogin = true, loginUrl });
+        if (voteType is not (1 or -1))
+            return BadRequest(new { message = "Choose helpful or not helpful." });
+
+        try
+        {
+            var result = await api.VoteForProductReviewAsync(reviewId, voteType);
+            if (result.Success && result.Result is not null)
+                return Json(result.Result);
+            if (result.Status == HttpStatusCode.Unauthorized)
+                return Unauthorized(new { requiresLogin = true, loginUrl });
+            return StatusCode((int)result.Status, new { message = "We couldn't save your vote. Please try again." });
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogWarning(ex, "Review vote request failed for review {ReviewId}", reviewId);
+            return StatusCode(502, new { message = "Review voting is temporarily unavailable." });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ReviewPage(int productId, int page = 1, int? rating = null, string? sort = null)
+    {
+        try
+        {
+            return Json(await api.GetProductReviewsAsync(productId, page, 10, rating, sort ?? "helpful"));
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogWarning(ex, "Review page request failed for product {ProductId}, page {Page}", productId, page);
+            return StatusCode(502, new { message = "Reviews are temporarily unavailable." });
+        }
+    }
+
+    [HttpGet("Reviews/{productId:int}")]
+    public async Task<IActionResult> Reviews(int productId, int? rating = null, string? sort = "helpful")
+    {
+        var product = await api.GetProductAsync(productId);
+        if (product is null) return NotFound();
+        try
+        {
+            ViewBag.ProductReviews = await api.GetProductReviewsAsync(productId, 1, 10, rating, sort);
+        }
+        catch (HttpRequestException ex)
+        {
+            ViewBag.ProductReviews = new ProductReviewsViewModel();
+            ViewBag.ProductReviewsError = "Reviews are temporarily unavailable. Please try again later.";
+            logger.LogWarning(ex, "Reviews page request failed for product {ProductId}", productId);
+        }
+        return View("Reviews", product);
     }
 
     [HttpPost]

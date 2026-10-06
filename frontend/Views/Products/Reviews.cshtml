@@ -1,0 +1,94 @@
+@model ProductViewModel
+@{
+    var reviews = ViewBag.ProductReviews as ProductReviewsViewModel ?? new ProductReviewsViewModel();
+    var image = ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"]);
+    ViewData["Title"] = $"Customer Reviews - {Model.Name}";
+}
+
+<main class="all-reviews-page" id="allReviews" data-product-id="@Model.Id"
+      data-page-url="@Url.Action("ReviewPage", "Products")" data-vote-url="@Url.Action("VoteReview", "Products")"
+      data-return-url="@Url.Action("Reviews", "Products", new { productId = Model.Id })">
+    <div class="all-reviews-container">
+        <a class="all-reviews-back" href="@Url.Action("Details", "Products", new { id = Model.Id })#productReviews">← Back to product</a>
+        <header class="all-reviews-product">
+            <img src="@image" alt="@Model.Name" />
+            <div><p class="product-reviews-eyebrow">CUSTOMER FEEDBACK</p><h1>@Model.Name reviews</h1><p>@Model.Price.ToString("C")</p></div>
+        </header>
+        @if (reviews.ReviewCount > 0)
+        {
+            <section class="all-reviews-summary">
+                <div class="all-reviews-score"><strong>@reviews.AverageRating.ToString("0.0")</strong><span aria-label="Rated @reviews.AverageRating out of 5">★★★★★</span><small>@reviews.ReviewCount reviews · @reviews.VerifiedPurchaseCount verified purchases</small></div>
+                <div class="all-reviews-breakdown">
+                    @for (var stars = 5; stars >= 1; stars--)
+                    {
+                        var count = reviews.RatingBreakdown.TryGetValue(stars, out var value) ? value : 0;
+                        <button type="button" data-rating-filter="@stars" aria-pressed="@(reviews.Rating == stars ? "true" : "false")"><span>@stars ★</span><span class="all-reviews-track"><i style="width:@(reviews.ReviewCount == 0 ? 0 : count * 100 / reviews.ReviewCount)%"></i></span><small>@count</small></button>
+                    }
+                    <button type="button" data-rating-filter="" aria-pressed="@(reviews.Rating is null ? "true" : "false")" class="all-reviews-clear">All ratings</button>
+                </div>
+            </section>
+            @if (reviews.CustomerPhotos.Count > 0)
+            {
+                <section class="all-review-photos"><div><p class="product-reviews-eyebrow">FROM OUR COMMUNITY</p><h2>Customer photos (@reviews.CustomerPhotoCount)</h2></div><div class="all-review-photo-strip">
+                    @foreach (var photo in reviews.CustomerPhotos)
+                    { var url = ImageUrlHelper.Resolve(photo, Configuration["ApiBaseUrl"]); <button type="button" data-review-photo="@url"><img src="@url" alt="Photo shared by a customer" loading="lazy" /></button> }
+                </div></section>
+            }
+        }
+        <section class="all-reviews-list-section">
+            <div class="all-reviews-list-head"><div><p class="product-reviews-eyebrow">REAL CUSTOMER FEEDBACK</p><h2>Customer reviews <span>(@reviews.ReviewCount)</span></h2></div>
+                <div class="reviews-sort"><label for="reviewsSort">Sort by</label><select id="reviewsSort"><option value="helpful" selected="@(reviews.Sort == "helpful")">Most helpful</option><option value="newest" selected="@(reviews.Sort == "newest")">Newest</option><option value="oldest" selected="@(reviews.Sort == "oldest")">Oldest</option><option value="highest" selected="@(reviews.Sort == "highest")">Highest rating</option><option value="lowest" selected="@(reviews.Sort == "lowest")">Lowest rating</option></select></div>
+            </div>
+            @if (ViewBag.ProductReviewsError is string error) { <p class="all-reviews-status" role="alert">@error</p> }
+            <p class="all-reviews-status" id="reviewsStatus" role="status">Showing @reviews.Reviews.Count of @reviews.FilteredReviewCount reviews</p>
+            <div class="all-reviews-list" id="reviewsList">
+                @foreach (var review in reviews.Reviews)
+                {
+                    <article class="product-review-card" data-review-card="@review.Id"><div class="product-review-card-top"><div><span class="product-review-card-stars" aria-label="@review.Rating out of 5 stars">@(new string((char)9733, review.Rating))@(new string((char)9734, 5-review.Rating))</span>@if (!string.IsNullOrWhiteSpace(review.Title)){<h3>@review.Title</h3>}</div>@if (review.VerifiedPurchase){<span class="product-review-verified">✓ Verified Purchase</span>}</div>
+                        @if (!string.IsNullOrWhiteSpace(review.Comment)){<p class="product-review-comment">@review.Comment</p>}
+                        @if (review.Images.Count > 0){<div class="product-review-images">@foreach(var photo in review.Images){var url=ImageUrlHelper.Resolve(photo, Configuration["ApiBaseUrl"]);<button type="button" data-review-photo="@url"><img src="@url" alt="Photo shared in a customer review" loading="lazy" /></button>}</div>}
+                        <div class="review-meta-row">
+                            <div class="product-review-meta"><strong>@review.CustomerName</strong><span>·</span><time datetime="@review.CreatedDate.ToString("yyyy-MM-dd")">@review.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</time></div>
+                            <div class="product-review-votes" data-review-vote-group="@review.Id">
+                                <button type="button" class="product-review-vote @(review.CurrentUserVote == 1 ? "is-selected" : "")" data-review-vote="1" data-review-id="@review.Id" aria-label="Mark this review as helpful" aria-pressed="@(review.CurrentUserVote == 1 ? "true" : "false")">
+                                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 3a3.13 3.13 0 0 1 3 2.88Z" /></svg><span data-helpful-count>@review.HelpfulCount</span>
+                                </button>
+                                <button type="button" class="product-review-vote @(review.CurrentUserVote == -1 ? "is-selected" : "")" data-review-vote="-1" data-review-id="@review.Id" aria-label="Mark this review as not helpful" aria-pressed="@(review.CurrentUserVote == -1 ? "true" : "false")">
+                                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 3a3.13 3.13 0 0 1 3 2.88Z" transform="rotate(180 12 12)" /></svg><span data-not-helpful-count>@review.NotHelpfulCount</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+            <button type="button" class="product-review-view-all" id="loadMoreReviews" hidden>Load more reviews</button>
+        </section>
+    </div>
+    <form hidden id="reviewVoteToken">@Html.AntiForgeryToken()</form>
+</main>
+<dialog class="reviews-lightbox" id="reviewsLightbox" aria-label="Customer photo gallery" tabindex="-1">
+    <button type="button" class="reviews-lightbox-close" data-close-lightbox aria-label="Close image viewer">×</button>
+    <div class="reviews-lightbox-stage">
+        <button type="button" class="reviews-lightbox-nav" data-previous-image aria-label="Previous image">←</button>
+        <img alt="Customer shared photo" />
+        <button type="button" class="reviews-lightbox-nav" data-next-image aria-label="Next image">→</button>
+    </div>
+    <p class="reviews-lightbox-counter" aria-live="polite"></p>
+</dialog>
+<script>
+(() => {
+ const root=document.getElementById('allReviews'), list=document.getElementById('reviewsList'), status=document.getElementById('reviewsStatus'), more=document.getElementById('loadMoreReviews'), sort=document.getElementById('reviewsSort');
+ const lightbox=document.getElementById('reviewsLightbox'), lightboxImage=lightbox.querySelector('img'), counter=lightbox.querySelector('.reviews-lightbox-counter'), previous=lightbox.querySelector('[data-previous-image]'), next=lightbox.querySelector('[data-next-image]'); let page=@reviews.Page, totalPages=@reviews.TotalPages, rating=null, busy=false, gallery=[], galleryIndex=0;
+ const token=document.querySelector('#reviewVoteToken input[name="__RequestVerificationToken"]')?.value||'';
+ document.querySelectorAll('[data-rating-filter]').forEach(button=>button.addEventListener('click',()=>{rating=button.dataset.ratingFilter||null;document.querySelectorAll('[data-rating-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));load(1)}));
+ sort.addEventListener('change',()=>load(1)); more.addEventListener('click',()=>load(page+1));
+ async function load(next){if(busy)return;busy=true;status.textContent='Loading reviews…';more.disabled=true;try{const url=new URL(root.dataset.pageUrl,location.origin);url.searchParams.set('productId',root.dataset.productId);url.searchParams.set('page',next);url.searchParams.set('sort',sort.value);if(rating)url.searchParams.set('rating',rating);const response=await fetch(url);if(!response.ok)throw new Error('Could not load reviews. Please try again.');const data=await response.json();if(next===1)list.replaceChildren();data.reviews.forEach(renderReview);page=data.page;totalPages=data.totalPages;status.textContent=`Showing ${list.children.length} of ${data.filteredReviewCount} reviews`;more.hidden=page>=totalPages;}catch(e){status.textContent=e.message;more.hidden=false;}finally{busy=false;more.disabled=false}}
+ function renderReview(r){const card=document.createElement('article');card.className='product-review-card';card.dataset.reviewCard=r.id;const top=document.createElement('div');top.className='product-review-card-top';const heading=document.createElement('div');const stars=document.createElement('span');stars.className='product-review-card-stars';stars.textContent='★'.repeat(r.rating)+'☆'.repeat(5-r.rating);stars.setAttribute('aria-label',`${r.rating} out of 5 stars`);heading.append(stars);if(r.title){const title=document.createElement('h3');title.textContent=r.title;heading.append(title)}top.append(heading);if(r.verifiedPurchase){const badge=document.createElement('span');badge.className='product-review-verified';badge.textContent='✓ Verified Purchase';top.append(badge)}card.append(top);if(r.comment){const comment=document.createElement('p');comment.className='product-review-comment';comment.textContent=r.comment;card.append(comment)}if(r.images?.length){const photos=document.createElement('div');photos.className='product-review-images';r.images.forEach(src=>{const b=document.createElement('button');b.type='button';b.dataset.reviewPhoto=new URL(src,@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Configuration["ApiBaseUrl"] ?? ""))||location.origin).href;const img=document.createElement('img');img.src=b.dataset.reviewPhoto;img.alt='Photo shared in a customer review';img.loading='lazy';b.append(img);photos.append(b)});card.append(photos)}const meta=document.createElement('div');meta.className='product-review-meta';const name=document.createElement('strong');name.textContent=r.customerName;const time=document.createElement('time');const date=new Date(r.createdDate);time.dateTime=date.toISOString().slice(0,10);time.textContent=date.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});meta.append(name,document.createTextNode(' · '),time);const metaRow=document.createElement('div');metaRow.className='review-meta-row';metaRow.append(meta);const votes=document.createElement('div');votes.className='product-review-votes';votes.dataset.reviewVoteGroup=r.id;for(const [type,count] of [[1,r.helpfulCount],[-1,r.notHelpfulCount]]){const b=document.createElement('button');b.type='button';b.className='product-review-vote';b.dataset.reviewVote=type;b.dataset.reviewId=r.id;b.setAttribute('aria-label',type===1?'Mark this review as helpful':'Mark this review as not helpful');b.setAttribute('aria-pressed',String(r.currentUserVote===type));if(r.currentUserVote===type)b.classList.add('is-selected');const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 3a3.13 3.13 0 0 1 3 2.88Z');if(type===-1)path.setAttribute('transform','rotate(180 12 12)');icon.append(path);b.append(icon);const n=document.createElement('span');n.dataset[type===1?'helpfulCount':'notHelpfulCount']='';n.textContent=count;b.append(n);votes.append(b)}metaRow.append(votes);card.append(metaRow);list.append(card)}
+ document.addEventListener('click',async e=>{const photo=e.target.closest('[data-review-photo]');if(photo&&root.contains(photo)){openGallery(photo);return}const b=e.target.closest('[data-review-vote]');if(!b||b.disabled)return;b.disabled=true;try{const body=new URLSearchParams({__RequestVerificationToken:token,productId:root.dataset.productId,reviewId:b.dataset.reviewId,voteType:b.dataset.reviewVote,returnUrl:root.dataset.returnUrl});const res=await fetch(root.dataset.voteUrl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body});const data=await res.json();if(res.status===401&&data.loginUrl){location.assign(data.loginUrl);return}if(!res.ok)throw new Error(data.message||'Could not save vote.');document.querySelectorAll(`[data-review-vote-group="${b.dataset.reviewId}"]`).forEach(g=>{g.querySelector('[data-helpful-count]').textContent=data.helpfulCount;g.querySelector('[data-not-helpful-count]').textContent=data.notHelpfulCount;g.querySelectorAll('[data-review-vote]').forEach(x=>{const selected=Number(x.dataset.reviewVote)===data.currentUserVote;x.classList.toggle('is-selected',selected);x.setAttribute('aria-pressed',String(selected))})})}catch(err){alert(err.message)}finally{b.disabled=false}});
+ function openGallery(clicked){const seen=new Set();gallery=[...root.querySelectorAll('[data-review-photo]')].map(button=>({src:button.dataset.reviewPhoto,alt:button.querySelector('img')?.alt||'Customer shared photo'})).filter(photo=>{if(seen.has(photo.src))return false;seen.add(photo.src);return true});galleryIndex=gallery.findIndex(photo=>photo.src===clicked.dataset.reviewPhoto);if(galleryIndex<0)return;showGalleryImage();lightbox.showModal();const focusTarget=!previous.disabled?previous:!next.disabled?next:lightbox;focusTarget.focus()}
+ function showGalleryImage(){const photo=gallery[galleryIndex];lightboxImage.src=photo.src;lightboxImage.alt=photo.alt;counter.textContent=`${galleryIndex+1} / ${gallery.length}`;previous.disabled=galleryIndex===0;next.disabled=galleryIndex===gallery.length-1}
+ previous.addEventListener('click',()=>{if(galleryIndex>0){galleryIndex--;showGalleryImage()}});next.addEventListener('click',()=>{if(galleryIndex<gallery.length-1){galleryIndex++;showGalleryImage()}});
+ document.addEventListener('keydown',e=>{if(!lightbox.open)return;if(e.key==='ArrowLeft'){e.preventDefault();previous.click()}else if(e.key==='ArrowRight'){e.preventDefault();next.click()}});
+ document.querySelector('[data-close-lightbox]').addEventListener('click',()=>lightbox.close());lightbox.addEventListener('click',e=>{if(e.target===lightbox)lightbox.close()});
+})();
+</script>

@@ -92,9 +92,14 @@ public class ApiService(
                 $"api/products/{id}");
     }
 
-    public async Task<ProductReviewsViewModel> GetProductReviewsAsync(int productId)
+    public async Task<ProductReviewsViewModel> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 2, int? rating = null, string? sort = null)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/products/{productId}/reviews");
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 20);
+        var query = $"page={page}&pageSize={pageSize}";
+        if (rating is >= 1 and <= 5) query += $"&rating={rating}";
+        if (!string.IsNullOrWhiteSpace(sort)) query += $"&sort={Uri.EscapeDataString(sort)}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/products/{productId}/reviews?{query}");
         AddToken(request);
         using var response = await Client.SendAsync(request);
         if (!response.IsSuccessStatusCode)
@@ -131,6 +136,20 @@ public class ApiService(
         return response.IsSuccessStatusCode
             ? (true, string.Empty)
             : (false, FormatReviewError(response.StatusCode, body));
+    }
+
+    public async Task<(bool Success, ProductReviewVoteResultViewModel? Result, HttpStatusCode Status)> VoteForProductReviewAsync(int reviewId, int voteType)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/products/reviews/{reviewId}/vote")
+        {
+            Content = JsonContent.Create(new { voteType })
+        };
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        if (!response.IsSuccessStatusCode)
+            return (false, null, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<ProductReviewVoteResultViewModel>();
+        return (result is not null, result, response.StatusCode);
     }
 
     private static string FormatReviewError(HttpStatusCode statusCode, string body)
