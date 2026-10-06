@@ -110,12 +110,20 @@ public class ApiService(
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, $"api/products/{productId}/reviews");
         AddToken(request);
-        request.Content = JsonContent.Create(new
+        var content = new MultipartFormDataContent
         {
-            rating = model.Rating,
-            title = model.Title,
-            comment = model.Comment
-        });
+            { new StringContent(model.Rating.ToString()), "Rating" },
+            { new StringContent(model.Title ?? string.Empty), "Title" },
+            { new StringContent(model.Comment ?? string.Empty), "Comment" }
+        };
+        foreach (var image in model.Images)
+        {
+            var imageContent = new StreamContent(image.OpenReadStream());
+            imageContent.Headers.ContentType = new MediaTypeHeaderValue(
+                string.IsNullOrWhiteSpace(image.ContentType) ? "application/octet-stream" : image.ContentType);
+            content.Add(imageContent, "Images", image.FileName);
+        }
+        request.Content = content;
 
         using var response = await Client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();

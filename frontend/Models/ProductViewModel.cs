@@ -89,6 +89,7 @@ public class ProductReviewViewModel
     public string CustomerName { get; set; } = string.Empty;
     public bool VerifiedPurchase { get; set; }
     public DateTime CreatedDate { get; set; }
+    public List<string> Images { get; set; } = [];
 }
 
 public class ProductReviewSubmissionViewModel
@@ -101,4 +102,6 @@ public class ProductReviewSubmissionViewModel
 
     [System.ComponentModel.DataAnnotations.StringLength(2000)]
     public string? Comment { get; set; }
+
+    public List<Microsoft.AspNetCore.Http.IFormFile> Images { get; set; } = [];
 }

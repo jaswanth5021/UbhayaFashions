@@ -2271,6 +2271,29 @@
     color: #514440;
 }
 
+.product-review-images,
+.product-review-image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.product-review-images img,
+.product-review-image-preview img {
+    display: block;
+    width: 92px;
+    height: 110px;
+    object-fit: cover;
+    border: 1px solid #e7deda;
+}
+
+.product-review-upload-hint {
+    margin: 6px 0 0;
+    color: #80645f;
+    font-size: 11px;
+}
+
 .product-reviews-empty {
     min-height: 210px;
     display: grid;

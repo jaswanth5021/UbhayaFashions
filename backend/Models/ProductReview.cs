@@ -10,4 +10,12 @@ public class ProductReview
     public string Comment { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
+    public List<ProductReviewImage> Images { get; set; } = [];
+}
+
+public class ProductReviewImage
+{
+    public int Id { get; set; }
+    public int ProductReviewId { get; set; }
+    public string ImageUrl { get; set; } = string.Empty;
 }

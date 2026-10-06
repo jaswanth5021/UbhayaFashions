@@ -170,6 +170,12 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
         // before sending them to the review API.
         model.Title = string.IsNullOrWhiteSpace(model.Title) ? null : model.Title.Trim();
         model.Comment = string.IsNullOrWhiteSpace(model.Comment) ? null : model.Comment.Trim();
+        model.Images ??= [];
+        if (model.Images.Count > 5 || model.Images.Any(image => image.Length > 5_000_000))
+        {
+            TempData["ReviewError"] = "Choose up to five images, each under 5 MB.";
+            return RedirectToProductReviews(productId);
+        }
 
         try
         {

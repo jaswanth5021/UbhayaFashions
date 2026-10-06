@@ -773,7 +773,7 @@
                 </aside>
 
                 <div class="product-review-list">
-                    @foreach (var review in productReviews.Reviews)
+            @foreach (var review in productReviews.Reviews)
                     {
                         <article class="product-review-card">
                             <div class="product-review-card-top">
@@ -794,6 +794,18 @@
                             </div>
 
                             <p class="product-review-comment">@review.Comment</p>
+
+                            @if (review.Images.Count > 0)
+                            {
+                                <div class="product-review-images" aria-label="Customer review photos">
+                                    @foreach (var imageUrl in review.Images)
+                                    {
+                                        <a href="@ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"])" target="_blank" rel="noopener">
+                                            <img src="@ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"])" alt="Photo shared in a customer review" loading="lazy" />
+                                        </a>
+                                    }
+                                </div>
+                            }
 
                             <div class="product-review-meta">
                                 <strong>@review.CustomerName</strong>
@@ -835,6 +847,7 @@
             <form asp-controller="Products"
                   asp-action="SubmitReview"
                   method="post"
+                  enctype="multipart/form-data"
                   class="product-review-form"
                   id="productReviewForm"
                   hidden>
@@ -879,6 +892,11 @@
                           rows="5"
                           maxlength="2000"
                           placeholder="Tell us about the fit, fabric, quality and overall experience."></textarea>
+
+                <label for="reviewImages">Add photos <span>(optional, up to 5)</span></label>
+                <input id="reviewImages" name="Images" type="file" accept="image/jpeg,image/png,image/webp" multiple />
+                <p class="product-review-upload-hint">JPG, PNG or WebP. Maximum 5 MB per image.</p>
+                <div class="product-review-image-preview" id="reviewImagePreview" aria-live="polite"></div>
 
                 <div class="product-review-form-footer">
                     <p>Only customers who purchased this product can submit a review.</p>
@@ -1448,6 +1466,24 @@
                 }
 
             });
+
+    document.getElementById("reviewImages")?.addEventListener("change", event => {
+        const input = event.currentTarget;
+        const preview = document.getElementById("reviewImagePreview");
+        if (!input || !preview) return;
+        if (input.files.length > 5) {
+            input.value = "";
+            preview.textContent = "Please choose no more than five images.";
+            return;
+        }
+        preview.replaceChildren();
+        Array.from(input.files).forEach(file => {
+            const image = document.createElement("img");
+            image.alt = file.name;
+            image.src = URL.createObjectURL(file);
+            preview.append(image);
+        });
+    });
 
 
     /* =========================================================

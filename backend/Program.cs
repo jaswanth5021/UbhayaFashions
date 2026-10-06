@@ -262,6 +262,18 @@ using (var scope = app.Services.CreateScope())
             CREATE INDEX IX_ProductReviews_Product_CreatedDate ON dbo.ProductReviews(ProductId, CreatedDate DESC);
         END;
 
+        IF OBJECT_ID(N'dbo.ProductReviewImages', N'U') IS NULL
+        BEGIN
+            CREATE TABLE dbo.ProductReviewImages
+            (
+                Id int IDENTITY(1,1) NOT NULL CONSTRAINT PK_ProductReviewImages PRIMARY KEY,
+                ProductReviewId int NOT NULL,
+                ImageUrl nvarchar(2048) NOT NULL,
+                CONSTRAINT FK_ProductReviewImages_ProductReviews_ProductReviewId FOREIGN KEY (ProductReviewId) REFERENCES dbo.ProductReviews(Id) ON DELETE CASCADE
+            );
+            CREATE INDEX IX_ProductReviewImages_ProductReviewId ON dbo.ProductReviewImages(ProductReviewId);
+        END;
+
         IF COL_LENGTH(N'dbo.Products', N'IsBestSeller') IS NULL
             ALTER TABLE dbo.Products ADD IsBestSeller bit NOT NULL CONSTRAINT DF_Products_IsBestSeller DEFAULT 0;
 
