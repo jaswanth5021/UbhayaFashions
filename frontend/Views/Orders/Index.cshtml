@@ -8,7 +8,7 @@
         <div>
             <span class="orders-eyebrow">YOUR ACCOUNT</span>
             <h1>My Orders</h1>
-            <p>Track your recent purchases and payment status.</p>
+            <p>Track purchases, payment status and reviews.</p>
         </div>
         <a class="orders-shop-link" asp-controller="Products" asp-action="Index">Continue Shopping</a>
     </div>
@@ -29,24 +29,65 @@
     }
     else
     {
-        <div class="orders-list">
+        <div class="orders-toolbar" aria-label="Order filters">
+            <div class="orders-filter-tabs" role="tablist" aria-label="Filter orders">
+                <button type="button" class="orders-filter-tab is-active" data-order-filter="all" aria-selected="true">All <span>@Model.Count</span></button>
+                <button type="button" class="orders-filter-tab" data-order-filter="paid" aria-selected="false">Paid</button>
+                <button type="button" class="orders-filter-tab" data-order-filter="pending" aria-selected="false">Pending</button>
+                <button type="button" class="orders-filter-tab" data-order-filter="processing" aria-selected="false">Processing</button>
+                <button type="button" class="orders-filter-tab" data-order-filter="delivered" aria-selected="false">Delivered</button>
+            </div>
+
+            <label class="orders-sort">
+                <span>Sort</span>
+                <select id="ordersSort">
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="high">Highest amount</option>
+                    <option value="low">Lowest amount</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="orders-results-summary">
+            <strong id="ordersResultCount">@Model.Count orders</strong>
+            <span>Showing your latest order activity</span>
+        </div>
+
+        <div class="orders-list" id="ordersList">
             @foreach (var order in Model)
             {
                 var statusClass = (order.Status ?? "").ToLowerInvariant().Replace(" ", "-");
                 var paymentClass = (order.PaymentStatus ?? "").ToLowerInvariant().Replace(" ", "-");
+                var filterText = $"{order.Status} {order.PaymentStatus}".ToLowerInvariant();
+                var isPaid = string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase);
 
-                <article class="order-card">
+                <article class="order-card"
+                         data-order-card
+                         data-status="@filterText"
+                         data-date="@order.CreatedDate.UtcDateTime.Ticks"
+                         data-total="@order.TotalAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)">
                     <div class="order-card-header">
-                        <div>
+                        <div class="order-card-heading">
                             <span class="order-card-label">ORDER #@order.Id</span>
                             <h2>@order.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</h2>
                         </div>
-                        <div class="order-card-total">₹@order.TotalAmount.ToString("N0")</div>
+
+                        <div class="order-card-heading-right">
+                            <div class="order-card-total">₹@order.TotalAmount.ToString("N0")</div>
+                            <button type="button" class="order-view-toggle" data-order-toggle aria-expanded="false">
+                                View details <span aria-hidden="true">⌄</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="order-card-status">
                         <span class="order-status-pill @statusClass">@order.Status</span>
                         <span class="order-payment-pill @paymentClass">Payment: @order.PaymentStatus</span>
+                        @if (isPaid)
+                        {
+                            <span class="order-review-ready-pill">Review available</span>
+                        }
                     </div>
 
                     <div class="order-card-items">
@@ -54,26 +95,152 @@
                         {
                             <div class="order-item-row">
                                 <div class="order-item-image">
-                                    <span>U</span>
+                                    @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.ProductName" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span>U</span>
+                                    }
                                 </div>
+
                                 <div class="order-item-info">
                                     <strong>@item.ProductName</strong>
                                     <span>Size: @item.Size · Qty: @item.Quantity</span>
                                 </div>
-                                <strong class="order-item-price">₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+
+                                <div class="order-item-actions">
+                                    <strong class="order-item-price">₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+                                    @if (isPaid)
+                                    {
+                                        <a class="order-review-button"
+                                           asp-controller="Products"
+                                           asp-action="Details"
+                                           asp-route-id="@item.ProductId"
+                                           asp-fragment="productReviews">
+                                            <span aria-hidden="true">☆</span> Review
+                                        </a>
+                                    }
+                                </div>
                             </div>
                         }
                     </div>
 
-                    <div class="order-card-footer">
-                        <span>@order.ShippingAddress</span>
+                    <div class="order-card-details" data-order-details hidden>
+                        <div>
+                            <span>DELIVERY ADDRESS</span>
+                            <strong>@order.ShippingAddress</strong>
+                        </div>
                         @if (!string.IsNullOrWhiteSpace(order.RazorpayOrderId))
                         {
-                            <small>Payment reference: @order.RazorpayOrderId</small>
+                            <div>
+                                <span>PAYMENT REFERENCE</span>
+                                <strong>@order.RazorpayOrderId</strong>
+                            </div>
                         }
                     </div>
                 </article>
             }
         </div>
+
+        <div class="orders-filter-empty" id="ordersFilterEmpty" hidden>
+            <span>⌕</span>
+            <h2>No matching orders</h2>
+            <p>Try another order filter.</p>
+        </div>
     }
 </section>
+
+@section Scripts {
+<script>
+(() => {
+    const cards = [...document.querySelectorAll('[data-order-card]')];
+    const tabs = [...document.querySelectorAll('[data-order-filter]')];
+    const sort = document.getElementById('ordersSort');
+    const resultCount = document.getElementById('ordersResultCount');
+    const empty = document.getElementById('ordersFilterEmpty');
+
+    if (!cards.length) return;
+
+    let activeFilter = 'all';
+
+    const matchesFilter = card => {
+        if (activeFilter === 'all') return true;
+
+        const text = (card.dataset.status || '').toLowerCase();
+
+        if (activeFilter === 'paid') return text.includes('paid');
+        if (activeFilter === 'pending') return text.includes('pending');
+        if (activeFilter === 'processing') return text.includes('processing');
+        if (activeFilter === 'delivered') return text.includes('delivered');
+
+        return true;
+    };
+
+    const apply = () => {
+        const visible = cards.filter(matchesFilter);
+
+        visible.sort((a, b) => {
+            if (sort?.value === 'oldest')
+                return Number(a.dataset.date) - Number(b.dataset.date);
+
+            if (sort?.value === 'high')
+                return Number(b.dataset.total) - Number(a.dataset.total);
+
+            if (sort?.value === 'low')
+                return Number(a.dataset.total) - Number(b.dataset.total);
+
+            return Number(b.dataset.date) - Number(a.dataset.date);
+        });
+
+        const list = document.getElementById('ordersList');
+        visible.forEach(card => list.appendChild(card));
+
+        cards.forEach(card => {
+            card.hidden = !visible.includes(card);
+        });
+
+        if (resultCount) {
+            resultCount.textContent = visible.length === 1 ? '1 order' : visible.length + ' orders';
+        }
+
+        if (empty) empty.hidden = visible.length !== 0;
+    };
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            activeFilter = tab.dataset.orderFilter || 'all';
+
+            tabs.forEach(x => {
+                const active = x === tab;
+                x.classList.toggle('is-active', active);
+                x.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+
+            apply();
+        });
+    });
+
+    sort?.addEventListener('change', apply);
+
+    document.querySelectorAll('[data-order-toggle]').forEach(button => {
+        button.addEventListener('click', () => {
+            const card = button.closest('[data-order-card]');
+            const details = card?.querySelector('[data-order-details]');
+            if (!details) return;
+
+            const open = !details.hidden;
+            details.hidden = open;
+            button.setAttribute('aria-expanded', open ? 'false' : 'true');
+            button.classList.toggle('is-open', !open);
+            button.innerHTML = open
+                ? 'View details <span aria-hidden="true">⌄</span>'
+                : 'Hide details <span aria-hidden="true">⌃</span>';
+        });
+    });
+
+    apply();
+})();
+</script>
+}
