@@ -1,4 +1,4 @@
-﻿using backend.Models;
+using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data;
@@ -17,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
     public DbSet<WishlistItem> WishlistItems => Set<WishlistItem>();
+    public DbSet<RecentlyViewedProduct> RecentlyViewedProducts => Set<RecentlyViewedProduct>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<CustomerAddress> CustomerAddresses => Set<CustomerAddress>();
@@ -64,6 +65,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<WishlistItem>().HasIndex(x => new { x.CustomerId, x.ProductId }).IsUnique();
         modelBuilder.Entity<WishlistItem>().HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<WishlistItem>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<RecentlyViewedProduct>().HasIndex(x => new { x.CustomerId, x.ProductId }).IsUnique();
+        modelBuilder.Entity<RecentlyViewedProduct>().HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<RecentlyViewedProduct>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductReview>().Property(x => x.Title).HasMaxLength(100).IsRequired();
         modelBuilder.Entity<ProductReview>().Property(x => x.Comment).HasMaxLength(2000).IsRequired();
         modelBuilder.Entity<ProductReview>().HasIndex(x => new { x.CustomerId, x.ProductId }).IsUnique();

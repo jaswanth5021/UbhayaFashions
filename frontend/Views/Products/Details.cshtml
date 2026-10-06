@@ -386,17 +386,8 @@
 
                 <div class="product-stock-row">
                     <span id="productStockMessage">Select a size to see availability</span>
-                    <span id="productStockCount"></span>
                 </div>
 
-                <div class="product-stock-meter"
-                     aria-hidden="true">
-                    <span id="productStockMeter"></span>
-                </div>
-
-                <small id="productStockHint">
-                    Select your size to check live availability.
-                </small>
             </div>
 
 
@@ -633,7 +624,7 @@
 <div class="product-mobile-sticky-bar" id="productMobileStickyBar" aria-label="Quick purchase">
     <div class="product-mobile-sticky-price">
         <span>&#8377;<span data-sticky-price>@Model.Price.ToString("N0")</span></span>
-        <small data-sticky-stock>Select size</small>
+        
     </div>
     <button type="button" class="product-mobile-sticky-button" data-sticky-add>ADD TO BAG</button>
 </div>
@@ -995,16 +986,19 @@
 
         <div class="product-bestsellers-inner">
 
-            <p class="catalog-eyebrow">
-                DISCOVER MORE
-            </p>
+            <div class="product-bestsellers-heading">
+                <div class="product-bestsellers-copy">
+                    <p class="catalog-eyebrow">DISCOVER MORE</p>
+                    <h2 id="productBestsellersTitle">You may also like</h2>
+                </div>
+                <div class="product-bestsellers-controls" aria-label="You may also like controls">
+                    <a class="product-bestsellers-view-all" href="/Products">View all products <span aria-hidden="true">&#8594;</span></a>
+                    <button type="button" class="product-bestsellers-scroll" data-related-prev aria-label="Scroll to previous products" aria-controls="relatedProductsTrack">&#8249;</button>
+                    <button type="button" class="product-bestsellers-scroll" data-related-next aria-label="Scroll to more products" aria-controls="relatedProductsTrack">&#8250;</button>
+                </div>
+            </div>
 
-            <h2 id="productBestsellersTitle">
-                You may also like
-            </h2>
-
-
-            <div class="product-bestsellers-grid">
+            <div class="product-bestsellers-grid" id="relatedProductsTrack" data-related-track tabindex="0" aria-label="You may also like">
 
                 @foreach (var item in relatedProducts)
                 {
@@ -1108,6 +1102,41 @@
 }
 
 
+<section class="recently-viewed-section"
+         data-recently-viewed
+         data-product-id="@Model.Id"
+         data-product-name="@Model.Name"
+         data-product-category="@Model.Category"
+         data-product-image="@ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"])"
+         data-image-base="@Configuration["ApiBaseUrl"]"
+         data-product-price="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+         data-product-discount="@Model.Discount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+         data-product-rating="@(((ViewBag.ProductReviews as ProductReviewsViewModel)?.AverageRating ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
+         data-product-review-count="@((ViewBag.ProductReviews as ProductReviewsViewModel)?.ReviewCount ?? 0)"
+         data-review-summary-url="@Url.Action("ReviewPage", "Products")"
+         data-product-url="@Url.Action("Details", "Products")"
+         data-server-history-enabled="@(User.Identity?.IsAuthenticated == true ? "true" : "false")"
+         data-history-sync-url="@Url.Action("SyncRecentlyViewed", "Products")"
+         data-server-history="@System.Text.Json.JsonSerializer.Serialize((ViewBag.RecentlyViewedProducts as List<RelatedProductViewModel>) ?? [], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web))"
+         aria-labelledby="recentlyViewedTitle" hidden>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div hidden>@Html.AntiForgeryToken()</div>
+    }
+    <div class="recently-viewed-inner">
+        <div class="recently-viewed-heading">
+            <div>
+                <p class="recently-viewed-eyebrow">YOUR BROWSING HISTORY</p>
+                <h2 id="recentlyViewedTitle" class="recently-viewed-title">Recently viewed</h2>
+            </div>
+            <div class="recently-viewed-controls" aria-label="Recently viewed controls">
+                <button type="button" class="recently-viewed-scroll" data-recent-prev aria-label="Scroll to previous products" aria-controls="recentlyViewedList">&#8249;</button>
+                <button type="button" class="recently-viewed-scroll" data-recent-next aria-label="Scroll to more products" aria-controls="recentlyViewedList">&#8250;</button>
+            </div>
+        </div>
+        <div class="recently-viewed-list" id="recentlyViewedList" data-recently-viewed-list tabindex="0" aria-label="Recently viewed products"></div>
+    </div>
+</section>
 <!-- =============================================================
      IMAGE ZOOM
      ============================================================= -->
@@ -2050,58 +2079,23 @@
                         }
 
 
-                        /* -----------------------------------------
-                           UPDATE STOCK MESSAGE
-
-                           Stock 1:
-                           Hurry! Only 1 left in stock
-
-                           Stock 2+:
-                           Size M is available
-                           ----------------------------------------- */
-
                         const stockMessage =
                             document.getElementById(
                                 "productStockMessage"
                             );
 
 
-                        const stockCount = document.getElementById("productStockCount");
-                        const stockMeter = document.getElementById("productStockMeter");
-                        const stockHint = document.getElementById("productStockHint");
-
                         if (stockMessage) {
                             if (stock <= 0) {
                                 stockMessage.textContent = "Out of stock";
                                 stockMessage.classList.add("is-out");
-                            } else if (stock <= 3) {
-                                stockMessage.textContent = `Hurry! Only ${stock} left`;
+                            } else if (stock === 1) {
+                                stockMessage.textContent = "Hurry, only 1 item left in this size";
                                 stockMessage.classList.remove("is-out");
                             } else {
-                                stockMessage.textContent = `Size ${option.dataset.size} is available`;
+                                stockMessage.textContent = "Available in stock";
                                 stockMessage.classList.remove("is-out");
                             }
-                        }
-
-                        if (stockCount) {
-                            stockCount.textContent =
-                                stock > 0 ? `${stock} available` : "Unavailable";
-                        }
-
-                        if (stockMeter) {
-                            const percentage = stock <= 0
-                                ? 0
-                                : Math.min(100, Math.max(12, stock <= 3 ? stock * 25 : 100));
-                            stockMeter.style.width = percentage + "%";
-                        }
-
-                        if (stockHint) {
-                            stockHint.textContent =
-                                stock <= 0
-                                    ? "Please choose another size."
-                                    : stock <= 3
-                                        ? "Popular size &mdash; order soon before it sells out."
-                                        : "Available to order now."; 
                         }
 
 
@@ -2133,11 +2127,6 @@
                         const stickyPrice = document.querySelector("[data-sticky-price]");
                         if (stickyPrice) {
                             stickyPrice.textContent = price.toLocaleString("en-IN", { maximumFractionDigits: 0 });
-                        }
-
-                        const stickyStock = document.querySelector("[data-sticky-stock]");
-                        if (stickyStock) {
-                            stickyStock.textContent = stock === 1 ? "Only 1 left" : (stock + " available");
                         }
 
                         document
@@ -2340,7 +2329,7 @@
                 ) {
 
                     errors.push(
-                        `Only ${quantityInput.max} item(s) are in stock.`
+                        "Requested quantity is not available in this size."
                     );
 
                 }

@@ -40,12 +40,15 @@
     }
     var openCartDrawer = TempData["OpenCartDrawer"] as bool? == true;
     var savedCheckoutAddresses = new List<LadiesDressStore.Web.Models.SavedAddressViewModel>();
+    var accountName = User.Identity?.Name ?? "My account";
+    var accountMobile = "";
 
     var wishlistCount = 0;
     if (User.Identity?.IsAuthenticated == true)
     {
         var wishlistTask = Api.GetWishlistAsync();
         var addressesTask = Api.GetMyAddressesAsync();
+        var profileTask = Api.GetMyProfileAsync();
         try
         {
             wishlistCount = (await wishlistTask).Count;
@@ -55,6 +58,18 @@
         try
         {
             savedCheckoutAddresses = await addressesTask;
+        }
+        catch (HttpRequestException) { }
+        catch (JsonException) { }
+
+        try
+        {
+            var profileResult = await profileTask;
+            if (profileResult.Data is not null)
+            {
+                accountName = string.IsNullOrWhiteSpace(profileResult.Data.Name) ? accountName : profileResult.Data.Name;
+                accountMobile = profileResult.Data.Mobile ?? "";
+            }
         }
         catch (HttpRequestException) { }
         catch (JsonException) { }
@@ -220,29 +235,38 @@
 
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a asp-controller="Account"
-                   asp-action="Profile"
-                   class="header-icon header-account-icon"
-                   aria-label="My account">
-
-                    <svg width="22"
-                         height="22"
-                         viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.7"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-
-                        <circle cx="12"
-                                cy="8"
-                                r="4" />
-
-                        <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
-
-                    </svg>
-
-                </a>
+                <div class="account-menu">
+                    <button type="button"
+                            class="header-icon header-account-icon account-menu-toggle"
+                            id="accountMenuToggle"
+                            aria-label="My account menu"
+                            aria-controls="accountMenuDropdown"
+                            aria-expanded="false">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+                        </svg>
+                    </button>
+                    <section class="account-dropdown" id="accountMenuDropdown" aria-label="My account">
+                        <div class="account-dropdown-greeting">
+                            <strong>Hello, @accountName</strong>
+                            @if (!string.IsNullOrWhiteSpace(accountMobile))
+                            {
+                                <span>@accountMobile</span>
+                            }
+                        </div>
+                        <nav class="account-dropdown-links" aria-label="Account links">
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders">Orders</a>
+                            <a asp-controller="Wishlist" asp-action="Index">Wishlist</a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="addresses">Saved addresses</a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="details">Edit profile</a>
+                        </nav>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="account-dropdown-logout-form">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="account-dropdown-logout">Log out</button>
+                        </form>
+                    </section>
+                </div>
             }
             else
             {
@@ -573,11 +597,14 @@
     <script src="~/js/menu.js"
             asp-append-version="true">
     </script>
+    <script src="~/js/account-menu.js" asp-append-version="true"></script>
     <script src="~/js/cart-drawer.js" asp-append-version="true"></script>
     <script src="~/js/cart-update.js" asp-append-version="true"></script>
     <script src="~/js/checkout-address.js" asp-append-version="true"></script>
     <script src="~/js/search.js" asp-append-version="true"></script>
     <script src="~/js/product-carousel.js" asp-append-version="true"></script>
+    <script src="~/js/related-products.js" asp-append-version="true"></script>
+    <script src="~/js/recently-viewed.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync(
         "Scripts",

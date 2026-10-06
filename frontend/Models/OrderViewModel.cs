@@ -3,6 +3,9 @@ namespace LadiesDressStore.Web.Models;
 public class CreateOrderViewModel
 {
     public string ShippingAddress { get; set; } = "";
+    public bool SaveAddress { get; set; }
+    public int SelectedSavedAddressId { get; set; }
+    public SaveAddressViewModel Address { get; set; } = new();
 }
 
 

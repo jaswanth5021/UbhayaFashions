@@ -30,6 +30,8 @@
     <form asp-controller="Orders" asp-action="Checkout" method="post" id="checkoutScreenForm">
         @Html.AntiForgeryToken()
         <input type="hidden" name="ShippingAddress" id="checkoutShippingAddress" />
+        <input type="hidden" name="SelectedSavedAddressId" id="checkoutSelectedSavedAddressId" value="0" />
+        <input type="hidden" name="Address.AddressLine2" id="checkoutAddressLine2" value="@(savedAddresses.FirstOrDefault()?.AddressLine2 ?? "")" />
 
         <div class="checkout-screen-layout">
             <main class="checkout-screen-main">
@@ -108,8 +110,15 @@
                                 var address = savedAddresses[addressIndex];
                                 var isFirstAddress = addressIndex == 0;
 
-                                <label class="checkout-screen-saved-card @(isFirstAddress ? "is-selected" : "")"
+                <label class="checkout-screen-saved-card @(isFirstAddress ? "is-selected" : "")"
+                                       data-saved-id="@address.Id"
                                        data-saved-address="@address.FullAddress"
+                                       data-saved-line1="@address.AddressLine1"
+                                       data-saved-line2="@address.AddressLine2"
+                                       data-saved-city="@address.City"
+                                       data-saved-state="@address.State"
+                                       data-saved-postal-code="@address.PostalCode"
+                                       data-saved-country="@address.Country"
                                        data-saved-name="@address.Name"
                                        data-saved-mobile="@address.Mobile">
                                     <input type="radio"
@@ -134,38 +143,38 @@
                     <div class="checkout-screen-fields">
                         <label>
                             Full Name
-                            <input id="checkoutName" type="text" value="@(savedAddresses.FirstOrDefault()?.Name ?? "")" autocomplete="name" required />
+                            <input id="checkoutName" name="Address.Name" type="text" value="@(savedAddresses.FirstOrDefault()?.Name ?? "")" autocomplete="name" required />
                         </label>
                         <label>
                             Phone Number
-                            <input id="checkoutPhone" type="tel" value="@(savedAddresses.FirstOrDefault()?.Mobile ?? "")" autocomplete="tel" required />
+                            <input id="checkoutPhone" name="Address.Mobile" type="tel" value="@(savedAddresses.FirstOrDefault()?.Mobile ?? "")" autocomplete="tel" required />
                         </label>
                         <label class="full">
                             Address
-                            <textarea id="checkoutAddressText" placeholder="House / Flat / Street / Area" required>@(savedAddresses.FirstOrDefault()?.FullAddress ?? "")</textarea>
+                            <textarea id="checkoutAddressText" name="Address.AddressLine1" placeholder="House / Flat / Street / Area" required>@(savedAddresses.FirstOrDefault()?.AddressLine1 ?? "")</textarea>
                         </label>
                         <label>
                             Pincode
-                            <input id="checkoutPincode" type="text" inputmode="numeric" autocomplete="postal-code" />
+                            <input id="checkoutPincode" name="Address.PostalCode" type="text" value="@(savedAddresses.FirstOrDefault()?.PostalCode ?? "")" inputmode="numeric" autocomplete="postal-code" />
                         </label>
                         <label>
                             City
-                            <input id="checkoutCity" type="text" autocomplete="address-level2" />
+                            <input id="checkoutCity" name="Address.City" type="text" value="@(savedAddresses.FirstOrDefault()?.City ?? "")" autocomplete="address-level2" />
                         </label>
                         <label>
                             State
-                            <input id="checkoutState" type="text" value="Telangana" autocomplete="address-level1" />
+                            <input id="checkoutState" name="Address.State" type="text" value="@(savedAddresses.FirstOrDefault()?.State ?? "Telangana")" autocomplete="address-level1" />
                         </label>
                         <label>
                             Country
-                            <select id="checkoutCountry">
-                                <option selected>India</option>
+                            <select id="checkoutCountry" name="Address.Country">
+                                <option selected="@(string.IsNullOrWhiteSpace(savedAddresses.FirstOrDefault()?.Country) || savedAddresses.FirstOrDefault()?.Country == "India")">India</option>
                             </select>
                         </label>
                     </div>
 
                     <label class="checkout-save-address">
-                        <input type="checkbox" checked />
+                        <input id="checkoutSaveAddress" type="checkbox" name="SaveAddress" value="true" checked />
                         <span>Save this address for future orders</span>
                     </label>
 
@@ -325,10 +334,24 @@
             const addressText = document.getElementById('checkoutAddressText');
             const name = document.getElementById('checkoutName');
             const phone = document.getElementById('checkoutPhone');
+            const pincode = document.getElementById('checkoutPincode');
+            const city = document.getElementById('checkoutCity');
+            const state = document.getElementById('checkoutState');
+            const country = document.getElementById('checkoutCountry');
+            const addressLine2 = document.getElementById('checkoutAddressLine2');
+            const selectedAddressId = document.getElementById('checkoutSelectedSavedAddressId');
+            const saveAddressCheckbox = document.getElementById('checkoutSaveAddress');
 
             const syncAddress = () => {
                 if (!shipping) return;
-                shipping.value = addressText?.value.trim() || '';
+                shipping.value = [
+                    addressText?.value,
+                    addressLine2?.value,
+                    city?.value,
+                    state?.value,
+                    pincode?.value,
+                    country?.value
+                ].map(value => value?.trim()).filter(Boolean).join(', ');
                 const reviewName = document.getElementById('reviewName');
                 const reviewAddress = document.getElementById('reviewAddress');
                 if (reviewName) reviewName.textContent = name?.value.trim() || 'Customer';
@@ -352,10 +375,32 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
+            const validateNewAddressForSaving = () => {
+                if (!saveAddressCheckbox?.checked || Number(selectedAddressId?.value || 0) > 0)
+                    return true;
+
+                const missingField = [name, phone, addressText, city, state, pincode]
+                    .find(input => !input?.value.trim() || (input === pincode && input.value.trim().length < 5));
+                if (!missingField) return true;
+
+                showStep(2);
+                alert(missingField === pincode
+                    ? 'Enter a valid pincode to save this address.'
+                    : 'Complete your address details to save it for future orders.');
+                missingField.focus();
+                return false;
+            };
+
             const selectSavedAddress = card => {
-                addressText.value = card.dataset.savedAddress || '';
+                addressText.value = card.dataset.savedLine1 || '';
+                if (addressLine2) addressLine2.value = card.dataset.savedLine2 || '';
                 name.value = card.dataset.savedName || '';
                 phone.value = card.dataset.savedMobile || '';
+                if (pincode) pincode.value = card.dataset.savedPostalCode || '';
+                if (city) city.value = card.dataset.savedCity || '';
+                if (state) state.value = card.dataset.savedState || '';
+                if (country) country.value = card.dataset.savedCountry || 'India';
+                if (selectedAddressId) selectedAddressId.value = card.dataset.savedId || '0';
 
                 document.querySelectorAll('[data-saved-address]').forEach(x => {
                     x.classList.remove('is-selected');
@@ -403,6 +448,9 @@
                         return;
                     }
 
+                    if (step === 3 && !validateNewAddressForSaving())
+                        return;
+
                     syncAddress();
                     showStep(step);
                 });
@@ -412,8 +460,14 @@
                 button.addEventListener('click', () => showStep(Number(button.dataset.checkoutScreenBack)));
             });
 
-            addressText?.addEventListener('input', syncAddress);
-            name?.addEventListener('input', syncAddress);
+            const markAddressAsNew = () => {
+                if (selectedAddressId) selectedAddressId.value = '0';
+                syncAddress();
+            };
+            [addressText, name, phone, pincode, city, state, country].forEach(input => {
+                input?.addEventListener('input', markAddressAsNew);
+                input?.addEventListener('change', markAddressAsNew);
+            });
 
             document.querySelector('[data-mobile-checkout-next]')?.addEventListener('click', () => {
                 const activePanel = document.querySelector('[data-checkout-screen-step].is-visible');
@@ -463,6 +517,9 @@
                         return;
                     }
 
+                    if (!validateNewAddressForSaving())
+                        return;
+
                     const form = document.getElementById('checkoutScreenForm');
                     const token = form?.querySelector('input[name="__RequestVerificationToken"]')?.value;
                     if (!token) return;
@@ -478,9 +535,8 @@
                     }
 
                     try {
-                        const formData = new FormData();
-                        formData.append('ShippingAddress', address);
-                        formData.append('__RequestVerificationToken', token);
+                        syncAddress();
+                        const formData = new FormData(form);
 
                         const response = await fetch('@Url.Action("TestPaymentSuccess", "Orders")', {
                             method: 'POST',

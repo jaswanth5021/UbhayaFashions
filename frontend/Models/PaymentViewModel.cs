@@ -12,6 +12,9 @@ public class PaymentCheckoutViewModel
     public string CustomerName { get; set; } = "";
     public string CustomerEmail { get; set; } = "";
     public string CustomerPhone { get; set; } = "";
+    public bool SaveAddress { get; set; }
+    public int SelectedSavedAddressId { get; set; }
+    public SaveAddressViewModel Address { get; set; } = new();
 }
 
 public class PaymentVerifyViewModel
@@ -20,4 +23,7 @@ public class PaymentVerifyViewModel
     public string RazorpayOrderId { get; set; } = "";
     public string RazorpayPaymentId { get; set; } = "";
     public string RazorpaySignature { get; set; } = "";
+    public bool SaveAddress { get; set; }
+    public int SelectedSavedAddressId { get; set; }
+    public SaveAddressViewModel Address { get; set; } = new();
 }

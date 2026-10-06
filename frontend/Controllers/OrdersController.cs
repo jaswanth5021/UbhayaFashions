@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LadiesDressStore.Web.Controllers;
 
 [Authorize]
-public class OrdersController(ApiService api) : Controller
+public class OrdersController(ApiService api, ILogger<OrdersController> logger) : Controller
 {
     [HttpGet]
     public IActionResult Index() => RedirectToAction("Profile", "Account", new { tab = "orders" });
@@ -79,6 +79,9 @@ public class OrdersController(ApiService api) : Controller
             return RedirectToAction("Index", "Cart");
         }
 
+        result.Data.SaveAddress = model.SaveAddress;
+        result.Data.SelectedSavedAddressId = model.SelectedSavedAddressId;
+        result.Data.Address = model.Address;
         return View("Payment", result.Data);
     }
 
@@ -101,13 +104,13 @@ public class OrdersController(ApiService api) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> TestPaymentSuccess()
+    public async Task<IActionResult> TestPaymentSuccess(CreateOrderViewModel model)
     {
         var cart = ReadCart();
         if (cart.Count == 0)
             return Json(new { success = false, message = "Your cart is empty." });
 
-        var address = Request.Form["ShippingAddress"].ToString().Trim();
+        var address = model.ShippingAddress.Trim();
         if (string.IsNullOrWhiteSpace(address))
             return Json(new { success = false, message = "Delivery address is required." });
 
@@ -115,6 +118,7 @@ public class OrdersController(ApiService api) : Controller
         if (!result.Success)
             return Json(new { success = false, message = result.Message });
 
+        await SaveNewAddressAfterPaymentAsync(model.SaveAddress, model.SelectedSavedAddressId, model.Address);
         Response.Cookies.Delete("cart");
         return Json(new
         {
@@ -135,8 +139,52 @@ public class OrdersController(ApiService api) : Controller
         if (!result.Success)
             return BadRequest(new { success = false, message = result.Message });
 
+        await SaveNewAddressAfterPaymentAsync(model.SaveAddress, model.SelectedSavedAddressId, model.Address);
         Response.Cookies.Delete("cart");
         return Json(new { success = true, redirectUrl = Url.Action(nameof(Success), new { id = model.OrderId }) });
+    }
+
+    private async Task SaveNewAddressAfterPaymentAsync(bool saveAddress, int selectedAddressId, SaveAddressViewModel address)
+    {
+        if (!saveAddress || selectedAddressId > 0)
+            return;
+
+        if (string.IsNullOrWhiteSpace(address.Name) ||
+            string.IsNullOrWhiteSpace(address.Mobile) ||
+            string.IsNullOrWhiteSpace(address.AddressLine1) ||
+            string.IsNullOrWhiteSpace(address.City) ||
+            string.IsNullOrWhiteSpace(address.State) ||
+            string.IsNullOrWhiteSpace(address.PostalCode))
+        {
+            logger.LogWarning("Address was not saved after successful payment because required address fields were missing.");
+            return;
+        }
+
+        address.Id = 0;
+        address.IsDefault = false;
+
+        try
+        {
+            var savedAddresses = await api.GetMyAddressesAsync();
+            if (savedAddresses.Any(saved =>
+                    string.Equals(saved.Name.Trim(), address.Name.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(saved.Mobile.Trim(), address.Mobile.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(saved.AddressLine1.Trim(), address.AddressLine1.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(saved.AddressLine2?.Trim() ?? "", address.AddressLine2?.Trim() ?? "", StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(saved.City.Trim(), address.City.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(saved.State.Trim(), address.State.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(saved.PostalCode.Trim(), address.PostalCode.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(saved.Country.Trim(), address.Country.Trim(), StringComparison.OrdinalIgnoreCase)))
+                return;
+
+            var result = await api.SaveAddressAsync(address);
+            if (!result.Success)
+                logger.LogWarning("Order succeeded, but saving the checkout address failed: {Message}", result.Message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Order succeeded, but saving the checkout address failed.");
+        }
     }
 
     private List<CartItemViewModel> ReadCart()

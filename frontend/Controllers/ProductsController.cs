@@ -87,6 +87,20 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
         var product = await api.GetProductAsync(id);
         if (product is null) return NotFound();
 
+        ViewBag.RecentlyViewedProducts = new List<RelatedProductViewModel>();
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            try
+            {
+                await api.RecordRecentlyViewedAsync(id);
+                ViewBag.RecentlyViewedProducts = await api.GetRecentlyViewedAsync();
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.LogWarning(ex, "Recently viewed API request failed for product {ProductId}", id);
+            }
+        }
+
         try
         {
             ViewBag.RelatedProducts = (await api.GetRelatedProductsAsync(id))
@@ -138,6 +152,39 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
         }
 
         return View(product);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SyncRecentlyViewed([FromForm] List<int> productIds)
+    {
+        if (User.Identity?.IsAuthenticated != true) return Unauthorized();
+
+        foreach (var productId in (productIds ?? [])
+                     .Where(id => id > 0)
+                     .Distinct()
+                     .Take(25)
+                     .Reverse())
+        {
+            try
+            {
+                await api.RecordRecentlyViewedAsync(productId);
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.LogDebug(ex, "Skipped syncing recently viewed product {ProductId}", productId);
+            }
+        }
+
+        try
+        {
+            return Json(await api.GetRecentlyViewedAsync());
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogWarning(ex, "Recently viewed history sync failed");
+            return StatusCode(502, new { message = "Recently viewed products are temporarily unavailable." });
+        }
     }
 
     [HttpPost]

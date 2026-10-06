@@ -34,13 +34,11 @@
             button.disabled = true;
             message.textContent = 'Verifying your payment...';
 
-            const formData = new FormData();
+            const formData = new FormData(document.getElementById('paymentVerifyForm'));
             formData.append('OrderId', '@Model.OrderId');
             formData.append('RazorpayOrderId', response.razorpay_order_id || '');
             formData.append('RazorpayPaymentId', response.razorpay_payment_id || '');
             formData.append('RazorpaySignature', response.razorpay_signature || '');
-            formData.append('__RequestVerificationToken',
-                document.querySelector('input[name="__RequestVerificationToken"]').value);
 
             const verifyResponse = await fetch('@Url.Action("Verify", "Orders")', {
                 method: 'POST',
@@ -74,6 +72,16 @@
 })();
 </script>
 
-<form style="display:none">
+<form id="paymentVerifyForm" style="display:none">
     @Html.AntiForgeryToken()
+    <input type="hidden" name="SaveAddress" value="@(Model.SaveAddress ? "true" : "false")" />
+    <input type="hidden" name="SelectedSavedAddressId" value="@Model.SelectedSavedAddressId" />
+    <input type="hidden" name="Address.Name" value="@Model.Address.Name" />
+    <input type="hidden" name="Address.Mobile" value="@Model.Address.Mobile" />
+    <input type="hidden" name="Address.AddressLine1" value="@Model.Address.AddressLine1" />
+    <input type="hidden" name="Address.AddressLine2" value="@Model.Address.AddressLine2" />
+    <input type="hidden" name="Address.City" value="@Model.Address.City" />
+    <input type="hidden" name="Address.State" value="@Model.Address.State" />
+    <input type="hidden" name="Address.PostalCode" value="@Model.Address.PostalCode" />
+    <input type="hidden" name="Address.Country" value="@Model.Address.Country" />
 </form>

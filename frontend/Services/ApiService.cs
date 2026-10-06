@@ -245,6 +245,23 @@ public class ApiService(
         return await Client.GetFromJsonAsync<List<RelatedProductViewModel>>($"api/products/{id}/related") ?? [];
     }
 
+    public async Task RecordRecentlyViewedAsync(int productId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/recently-viewed/{productId}");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<List<RelatedProductViewModel>> GetRecentlyViewedAsync()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "api/recently-viewed");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<RelatedProductViewModel>>() ?? [];
+    }
+
 
     public async Task<List<ProductViewModel>>
         GetNewarrivalsAsync()
