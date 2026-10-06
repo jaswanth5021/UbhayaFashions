@@ -51,6 +51,7 @@
         ViewBag.WishlistedProductIds as HashSet<int> ?? [];
     var productReviews =
         ViewBag.ProductReviews as ProductReviewsViewModel ?? new ProductReviewsViewModel();
+    var productReviewsError = ViewBag.ProductReviewsError as string;
 
     if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
@@ -687,7 +688,11 @@
                 </div>
             }
 
-            @if (User.Identity?.IsAuthenticated == true && !productReviews.HasReviewed)
+            @if (!string.IsNullOrWhiteSpace(productReviewsError))
+            {
+                <span class="product-review-eligibility-notice">Review options are temporarily unavailable.</span>
+            }
+            else if (User.Identity?.IsAuthenticated == true && !productReviews.HasReviewed)
             {
                 <button class="product-review-button"
                         type="button"
@@ -707,11 +712,19 @@
                 <a class="product-review-button"
                    asp-controller="Account"
                    asp-action="Login"
-                   asp-route-returnUrl="@($"{Context.Request.Path}{Context.Request.QueryString}")">
+                   asp-route-returnUrl="@($"{Context.Request.Path}{Context.Request.QueryString}#productReviews")">
                     Write a review
                 </a>
             }
         </div>
+
+        @if (!string.IsNullOrWhiteSpace(productReviewsError))
+        {
+            <div class="product-review-notice error" role="alert">
+                <span aria-hidden="true">!</span>
+                @productReviewsError
+            </div>
+        }
 
         @if (TempData["ReviewMessage"] is string reviewMessage)
         {
@@ -795,7 +808,7 @@
 
             </div>
         }
-        else
+        else if (string.IsNullOrWhiteSpace(productReviewsError))
         {
             <div class="product-reviews-empty">
                 <div class="product-reviews-empty-icon" aria-hidden="true">★</div>
@@ -817,7 +830,7 @@
             </div>
         }
 
-        @if (User.Identity?.IsAuthenticated == true && productReviews.CanReview)
+        @if (string.IsNullOrWhiteSpace(productReviewsError) && User.Identity?.IsAuthenticated == true && productReviews.CanReview)
         {
             <form asp-controller="Products"
                   asp-action="SubmitReview"
@@ -860,13 +873,11 @@
                     </div>
                 </div>
 
-                <label for="reviewBody">Your review</label>
+                <label for="reviewBody">Your review <span>(optional)</span></label>
                 <textarea id="reviewBody"
                           name="Comment"
                           rows="5"
                           maxlength="2000"
-                          minlength="10"
-                          required
                           placeholder="Tell us about the fit, fabric, quality and overall experience."></textarea>
 
                 <div class="product-review-form-footer">
@@ -1402,7 +1413,7 @@
                         notice.className =
                             "product-review-eligibility-notice";
                         notice.textContent =
-                            "Purchase this product to unlock the review form.";
+                            "You can review this product after purchasing it.";
                         reviewButton
                             .closest(".product-reviews-heading")
                             ?.after(notice);

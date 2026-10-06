@@ -97,9 +97,8 @@ public class ProductReviewSubmissionViewModel
     public int Rating { get; set; }
 
     [System.ComponentModel.DataAnnotations.StringLength(100)]
-    public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; }
 
-    [System.ComponentModel.DataAnnotations.Required]
-    [System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 10)]
-    public string Comment { get; set; } = string.Empty;
+    [System.ComponentModel.DataAnnotations.StringLength(2000)]
+    public string? Comment { get; set; }
 }

@@ -3,6 +3,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using System.Security.Claims;
 
 namespace backend.Controllers;
@@ -96,9 +97,6 @@ public class ProductReviewsController(ApplicationDbContext db) : ControllerBase
         var title = (request.Title ?? string.Empty).Trim();
         var comment = (request.Comment ?? string.Empty).Trim();
 
-        if (comment.Length < 10)
-            return BadRequest("Review must contain at least 10 characters.");
-
         if (title.Length > 100 || comment.Length > 2000)
             return BadRequest("Review is too long.");
 
@@ -124,7 +122,15 @@ public class ProductReviewsController(ApplicationDbContext db) : ControllerBase
             Comment = comment
         });
 
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.GetBaseException() is SqlException { Number: 2601 or 2627 })
+        {
+            return Conflict("You have already reviewed this product.");
+        }
+
         return Created(string.Empty, new { success = true });
     }
 }

@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net;
 using System.Text.Json;
 using LadiesDressStore.Web.Models;
 
@@ -121,10 +122,95 @@ public class ApiService(
 
         return response.IsSuccessStatusCode
             ? (true, string.Empty)
-            : (false, string.IsNullOrWhiteSpace(body)
-                ? $"Review submission failed ({(int)response.StatusCode})."
-                : body);
+            : (false, FormatReviewError(response.StatusCode, body));
     }
+
+    private static string FormatReviewError(HttpStatusCode statusCode, string body)
+    {
+        if (statusCode == HttpStatusCode.Unauthorized)
+            return "Please sign in again before submitting a review.";
+        if (statusCode == HttpStatusCode.Forbidden)
+            return "Please purchase this product before submitting a review.";
+        if (statusCode == HttpStatusCode.Conflict)
+            return "You have already reviewed this product.";
+        if (statusCode == HttpStatusCode.NotFound)
+            return "This product is no longer available, so we couldn't submit your review.";
+
+        var message = body.Trim();
+        if (message.StartsWith('{') || message.StartsWith('"'))
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(message);
+                if (document.RootElement.ValueKind == JsonValueKind.String)
+                {
+                    message = document.RootElement.GetString() ?? string.Empty;
+                }
+                else if (document.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    message = ReadString(document.RootElement, "detail")
+                        ?? ReadString(document.RootElement, "message")
+                        ?? string.Empty;
+
+                    if (string.IsNullOrWhiteSpace(message) &&
+                        document.RootElement.TryGetProperty("errors", out var errors) &&
+                        errors.ValueKind == JsonValueKind.Object)
+                    {
+                        foreach (var error in errors.EnumerateObject())
+                        {
+                            if (error.Value.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var value in error.Value.EnumerateArray())
+                                {
+                                    if (value.ValueKind == JsonValueKind.String &&
+                                        !string.IsNullOrWhiteSpace(value.GetString()))
+                                    {
+                                        message = value.GetString()!;
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (error.Value.ValueKind == JsonValueKind.String)
+                            {
+                                message = error.Value.GetString() ?? string.Empty;
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(message))
+                                break;
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(message))
+                        message = ReadString(document.RootElement, "title") ?? string.Empty;
+                }
+            }
+            catch (JsonException)
+            {
+                message = string.Empty;
+            }
+        }
+
+        var normalized = message.Trim().Trim('"').ToLowerInvariant();
+        if (normalized.Contains("already reviewed", StringComparison.Ordinal))
+            return "You have already reviewed this product.";
+        if (normalized.Contains("purchase", StringComparison.Ordinal) ||
+            normalized.Contains("eligible", StringComparison.Ordinal))
+            return "Please purchase this product before submitting a review.";
+        if (normalized.Contains("rating", StringComparison.Ordinal))
+            return "Please choose a rating from 1 to 5 stars.";
+        if (normalized.Contains("too long", StringComparison.Ordinal))
+            return "Please shorten your review and try again.";
+
+        if (statusCode == HttpStatusCode.BadRequest)
+            return "Please check your rating and review, then try again.";
+
+        return "We couldn't submit your review right now. Please try again.";
+    }
+
+    private static string? ReadString(JsonElement element, string propertyName) =>
+        element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
 
 
     public async Task<List<RelatedProductViewModel>> GetRelatedProductsAsync(int id)

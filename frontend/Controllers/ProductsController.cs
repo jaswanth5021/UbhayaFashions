@@ -1,10 +1,11 @@
 using LadiesDressStore.Web.Models;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace LadiesDressStore.Web.Controllers;
 
-public class ProductsController(ApiService api) : Controller
+public class ProductsController(ApiService api, ILogger<ProductsController> logger) : Controller
 {
     public async Task<IActionResult> Categories()
     {
@@ -102,9 +103,23 @@ public class ProductsController(ApiService api) : Controller
         {
             ViewBag.ProductReviews = await api.GetProductReviewsAsync(id);
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
             ViewBag.ProductReviews = new ProductReviewsViewModel();
+            ViewBag.ProductReviewsError = "Reviews are temporarily unavailable. Please try again later.";
+            logger.LogWarning(ex, "Review API request failed for product {ProductId}", id);
+        }
+        catch (JsonException ex)
+        {
+            ViewBag.ProductReviews = new ProductReviewsViewModel();
+            ViewBag.ProductReviewsError = "Reviews could not be loaded right now. Please try again later.";
+            logger.LogError(ex, "Review API returned invalid data for product {ProductId}", id);
+        }
+        catch (OperationCanceledException ex)
+        {
+            ViewBag.ProductReviews = new ProductReviewsViewModel();
+            ViewBag.ProductReviewsError = "Reviews are taking too long to load. Please try again later.";
+            logger.LogWarning(ex, "Review API request timed out for product {ProductId}", id);
         }
 
         if (User.Identity?.IsAuthenticated == true)
@@ -128,19 +143,33 @@ public class ProductsController(ApiService api) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SubmitReview(
         int productId,
-        ProductReviewSubmissionViewModel model)
+        [FromForm, Bind(Prefix = "")] ProductReviewSubmissionViewModel model)
     {
         if (User.Identity?.IsAuthenticated != true)
         {
-            var reviewUrl = Url.Action(nameof(Details), new { id = productId }) + "#productReviews";
+            var productUrl = Url.Action(nameof(Details), new { id = productId }) ?? $"/Products/Details/{productId}";
+            var reviewUrl = productUrl + "#productReviews";
             return RedirectToAction("Login", "Account", new { returnUrl = reviewUrl });
         }
 
-        if (!ModelState.IsValid)
+        var ratingState = ModelState[nameof(model.Rating)];
+        if (model.Rating is < 1 or > 5 || ratingState?.Errors.Count > 0)
         {
-            TempData["ReviewError"] = "Please provide a rating and a review of at least 10 characters.";
+            var rating = model.Rating;
+            TempData["ReviewError"] = "Please select a rating between 1 and 5.";
+            logger.LogWarning(
+                "Review submission validation failed for product {ProductId}. Rating: {Rating}; errors: {Errors}",
+                productId,
+                rating,
+                string.Join("; ", ModelState.Where(entry => entry.Value?.Errors.Count > 0)
+                    .Select(entry => $"{entry.Key}: {string.Join(", ", entry.Value!.Errors.Select(error => error.ErrorMessage))}")));
             return RedirectToProductReviews(productId);
         }
+
+        // A rating by itself is a valid review. Normalize blank optional fields
+        // before sending them to the review API.
+        model.Title = string.IsNullOrWhiteSpace(model.Title) ? null : model.Title.Trim();
+        model.Comment = string.IsNullOrWhiteSpace(model.Comment) ? null : model.Comment.Trim();
 
         try
         {
@@ -150,9 +179,15 @@ public class ProductsController(ApiService api) : Controller
             else
                 TempData["ReviewError"] = result.Message.Trim('"');
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
             TempData["ReviewError"] = "We couldn't reach the review service. Please try again.";
+            logger.LogError(ex, "Review submission request failed for product {ProductId}", productId);
+        }
+        catch (OperationCanceledException ex)
+        {
+            TempData["ReviewError"] = "The review service took too long to respond. Please try again.";
+            logger.LogWarning(ex, "Review submission timed out for product {ProductId}", productId);
         }
 
         return RedirectToProductReviews(productId);

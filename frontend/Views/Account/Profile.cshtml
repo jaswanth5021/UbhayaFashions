@@ -168,7 +168,9 @@
                         {
                             var statusClass = (order.Status ?? "").ToLowerInvariant().Replace(" ", "-");
                             var paymentClass = (order.PaymentStatus ?? "").ToLowerInvariant().Replace(" ", "-");
-                            var isPaid = string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase);
+                            var canReviewOrder = string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(order.Status, "Delivered", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase);
                             <article class="profile-order-card order-card"
                                      data-profile-order-card
                                      data-order-status="@((order.Status ?? "").ToLowerInvariant())"
@@ -202,7 +204,7 @@
                                                 <span class="profile-order-item-info"><strong>@item.ProductName</strong><small>Size: @item.Size · Qty: @item.Quantity</small></span>
                                                 <div class="order-item-actions">
                                                     <strong class="profile-order-item-price">₹@((item.Price * item.Quantity).ToString("N0"))</strong>
-                                                    @if (isPaid)
+                                                    @if (canReviewOrder)
                                                     {
                                                         <a class="order-review-button" asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" asp-fragment="productReviews"><span aria-hidden="true">☆</span> Review</a>
                                                     }
