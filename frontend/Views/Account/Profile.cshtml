@@ -13,8 +13,8 @@
             <div class="profile-avatar">@firstLetter</div>
             <div class="profile-heading">
                 <span class="profile-eyebrow">ACCOUNT</span>
-                <h1>@(activeTab == "addresses" ? "Your Addresses" : "My Profile")</h1>
-                <p>@(activeTab == "addresses" ? "Manage the addresses you use for delivery." : "Manage your personal information, delivery addresses, and password.")</p>
+                <h1>@(activeTab == "addresses" ? "Your Addresses" : activeTab == "orders" ? "My Orders" : "My Profile")</h1>
+                <p>@(activeTab == "addresses" ? "Manage the addresses you use for delivery." : activeTab == "orders" ? "Track your purchases and review your order history." : "Manage your personal information, delivery addresses, and password.")</p>
             </div>
         </header>
 
@@ -25,6 +25,7 @@
         <nav class="profile-tabs" aria-label="Profile sections">
             <a class="@(activeTab == "details" ? "is-active" : "")" asp-action="Profile" asp-route-tab="details">Personal details</a>
             <a class="@(activeTab == "addresses" ? "is-active" : "")" asp-action="Profile" asp-route-tab="addresses">My addresses</a>
+            <a class="@(activeTab == "orders" ? "is-active" : "")" asp-action="Profile" asp-route-tab="orders">My orders</a>
             <a class="@(activeTab == "security" ? "is-active" : "")" asp-action="Profile" asp-route-tab="security">Password &amp; security</a>
         </nav>
 
@@ -121,6 +122,67 @@
                         </article>
                     }
                 </div>
+            </section>
+        }
+        else if (activeTab == "orders")
+        {
+            var orders = ViewBag.MyOrders as List<MyOrderViewModel> ?? [];
+            <section class="profile-tab-panel profile-orders-panel">
+                <div class="profile-panel-heading"><h2>Order history</h2><p>Review your purchases, order status, and payment details.</p></div>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.OrderLoadError))
+                {
+                    <div class="profile-error">@ViewBag.OrderLoadError</div>
+                }
+                else if (orders.Count == 0)
+                {
+                    <div class="profile-orders-empty">
+                        <span aria-hidden="true">♡</span>
+                        <h3>No orders yet</h3>
+                        <p>Once you place an order, its status and details will appear here.</p>
+                        <a asp-controller="Products" asp-action="Index" class="profile-orders-shop">Explore the collection</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="profile-orders-list">
+                        @foreach (var order in orders)
+                        {
+                            var statusClass = (order.Status ?? "").ToLowerInvariant().Replace(" ", "-");
+                            var paymentClass = (order.PaymentStatus ?? "").ToLowerInvariant().Replace(" ", "-");
+                            <article class="profile-order-card">
+                                <header class="profile-order-header">
+                                    <div><span>ORDER #@order.Id</span><time datetime="@order.CreatedDate.ToString("O")">@order.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</time></div>
+                                    <strong>₹@order.TotalAmount.ToString("N0")</strong>
+                                </header>
+                                <div class="profile-order-badges">
+                                    <span class="order-status-pill @statusClass">@order.Status</span>
+                                    <span class="order-payment-pill @paymentClass">Payment: @order.PaymentStatus</span>
+                                </div>
+                                <div class="profile-order-items">
+                                    @foreach (var item in order.Items)
+                                    {
+                                        <div class="profile-order-item">
+                                            @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                            {
+                                                <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.ProductName" loading="lazy" />
+                                            }
+                                            else
+                                            {
+                                                <span class="profile-order-image-placeholder" aria-hidden="true">U</span>
+                                            }
+                                            <span class="profile-order-item-info"><strong>@item.ProductName</strong><small>Size: @item.Size · Qty: @item.Quantity</small></span>
+                                            <strong class="profile-order-item-price">₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+                                        </div>
+                                    }
+                                </div>
+                                <footer class="profile-order-footer">
+                                    <span><small>Delivery address</small>@order.ShippingAddress</span>
+                                    @if (!string.IsNullOrWhiteSpace(order.RazorpayOrderId)) { <small>Payment reference: @order.RazorpayOrderId</small> }
+                                </footer>
+                            </article>
+                        }
+                    </div>
+                }
             </section>
         }
         else if (activeTab == "security")
