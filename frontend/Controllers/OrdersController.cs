@@ -20,9 +20,10 @@ public class OrdersController(ApiService api) : Controller
                 json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
             TempData["Error"] = "We couldn't load your orders right now. Please try again.";
+            Console.WriteLine($"My Orders JSON parsing failed: {ex.Message}");
         }
         catch (HttpRequestException)
         {
