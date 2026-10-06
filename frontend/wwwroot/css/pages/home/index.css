@@ -500,12 +500,31 @@ a {
    CATEGORY GRID
    ========================================================= */
 
-.category-grid {
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
+.category-section .category-grid {
+    display: flex;
+    flex-wrap: nowrap;
     gap: 16px;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+}
+
+.category-section .category-grid .category-tile {
+    flex: 1 1 0;
+    min-width: 220px;
+    height: 390px;
+}
+
+@media (min-width: 1200px) {
+    .category-section .category-grid {
+        overflow-x: auto;
+    }
+
+    .category-section .category-grid .category-tile {
+        min-width: 0;
+    }
 }
 
 .all-categories-page {
