@@ -1,6 +1,79 @@
+@model List<LadiesDressStore.Web.Models.MyOrderViewModel>
 @{
     ViewData["Title"] = "My Orders";
 }
-<h1>My Orders</h1>
-<p>Your order data is loaded from the ASP.NET Core API.</p>
-<pre class="order-json">@ViewBag.OrdersJson</pre>
+
+<section class="orders-page">
+    <div class="orders-page-header">
+        <div>
+            <span class="orders-eyebrow">YOUR ACCOUNT</span>
+            <h1>My Orders</h1>
+            <p>Track your recent purchases and payment status.</p>
+        </div>
+        <a class="orders-shop-link" asp-controller="Products" asp-action="Index">Continue Shopping</a>
+    </div>
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="orders-alert">@error</div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="orders-empty">
+            <div class="orders-empty-icon">♡</div>
+            <h2>No orders yet</h2>
+            <p>Your completed purchases will appear here.</p>
+            <a class="orders-primary-button" asp-controller="Products" asp-action="Index">Shop Now</a>
+        </div>
+    }
+    else
+    {
+        <div class="orders-list">
+            @foreach (var order in Model)
+            {
+                var statusClass = (order.Status ?? "").ToLowerInvariant().Replace(" ", "-");
+                var paymentClass = (order.PaymentStatus ?? "").ToLowerInvariant().Replace(" ", "-");
+
+                <article class="order-card">
+                    <div class="order-card-header">
+                        <div>
+                            <span class="order-card-label">ORDER #@order.Id</span>
+                            <h2>@order.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</h2>
+                        </div>
+                        <div class="order-card-total">₹@order.TotalAmount.ToString("N0")</div>
+                    </div>
+
+                    <div class="order-card-status">
+                        <span class="order-status-pill @statusClass">@order.Status</span>
+                        <span class="order-payment-pill @paymentClass">Payment: @order.PaymentStatus</span>
+                    </div>
+
+                    <div class="order-card-items">
+                        @foreach (var item in order.Items)
+                        {
+                            <div class="order-item-row">
+                                <div class="order-item-image">
+                                    <span>U</span>
+                                </div>
+                                <div class="order-item-info">
+                                    <strong>@item.ProductName</strong>
+                                    <span>Size: @item.Size · Qty: @item.Quantity</span>
+                                </div>
+                                <strong class="order-item-price">₹@((item.Price * item.Quantity).ToString("N0"))</strong>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="order-card-footer">
+                        <span>@order.ShippingAddress</span>
+                        @if (!string.IsNullOrWhiteSpace(order.RazorpayOrderId))
+                        {
+                            <small>Payment reference: @order.RazorpayOrderId</small>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
