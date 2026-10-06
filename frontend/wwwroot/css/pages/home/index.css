@@ -180,7 +180,7 @@ a {
 
     margin-left: calc(50% - 50vw);
 
-    aspect-ratio: 19 / 5;
+    aspect-ratio: 16 / 6;
     height: auto;
 
     min-height: 0;
@@ -204,7 +204,7 @@ a {
 
     object-fit: cover;
 
-    object-position: center;
+    object-position: center 32%;
 
     margin: 0;
 
