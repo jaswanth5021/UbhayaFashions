@@ -131,21 +131,38 @@ public class ProductsController(ApiService api) : Controller
         ProductReviewSubmissionViewModel model)
     {
         if (User.Identity?.IsAuthenticated != true)
-            return RedirectToAction("Login", "Account", new { returnUrl = Url.Action(nameof(Details), new { id = productId }) });
+        {
+            var reviewUrl = Url.Action(nameof(Details), new { id = productId }) + "#productReviews";
+            return RedirectToAction("Login", "Account", new { returnUrl = reviewUrl });
+        }
 
         if (!ModelState.IsValid)
         {
             TempData["ReviewError"] = "Please provide a rating and a review of at least 10 characters.";
-            return RedirectToAction(nameof(Details), new { id = productId });
+            return RedirectToProductReviews(productId);
         }
 
-        var result = await api.SubmitProductReviewAsync(productId, model);
-        if (result.Success)
-            TempData["ReviewMessage"] = "Thank you. Your review has been submitted.";
-        else
-            TempData["ReviewError"] = result.Message.Trim('"');
+        try
+        {
+            var result = await api.SubmitProductReviewAsync(productId, model);
+            if (result.Success)
+                TempData["ReviewMessage"] = "Thank you. Your review has been submitted.";
+            else
+                TempData["ReviewError"] = result.Message.Trim('"');
+        }
+        catch (HttpRequestException)
+        {
+            TempData["ReviewError"] = "We couldn't reach the review service. Please try again.";
+        }
 
-        return RedirectToAction(nameof(Details), new { id = productId });
+        return RedirectToProductReviews(productId);
+    }
+
+    private IActionResult RedirectToProductReviews(int productId)
+    {
+        var productUrl = Url.Action(nameof(Details), new { id = productId })
+            ?? $"/Products/Details/{productId}";
+        return Redirect($"{productUrl}#productReviews");
     }
 
 }

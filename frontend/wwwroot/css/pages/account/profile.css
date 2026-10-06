@@ -380,6 +380,8 @@
 .profile-order-header > strong { color:#321e25; font-size:18px; white-space:nowrap; }
 .profile-order-badges { display:flex; flex-wrap:wrap; gap:8px; padding:12px 20px; background:#fcfaf8; }
 .profile-order-badges .order-status-pill,.profile-order-badges .order-payment-pill { min-height:28px; border-radius:99px; font-size:10px; letter-spacing:.03em; }
+.profile-order-details { border-top:1px solid #eee8e6; }
+.profile-order-details[hidden] { display:none; }
 .profile-order-items { padding:4px 20px; }
 .profile-order-items > div { display:grid; grid-template-columns:56px minmax(0,1fr) auto; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid #f0ebec; }
 .profile-order-items > div:last-child { border-bottom:0; }
