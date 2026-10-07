@@ -1,0 +1,23 @@
+/* Keep the selected account tab readable against the shared pastel theme. */
+.profile-tabs a {
+    border: 1px solid transparent;
+    transition: color .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.profile-tabs a.is-active {
+    border-color: #68142e;
+    background: linear-gradient(110deg, #68142e, #9c3656) !important;
+    box-shadow: 0 4px 12px rgb(104 20 46 / 17%);
+    color: #fff !important;
+}
+
+.profile-tabs a:hover:not(.is-active) {
+    border-color: #ead2d7;
+    background: #fff5f5;
+    color: #68142e;
+}
+
+.profile-tabs a:focus-visible {
+    outline: 2px solid #b97b88;
+    outline-offset: 2px;
+}

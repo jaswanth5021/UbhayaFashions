@@ -6,6 +6,7 @@
     var pageTitle = ViewData["Title"]?.ToString() ?? "Home";
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+    var isHomePage = currentController == "Home" && currentAction == "Index";
     var cartItems = new List<LadiesDressStore.Web.Models.CartItemViewModel>();
     var cartCookie = Context.Request.Cookies["cart"];
     if (!string.IsNullOrWhiteSpace(cartCookie))
@@ -107,12 +108,12 @@
 
     <!-- Hamburger Menu CSS -->
     <link rel="stylesheet"
-          href="~/css/pages/shared/menu.css"
+          href="~/css/pages/shared/menu.css?v=drawer-2026-10-07"
           asp-append-version="true" />
 
     <!-- Footer CSS -->
     <link rel="stylesheet"
-          href="~/css/pages/shared/footer.css"
+          href="~/css/pages/shared/footer.css?v=footer-burgundy-2026-10-07"
           asp-append-version="true" />
 
     <!-- Contact Page CSS -->
@@ -127,9 +128,34 @@
     <link rel="stylesheet"
           href="~/css/pages/cart/checkout.css"
           asp-append-version="true" />
+    @if (currentController == "Shipping")
+    {
+        <link rel="stylesheet" href="~/css/pages/shipping/index.css" asp-append-version="true" />
+    }
+    <link rel="stylesheet"
+          href="~/css/pages/shared/ui-refresh.css"
+          asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/search-polish.css?v=search-polish-2026-10-07-2" asp-append-version="true" />
+    @if (currentController == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile")
+    {
+        <link rel="stylesheet" href="~/css/pages/account/profile-tabs-polish.css?v=profile-tabs-2026-10-07-1" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/pages/account/profile-orders-polish.css?v=profile-orders-2026-10-07-5" asp-append-version="true" />
+    }
+    @if (currentController == "Cart" && ViewContext.RouteData.Values["action"]?.ToString() == "Index")
+    {
+        <link rel="stylesheet" href="~/css/pages/cart/cart-compact.css?v=cart-compact-2026-10-07-1" asp-append-version="true" />
+    }
+    @if (currentController == "Products" && ViewContext.RouteData.Values["action"]?.ToString() == "Index")
+    {
+        <link rel="stylesheet" href="~/css/pages/products/catalog-color-cards.css?v=2026-10-07-3" asp-append-version="true" />
+    }
+    @if (isHomePage)
+    {
+        <link rel="stylesheet" href="~/css/pages/home/clean-home.css?v=home-clean-2026-10-07" asp-append-version="true" />
+    }
 </head>
 
-<body>
+<body class="@(isHomePage ? "home-page" : string.Empty)">
 
     <!-- =========================================
          ANNOUNCEMENT BAR
@@ -138,7 +164,7 @@
     <div class="announcement-bar">
         <span>FREE SHIPPING ACROSS INDIA</span>
         <i aria-hidden="true">·</i>
-        @* <span>EASY RETURNS</span> *@
+        <span>PREMIUM QUALITY</span>
         <i aria-hidden="true">·</i>
         <span>SECURE PAYMENTS</span>
     </div>
@@ -256,14 +282,14 @@
                             }
                         </div>
                         <nav class="account-dropdown-links" aria-label="Account links">
-                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders">Orders</a>
-                            <a asp-controller="Wishlist" asp-action="Index">Wishlist</a>
-                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="addresses">Saved addresses</a>
-                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="details">Edit profile</a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9M8 5.3l8 4.6"/></svg><span>Orders</span></a>
+                            <a asp-controller="Wishlist" asp-action="Index"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.5 5.5 0 0 0-7.8 0L12 5.9l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.3 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg><span>Wishlist</span></a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="addresses"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Saved addresses</span></a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="details"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Edit profile</span></a>
                         </nav>
                         <form asp-controller="Account" asp-action="Logout" method="post" class="account-dropdown-logout-form">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="account-dropdown-logout">Log out</button>
+                            <button type="submit" class="account-dropdown-logout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg><span>Log out</span></button>
                         </form>
                     </section>
                 </div>

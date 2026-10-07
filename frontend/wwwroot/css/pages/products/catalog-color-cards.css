@@ -1,0 +1,295 @@
+/* Loaded after shared UI refresh so catalog cards retain the home page palette. */
+.catalog-page .catalog-card {
+    --catalog-accent: #9c3656;
+    --catalog-tint: #fff9fb;
+    border: 1px solid color-mix(in srgb, var(--catalog-accent) 19%, white);
+    border-top: 3px solid var(--catalog-accent);
+    border-radius: 10px;
+    background: var(--catalog-tint);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--catalog-accent) 8%, transparent);
+}
+
+.catalog-page .catalog-card:nth-child(4n + 2) { --catalog-accent: #ae7c31; --catalog-tint: #fffdf8; }
+.catalog-page .catalog-card:nth-child(4n + 3) { --catalog-accent: #557a69; --catalog-tint: #f9fcf9; }
+.catalog-page .catalog-card:nth-child(4n + 4) { --catalog-accent: #79618f; --catalog-tint: #fcfaff; }
+
+.catalog-page .catalog-card:hover {
+    border-color: color-mix(in srgb, var(--catalog-accent) 36%, white);
+    border-top-color: var(--catalog-accent);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--catalog-accent) 14%, transparent);
+}
+
+.catalog-page .catalog-card .catalog-image-wrap {
+    background: color-mix(in srgb, var(--catalog-accent) 9%, #f3ece8);
+}
+
+.catalog-page .catalog-card .product-category { color: var(--catalog-accent); }
+.catalog-page .catalog-card .product-name a { color: #382a2d; }
+.catalog-page .catalog-card .current-price { color: #68142e; }
+
+.catalog-page .catalog-card .catalog-size-options > span {
+    border-color: color-mix(in srgb, var(--catalog-accent) 28%, white);
+}
+
+.catalog-page .catalog-card .catalog-action {
+    border-color: var(--catalog-accent);
+    background: var(--catalog-accent) !important;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--catalog-accent) 17%, transparent);
+}
+
+.catalog-page .catalog-card .catalog-action:hover {
+    filter: brightness(1.08);
+}
+
+.catalog-page .catalog-card .catalog-action.disabled {
+    border-color: #b9aaa6;
+    background: #b9aaa6 !important;
+}
+
+/* Give the catalog filters a warmer, more deliberate panel design. */
+.catalog-page .catalog-sidebar {
+    overflow: hidden;
+    border: 1px solid #eedfdb;
+    border-radius: 12px;
+    background: linear-gradient(155deg, #fff 0%, #fffaf8 62%, #fcf3f0 100%);
+    box-shadow: 0 10px 26px rgb(88 48 54 / 6%);
+}
+
+.catalog-page .catalog-sidebar-header {
+    padding: 18px 18px;
+    border-bottom-color: #efdfdc;
+    background: linear-gradient(100deg, #fff7f5, #f8e9ed);
+}
+
+.catalog-page .catalog-sidebar-header > span {
+    color: #68142e;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+}
+
+.catalog-page .catalog-sidebar-header a {
+    padding: 7px 10px;
+    border: 1px solid #e8cdd1;
+    border-radius: 20px;
+    background: #fff;
+    color: #8d3c52;
+    transition: background .18s ease, color .18s ease;
+}
+
+.catalog-page .catalog-sidebar-header a:hover {
+    background: #68142e;
+    color: #fff;
+}
+
+/* Keep the collection masthead compact so products appear sooner. */
+.catalog-page .catalog-header {
+    padding: 17px 24px;
+    border-radius: 10px;
+}
+
+.catalog-page .catalog-eyebrow { margin-bottom: 7px; }
+
+.catalog-page .catalog-header h1 {
+    font-size: clamp(36px, 4vw, 48px);
+    line-height: 1.05;
+}
+
+.catalog-page .catalog-count { margin-top: 6px; }
+
+.catalog-page .catalog-header-actions { gap: 12px; }
+
+.catalog-page .catalog-sort-form select,
+.catalog-page .catalog-back-categories { min-height: 42px; height: 42px; }
+
+.catalog-page .catalog-sidebar-form { padding: 0 18px; }
+
+.catalog-page .filter-section {
+    padding: 15px 0;
+    border-bottom-color: #efe3df;
+}
+
+.catalog-page .filter-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: #4b2833;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+}
+
+.catalog-page .filter-section h3::before {
+    width: 3px;
+    height: 14px;
+    border-radius: 3px;
+    background: linear-gradient(#a33c5d, #d2a04c);
+    content: "";
+}
+
+.catalog-page .filter-radio-list { gap: 2px; }
+
+.catalog-page .filter-radio {
+    min-height: 27px;
+    gap: 8px;
+    padding: 0 7px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #665557;
+    transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.catalog-page .filter-radio:hover {
+    border-color: #f0dcdf;
+    background: #fff5f6;
+    color: #68142e;
+}
+
+.catalog-page .filter-radio input {
+    width: 16px;
+    height: 16px;
+    accent-color: #9c3656;
+}
+
+.catalog-page .filter-radio input:checked + span {
+    color: #68142e;
+    font-weight: 700;
+}
+
+.catalog-page .filter-size-list { gap: 6px; }
+
+.catalog-page .filter-size-option span {
+    min-width: 36px;
+    height: 33px;
+    border-color: #eadbd7;
+    border-radius: 5px;
+    background: #fff;
+    color: #645257;
+    transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
+}
+
+.catalog-page .filter-size-option:hover span {
+    border-color: #b16e7d;
+    transform: translateY(-1px);
+}
+
+.catalog-page .filter-size-option.is-selected span {
+    border-color: #9c3656;
+    background: linear-gradient(135deg, #9c3656, #741a39);
+    box-shadow: 0 3px 9px rgb(104 20 46 / 18%);
+    color: #fff;
+}
+
+.catalog-page .filter-color-list { gap: 12px; }
+
+.catalog-page .filter-color-option {
+    width: 30px;
+    height: 30px;
+}
+
+.catalog-page .filter-color-option > span {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #e3d8d4;
+}
+
+.catalog-page .filter-color-option:hover > span { transform: scale(1.1); }
+
+.catalog-page .filter-color-option.is-selected > span {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #9c3656;
+    transform: scale(.94);
+}
+
+.catalog-page .filter-price-values {
+    color: #68142e;
+    font-size: 12px;
+}
+
+.catalog-page .filter-price-inputs input {
+    height: 38px;
+    border-color: #eadbd7;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.catalog-page .filter-price-inputs input:focus {
+    border-color: #9c3656;
+    outline: 2px solid rgb(156 54 86 / 12%);
+}
+
+.catalog-page .catalog-apply-filters {
+    border-radius: 5px;
+    background: linear-gradient(100deg, #68142e, #9c3656);
+    box-shadow: 0 5px 14px rgb(104 20 46 / 18%);
+}
+
+@media (max-width: 700px) {
+    .catalog-page .catalog-card { border-radius: 8px; }
+    .catalog-page .catalog-card .catalog-action {
+        min-height: 36px;
+        font-size: 10px;
+        letter-spacing: .45px;
+    }
+    .catalog-page .catalog-sidebar { border-radius: 12px 0 0 12px; }
+    .catalog-page .catalog-sidebar-form { padding-right: 16px; padding-left: 16px; }
+    .catalog-page .catalog-header { padding: 16px 18px; }
+    .catalog-page .catalog-header h1 { font-size: clamp(32px, 8vw, 42px); }
+}
+
+/* Refine the store announcement strip and carry its accents into the filters. */
+.announcement-bar {
+    position: relative;
+    height: 38px;
+    gap: 12px;
+    overflow: hidden;
+    border-bottom: 1px solid rgb(221 183 111 / 72%);
+    background: linear-gradient(105deg, #4d1025 0%, #76203e 48%, #541329 100%);
+    box-shadow: inset 0 1px rgb(255 255 255 / 12%);
+    font-size: 10px;
+    letter-spacing: 1.6px;
+}
+
+.announcement-bar span {
+    padding: 4px 10px;
+    border: 1px solid rgb(255 255 255 / 13%);
+    border-radius: 20px;
+    background: rgb(255 255 255 / 5%);
+}
+
+.announcement-bar i {
+    color: #e1bd76;
+    font-size: 13px;
+    font-style: normal;
+    opacity: .95;
+}
+
+.catalog-page .catalog-sidebar-header {
+    border-bottom: 2px solid #c69a45;
+    background: linear-gradient(105deg, #541329, #812744 55%, #641630);
+}
+
+.catalog-page .catalog-sidebar-header > span { color: #fff8f1; }
+
+.catalog-page .catalog-sidebar-header a {
+    border-color: rgb(255 255 255 / 42%);
+    background: rgb(255 255 255 / 96%);
+    color: #68142e;
+}
+
+.catalog-page .catalog-sidebar-header a:hover {
+    border-color: #f0d38f;
+    background: #f0d38f;
+    color: #4d1025;
+}
+
+@media (max-width: 600px) {
+    .announcement-bar {
+        height: 34px;
+        gap: 5px;
+        font-size: 8px;
+        letter-spacing: .8px;
+    }
+
+    .announcement-bar span { padding: 3px 7px; }
+    .announcement-bar i { font-size: 11px; }
+}

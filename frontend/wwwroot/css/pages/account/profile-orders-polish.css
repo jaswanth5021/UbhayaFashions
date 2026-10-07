@@ -1,0 +1,320 @@
+/* Order history: clearer controls and a stronger, easier-to-scan card layout. */
+.profile-orders-panel .profile-panel-heading {
+    margin-bottom: 18px;
+}
+
+.profile-orders-panel .profile-panel-heading h2 {
+    color: #421526;
+    font-size: 28px;
+}
+
+.profile-orders-panel .orders-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto max-content;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px solid #ecdadd;
+    border-radius: 10px;
+    background: linear-gradient(110deg, #fff9f7, #fbf0f1 70%, #fffaf2);
+    box-shadow: 0 5px 16px rgb(88 48 54 / 5%);
+}
+
+.profile-orders-panel .orders-filter-tabs {
+    gap: 6px;
+}
+
+.profile-orders-panel .orders-filter-tab {
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    color: #755f64;
+    font-size: 11px;
+    transition: border-color .16s ease, background .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+.profile-orders-panel .orders-filter-tab:hover {
+    border-color: #efd8dd;
+    background: #fff;
+    color: #68142e;
+}
+
+.profile-orders-panel .orders-filter-tab.is-active {
+    border-color: #68142e;
+    background: linear-gradient(110deg, #68142e, #9c3656);
+    box-shadow: 0 3px 9px rgb(104 20 46 / 17%);
+    color: #fff;
+}
+
+.profile-orders-panel .orders-sort {
+    min-width: 0;
+    gap: 8px;
+    color: #6e535b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.profile-orders-panel .orders-sort select {
+    width: 150px;
+    min-width: 0;
+    min-height: 36px;
+    box-sizing: border-box;
+    border: 1px solid #e6cfd3;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.profile-orders-panel .orders-page-size {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #6e535b;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.profile-orders-panel .orders-page-size select {
+    width: 76px;
+    min-height: 36px;
+    padding: 0 8px;
+    border: 1px solid #e6cfd3;
+    border-radius: 6px;
+    background: #fff;
+    color: #4d2934;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.profile-orders-panel .profile-orders-match-count {
+    justify-self: end;
+    flex: 0 0 auto;
+    padding: 7px 11px;
+    border: 1px solid #eadadd;
+    border-radius: 20px;
+    background: #fff;
+    color: #68142e;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.profile-orders-panel .profile-orders-list { gap: 12px; }
+
+.profile-orders-panel .profile-order-card {
+    --order-accent: #9c3656;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--order-accent) 19%, white);
+    border-left: 4px solid var(--order-accent);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 5px 18px color-mix(in srgb, var(--order-accent) 7%, transparent);
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.profile-orders-panel .profile-order-card:nth-child(4n + 2) { --order-accent: #ae7c31; }
+.profile-orders-panel .profile-order-card:nth-child(4n + 3) { --order-accent: #557a69; }
+.profile-orders-panel .profile-order-card:nth-child(4n + 4) { --order-accent: #79618f; }
+
+.profile-orders-panel .profile-order-card:hover {
+    border-color: color-mix(in srgb, var(--order-accent) 36%, white);
+    border-left-color: var(--order-accent);
+    box-shadow: 0 9px 22px color-mix(in srgb, var(--order-accent) 12%, transparent);
+    transform: translateY(-1px);
+}
+
+.profile-orders-panel .profile-order-header {
+    min-height: 78px;
+    padding: 15px 18px;
+    background: linear-gradient(105deg, color-mix(in srgb, var(--order-accent) 5%, white), #fff 72%);
+}
+
+.profile-orders-panel .profile-order-header > div span {
+    color: var(--order-accent);
+    font-size: 11px;
+    letter-spacing: .09em;
+}
+
+.profile-orders-panel .profile-order-header time {
+    color: #75656a;
+    font-size: 12px;
+}
+
+.profile-orders-panel .order-card-heading-right {
+    gap: 18px;
+}
+
+.profile-orders-panel .order-card-total {
+    color: #68142e;
+    font: 700 23px/1 Georgia, "Times New Roman", serif;
+    white-space: nowrap;
+}
+
+.profile-orders-panel .order-view-toggle {
+    border-bottom-color: color-mix(in srgb, var(--order-accent) 42%, white);
+    color: var(--order-accent);
+    font-size: 10px;
+    letter-spacing: .2px;
+}
+
+.profile-orders-panel .order-view-toggle:hover { color: #4d1025; }
+
+.profile-orders-panel .profile-order-badges {
+    gap: 7px;
+    padding: 10px 18px;
+    border-top: 1px solid color-mix(in srgb, var(--order-accent) 13%, white);
+    background: color-mix(in srgb, var(--order-accent) 5%, #fff);
+}
+
+.profile-orders-panel .profile-order-badges .order-status-pill,
+.profile-orders-panel .profile-order-badges .order-payment-pill {
+    display: inline-flex;
+    min-height: 27px;
+    align-items: center;
+    padding: 0 11px;
+    border: 1px solid color-mix(in srgb, var(--order-accent) 15%, white);
+    border-radius: 20px;
+    background: #fff;
+    color: var(--order-accent);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.profile-orders-panel .order-payment-pill.paid {
+    border-color: #d8e9dc;
+    background: #f2faf4;
+    color: #35744b;
+}
+
+.profile-orders-panel .order-status-pill.delivered,
+.profile-orders-panel .order-status-pill.completed {
+    border-color: #d8e9dc;
+    background: #f2faf4;
+    color: #35744b;
+}
+
+.profile-orders-panel .order-status-pill.cancelled,
+.profile-orders-panel .order-payment-pill.failed {
+    border-color: #f0d7da;
+    background: #fff4f4;
+    color: #a13248;
+}
+
+.profile-orders-panel .profile-order-details { background: #fff; }
+
+.profile-orders-panel .profile-order-footer {
+    background: linear-gradient(100deg, #fff9f7, #fcf5f3);
+}
+
+.profile-orders-panel .profile-orders-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid #ecdadd;
+    border-radius: 9px;
+    background: linear-gradient(110deg, #fff9f7, #fbf0f1 70%, #fffaf2);
+}
+
+.profile-orders-panel .profile-orders-pagination[hidden] { display: none; }
+
+.profile-orders-panel .profile-orders-pagination button {
+    min-height: 34px;
+    padding: 0 13px;
+    border: 1px solid #dcbfc6;
+    border-radius: 5px;
+    background: #fff;
+    color: #68142e;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.profile-orders-panel .profile-orders-pagination button:hover:not(:disabled) {
+    border-color: #68142e;
+    background: #68142e;
+    color: #fff;
+}
+
+.profile-orders-panel .profile-orders-pagination button:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+.profile-orders-panel .profile-orders-pagination > span {
+    color: #745d62;
+    font-size: 11px;
+    text-align: center;
+}
+
+.profile-orders-panel .profile-orders-page-numbers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.profile-orders-panel .profile-orders-page-numbers button {
+    width: 34px;
+    min-height: 34px;
+    padding: 0;
+    border-color: #eadadd;
+    color: #6b4651;
+}
+
+.profile-orders-panel .profile-orders-page-numbers button.is-current {
+    border-color: #68142e;
+    background: linear-gradient(110deg, #68142e, #9c3656);
+    box-shadow: 0 3px 9px rgb(104 20 46 / 17%);
+    color: #fff;
+}
+
+.profile-orders-panel .profile-orders-page-gap {
+    padding: 0 2px;
+    color: #9b858a;
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .profile-orders-panel .orders-toolbar {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+    .profile-orders-panel .orders-filter-tabs { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+    .profile-orders-panel .orders-toolbar {
+        grid-template-columns: minmax(0, 1fr) max-content;
+        gap: 10px;
+        padding: 10px;
+    }
+    .profile-orders-panel .orders-filter-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 3px;
+    }
+    .profile-orders-panel .orders-filter-tab { flex: 0 0 auto; min-height: 33px; padding: 0 10px; }
+    .profile-orders-panel .orders-sort { grid-column: 1; }
+    .profile-orders-panel .orders-sort select { width: min(150px, 42vw); max-width: 150px; }
+    .profile-orders-panel .orders-page-size { grid-column: 2; }
+    .profile-orders-panel .orders-page-size select { width: 64px; }
+    .profile-orders-panel .profile-orders-match-count { grid-column: 1 / -1; justify-self: end; }
+    .profile-orders-panel .profile-orders-pagination { flex-wrap: wrap; gap: 9px; padding: 10px; }
+    .profile-orders-panel .profile-orders-pagination > span { flex: 1 1 100%; order: -1; }
+    .profile-orders-panel .profile-orders-page-numbers { flex: 1 1 auto; gap: 3px; }
+    .profile-orders-panel .profile-orders-page-numbers button { width: 30px; min-height: 32px; }
+    .profile-orders-panel .profile-order-header { min-height: 68px; padding: 12px; }
+    .profile-orders-panel .order-card-heading-right { align-items: flex-end; flex-direction: column; gap: 5px; }
+    .profile-orders-panel .order-card-total { font-size: 19px; }
+    .profile-orders-panel .profile-order-badges { padding: 9px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .profile-orders-panel .orders-filter-tab,
+    .profile-orders-panel .profile-order-card { transition: none; }
+}

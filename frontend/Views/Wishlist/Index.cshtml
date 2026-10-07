@@ -49,6 +49,15 @@
                         {
                             <span>UBHAYA</span>
                         }
+                        @if (product.ReviewCount.GetValueOrDefault() > 0 && product.AverageRating.HasValue)
+                        {
+                            <span class="wishlist-rating-badge" aria-label="@product.AverageRating.Value.ToString("0.0") out of 5 stars from @product.ReviewCount reviews">
+                                <strong>@product.AverageRating.Value.ToString("0.0")</strong>
+                                <span class="wishlist-rating-star" aria-hidden="true">&#9733;</span>
+                                <span class="wishlist-rating-divider" aria-hidden="true">|</span>
+                                <span>@product.ReviewCount</span>
+                            </span>
+                        }
                     </a>
                     <div class="wishlist-card-info">
                         <p>@product.Category</p>

@@ -616,3 +616,326 @@ body.menu-open { overflow: hidden; }
         background: #fff1f4 !important;
     }
 }
+
+/* Refined hamburger drawer: richer brand header, calmer type, and clearer rows. */
+.side-menu {
+    width: min(390px, 90vw);
+    max-width: 90vw;
+    background: #fffdfb;
+    color: #302326;
+    border-right: 1px solid #ead9d5;
+    box-shadow: 18px 0 48px rgb(48 23 31 / 18%);
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+}
+
+.side-menu::-webkit-scrollbar { display: none; }
+
+.side-menu-header {
+    position: relative;
+    min-height: 154px;
+    background: linear-gradient(135deg, #f8eeeb 0%, #fffaf5 58%, #f3e2d4 100%);
+    border-bottom: 1px solid #ead9d5;
+}
+
+.side-menu-header::before {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, #68142e, #b67a36 62%, #ead2a4);
+    content: "";
+}
+
+.side-menu-header > button {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 72%);
+    color: #68142e;
+    transition: background .18s ease, transform .18s ease;
+}
+
+.side-menu-header > button:hover {
+    background: #fff;
+    transform: translateY(-1px);
+}
+
+.side-menu-tagline {
+    padding: 13px 18px 11px;
+    background: #fffaf7;
+    color: #8a5b50;
+    font-size: 10px;
+    letter-spacing: .24em;
+}
+
+.menu-navigation {
+    padding: 14px 16px 28px;
+    background: #fffdfb;
+}
+
+.menu-item {
+    min-height: 62px;
+    grid-template-columns: 48px minmax(0, 1fr) 30px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 12px;
+    color: #33272a;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .005em;
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+
+.menu-item + li { border-top: 1px solid #f0e8e5; }
+.menu-list li + li { border-top: 1px solid #f0e8e5; }
+
+.menu-item:hover {
+    transform: translateX(2px);
+    background: #fbf1ef;
+    color: #68142e;
+}
+
+.menu-item.is-current {
+    margin: 3px 0;
+    background: linear-gradient(100deg, #f8e9e9, #fcf4ed);
+    box-shadow: inset 3px 0 #8c2946;
+    color: #68142e;
+}
+
+.menu-item-icon {
+    width: 38px;
+    height: 38px;
+    background: #f9eeef;
+    color: #812440;
+    transition: background .18s ease, color .18s ease;
+}
+
+.menu-item-icon svg { width: 20px; height: 20px; }
+.menu-item:hover .menu-item-icon,
+.menu-item.is-current .menu-item-icon { background: #edd5d8; color: #68142e; }
+
+.menu-item-label { padding-left: 4px; }
+
+.menu-item-arrow {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    border-radius: 50%;
+    background: #f8f1ed;
+    color: #9b796d;
+    font-size: 22px;
+}
+
+.menu-item:hover .menu-item-arrow,
+.menu-item.is-current .menu-item-arrow { background: #edd5d8; color: #68142e; }
+
+@media (max-width: 600px) {
+    .side-menu { width: min(390px, 90vw) !important; max-width: 90vw !important; }
+    .side-menu-header { min-height: 136px; height: 136px; }
+    .menu-navigation { padding: 10px 14px 24px; }
+    .menu-item { min-height: 60px; font-size: 15px; }
+    .menu-item-icon { width: 38px; height: 38px; }
+}
+
+/* Final drawer hierarchy and brand details. */
+.side-menu {
+    scrollbar-width: thin;
+    scrollbar-color: #d9b8ae transparent;
+}
+
+.side-menu::-webkit-scrollbar { display: block; width: 5px; }
+.side-menu::-webkit-scrollbar-thumb { border-radius: 8px; background: #d9b8ae; }
+.side-menu::-webkit-scrollbar-track { background: transparent; }
+
+.side-menu-header {
+    min-height: 126px;
+    height: 126px;
+    padding: 20px 20px;
+    gap: 16px;
+}
+
+.side-menu-brand-image {
+    width: 92px;
+    height: 92px;
+    padding: 5px;
+    border: 1px solid rgb(177 132 76 / 22%);
+    border-radius: 4px;
+    background: #fffaf0;
+    box-shadow: 0 7px 18px rgb(91 46 37 / 9%);
+}
+
+.side-menu-tagline {
+    padding: 12px 18px 9px;
+    font-size: 9px;
+    letter-spacing: .25em;
+}
+
+.menu-navigation { padding-top: 8px; }
+
+.menu-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 10px 7px;
+    color: #9a7770;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.menu-section-heading i {
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg, #eadbd4, transparent);
+}
+
+.menu-list li + li { border-color: #f2eae6; }
+
+.menu-item {
+    min-height: 58px;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.menu-item.is-current { margin: 2px 0; }
+
+.menu-help-link {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 24px;
+    align-items: center;
+    gap: 11px;
+    margin: 18px 2px 0;
+    padding: 13px 12px;
+    border: 1px solid #efded8;
+    border-radius: 11px;
+    background: linear-gradient(110deg, #fff7f3, #fbf0f1);
+    color: #5e2837;
+    text-decoration: none;
+    transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.menu-help-link:hover {
+    transform: translateY(-1px);
+    border-color: #dcb8b5;
+    box-shadow: 0 6px 16px rgb(104 20 46 / 8%);
+}
+
+.menu-help-icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    color: #812440;
+}
+
+.menu-help-icon svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.menu-help-link strong,
+.menu-help-link small { display: block; }
+.menu-help-link strong { font-size: 13px; font-weight: 700; }
+.menu-help-link small { margin-top: 3px; color: #8a706d; font-size: 11px; line-height: 1.35; }
+.menu-help-arrow { color: #9c6670; font-size: 23px; text-align: center; }
+
+@media (max-width: 600px) {
+    .side-menu-header { min-height: 112px; height: 112px; padding: 14px 14px; }
+    .side-menu-brand-image { width: 80px; height: 80px; padding: 4px; }
+    .side-menu-tagline { padding: 10px 12px 8px; }
+    .menu-navigation { padding: 9px 13px 20px; }
+    .menu-item { min-height: 55px; font-size: 14px; }
+    .menu-item-icon { width: 36px; height: 36px; }
+    .menu-help-link { margin-top: 14px; }
+}
+
+/* Keep the navigation edge clean; scrolling still works without a visible track. */
+.side-menu { scrollbar-width: none; }
+.side-menu::-webkit-scrollbar { display: none; }
+.menu-item-arrow { display: none; }
+.menu-item { grid-template-columns: 44px minmax(0, 1fr); }
+
+@media (max-width: 600px) {
+    .menu-item { grid-template-columns: 44px minmax(0, 1fr); }
+}
+
+/* Anchor the drawer's brand and support actions while its links scroll. */
+.side-menu-header {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    flex: 0 0 auto;
+    min-height: 112px;
+    height: 112px;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, #f8eeeb 0%, #fffaf5 62%, #f3e2d4 100%);
+    box-shadow: 0 5px 16px rgb(72 39 37 / 6%);
+}
+
+.side-menu-brand-image {
+    box-sizing: border-box;
+    width: 80px;
+    height: 80px;
+    padding: 4px;
+}
+
+.side-menu-tagline { flex: 0 0 auto; }
+.menu-navigation { padding-bottom: 16px; }
+
+.menu-help-link {
+    position: sticky;
+    bottom: 8px;
+    z-index: 5;
+    margin-top: 14px;
+    background: linear-gradient(110deg, #fff7f3, #fbf0f1);
+    box-shadow: 0 -8px 18px rgb(255 253 251 / 88%);
+}
+
+.side-menu-footer-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 0 6px;
+    color: #a1847d;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .14em;
+}
+
+.side-menu-footer-note i {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #bf9758;
+}
+
+@media (max-width: 600px) {
+    .side-menu-header {
+        min-height: 112px !important;
+        height: 112px !important;
+        padding: 12px 14px !important;
+        align-items: center !important;
+    }
+
+    .side-menu-brand-image {
+        width: auto !important;
+        height: auto !important;
+        max-width: 76px !important;
+        max-height: 76px !important;
+        box-sizing: border-box !important;
+        padding: 3px !important;
+    }
+}

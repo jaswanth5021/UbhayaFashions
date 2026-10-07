@@ -297,8 +297,7 @@
                                                      alt="@product.Name - image @(imageIndex + 1)"
                                                      class="catalog-image product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
                                                      data-carousel-image="@imageIndex"
-                                                     loading="@(imageIndex == 0 ? "eager" : "lazy")"
-                                                     onerror="this.remove();" />
+                                                     loading="@(imageIndex == 0 ? "eager" : "lazy")" />
                                             }
 
                                             @if (productImages.Count > 1)
@@ -312,6 +311,10 @@
                                                     }
                                                 </div>
                                             }
+                                        </div>
+                                        <div class="catalog-image-fallback catalog-image-fallback-overlay" hidden aria-label="Product image unavailable">
+                                            <span>UBHAYA</span>
+                                            <small>@product.Name</small>
                                         </div>
                                     }
                                     else
@@ -368,11 +371,16 @@
                                 var availableSizes = new HashSet<string>(
                                     product.Variants.Where(variant => variant.Stock > 0).Select(variant => variant.Size),
                                     StringComparer.OrdinalIgnoreCase);
+                                var showOnlyAvailableSizes = string.Equals(availability, "in-stock", StringComparison.OrdinalIgnoreCase);
                             }
                             <div class="size-options catalog-size-options" aria-label="Available sizes">
                                 @foreach (var size in standardSizes)
                                 {
                                     var isAvailable = availableSizes.Contains(size);
+                                    if (showOnlyAvailableSizes && !isAvailable)
+                                    {
+                                        continue;
+                                    }
                                     <span class="@(isAvailable ? "size-available" : "size-unavailable")"
                                           aria-label="@size: @(isAvailable ? "available" : "unavailable")"
                                           title="@(isAvailable ? $"{size} available" : $"{size} unavailable")">
@@ -393,7 +401,7 @@
                             @* Desktop keeps the existing product-level stock behavior. *@
                             @if (product.Stock > 0)
                             {
-                                <p class="catalog-stock-label in-stock catalog-stock-desktop">@product.Stock in stock</p>
+                                <p class="catalog-stock-label in-stock catalog-stock-desktop">Available in stock</p>
                                 <a class="catalog-action catalog-action-desktop" asp-action="Details" asp-route-id="@product.Id">VIEW PRODUCT <span>→</span></a>
                             }
                             else
@@ -504,6 +512,13 @@
         });
         panel.querySelector("form")?.addEventListener("submit", () => setOpen(false));
     }
+
+    const filterForm = document.querySelector(".catalog-sidebar-form");
+    filterForm?.addEventListener("change", (event) => {
+        if (event.target.matches('input[type="radio"], input[type="range"], input[type="number"]')) {
+            filterForm.requestSubmit();
+        }
+    });
 
     const minRange = document.getElementById('minPriceRange');
     const maxRange = document.getElementById('maxPriceRange');

@@ -1,57 +1,74 @@
 (() => {
-    const carousels = [...document.querySelectorAll('[data-product-carousel]')];
+    document.querySelectorAll("[data-product-carousel]").forEach(carousel => {
+        if (carousel.dataset.carouselInitialized === "true") return;
+        carousel.dataset.carouselInitialized = "true";
 
-    carousels.forEach(carousel => {
-        if (carousel.dataset.carouselInitialized === 'true') return;
-
-        const images = [...carousel.querySelectorAll('[data-carousel-image]')];
-        const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
-        const previousButton = carousel.querySelector('[data-carousel-prev]');
-        const nextButton = carousel.querySelector('[data-carousel-next]');
-
-        if (images.length < 2) return;
-
-        carousel.dataset.carouselInitialized = 'true';
+        const images = [...carousel.querySelectorAll("img[data-carousel-image]")];
+        const dots = [...carousel.querySelectorAll("[data-carousel-dot]")];
+        const previousButton = carousel.querySelector("[data-carousel-prev]");
+        const nextButton = carousel.querySelector("[data-carousel-next]");
+        const fallback = carousel.closest(".product-image-wrapper")?.querySelector(".product-image-fallback")
+            ?? carousel.closest(".catalog-image-wrap")?.querySelector(".catalog-image-fallback-overlay");
+        if (!images.length) return;
 
         let current = 0;
         let timer = null;
         let touchStartX = 0;
         let isPointerOver = false;
 
+        const availableImages = () => images.filter(image =>
+            image.isConnected && image.dataset.carouselFailed !== "true");
+
+        const updateControls = activeImages => {
+            const hasMultiple = activeImages.length > 1;
+            if (previousButton) previousButton.hidden = !hasMultiple;
+            if (nextButton) nextButton.hidden = !hasMultiple;
+            const dotTrack = carousel.querySelector(".product-image-dots");
+            if (dotTrack) dotTrack.hidden = !hasMultiple;
+
+            dots.forEach(dot => {
+                const dotIndex = Number(dot.dataset.carouselDot);
+                const image = images.find(item => Number(item.dataset.carouselImage) === dotIndex);
+                dot.hidden = !image || image.dataset.carouselFailed === "true";
+            });
+        };
+
         const showImage = index => {
-            current = (index + images.length) % images.length;
+            const activeImages = availableImages();
+            if (!activeImages.length) {
+                carousel.classList.add("is-image-unavailable");
+                if (fallback) fallback.hidden = false;
+                updateControls(activeImages);
+                return;
+            }
 
-            images.forEach((image, imageIndex) => {
-                image.classList.toggle('is-active', imageIndex === current);
+            carousel.classList.remove("is-image-unavailable");
+            current = ((index % activeImages.length) + activeImages.length) % activeImages.length;
+            const activeImage = activeImages[current];
+
+            images.forEach(image => image.classList.toggle("is-active", image === activeImage));
+            dots.forEach(dot => {
+                dot.classList.toggle("is-active", Number(dot.dataset.carouselDot) === Number(activeImage.dataset.carouselImage));
             });
 
-            dots.forEach((dot, dotIndex) => {
-                dot.classList.toggle('is-active', dotIndex === current);
+            if (fallback) fallback.hidden = activeImage.complete && activeImage.naturalWidth > 0;
+            updateControls(activeImages);
+        };
+
+        const handleImageFailure = image => {
+            if (image.dataset.carouselFailed === "true") return;
+            image.dataset.carouselFailed = "true";
+            image.classList.remove("is-active");
+            showImage(Math.min(current, availableImages().length - 1));
+        };
+
+        images.forEach(image => {
+            image.addEventListener("error", () => handleImageFailure(image));
+            image.addEventListener("load", () => {
+                if (image.classList.contains("is-active") && fallback) fallback.hidden = true;
             });
-
-            const count = carousel.querySelector('.product-image-count');
-            if (count) count.textContent = `${current + 1}/${images.length}`;
-        };
-
-        const nextImage = () => showImage(current + 1);
-        const previousImage = () => showImage(current - 1);
-
-        previousButton?.addEventListener('click', event => {
-            event.preventDefault();
-            event.stopPropagation();
-            previousImage();
+            if (image.complete && image.naturalWidth === 0) handleImageFailure(image);
         });
-
-        nextButton?.addEventListener('click', event => {
-            event.preventDefault();
-            event.stopPropagation();
-            nextImage();
-        });
-
-        const start = () => {
-            if (timer || document.hidden || isPointerOver) return;
-            timer = window.setInterval(nextImage, 2200);
-        };
 
         const stop = () => {
             if (!timer) return;
@@ -59,66 +76,65 @@
             timer = null;
         };
 
-        carousel.addEventListener('mouseenter', () => {
-            isPointerOver = true;
+        const start = () => {
+            if (timer || document.hidden || isPointerOver || availableImages().length < 2) return;
+            timer = window.setInterval(() => showImage(current + 1), 2600);
+        };
+
+        previousButton?.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
             stop();
+            showImage(current - 1);
         });
 
-        carousel.addEventListener('mouseleave', () => {
-            isPointerOver = false;
-            start();
+        nextButton?.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            stop();
+            showImage(current + 1);
         });
 
-        carousel.addEventListener('touchstart', event => {
-            touchStartX = event.changedTouches[0]?.clientX ?? 0;
-            stop();
-        }, { passive: true });
-
-        carousel.addEventListener('touchend', event => {
-            const touchEndX = event.changedTouches[0]?.clientX ?? 0;
-            const distance = touchEndX - touchStartX;
-
-            if (Math.abs(distance) >= 35) {
-                showImage(distance < 0 ? current + 1 : current - 1);
-            }
-
-            window.setTimeout(start, 700);
-        }, { passive: true });
-
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', event => {
+        dots.forEach(dot => {
+            dot.addEventListener("click", event => {
                 event.preventDefault();
                 event.stopPropagation();
-                showImage(index);
+                stop();
+                const activeImages = availableImages();
+                const requestedIndex = activeImages.findIndex(image =>
+                    Number(image.dataset.carouselImage) === Number(dot.dataset.carouselDot));
+                if (requestedIndex >= 0) showImage(requestedIndex);
             });
         });
 
-        const observer = 'IntersectionObserver' in window
-            ? new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        start();
-                    } else {
-                        stop();
-                    }
-                });
-            }, { threshold: 0.15 })
-            : null;
+        carousel.addEventListener("mouseenter", () => {
+            isPointerOver = true;
+            stop();
+        });
+        carousel.addEventListener("mouseleave", () => {
+            isPointerOver = false;
+            start();
+        });
+        carousel.addEventListener("touchstart", event => {
+            touchStartX = event.changedTouches[0]?.clientX ?? 0;
+            stop();
+        }, { passive: true });
+        carousel.addEventListener("touchend", event => {
+            const distance = (event.changedTouches[0]?.clientX ?? 0) - touchStartX;
+            if (Math.abs(distance) >= 35) showImage(current + (distance < 0 ? 1 : -1));
+            window.setTimeout(start, 700);
+        }, { passive: true });
 
-        if (observer) {
+        if ("IntersectionObserver" in window) {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => entry.isIntersecting ? start() : stop());
+            }, { threshold: .15 });
             observer.observe(carousel);
         } else {
             start();
         }
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stop();
-            } else {
-                start();
-            }
-        });
-
-        showImage(0);
+        document.addEventListener("visibilitychange", () => document.hidden ? stop() : start());
+        showImage(current);
     });
 })();

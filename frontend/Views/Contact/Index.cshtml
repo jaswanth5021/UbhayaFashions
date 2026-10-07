@@ -43,19 +43,19 @@
 
                 <label asp-for="Name"></label>
                 <input asp-for="Name" />
-                <span asp-validation-for="Name" class="error"></span>
+                <span asp-validation-for="Name" class="contact-validation"></span>
 
                 <label asp-for="Email"></label>
                 <input asp-for="Email" type="email" />
-                <span asp-validation-for="Email" class="error"></span>
+                <span asp-validation-for="Email" class="contact-validation"></span>
 
                 <label asp-for="Subject"></label>
                 <input asp-for="Subject" />
-                <span asp-validation-for="Subject" class="error"></span>
+                <span asp-validation-for="Subject" class="contact-validation"></span>
 
                 <label asp-for="Message"></label>
                 <textarea asp-for="Message"></textarea>
-                <span asp-validation-for="Message" class="error"></span>
+                <span asp-validation-for="Message" class="contact-validation"></span>
 
                 <button type="submit" class="button">
                     Send Message

@@ -66,19 +66,19 @@
 
 <section class="home-benefits" aria-label="Ubhaya Fashions benefits">
     <div class="home-benefit">
-        <span class="home-benefit-icon">🚚</span>
+        <span class="home-benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg></span>
         <div><strong>Free Shipping</strong><small>Across India</small></div>
     </div>
     <div class="home-benefit">
-        <span class="home-benefit-icon">✿</span>
+        <span class="home-benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="m8.5 12-1 9 4.5-2.5 4.5 2.5-1-9"/></svg></span>
         <div><strong>Premium Quality</strong><small>Handpicked Collection</small></div>
     </div>
     <div class="home-benefit">
-        <span class="home-benefit-icon">▣</span>
+        <span class="home-benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 4.4-3.2 7.7-8 9-4.8-1.3-8-4.6-8-9V7l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
         <div><strong>Secure Payment</strong><small>100% Safe &amp; Secure</small></div>
     </div>
     @* <div class="home-benefit">
-        <span class="home-benefit-icon">♧</span>
+        
         <div><strong>Easy Returns</strong><small>Hassle-free returns</small></div>
     </div> *@
 </section>
@@ -126,6 +126,14 @@
                     @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
                     {
                         <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])" alt="@category.Name" />
+                    }
+                    else
+                    {
+                        <div class="category-tile-fallback" aria-hidden="true">
+                            <svg viewBox="0 0 120 120" focusable="false"><circle cx="60" cy="60" r="42"/><circle cx="60" cy="60" r="30"/><path d="M60 12c9 12 9 24 0 36-9-12-9-24 0-36ZM108 60c-12 9-24 9-36 0 12-9 24-9 36 0ZM60 108c-9-12-9-24 0-36 9 12 9 24 0 36ZM12 60c12-9 24-9 36 0-12 9-24 9-36 0ZM26 26c15 3 23 11 26 26-15-3-23-11-26-26ZM94 26c-3 15-11 23-26 26 3-15 11-23 26-26ZM94 94c-15-3-23-11-26-26 15 3 23 11 26 26ZM26 94c3-15 11-23 26-26-3 15-11 23-26 26Z"/></svg>
+                            <span>UBHAYA</span>
+                            <small>FASHIONS</small>
+                        </div>
                     }
                     <div class="category-tile-content">
                         <h3>@category.Name</h3>
@@ -249,8 +257,7 @@
                                              alt="@p.Name - image @(imageIndex + 1)"
                                              class="product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
                                              data-carousel-image="@imageIndex"
-                                             loading="@(imageIndex == 0 ? "eager" : "lazy")"
-                                             onerror="this.remove();" />
+                                             loading="@(imageIndex == 0 ? "eager" : "lazy")" />
                                     }
 
                                     @if (productImages.Count > 1)
@@ -277,6 +284,10 @@
                                             }
                                         </div>
                                     }
+                                </div>
+                                <div class="product-image-fallback product-image-fallback-overlay" hidden aria-label="Product image unavailable">
+                                    <span>UBHAYA</span>
+                                    <small>@p.Name</small>
                                 </div>
                             }
                             else
@@ -447,6 +458,8 @@
         <!-- 01 -->
         <div class="promise-item">
 
+            <span class="promise-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span>
+
             <div class="promise-number">
                 01
             </div>
@@ -464,6 +477,8 @@
 
         <!-- 02 -->
         <div class="promise-item">
+
+            <span class="promise-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 14.2 9.8 21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3Z"/><path d="m19 3 .8 2.2L22 6l-2.2.8L19 9l-.8-2.2L17 6l1.2-.8L19 3Z"/></svg></span>
 
             <div class="promise-number">
                 02
@@ -484,6 +499,8 @@
         <!-- 03 -->
         <div class="promise-item">
 
+            <span class="promise-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg></span>
+
             <div class="promise-number">
                 03
             </div>
@@ -502,6 +519,8 @@
 
         <!-- 04 -->
         <div class="promise-item">
+
+            <span class="promise-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></span>
 
             <div class="promise-number">
                 04

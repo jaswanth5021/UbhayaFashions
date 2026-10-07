@@ -17,6 +17,7 @@
     <div class="side-menu-tagline">TRADITION MEETS TODAY</div>
 
     <nav class="menu-navigation" aria-label="Mobile menu">
+        <div class="menu-section-heading"><span>Explore</span><i></i></div>
         <ul class="menu-list">
             <li><a asp-controller="Home" asp-action="Index" class="menu-item @(sideMenuController == "Home" ? "is-current" : "")"><span class="menu-item-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg></span><span class="menu-item-label">Home</span><span class="menu-item-arrow">›</span></a></li>
             <li><a asp-controller="Products" asp-action="Index" class="menu-item"><span class="menu-item-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span><span class="menu-item-label">New Arrivals</span><span class="menu-item-arrow">›</span></a></li>
@@ -29,5 +30,11 @@
             <li><a asp-controller="Account" asp-action="@(User.Identity?.IsAuthenticated == true ? "Profile" : "Login")" class="menu-item @(sideMenuController == "Account" ? "is-current" : "")"><span class="menu-item-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span><span class="menu-item-label">My Account</span><span class="menu-item-arrow">›</span></a></li>
             <li><a asp-controller="Contact" asp-action="Index" class="menu-item @(sideMenuController == "Contact" ? "is-current" : "")"><span class="menu-item-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5 9 3l2 4-2 1.5c1 2.2 2.3 3.5 4.5 4.5L15 11l4 2-1.5 2.5C16.8 18 15.8 19 14 19c-4.8 0-9-4.2-9-9 0-1.8 1-2.8 1.5-5.5Z"/></svg></span><span class="menu-item-label">Contact Us</span><span class="menu-item-arrow">›</span></a></li>
         </ul>
+        <a class="menu-help-link" asp-controller="Contact" asp-action="Index">
+            <span class="menu-help-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.2a9 9 0 0 1-.9-4A8.4 8.4 0 0 1 12.5 3H13a8.4 8.4 0 0 1 8 8v.5Z"/><path d="M9 9.5a3 3 0 0 1 6 0c0 2-3 2-3 4M12 17h.01"/></svg></span>
+            <span><strong>Need a hand?</strong><small>We’re here to help with your order</small></span>
+            <span class="menu-help-arrow" aria-hidden="true">&#8250;</span>
+        </a>
     </nav>
+    <div class="side-menu-footer-note">UBHAYA FASHIONS <i></i> TRADITION MEETS TODAY</div>
 </aside>

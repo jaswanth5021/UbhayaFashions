@@ -3,16 +3,31 @@
     ViewData["Title"] = "Secure Payment";
 }
 
-<div class="checkout-payment-page" style="max-width:720px;margin:60px auto;padding:32px;text-align:center;">
-    <h1>Complete Your Payment</h1>
-    <p>Order #@Model.OrderId</p>
-    <h2>₹@((Model.Amount / 100m).ToString("N2"))</h2>
-    <p id="payment-message">Click the button below to open Razorpay Checkout.</p>
+<section class="checkout-payment-page" aria-labelledby="paymentTitle">
+    <div class="checkout-payment-topline">
+        <span class="checkout-payment-shield" aria-hidden="true">&#10003;</span>
+        <span>SECURE PAYMENT</span>
+    </div>
+    <p class="checkout-payment-eyebrow">YOUR ORDER IS ALMOST READY</p>
+    <h1 id="paymentTitle">Complete your payment</h1>
+    <p class="checkout-payment-order">Order <strong>#@Model.OrderId</strong></p>
 
-    <button id="pay-button" class="button" type="button" style="min-width:220px;">
-        Pay ₹@((Model.Amount / 100m).ToString("N0"))
+    <div class="checkout-payment-amount-card">
+        <span>Amount to pay</span>
+        <strong>&#8377;@((Model.Amount / 100m).ToString("N2"))</strong>
+    </div>
+
+    <p id="payment-message" class="checkout-payment-message">Continue securely with Razorpay. Your order will be confirmed after payment verification.</p>
+
+    <button id="pay-button" class="checkout-payment-pay-button" type="button">
+        Pay &#8377;@((Model.Amount / 100m).ToString("N0")) <span aria-hidden="true">&rarr;</span>
     </button>
-</div>
+
+    <div class="checkout-payment-methods" aria-label="Supported payment methods">
+        <span>UPI</span><span>Cards</span><span>Net banking</span><span>Wallets</span>
+    </div>
+    <p class="checkout-payment-footnote"><span aria-hidden="true">&#10003;</span> Payments are processed securely by Razorpay.</p>
+</section>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
@@ -28,7 +43,7 @@
         description: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Description)),
         order_id: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RazorpayOrderId)),
         theme: {
-            color: "#111111"
+            color: "#68142e"
         },
         handler: async function (response) {
             button.disabled = true;

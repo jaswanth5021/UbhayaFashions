@@ -4,18 +4,13 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="auth-card">
+<div class="auth-card login-card">
+    <div class="login-heading">
+        <p class="login-eyebrow">UBHAYA FASHIONS</p>
+        <h1>Welcome back</h1>
+        <p>Login to continue shopping.</p>
+    </div>
 
-    <h1>Welcome back</h1>
-
-    <p>
-        Login to continue shopping.
-    </p>
-
-    @if (TempData["SuccessMessage"] is string loginSuccess)
-    {
-        <div class="success">@loginSuccess</div>
-    }
     @if (TempData["SignupSuccess"] is string signupSuccess)
     {
         <div class="success">@signupSuccess</div>
@@ -50,7 +45,7 @@
         <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
 
-        <label asp-for="Identifier">Email or mobile number</label>
+        <label asp-for="Identifier"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Email or mobile number</label>
 
         <input asp-for="Identifier" autocomplete="username" placeholder="Email address or mobile number" />
 
@@ -58,7 +53,7 @@
         </span>
 
 
-        <label asp-for="Password">
+        <label asp-for="Password"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3M12 14v3"/></svg>Password
         </label>
 
         <input asp-for="Password" autocomplete="current-password" />
@@ -69,7 +64,7 @@
         <div class="auth-forgot-link"><a asp-action="ForgotPassword">Forgot password?</a></div>
 
 
-        <button class="button full"
+        <button class="button full login-submit"
                 type="submit">
 
             Login
@@ -79,28 +74,7 @@
     </form>
 
 
-    <div class="divider">
-        OR
-    </div>
-
-
-    <a class="social google"
-       asp-action="Google">
-
-        Continue with Google
-
-    </a>
-
-
-    <a class="social facebook"
-       asp-action="Facebook">
-
-        Continue with Facebook
-
-    </a>
-
-
-    <p class="center">
+    <p class="login-signup">
 
         Don't have an account?
 

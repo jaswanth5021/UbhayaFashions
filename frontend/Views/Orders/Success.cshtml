@@ -4,21 +4,44 @@
 }
 <section class="order-result-page order-success-page">
     <div class="order-result-card">
-        <div class="order-result-icon success" aria-hidden="true">✓</div>
-        <span class="order-result-eyebrow">ORDER CONFIRMED</span>
-        <h1>Thank you for your order</h1>
-        <p class="order-result-message">Your order has been placed successfully. We have received your payment and your order is now being processed.</p>
+        <div class="order-result-confetti" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="order-result-icon success" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m5 12.5 4.3 4.3L19.5 6.8" /></svg>
+        </div>
+        <span class="order-result-eyebrow">THANK YOU FOR SHOPPING UBHAYA</span>
+        <h1>Your order is confirmed!</h1>
+        <p class="order-result-message">We’ve received your payment and our team is getting your order ready. We’ll keep you updated as it moves through each step.</p>
         @if (orderId.HasValue)
         {
-            <div class="order-result-number"><span>ORDER NUMBER</span><strong>#@orderId.Value</strong></div>
+            <div class="order-result-number">
+                <span>YOUR ORDER REFERENCE</span>
+                <strong>#@orderId.Value</strong>
+                <small>Keep this number handy when you contact us.</small>
+            </div>
         }
         <div class="order-result-status">
-            <div><span>Payment</span><strong>Paid</strong></div>
-            <div><span>Order status</span><strong>Processing</strong></div>
+            <div class="order-result-payment-status">
+                <span class="order-result-status-icon" aria-hidden="true">&#10003;</span>
+                <span><small>PAYMENT</small><strong>Received</strong></span>
+            </div>
+            <div class="order-result-processing-status">
+                <span class="order-result-status-icon" aria-hidden="true">&#10022;</span>
+                <span><small>ORDER STATUS</small><strong>Being prepared</strong></span>
+            </div>
+        </div>
+
+        <div class="order-result-next">
+            <h2>What happens next?</h2>
+            <div class="order-result-next-steps">
+                <div><span>1</span><p><strong>We prepare your order</strong><small>Our team carefully gets your pieces ready.</small></p></div>
+                <div><span>2</span><p><strong>We’ll share updates</strong><small>Check your order page for the latest status.</small></p></div>
+                <div><span>3</span><p><strong>Follow your delivery</strong><small>View tracking details from My Orders when available.</small></p></div>
+            </div>
         </div>
         <div class="order-result-actions">
-            <a class="button order-result-primary" asp-action="Index">View My Orders</a>
+            <a class="button order-result-primary" asp-action="Index">View My Orders <span aria-hidden="true">&rarr;</span></a>
             <a class="button order-result-secondary" asp-controller="Products" asp-action="Index">Continue Shopping</a>
         </div>
+        <p class="order-result-help">Need help with your order? <a asp-controller="Contact" asp-action="Index">Contact our team</a>.</p>
     </div>
 </section>

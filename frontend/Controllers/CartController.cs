@@ -19,14 +19,26 @@ public class CartController : Controller
         this.productCache = productCache;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        if (User.Identity?.IsAuthenticated != true)
+        var cart = GetCart();
+        var cartVariants = new Dictionary<int, List<ProductVariantViewModel>>();
+        foreach (var productId in cart.Select(item => item.ProductId).Distinct())
         {
-            return RedirectToAction("Login", "Account", new { returnUrl = "/Orders/Checkout" });
+            try
+            {
+                var product = await api.GetProductAsync(productId);
+                if (product is not null)
+                    cartVariants[productId] = product.Variants;
+            }
+            catch (HttpRequestException)
+            {
+                cartVariants[productId] = [];
+            }
         }
 
-        return RedirectToAction("Checkout", "Orders");
+        ViewBag.CartVariants = cartVariants;
+        return View(cart);
     }
 
     [HttpPost]

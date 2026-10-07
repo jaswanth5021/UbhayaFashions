@@ -5,21 +5,46 @@
 }
 <section class="order-result-page order-failure-page">
     <div class="order-result-card">
-        <div class="order-result-icon failure" aria-hidden="true">×</div>
+        <div class="order-failure-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 8v5m0 3h.01" /><circle cx="12" cy="12" r="9" /></svg>
+        </div>
         <span class="order-result-eyebrow">PAYMENT NOT COMPLETED</span>
-        <h1>We couldn't complete your payment</h1>
+        <h1>Your payment didn’t go through</h1>
         <p class="order-result-message">@message</p>
         @if (orderId.HasValue)
         {
-            <div class="order-result-number"><span>ORDER REFERENCE</span><strong>#@orderId.Value</strong></div>
+            <div class="order-result-number">
+                <span>ORDER REFERENCE</span>
+                <strong>#@orderId.Value</strong>
+            </div>
         }
         <div class="order-result-status">
-            <div><span>Payment</span><strong>Not captured</strong></div>
-            <div><span>Cart</span><strong>Still available</strong></div>
+            <div class="order-failure-payment-status">
+                <span class="order-failure-status-icon" aria-hidden="true">!</span>
+                <span class="order-failure-status-copy">
+                    <small>PAYMENT STATUS</small>
+                    <strong>Not captured</strong>
+                    <em>This payment attempt wasn’t completed.</em>
+                </span>
+            </div>
+            <div class="order-failure-cart-status">
+                <span class="order-failure-status-icon" aria-hidden="true">&#10003;</span>
+                <span class="order-failure-status-copy">
+                    <small>YOUR CART</small>
+                    <strong>Saved and ready</strong>
+                    <em>Your selected items are still in your cart.</em>
+                </span>
+            </div>
+        </div>
+        <div class="order-failure-next">
+            <h2>What you can do</h2>
+            <p>Try again with UPI, a card, or another payment option in the secure payment window.</p>
+            <p>If your bank or payment app shows a pending transaction, check its status before retrying.</p>
         </div>
         <div class="order-result-actions">
-            <a class="button order-result-primary" asp-action="Checkout">Try Payment Again</a>
-            <a class="button order-result-secondary" asp-controller="Cart" asp-action="Index">Return to Cart</a>
+            <a class="button order-result-primary" asp-action="Checkout">Try Payment Again <span aria-hidden="true">&rarr;</span></a>
+            <a class="button order-result-secondary" asp-controller="Cart" asp-action="Index">Review Your Cart</a>
         </div>
+        <p class="order-result-help">Need help? <a asp-controller="Contact" asp-action="Index">Contact our team</a>.</p>
     </div>
 </section>

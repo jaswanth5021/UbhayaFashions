@@ -18,7 +18,9 @@ public class WishlistController(ApiService api) : Controller
 
         try
         {
-            return View(await api.GetWishlistAsync());
+            var products = await api.GetWishlistAsync();
+            await Task.WhenAll(products.Select(AttachRatingAsync));
+            return View(products);
         }
         catch (HttpRequestException ex)
         {
@@ -26,6 +28,20 @@ public class WishlistController(ApiService api) : Controller
                 ? "The wishlist endpoint is not available in the backend yet. Restart the backend service, then try again."
                 : $"Could not load your wishlist. {ex.Message}";
             return View(new List<ProductViewModel>());
+        }
+    }
+
+    private async Task AttachRatingAsync(ProductViewModel product)
+    {
+        try
+        {
+            var summary = await api.GetProductReviewsAsync(product.Id, page: 1, pageSize: 1);
+            product.AverageRating = summary.AverageRating;
+            product.ReviewCount = summary.ReviewCount;
+        }
+        catch (HttpRequestException)
+        {
+            // Keep the wishlist available if an individual rating summary is unavailable.
         }
     }
 

@@ -160,6 +160,14 @@
                                 <option value="low">Lowest amount</option>
                             </select>
                         </label>
+                        <label class="orders-page-size" for="profileOrdersPageSize"><span>Show</span>
+                            <select id="profileOrdersPageSize">
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="50">50</option>
+                                <option value="all">All</option>
+                            </select>
+                        </label>
                         <span class="profile-orders-match-count" id="profileOrdersMatchCount" aria-live="polite">@orders.Count orders</span>
                     </div>
 
@@ -220,6 +228,12 @@
                             </article>
                         }
                     </div>
+                    <nav class="profile-orders-pagination" id="profileOrdersPagination" aria-label="Order history pages" hidden>
+                        <button type="button" data-orders-previous>Previous</button>
+                        <div class="profile-orders-page-numbers" data-orders-page-numbers aria-label="Choose order history page"></div>
+                        <button type="button" data-orders-next>Next</button>
+                        <span data-orders-page-status aria-live="polite"></span>
+                    </nav>
                     <div class="orders-filter-empty" id="profileOrdersFilterEmpty" hidden>
                         <span aria-hidden="true">⌕</span>
                         <h2>No matching orders</h2>
@@ -303,9 +317,16 @@
             const cards = [...list.querySelectorAll('[data-profile-order-card]')];
             const filterButtons = [...document.querySelectorAll('[data-order-filter]')];
             const sort = document.getElementById('profileOrdersSort');
+            const pageSizeSelect = document.getElementById('profileOrdersPageSize');
             const matchCount = document.getElementById('profileOrdersMatchCount');
+            const pagination = document.getElementById('profileOrdersPagination');
+            const pageStatus = pagination?.querySelector('[data-orders-page-status]');
+            const pageNumbers = pagination?.querySelector('[data-orders-page-numbers]');
+            const previousPage = pagination?.querySelector('[data-orders-previous]');
+            const nextPage = pagination?.querySelector('[data-orders-next]');
             const emptyState = document.getElementById('profileOrdersFilterEmpty');
             let activeFilter = 'all';
+            let currentPage = 1;
 
             const matches = card => {
                 const orderStatus = (card.dataset.orderStatus || '').trim().toLowerCase();
@@ -319,7 +340,7 @@
                 }
             };
 
-            const apply = () => {
+            const apply = (resetPage = false) => {
                 const visible = cards.filter(matches);
                 visible.sort((a, b) => {
                     if (sort?.value === 'oldest') return Number(a.dataset.orderDate) - Number(b.dataset.orderDate);
@@ -329,9 +350,49 @@
                 });
 
                 visible.forEach(card => list.appendChild(card));
-                cards.forEach(card => { card.hidden = !visible.includes(card); });
+                const pageSize = pageSizeSelect?.value === 'all' ? visible.length || 1 : Number(pageSizeSelect?.value || 10);
+                const pageCount = Math.max(1, Math.ceil(visible.length / pageSize));
+                if (resetPage) currentPage = 1;
+                currentPage = Math.min(currentPage, pageCount);
+                const pageStart = (currentPage - 1) * pageSize;
+                const pageCards = new Set(visible.slice(pageStart, pageStart + pageSize));
+                cards.forEach(card => { card.hidden = !pageCards.has(card); });
                 if (matchCount) matchCount.textContent = visible.length === 1 ? '1 order' : `${visible.length} orders`;
                 if (emptyState) emptyState.hidden = visible.length !== 0;
+                if (pagination) pagination.hidden = visible.length <= pageSize;
+                if (pageStatus) {
+                    const firstShown = visible.length ? pageStart + 1 : 0;
+                    const lastShown = Math.min(pageStart + pageSize, visible.length);
+                    pageStatus.textContent = `Showing ${firstShown}–${lastShown} of ${visible.length} orders`;
+                }
+                if (pageNumbers) {
+                    const pageEntries = pageCount <= 7
+                        ? Array.from({ length: pageCount }, (_, index) => index + 1)
+                        : [1, ...(currentPage > 3 ? ['…'] : []), ...Array.from({ length: Math.min(pageCount - 1, currentPage + 1) - Math.max(2, currentPage - 1) + 1 }, (_, index) => Math.max(2, currentPage - 1) + index), ...(currentPage < pageCount - 2 ? ['…'] : []), pageCount];
+                    pageNumbers.replaceChildren();
+                    pageEntries.forEach(page => {
+                        if (page === '…') {
+                            const gap = document.createElement('span');
+                            gap.className = 'profile-orders-page-gap';
+                            gap.textContent = '…';
+                            pageNumbers.appendChild(gap);
+                            return;
+                        }
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.dataset.ordersPage = String(page);
+                        button.textContent = String(page);
+                        if (page === currentPage) {
+                            button.classList.add('is-current');
+                            button.setAttribute('aria-current', 'page');
+                        } else {
+                            button.setAttribute('aria-label', `Go to order page ${page}`);
+                        }
+                        pageNumbers.appendChild(button);
+                    });
+                }
+                if (previousPage) previousPage.disabled = currentPage <= 1;
+                if (nextPage) nextPage.disabled = currentPage >= pageCount;
             };
 
             filterButtons.forEach(button => button.addEventListener('click', () => {
@@ -341,10 +402,25 @@
                     item.classList.toggle('is-active', selected);
                     item.setAttribute('aria-pressed', selected ? 'true' : 'false');
                 });
-                apply();
+                apply(true);
             }));
 
-            sort?.addEventListener('change', apply);
+            sort?.addEventListener('change', () => apply(true));
+            pageSizeSelect?.addEventListener('change', () => apply(true));
+            previousPage?.addEventListener('click', () => {
+                currentPage = Math.max(1, currentPage - 1);
+                apply();
+            });
+            nextPage?.addEventListener('click', () => {
+                currentPage += 1;
+                apply();
+            });
+            pageNumbers?.addEventListener('click', event => {
+                const button = event.target.closest('[data-orders-page]');
+                if (!button) return;
+                currentPage = Number(button.dataset.ordersPage);
+                apply();
+            });
             list.addEventListener('click', event => {
                 const button = event.target.closest('[data-profile-order-toggle]');
                 if (!button) return;
