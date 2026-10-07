@@ -353,6 +353,18 @@ using (var scope = app.Services.CreateScope())
 
         IF COL_LENGTH(N'dbo.Products', N'Category') IS NOT NULL
             EXEC(N'ALTER TABLE dbo.Products DROP COLUMN Category;');
+
+        IF COL_LENGTH(N'dbo.Products', N'CreatedDate') IS NULL
+        BEGIN
+            ALTER TABLE dbo.Products ADD CreatedDate datetime2 NOT NULL
+                CONSTRAINT DF_Products_CreatedDate DEFAULT (SYSUTCDATETIME());
+            -- Legacy rows have no known launch date; keep them outside the
+            -- New Arrivals window until a new product is published.
+            EXEC(N'UPDATE dbo.Products SET CreatedDate = DATEADD(day, -31, SYSUTCDATETIME());');
+        END;
+
+        IF COL_LENGTH(N'dbo.Products', N'UpdatedDate') IS NULL
+            ALTER TABLE dbo.Products ADD UpdatedDate datetime2 NULL;
         """);
 
     // If you are using EF migrations:

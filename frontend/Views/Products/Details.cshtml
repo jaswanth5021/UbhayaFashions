@@ -1045,6 +1045,15 @@
                                 </span>
                             }
 
+                            @if (item.ReviewCount > 0)
+                            {
+                                <div class="recently-viewed-rating" role="img" aria-label="Rated @item.AverageRating.ToString("0.0") out of 5 from @item.ReviewCount reviews">
+                                    <span>@item.AverageRating.ToString("0.0")</span>
+                                    <span class="recently-viewed-rating-star" aria-hidden="true">&#9733;</span>
+                                    <span aria-hidden="true">|</span>
+                                    <span class="recently-viewed-rating-count">@item.ReviewCount</span>
+                                </div>
+                            }
                         </div>
 
                     </a>
@@ -1073,6 +1082,16 @@
                             @item.Name
                         </h3>
 
+                        @if (item.Sizes.Count > 0)
+                        {
+                            <div class="recently-viewed-sizes" aria-label="Available sizes">
+                                <span class="recently-viewed-sizes-label">Sizes</span>
+                                @foreach (var size in item.Sizes)
+                                {
+                                    <span class="recently-viewed-size">@size</span>
+                                }
+                            </div>
+                        }
 
                         <div class="product-bestseller-pricing">
 
@@ -1111,6 +1130,7 @@
          data-image-base="@Configuration["ApiBaseUrl"]"
          data-product-price="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)"
          data-product-discount="@Model.Discount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+         data-product-sizes="@Model.Sizes"
          data-product-rating="@(((ViewBag.ProductReviews as ProductReviewsViewModel)?.AverageRating ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))"
          data-product-review-count="@((ViewBag.ProductReviews as ProductReviewsViewModel)?.ReviewCount ?? 0)"
          data-review-summary-url="@Url.Action("ReviewPage", "Products")"
@@ -1118,7 +1138,7 @@
          data-server-history-enabled="@(User.Identity?.IsAuthenticated == true ? "true" : "false")"
          data-history-sync-url="@Url.Action("SyncRecentlyViewed", "Products")"
          data-server-history="@System.Text.Json.JsonSerializer.Serialize((ViewBag.RecentlyViewedProducts as List<RelatedProductViewModel>) ?? [], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web))"
-         aria-labelledby="recentlyViewedTitle" hidden>
+         aria-labelledby="recentlyViewedTitle">
     @if (User.Identity?.IsAuthenticated == true)
     {
         <div hidden>@Html.AntiForgeryToken()</div>
@@ -1134,7 +1154,7 @@
                 <button type="button" class="recently-viewed-scroll" data-recent-next aria-label="Scroll to more products" aria-controls="recentlyViewedList">&#8250;</button>
             </div>
         </div>
-        <div class="recently-viewed-list" id="recentlyViewedList" data-recently-viewed-list tabindex="0" aria-label="Recently viewed products"></div>
+        <div class="recently-viewed-list" id="recentlyViewedList" data-recently-viewed-list tabindex="0" aria-label="Recently viewed products"><p class="recently-viewed-empty" data-recently-viewed-empty>Products you view will appear here.</p></div>
     </div>
 </section>
 <!-- =============================================================

@@ -54,7 +54,8 @@ public class ApiService(
         decimal? maxPrice = null,
         string? availability = null,
         bool bestSellers = false,
-        string? sort = null)
+        string? sort = null,
+        bool newArrivals = false)
     {
         var query = new List<string>();
 
@@ -74,6 +75,8 @@ public class ApiService(
             query.Add($"availability={Uri.EscapeDataString(availability.Trim())}");
         if (bestSellers)
             query.Add("bestSellers=true");
+        if (newArrivals)
+            query.Add("newArrivals=true");
         if (!string.IsNullOrWhiteSpace(sort))
             query.Add($"sort={Uri.EscapeDataString(sort.Trim())}");
 

@@ -46,6 +46,7 @@
         discount: Number(section.dataset.productDiscount) || 0,
         averageRating: Number(section.dataset.productRating) || 0,
         reviewCount: Number(section.dataset.productReviewCount) || 0,
+        sizes: String(section.dataset.productSizes || "").split(",").map(size => size.trim()).filter(Boolean),
         url: section.dataset.productUrl || "/Products/Details"
     };
 
@@ -84,6 +85,9 @@
             discount: Number(item.discount ?? item.Discount) || 0,
             averageRating: Number(item.averageRating ?? item.AverageRating) || 0,
             reviewCount: Number(item.reviewCount ?? item.ReviewCount) || 0,
+            sizes: Array.isArray(item.sizes ?? item.Sizes)
+                ? (item.sizes ?? item.Sizes).filter(Boolean)
+                : String(item.sizes ?? item.Sizes ?? "").split(",").map(size => size.trim()).filter(Boolean),
         };
         const article = document.createElement("article");
         article.className = "recently-viewed-card";
@@ -169,7 +173,23 @@
             pricing.append(original);
         }
 
-        link.append(imageWrap, category, title, pricing);
+        const sizes = document.createElement("div");
+        sizes.className = "recently-viewed-sizes";
+        if (product.sizes.length) {
+            const sizesLabel = document.createElement("span");
+            sizesLabel.className = "recently-viewed-sizes-label";
+            sizesLabel.textContent = "Sizes";
+            sizes.append(sizesLabel, ...product.sizes.map(size => {
+                const sizeOption = document.createElement("span");
+                sizeOption.className = "recently-viewed-size";
+                sizeOption.textContent = String(size);
+                return sizeOption;
+            }));
+        } else {
+            sizes.hidden = true;
+        }
+
+        link.append(imageWrap, category, title, sizes, pricing);
         article.append(link);
 
         if (product.reviewCount < 1 && section.dataset.reviewSummaryUrl) {
@@ -197,8 +217,19 @@
         const visibleItems = items
             .filter(item => item && String(item.id ?? item.Id) !== currentId)
             .slice(0, maxItems);
-        list.replaceChildren(...visibleItems.map(makeCard));
-        section.hidden = visibleItems.length === 0;
+        if (visibleItems.length) {
+            list.replaceChildren(...visibleItems.map(makeCard));
+        } else {
+            let emptyMessage = list.querySelector("[data-recently-viewed-empty]");
+            if (!emptyMessage) {
+                emptyMessage = document.createElement("p");
+                emptyMessage.className = "recently-viewed-empty";
+                emptyMessage.dataset.recentlyViewedEmpty = "";
+                emptyMessage.textContent = "Products you view will appear here.";
+            }
+            list.replaceChildren(emptyMessage);
+        }
+        section.hidden = false;
         window.requestAnimationFrame(updateScrollButtons);
     };
 

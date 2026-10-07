@@ -4,12 +4,13 @@
     var search = ViewBag.Search as string;
     var category = ViewBag.Category as string;
     var bestSellersOnly = (bool?)ViewBag.BestSellersOnly == true;
+    var newArrivalsOnly = (bool?)ViewBag.NewArrivalsOnly == true;
     var selectedSize = ViewBag.Size as string;
     var selectedColor = ViewBag.Color as string;
     var minPrice = (decimal?)ViewBag.MinPrice;
     var maxPrice = (decimal?)ViewBag.MaxPrice;
     var availability = ViewBag.Availability as string;
-    var selectedSort = ViewBag.Sort as string ?? "recommended";
+    var selectedSort = newArrivalsOnly ? "newest" : ViewBag.Sort as string ?? "recommended";
     var categories = ViewBag.Categories as List<CategoryViewModel> ?? new List<CategoryViewModel>();
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var productCount = (int)ViewBag.ProductCount;
@@ -17,7 +18,7 @@
     var pageCount = (int)ViewBag.PageCount;
     ViewData["Title"] = !string.IsNullOrWhiteSpace(search)
         ? $"Search: {search}"
-        : bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category)
+        : newArrivalsOnly ? "New Arrival" : bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category)
         ? "Shop All"
         : category;
 }
@@ -33,7 +34,7 @@
             }
             else
             {
-                <h1>@(bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
+                <h1>@(newArrivalsOnly ? "New Arrival" : bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
             }
             <p class="catalog-count">@productCount @(productCount == 1 ? "style" : "styles")</p>
         </div>
@@ -47,18 +48,26 @@
                 <input type="hidden" name="minPrice" value="@minPrice" />
                 <input type="hidden" name="maxPrice" value="@maxPrice" />
                 <input type="hidden" name="availability" value="@availability" />
+                @if (newArrivalsOnly) { <input type="hidden" name="newArrivals" value="true" /> }
                 @if (bestSellersOnly)
                 {
                     <input type="hidden" name="bestSellers" value="true" />
                 }
-                <label for="catalogSort">Sort by:</label>
-                <select id="catalogSort" name="sort" onchange="this.form.submit()">
-                    <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Recommended</option>
-                    <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Newest</option>
-                    <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Price: Low to High</option>
-                    <option value="price-high" selected="@(selectedSort == "price-high" ? "selected" : null)">Price: High to Low</option>
-                    <option value="name" selected="@(selectedSort == "name" ? "selected" : null)">Name</option>
-                </select>
+                @if (newArrivalsOnly)
+                {
+                    <input type="hidden" name="sort" value="newest" />
+                }
+                else
+                {
+                    <label for="catalogSort">Sort by:</label>
+                    <select id="catalogSort" name="sort" onchange="this.form.submit()">
+                        <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Recommended</option>
+                        <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Newest</option>
+                        <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Price: Low to High</option>
+                        <option value="price-high" selected="@(selectedSort == "price-high" ? "selected" : null)">Price: High to Low</option>
+                        <option value="name" selected="@(selectedSort == "name" ? "selected" : null)">Name</option>
+                    </select>
+                }
             </form>
 
             @if (!string.IsNullOrWhiteSpace(category))
@@ -89,6 +98,7 @@
             {
                 <input type="hidden" name="bestSellers" value="true" />
             }
+            @if (newArrivalsOnly) { <input type="hidden" name="newArrivals" value="true" /> }
             <button type="submit">SEARCH</button>
             @if (!string.IsNullOrWhiteSpace(search))
             {
@@ -104,7 +114,8 @@
                 <span>FILTERS</span>
                 <a asp-action="Index"
                    asp-route-search="@search"
-                   asp-route-bestSellers="@bestSellersOnly">Clear All</a>
+                   asp-route-bestSellers="@bestSellersOnly"
+                   asp-route-newArrivals="@newArrivalsOnly">Clear All</a>
             </div>
 
             <form asp-action="Index" method="get" class="catalog-sidebar-form">
@@ -113,6 +124,7 @@
                 {
                     <input type="hidden" name="bestSellers" value="true" />
                 }
+                @if (newArrivalsOnly) { <input type="hidden" name="newArrivals" value="true" /> }
 
                 <section class="filter-section">
                     <h3>Category</h3>
@@ -443,7 +455,7 @@
                     <nav class="catalog-pagination" aria-label="Product pages">
                         @if (currentPage > 1)
                         {
-                            <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@(currentPage - 1)">← Previous</a>
+                            <a class="catalog-page-link catalog-page-previous" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-newArrivals="@newArrivalsOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@(currentPage - 1)">← Previous</a>
                         }
                         else
                         {
@@ -459,14 +471,14 @@
                                 }
                                 else
                                 {
-                                    <a class="catalog-page-number" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@pageNumber">@pageNumber</a>
+                                    <a class="catalog-page-number" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-newArrivals="@newArrivalsOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@pageNumber">@pageNumber</a>
                                 }
                             }
                         </div>
 
                         @if (currentPage < pageCount)
                         {
-                            <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@(currentPage + 1)">Next →</a>
+                            <a class="catalog-page-link catalog-page-next" asp-action="Index" asp-route-search="@search" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-newArrivals="@newArrivalsOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort" asp-route-page="@(currentPage + 1)">Next →</a>
                         }
                         else
                         {

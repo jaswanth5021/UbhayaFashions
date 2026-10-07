@@ -19,6 +19,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         [FromQuery] decimal? maxPrice = null,
         [FromQuery] string? availability = null,
         [FromQuery] bool bestSellers = false,
+        [FromQuery] bool newArrivals = false,
         [FromQuery] string? sort = null)
     {
         var query = db.Products
@@ -90,7 +91,13 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             query = query.Where(x => x.IsBestSeller);
         }
 
-        query = sort?.Trim().ToLowerInvariant() switch
+        if (newArrivals)
+        {
+            var cutoff = DateTime.UtcNow.AddDays(-30);
+            query = query.Where(x => x.CreatedDate >= cutoff && x.Variants.Any(variant => variant.Stock > 0));
+        }
+
+        query = newArrivals ? query.OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.Id) : sort?.Trim().ToLowerInvariant() switch
         {
             "price-low" => query.OrderBy(x => x.Variants.Min(variant => (decimal?)variant.Price) ?? decimal.MaxValue),
             "price-high" => query.OrderByDescending(x => x.Variants.Max(variant => (decimal?)variant.Price) ?? 0),
@@ -159,12 +166,49 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             results.AddRange(fallback);
         }
 
+        var cardDetails = await GetCardDetailsAsync(results.Select(item => item.Id).Distinct().ToArray());
+
         return Ok(results.Select(item => new
         {
             item.Id, item.Name, item.Category, item.ImageUrl, item.Price, item.Discount,
-            item.IsBestSeller
+            item.IsBestSeller,
+            AverageRating = cardDetails[item.Id].AverageRating,
+            ReviewCount = cardDetails[item.Id].ReviewCount,
+            Sizes = cardDetails[item.Id].Sizes
         }));
     }
+
+    private async Task<Dictionary<int, ProductCardDetails>> GetCardDetailsAsync(int[] productIds)
+    {
+        var sizes = await db.ProductVariants.AsNoTracking()
+            .Where(variant => productIds.Contains(variant.ProductId) && variant.Stock > 0)
+            .OrderBy(variant => variant.Size)
+            .Select(variant => new { variant.ProductId, variant.Size })
+            .ToListAsync();
+        var sizeLookup = sizes.GroupBy(item => item.ProductId)
+            .ToDictionary(group => group.Key, group => group.Select(item => item.Size).Distinct().ToList());
+
+        var reviews = await db.ProductReviews.AsNoTracking()
+            .Where(review => productIds.Contains(review.ProductId))
+            .GroupBy(review => review.ProductId)
+            .Select(group => new
+            {
+                ProductId = group.Key,
+                AverageRating = group.Average(review => (decimal)review.Rating),
+                ReviewCount = group.Count()
+            })
+            .ToDictionaryAsync(item => item.ProductId);
+
+        return productIds.ToDictionary(id => id, id =>
+        {
+            var productSizes = sizeLookup.GetValueOrDefault(id) ?? [];
+            return reviews.TryGetValue(id, out var summary)
+                ? new ProductCardDetails(productSizes, summary.AverageRating, summary.ReviewCount)
+                : new ProductCardDetails(productSizes, 0, 0);
+        });
+    }
+
+    private sealed record ProductCardDetails(List<string> Sizes, decimal AverageRating, int ReviewCount);
 
     private sealed record RelatedProductResponse(
         int Id, string Name, string Category, string ImageUrl, decimal Price,
@@ -173,12 +217,15 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     [HttpGet("GetNewarrivals")]
     public async Task<IActionResult> GetNewarrivals()
     {
+        var cutoff = DateTime.UtcNow.AddDays(-30);
         var products = await db.Products.AsNoTracking()
             .Include(x => x.CategoryNavigation)
             .Include(x => x.Images)
             .Include(x => x.Videos)
             .Include(x => x.Variants)
-            .OrderByDescending(x => x.Id)
+            .Where(x => x.CreatedDate >= cutoff && x.Variants.Any(variant => variant.Stock > 0))
+            .OrderByDescending(x => x.CreatedDate)
+            .ThenByDescending(x => x.Id)
             .Take(4)
             .ToListAsync();
 

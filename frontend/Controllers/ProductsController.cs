@@ -24,7 +24,8 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
         string? availability = null,
         string? sort = null,
         int page = 1,
-        bool bestSellers = false)
+        bool bestSellers = false,
+        bool newArrivals = false)
     {
         var products = await api.GetProductsAsync(
             search,
@@ -35,7 +36,8 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
             maxPrice,
             availability,
             bestSellers,
-            sort);
+            sort,
+            newArrivals);
 
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -75,6 +77,7 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
         ViewBag.Availability = availability;
         ViewBag.Sort = sort;
         ViewBag.BestSellersOnly = bestSellers;
+        ViewBag.NewArrivalsOnly = newArrivals;
         ViewBag.ProductCount = productCount;
         ViewBag.CurrentPage = page;
         ViewBag.PageCount = pageCount;

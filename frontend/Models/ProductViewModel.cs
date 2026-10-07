@@ -4,6 +4,10 @@ public class ProductViewModel
 {
     public int Id { get; set; }
 
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime? UpdatedDate { get; set; }
+
     public decimal? AverageRating { get; set; }
 
     public int? ReviewCount { get; set; }
@@ -46,6 +50,9 @@ public class RelatedProductViewModel
     public decimal Price { get; set; }
     public decimal Discount { get; set; }
     public bool IsBestSeller { get; set; }
+    public decimal AverageRating { get; set; }
+    public int ReviewCount { get; set; }
+    public List<string> Sizes { get; set; } = [];
 }
 
 public class ProductVariantViewModel

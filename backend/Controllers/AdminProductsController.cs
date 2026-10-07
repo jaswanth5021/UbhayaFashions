@@ -76,6 +76,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         product.Colors = request.Colors?.Trim() ?? string.Empty;
         product.ImageUrl = request.ImageUrl?.Trim() ?? string.Empty;
         product.IsBestSeller = request.IsBestSeller;
+        product.UpdatedDate = DateTime.UtcNow;
         db.ProductVariants.RemoveRange(product.Variants);
         var updatedVariants = request.Variants.Select(ToVariant).ToList();
         db.ProductVariants.AddRange(updatedVariants);
@@ -100,6 +101,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         var product = await db.Products.FindAsync(id);
         if (product is null) return NotFound();
         product.IsBestSeller = isBestSeller;
+        product.UpdatedDate = DateTime.UtcNow;
         await db.SaveChangesAsync();
         return Ok(new { product.Id, product.IsBestSeller });
     }

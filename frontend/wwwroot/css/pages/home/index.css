@@ -1326,6 +1326,50 @@ a {
     }
 }
 
+/* Keep the expanded desktop menu balanced beside the logo and search. */
+@media (min-width: 901px) {
+    .header {
+        background: linear-gradient(180deg, #fff 0%, #fdfaf9 100%);
+        border-bottom-color: #eadfdd;
+        box-shadow: 0 5px 18px rgb(59 31 38 / 6%);
+    }
+
+    .header .desktop-primary-nav {
+        flex: 1 1 auto;
+        min-width: 0;
+        justify-content: center;
+        gap: clamp(10px, 1.1vw, 19px);
+        margin: 0 14px;
+    }
+
+    .header .desktop-primary-nav a {
+        color: #4b3b40;
+        font-size: clamp(10px, .68vw, 12px);
+        font-weight: 650;
+        letter-spacing: .65px;
+        line-height: 1;
+    }
+
+    .header .desktop-primary-nav a:focus-visible {
+        color: #68142e;
+        outline: 2px solid #b66b7b;
+        outline-offset: 6px;
+        border-radius: 2px;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1250px) {
+    .header .desktop-primary-nav {
+        gap: clamp(7px, .8vw, 10px);
+        margin: 0 8px;
+    }
+
+    .header .desktop-primary-nav a {
+        font-size: 9px;
+        letter-spacing: .35px;
+    }
+}
+
 /* Mobile keeps the existing centered header and compact navigation. */
 @media (max-width: 900px) {
     .desktop-primary-nav,

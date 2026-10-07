@@ -33,6 +33,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<PendingSignup>().Property(x => x.Email).HasMaxLength(320).IsRequired();
         modelBuilder.Entity<PendingSignup>().Property(x => x.CodeHash).HasMaxLength(64).IsRequired();
         modelBuilder.Entity<Product>().HasMany(x => x.Images).WithOne().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Product>().Property(x => x.CreatedDate).HasDefaultValueSql("SYSUTCDATETIME()");
         modelBuilder.Entity<Product>().HasMany(x => x.Videos).WithOne().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductVariant>().Property(x => x.Price).HasPrecision(18, 2);
         modelBuilder.Entity<ProductVariant>().Property(x => x.Discount).HasPrecision(5, 2);

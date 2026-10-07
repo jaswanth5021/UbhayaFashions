@@ -36,7 +36,42 @@ public class RecentlyViewedController(ApplicationDbContext db) : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(products);
+        var productIds = products.Select(product => product.Id).ToArray();
+        var sizes = await db.ProductVariants.AsNoTracking()
+            .Where(variant => productIds.Contains(variant.ProductId) && variant.Stock > 0)
+            .OrderBy(variant => variant.Size)
+            .Select(variant => new { variant.ProductId, variant.Size })
+            .ToListAsync();
+        var sizesByProductId = sizes.GroupBy(item => item.ProductId)
+            .ToDictionary(group => group.Key, group => group.Select(item => item.Size).Distinct().ToList());
+        var reviews = await db.ProductReviews.AsNoTracking()
+            .Where(review => productIds.Contains(review.ProductId))
+            .GroupBy(review => review.ProductId)
+            .Select(group => new
+            {
+                ProductId = group.Key,
+                AverageRating = group.Average(review => (decimal)review.Rating),
+                ReviewCount = group.Count()
+            })
+            .ToDictionaryAsync(item => item.ProductId);
+
+        return Ok(products.Select(product =>
+        {
+            reviews.TryGetValue(product.Id, out var reviewSummary);
+            return new
+            {
+                product.Id,
+                product.Name,
+                product.Category,
+                product.ImageUrl,
+                product.Price,
+                product.Discount,
+                product.IsBestSeller,
+                Sizes = sizesByProductId.GetValueOrDefault(product.Id) ?? [],
+                AverageRating = reviewSummary?.AverageRating ?? 0,
+                ReviewCount = reviewSummary?.ReviewCount ?? 0
+            };
+        }));
     }
 
     [HttpPost("{productId:int}")]
