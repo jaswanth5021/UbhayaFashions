@@ -1,5 +1,17 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    document.querySelectorAll(".desktop-nav-dropdown").forEach(function (dropdown) {
+        if (!window.matchMedia("(min-width: 901px)").matches) return;
+
+        dropdown.addEventListener("pointerenter", function () {
+            dropdown.open = true;
+        });
+
+        dropdown.addEventListener("pointerleave", function () {
+            dropdown.open = false;
+        });
+    });
+
     const menuOpen =
         document.getElementById("menuOpen");
 

@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,7 @@ builder.Services.AddHttpClient("Razorpay", client =>
     client.BaseAddress = new Uri("https://api.razorpay.com/v1/");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
+builder.Services.AddScoped<IOrderConfirmationEmailService, OrderConfirmationEmailService>();
 
 
 // =====================================================

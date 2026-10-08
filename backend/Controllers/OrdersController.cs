@@ -1,6 +1,7 @@
 ﻿using backend.Data;
 using backend.DTOs;
 using backend.Models;
+using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +12,14 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/orders")]
 [Authorize]
-public class OrdersController(ApplicationDbContext db) : ControllerBase
+public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailService orderEmail) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(CreateOrderRequest request)
     {
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId)) return Unauthorized();
+        var customer = await db.Customers.FindAsync(customerId);
+        if (customer is null) return Unauthorized();
         if (request.Items is null || request.Items.Count == 0) return BadRequest("Cart is empty.");
         if (request.Items.Any(item => item.Quantity <= 0 || string.IsNullOrWhiteSpace(item.Size))) return BadRequest("Choose a size and a valid quantity for each item.");
 
@@ -61,6 +64,7 @@ public class OrdersController(ApplicationDbContext db) : ControllerBase
         db.Orders.Add(order);
         db.InventoryTransactions.AddRange(inventoryTransactions);
         await db.SaveChangesAsync();
+        await orderEmail.SendOrderConfirmationAsync(order, customer);
         return Ok(order);
     }
 

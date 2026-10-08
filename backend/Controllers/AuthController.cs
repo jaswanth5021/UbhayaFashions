@@ -660,6 +660,10 @@ public class AuthController(
 
     private async Task SendConfiguredEmailAsync(string recipient, string subject, string code)
     {
+        try
+        {
+
+       
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
         var from = smtp["From"];
@@ -702,6 +706,12 @@ public class AuthController(
         var username = smtp["Username"];
         if (!string.IsNullOrWhiteSpace(username)) client.Credentials = new NetworkCredential(username, smtp["Password"]);
         await client.SendMailAsync(message);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
     // =====================================================
     // CREATE LOGIN RESPONSE

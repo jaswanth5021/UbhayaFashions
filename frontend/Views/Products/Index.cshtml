@@ -522,6 +522,11 @@
         panel.addEventListener("click", (event) => {
             if (event.target === panel) setOpen(false);
         });
+        document.addEventListener("click", (event) => {
+            if (panel.classList.contains("is-mobile-open") && !panel.contains(event.target) && event.target !== toggle) {
+                setOpen(false);
+            }
+        });
         panel.querySelector("form")?.addEventListener("submit", () => setOpen(false));
     }
 

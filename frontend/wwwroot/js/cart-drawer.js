@@ -14,20 +14,51 @@
     if (!drawer || !backdrop) return;
 
     const setBagCount = (count) => {
-        const link = document.getElementById('cartDrawerOpen');
-        if (!link) return;
-        let badge = link.querySelector('.header-icon-count');
-        if (count < 1) {
-            badge?.remove();
-            return;
+        const updateBadge = (link, selector, className) => {
+            if (!link) return;
+            let badge = link.querySelector(selector);
+            if (count < 1) {
+                badge?.remove();
+                return;
+            }
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = className;
+                link.prepend(badge);
+            }
+            badge.textContent = String(count);
+            badge.setAttribute('aria-label', `${count} items`);
+        };
+
+        updateBadge(document.getElementById('cartDrawerOpen'), '.header-icon-count', 'header-icon-count');
+        updateBadge(document.querySelector('.mobile-bottom-nav-cart'), '.mobile-bottom-nav-badge', 'mobile-bottom-nav-badge');
+    };
+
+    const refreshDrawer = async () => {
+        if (!openButton || !itemsStep || !footerStep) return;
+        try {
+            const response = await fetch(openButton.href, {
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) return;
+
+            const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+            const freshItems = page.querySelector('#cartDrawerItemsStep');
+            const freshFooter = page.querySelector('#cartDrawerFooterStep');
+            const freshColumns = page.querySelector('#cartDrawer .cart-drawer-columns');
+            if (!freshItems || !freshFooter) return;
+
+            itemsStep.innerHTML = freshItems.innerHTML;
+            footerStep.innerHTML = freshFooter.innerHTML;
+            if (columns && freshColumns) columns.hidden = freshColumns.hidden || Boolean(freshItems.querySelector('.cart-drawer-empty'));
+
+            const count = Number(page.querySelector('#cartDrawerOpen .header-icon-count')?.textContent || 0);
+            setBagCount(count);
+        } catch {
+            // Keep the existing drawer usable if its refresh request fails.
         }
-        if (!badge) {
-            badge = document.createElement('span');
-            badge.className = 'header-icon-count';
-            link.prepend(badge);
-        }
-        badge.textContent = String(count);
-        badge.setAttribute('aria-label', `${count} items`);
     };
 
     itemsStep?.addEventListener('submit', async event => {
@@ -83,7 +114,7 @@
         itemsStep.hidden = show;
         addressStep.hidden = !show;
         footerStep.hidden = show;
-        if (columns) columns.hidden = show;
+        if (columns) columns.hidden = show || Boolean(itemsStep?.querySelector('.cart-drawer-empty'));
         if (show && addressField) {
             const selected = savedAddressOptions.find(option => option.checked);
             if (selected) addressField.value = selected.dataset.address || '';
@@ -96,6 +127,7 @@
     openButton?.addEventListener('click', (event) => {
         event.preventDefault();
         setOpen(true);
+        void refreshDrawer();
     });
     beginCheckout?.addEventListener('click', () => showAddressStep(true));
     backToCart?.addEventListener('click', () => showAddressStep(false));

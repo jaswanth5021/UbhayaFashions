@@ -975,7 +975,7 @@ body {
 .product-reviews {
     width: min(1280px, calc(100% - 48px));
     margin: 44px auto 64px;
-    padding: 42px 0 0;
+    padding: 42px 0 44px;
     border-top: 1px solid #eadbd6;
 }
 
@@ -1215,17 +1215,47 @@ body {
 }
 
 @media (max-width: 760px) {
+    .product-details-page {
+        padding-bottom: 0;
+    }
+
+    .product-bestsellers,
+    .recently-viewed-section {
+        box-sizing: border-box;
+        width: calc(100% - 28px);
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 24px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
     .product-reviews {
-        width: calc(100% - 32px);
-        margin-top: 32px;
-        padding-top: 30px;
+        box-sizing: border-box;
+        width: calc(100% - 28px);
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 24px;
+        margin-bottom: 24px;
+        padding: 30px 20px;
     }
 
     .product-reviews-heading { align-items: flex-start; }
-    .product-review-summary { grid-template-columns: 1fr; padding: 18px; }
+    .product-review-summary {
+        box-sizing: border-box;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        min-width: 0;
+        padding: 18px;
+    }
     .product-review-summary > .product-reviews-eyebrow { grid-column: auto; }
     .product-review-average { min-height: 0; padding: 0 0 14px; border: 0; border-bottom: 1px solid #eadbd6; }
     .product-review-breakdown { max-width: none; }
+    .product-review-list {
+        box-sizing: border-box;
+        padding-right: 12px;
+        padding-left: 12px;
+    }
     .product-customer-photos { padding: 17px; }
     .product-review-card { padding: 17px; }
     .product-review-list-heading { align-items: flex-start; }

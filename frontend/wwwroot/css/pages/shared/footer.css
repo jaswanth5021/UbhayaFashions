@@ -530,6 +530,7 @@
 
     .mobile-bottom-nav-shop.is-active .mobile-bottom-nav-shop-icon {
         background: #68142e;
+        color: #fff;
         box-shadow: 0 6px 16px rgba(104, 20, 46, .25);
     }
 

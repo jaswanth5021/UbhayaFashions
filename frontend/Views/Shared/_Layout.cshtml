@@ -203,9 +203,14 @@
 
         <nav class="desktop-primary-nav" aria-label="Main navigation">
             <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true">NEW ARRIVAL</a>
-            <a asp-controller="Products" asp-action="Index" asp-route-category="Dresses">DRESSES</a>
-            <a asp-controller="Products" asp-action="Index" asp-route-category="2-piece sets">2-PIECE SETS</a>
-            <a asp-controller="Products" asp-action="Index" asp-route-category="3-piece sets">3-PIECE SETS</a>
+            <details class="desktop-nav-dropdown">
+                <summary>CATEGORIES</summary>
+                <div class="desktop-nav-dropdown-menu">
+                    <a asp-controller="Products" asp-action="Index" asp-route-category="Dresses">Dresses</a>
+                    <a asp-controller="Products" asp-action="Index" asp-route-category="2-piece sets">2-Piece Sets</a>
+                    <a asp-controller="Products" asp-action="Index" asp-route-category="3-piece sets">3-Piece Sets</a>
+                </div>
+            </details>
             <a asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">BEST SELLERS</a>
             <a asp-controller="Products" asp-action="Index" asp-route-sort="discount">OFFERS</a>
             <a asp-controller="Home" asp-action="Index">ABOUT</a>

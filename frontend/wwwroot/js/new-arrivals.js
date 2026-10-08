@@ -26,16 +26,16 @@
         }, 3500);
     };
 
-    const updateCount = (link, count) => {
+    const updateCount = (link, count, badgeClass = 'header-icon-count') => {
         if (!link) return;
-        let badge = link.querySelector('.header-icon-count');
+        let badge = link.querySelector(`.${badgeClass}`);
         if (count < 1) {
             badge?.remove();
             return;
         }
         if (!badge) {
             badge = document.createElement('span');
-            badge.className = 'header-icon-count';
+            badge.className = badgeClass;
             link.prepend(badge);
         }
         badge.textContent = count;
@@ -73,6 +73,7 @@
                 const result = await response.json();
                 if (!response.ok || !result.success) throw new Error(result.message || 'Could not add this item to your bag.');
                 updateCount(document.getElementById('cartDrawerOpen'), result.cartCount);
+                updateCount(document.querySelector('.mobile-bottom-nav-cart'), result.cartCount, 'mobile-bottom-nav-badge');
                 announce(result.message);
             } catch (error) {
                 announce(error.message || 'Could not add this item to your bag.', true);

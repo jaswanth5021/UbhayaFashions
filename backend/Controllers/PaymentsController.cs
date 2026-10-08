@@ -6,6 +6,7 @@ using System.Text.Json;
 using backend.Data;
 using backend.DTOs;
 using backend.Models;
+using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/payments")]
 [Authorize]
-public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory) : ControllerBase
+public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail) : ControllerBase
 {
     [HttpPost("create-order")]
     public async Task<IActionResult> CreateOrder(CreatePaymentOrderRequest request)
@@ -218,6 +219,9 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
 
+            await db.Entry(order).Reference(x => x.Customer).LoadAsync();
+            await orderEmail.SendOrderConfirmationAsync(order, order.Customer);
+
             return Ok(new { success = true, orderId = order.Id, status = "Paid" });
         }
         catch
@@ -236,6 +240,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         var order = await db.Orders
             .Include(x => x.Items)
             .Include(x => x.Payments)
+            .Include(x => x.Customer)
             .FirstOrDefaultAsync(x => x.Id == request.OrderId && x.CustomerId == customerId);
 
         if (order is null)
@@ -337,6 +342,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
 
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            await orderEmail.SendOrderConfirmationAsync(order, order.Customer);
 
             return Ok(new { success = true, orderId = order.Id, status = "Paid" });
         }
