@@ -1,0 +1,265 @@
+/* Final responsive safeguards shared by storefront pages. */
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+img,
+video,
+iframe {
+    max-width: 100%;
+}
+
+.policy-page,
+.status-page {
+    box-sizing: border-box;
+    width: min(100% - 32px, 900px);
+    margin: 48px auto;
+    padding: clamp(20px, 5vw, 48px);
+    background: #fff;
+    color: #302529;
+}
+
+.policy-page h1,
+.status-page h1 {
+    margin-top: 0;
+}
+
+.status-page {
+    text-align: center;
+}
+
+.status-page-code {
+    margin: 0;
+    color: #721932;
+    font-size: clamp(54px, 12vw, 100px);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.status-page .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin: 10px 6px 0;
+    padding: 0 18px;
+}
+
+.contact-success {
+    grid-column: 1 / -1;
+    padding: 14px 18px;
+    border: 1px solid #b7d8c0;
+    background: #f1faf4;
+    color: #28633c;
+}
+
+.home-catalog-status {
+    box-sizing: border-box;
+    width: min(100% - 32px, 1200px);
+    margin: 16px auto;
+    padding: 12px 16px;
+    background: #fff8e8;
+    color: #684d12;
+}
+
+.contact-page {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.contact-content,
+.contact-info,
+.contact-form,
+.contact-item {
+    min-width: 0;
+}
+
+.contact-item a {
+    color: #fff;
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.contact-item a:hover,
+.contact-item a:focus-visible {
+    color: #f2d397;
+}
+
+.desktop-primary-nav .desktop-view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.desktop-view-all-link svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+}
+
+/* Refined fashion-house typography for the desktop header navigation. */
+.header .desktop-primary-nav {
+    gap: clamp(6px, .62vw, 12px);
+}
+
+.header .desktop-primary-nav > a,
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary {
+    color: #563d45;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(10px, .82vw, 13px);
+    font-weight: 500;
+    letter-spacing: .035em;
+    line-height: 1;
+    text-decoration: none;
+    transition: color .2s ease;
+}
+
+.header .desktop-primary-nav > a {
+    padding: 12px 5px;
+}
+
+.header .desktop-primary-nav > a::after {
+    right: 5px;
+    bottom: 5px;
+    left: 5px;
+    height: 1px;
+    background: linear-gradient(90deg, #68142e, #bd8b58);
+}
+
+.header .desktop-primary-nav > a:hover,
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary:hover,
+.header .desktop-primary-nav > .desktop-nav-dropdown[open] > summary {
+    color: #68142e;
+}
+
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* Give the main links a deliberate, boutique-style navigation rail. */
+.header .desktop-primary-nav {
+    box-sizing: border-box;
+    gap: 3px;
+    padding: 5px;
+    border: 1px solid #efe2dc;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fffdfa 0%, #f9f1ed 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 5px 16px rgba(72, 38, 46, .055);
+}
+
+.header .desktop-primary-nav > a {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 11px;
+    border-radius: 999px;
+    color: #59434a;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(11px, .78vw, 13px);
+    letter-spacing: .025em;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.header .desktop-primary-nav > a::after {
+    display: none;
+}
+
+.header .desktop-primary-nav > a:hover,
+.header .desktop-primary-nav > a:focus-visible {
+    background: #68142e;
+    color: #fffaf6;
+    box-shadow: 0 4px 10px rgba(104, 20, 46, .16);
+}
+
+.header .desktop-primary-nav > .desktop-view-all-link.is-active,
+.header .desktop-primary-nav > a.is-active {
+    padding-right: 15px;
+    padding-left: 15px;
+    background: #68142e;
+    color: #fffaf6;
+    box-shadow: 0 4px 10px rgba(104, 20, 46, .14);
+}
+
+.header .desktop-primary-nav > .desktop-view-all-link:hover,
+.header .desktop-primary-nav > .desktop-view-all-link:focus-visible {
+    background: #4e0f23;
+}
+
+.header .desktop-primary-nav > .desktop-view-all-link:not(.is-active) {
+    background: transparent;
+    color: #59434a;
+    box-shadow: none;
+}
+
+.header .desktop-primary-nav > .desktop-view-all-link:not(.is-active):hover,
+.header .desktop-primary-nav > a.is-active {
+    background: #68142e;
+    color: #fffaf6;
+    box-shadow: 0 4px 10px rgba(104, 20, 46, .16);
+}
+
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary {
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    padding: 0 20px 0 11px;
+    border-radius: 999px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(11px, .78vw, 13px);
+    letter-spacing: .025em;
+}
+
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary::after {
+    right: 9px;
+}
+
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary:hover,
+.header .desktop-primary-nav > .desktop-nav-dropdown[open] > summary,
+.header .desktop-primary-nav > .desktop-nav-dropdown.is-active > summary {
+    background: #f1e2dc;
+    color: #68142e;
+}
+
+@media (min-width: 901px) and (max-width: 1250px) {
+    .header .desktop-primary-nav {
+        gap: 1px;
+        padding: 3px;
+    }
+
+    .header .desktop-primary-nav > a {
+        min-height: 32px;
+        padding: 0 6px;
+        font-size: 10px;
+    }
+
+    .header .desktop-primary-nav > .desktop-nav-dropdown > summary {
+        min-height: 32px;
+        padding-right: 17px;
+        padding-left: 6px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 760px) {
+    .contact-content {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

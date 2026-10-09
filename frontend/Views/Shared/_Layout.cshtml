@@ -3,10 +3,43 @@
 @inject LadiesDressStore.Web.Services.ApiService Api
 @inject IMemoryCache ProductCache
 @{
-    var pageTitle = ViewData["Title"]?.ToString() ?? "Home";
+    var pageTitle = ViewData["Title"]?.ToString() ?? (ViewContext.RouteData.Values["controller"]?.ToString() switch
+    {
+        "Home" => "Ubhaya Fashions",
+        "Products" => "Shop",
+        "Contact" => "Contact Us",
+        "Shipping" => "Shipping Policy",
+        "Cart" => "Your Cart",
+        "Orders" => "Checkout",
+        "Account" => "My Account",
+        "Wishlist" => "My Wishlist",
+        _ => "Ubhaya Fashions"
+    });
+    var metaDescription = ViewData["MetaDescription"]?.ToString() ?? (ViewContext.RouteData.Values["controller"]?.ToString() switch
+    {
+        "Home" => "Discover thoughtfully curated women’s fashion from Ubhaya Fashions. Shop dresses, ethnic wear, and new arrivals.",
+        "Products" => "Explore the Ubhaya Fashions collection of women’s dresses and ethnic wear. Find new arrivals, best sellers, and more.",
+        "Contact" => "Contact Ubhaya Fashions about your order, products, or any other questions.",
+        "Shipping" => "Read about shipping and delivery for Ubhaya Fashions orders across India.",
+        "Cart" => "Review the items in your Ubhaya Fashions shopping cart.",
+        "Orders" => "Complete your Ubhaya Fashions order securely.",
+        "Account" => "Manage your Ubhaya Fashions account and orders.",
+        "Wishlist" => "View your saved Ubhaya Fashions products.",
+        _ => "Shop women’s fashion at Ubhaya Fashions."
+    });
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
     var isHomePage = currentController == "Home" && currentAction == "Index";
+    var isContactPage = currentController == "Contact";
+    var navQuery = Context.Request.Query;
+    var isAboutNavActive = currentController == "Home" && currentAction == "About";
+    var isNewArrivalsNavActive = currentController == "Products" && navQuery.ContainsKey("newArrivals");
+    var isBestSellersNavActive = currentController == "Products" && navQuery.ContainsKey("bestSellers");
+    var isOffersNavActive = currentController == "Products" && string.Equals(navQuery["sort"], "discount", StringComparison.OrdinalIgnoreCase);
+    var isCategoryNavActive = currentController == "Products" && navQuery.ContainsKey("category");
+    var isViewAllNavActive = currentController == "Products" && currentAction == "Index" &&
+        !navQuery.ContainsKey("newArrivals") && !navQuery.ContainsKey("bestSellers") &&
+        !navQuery.ContainsKey("sort") && !navQuery.ContainsKey("category") && !navQuery.ContainsKey("search");
     var cartItems = new List<LadiesDressStore.Web.Models.CartItemViewModel>();
     var cartCookie = Context.Request.Cookies["cart"];
     if (!string.IsNullOrWhiteSpace(cartCookie))
@@ -78,13 +111,14 @@
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="@(isContactPage ? "contact-page-view" : string.Empty)">
 
 <head>
     <meta charset="utf-8" />
 
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="@metaDescription" />
 
     <link rel="icon" type="image/png" href="~/images/favicon.png" asp-append-version="true" />
 
@@ -136,6 +170,8 @@
           href="~/css/pages/shared/ui-refresh.css"
           asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/search-polish.css?v=search-polish-2026-10-07-2" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/site-fixes.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/account/login.css?v=account-login-layout-20261009-4" asp-append-version="true" />
     @if (currentController == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile")
     {
         <link rel="stylesheet" href="~/css/pages/account/profile-tabs-polish.css?v=profile-tabs-2026-10-07-1" asp-append-version="true" />
@@ -152,6 +188,10 @@
     @if (isHomePage)
     {
         <link rel="stylesheet" href="~/css/pages/home/clean-home.css?v=home-clean-2026-10-07" asp-append-version="true" />
+    }
+    @if (currentController == "Home" && currentAction == "About")
+    {
+        <link rel="stylesheet" href="~/css/pages/home/about.css" asp-append-version="true" />
     }
 </head>
 
@@ -202,19 +242,23 @@
         </a>
 
         <nav class="desktop-primary-nav" aria-label="Main navigation">
-            <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true">NEW ARRIVAL</a>
-            <details class="desktop-nav-dropdown">
-                <summary>CATEGORIES</summary>
+            <a class="@(isHomePage ? "is-active" : "")" aria-current="@(isHomePage ? "page" : null)" asp-controller="Home" asp-action="Index">Home</a>
+            <a class="desktop-view-all-link @(isViewAllNavActive ? "is-active" : "")" aria-current="@(isViewAllNavActive ? "page" : null)" asp-controller="Products" asp-action="Index">
+                <span>View All</span>
+            </a>
+            <a class="@(isNewArrivalsNavActive ? "is-active" : "")" aria-current="@(isNewArrivalsNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-newArrivals="true">New Arrivals</a>
+            <details class="desktop-nav-dropdown @(isCategoryNavActive ? "is-active" : "")">
+                <summary>Categories</summary>
                 <div class="desktop-nav-dropdown-menu">
                     <a asp-controller="Products" asp-action="Index" asp-route-category="Dresses">Dresses</a>
                     <a asp-controller="Products" asp-action="Index" asp-route-category="2-piece sets">2-Piece Sets</a>
                     <a asp-controller="Products" asp-action="Index" asp-route-category="3-piece sets">3-Piece Sets</a>
                 </div>
             </details>
-            <a asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">BEST SELLERS</a>
-            <a asp-controller="Products" asp-action="Index" asp-route-sort="discount">OFFERS</a>
-            <a asp-controller="Home" asp-action="Index">ABOUT</a>
-            <a asp-controller="Contact" asp-action="Index">CONTACT</a>
+            <a class="@(isBestSellersNavActive ? "is-active" : "")" aria-current="@(isBestSellersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">Best Sellers</a>
+            <a class="@(isOffersNavActive ? "is-active" : "")" aria-current="@(isOffersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-sort="discount">Offers</a>
+            <a class="@(isAboutNavActive ? "is-active" : "")" aria-current="@(isAboutNavActive ? "page" : null)" asp-controller="Home" asp-action="About">About</a>
+            <a class="@(isContactPage ? "is-active" : "")" aria-current="@(isContactPage ? "page" : null)" asp-controller="Contact" asp-action="Index">Contact</a>
         </nav>
 
         <form class="desktop-header-search" asp-controller="Products" asp-action="Index" method="get" role="search">

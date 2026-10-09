@@ -342,7 +342,8 @@ public class ApiService(
 
                     password = model.Password,
 
-                    age = model.Age
+                    age = model.Age,
+                    dateOfBirth = model.DateOfBirth
                 });
 
         if (!response.IsSuccessStatusCode)

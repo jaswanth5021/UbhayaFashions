@@ -26,6 +26,22 @@
         }, 3500);
     };
 
+    const showCardError = (card, message) => {
+        const feedback = card?.querySelector('[data-card-feedback]');
+        if (!feedback) return;
+        feedback.textContent = message;
+        feedback.hidden = false;
+        feedback.classList.add('is-error');
+    };
+
+    const clearCardFeedback = card => {
+        const feedback = card?.querySelector('[data-card-feedback]');
+        if (!feedback) return;
+        feedback.textContent = '';
+        feedback.hidden = true;
+        feedback.classList.remove('is-error');
+    };
+
     const updateCount = (link, count, badgeClass = 'header-icon-count') => {
         if (!link) return;
         let badge = link.querySelector(`.${badgeClass}`);
@@ -46,6 +62,7 @@
         const sizeButton = event.target.closest('.size-options button:not(:disabled)');
         if (sizeButton && section.contains(sizeButton)) {
             const card = sizeButton.closest('.product-card');
+            clearCardFeedback(card);
             card.querySelectorAll('.size-options button').forEach(button => {
                 button.classList.toggle('is-selected', button === sizeButton);
                 button.setAttribute('aria-pressed', String(button === sizeButton));
@@ -58,7 +75,7 @@
             const card = bagButton.closest('.product-card');
             const selectedSize = card.querySelector('.size-options button.is-selected');
             if (card.querySelector('.size-options') && !selectedSize) {
-                announce('Please select a size first.', true);
+                showCardError(card, 'Please select a size first.');
                 return;
             }
             const token = card.querySelector('input[name="__RequestVerificationToken"]') || section.querySelector('input[name="__RequestVerificationToken"]');
@@ -76,7 +93,7 @@
                 updateCount(document.querySelector('.mobile-bottom-nav-cart'), result.cartCount, 'mobile-bottom-nav-badge');
                 announce(result.message);
             } catch (error) {
-                announce(error.message || 'Could not add this item to your bag.', true);
+                showCardError(card, error.message || 'Could not add this item to your bag.');
             } finally {
                 bagButton.disabled = false;
             }

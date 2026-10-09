@@ -1,4 +1,12 @@
 @model LadiesDressStore.Web.Models.ContactViewModel
+@{
+    ViewData["Title"] = "Contact Ubhaya Fashions";
+    ViewData["MetaDescription"] = "Contact Ubhaya Fashions about orders, products, or other questions. Send our team a message.";
+    var contactPhone = Configuration["Contact:Phone"];
+    var phoneLink = string.IsNullOrWhiteSpace(contactPhone)
+        ? null
+        : "tel:" + new string(contactPhone.Where(character => char.IsDigit(character) || character == '+').ToArray());
+}
 
 <div class="contact-page">
 
@@ -8,6 +16,11 @@
     </div>
 
     <div class="contact-content">
+
+        @if (TempData["ContactSuccess"] is string contactSuccess)
+        {
+            <p class="contact-success" role="status">@contactSuccess</p>
+        }
 
         <div class="contact-info">
             <h2>Get in Touch</h2>
@@ -19,18 +32,20 @@
 
             <div class="contact-item">
                 <strong>Email</strong>
-                <span>ubhayafashions@gamil.com</span>
-            </div>
-
-            <div class="contact-item">
-                <strong>Phone</strong>
-                <span>+91 XXXXX XXXXX</span>
+                <a href="mailto:ubhayafashions@gmail.com">ubhayafashions@gmail.com</a>
             </div>
 
             <div class="contact-item">
                 <strong>Location</strong>
                 <span>Hyderabad, Telangana, India</span>
             </div>
+            @if (!string.IsNullOrWhiteSpace(contactPhone) && !string.IsNullOrWhiteSpace(phoneLink))
+            {
+                <div class="contact-item">
+                    <strong>Phone</strong>
+                    <a href="@phoneLink">@contactPhone</a>
+                </div>
+            }
         </div>
 
         <div class="contact-form">
@@ -40,6 +55,8 @@
             <form asp-controller="Contact"
                   asp-action="Index"
                   method="post">
+
+                <div asp-validation-summary="ModelOnly" class="contact-validation" role="alert"></div>
 
                 <label asp-for="Name"></label>
                 <input asp-for="Name" />

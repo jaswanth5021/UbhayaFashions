@@ -3,6 +3,7 @@
     var reviews = ViewBag.ProductReviews as ProductReviewsViewModel ?? new ProductReviewsViewModel();
     var image = ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"]);
     ViewData["Title"] = $"Customer Reviews - {Model.Name}";
+    ViewData["MetaDescription"] = $"Read customer reviews and ratings for {Model.Name} at Ubhaya Fashions.";
 }
 
 <main class="all-reviews-page" id="allReviews" data-product-id="@Model.Id"

@@ -1,0 +1,337 @@
+.about-page {
+    --about-wine: #68142e;
+    --about-ink: #35262b;
+    --about-muted: #806d70;
+    box-sizing: border-box;
+    width: min(100% - 36px, 1120px);
+    margin: 46px auto 76px;
+    overflow: hidden;
+    border: 1px solid #e8d9d4;
+    border-radius: 16px;
+    background: #fffdfa;
+    color: var(--about-ink);
+    box-shadow: 0 22px 60px rgba(73, 31, 43, .10);
+}
+
+.about-hero {
+    position: relative;
+    display: grid;
+    min-height: 340px;
+    place-items: center;
+    overflow: hidden;
+    padding: 56px 9%;
+    background:
+        radial-gradient(ellipse at 88% 18%, rgba(236, 193, 157, .18), transparent 30%),
+        radial-gradient(ellipse at 8% 100%, rgba(196, 130, 121, .2), transparent 38%),
+        linear-gradient(125deg, #4e1028, #741b3b 58%, #8b3850);
+    color: #fffaf6;
+    text-align: center;
+}
+
+.about-hero::before,
+.about-hero::after {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    border: 1px solid rgba(246, 223, 204, .2);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+}
+
+.about-hero::before {
+    top: -160px;
+    left: -100px;
+    box-shadow: 0 0 0 22px rgba(255, 255, 255, .025), 0 0 0 45px rgba(255, 255, 255, .02);
+}
+
+.about-hero::after {
+    right: -120px;
+    bottom: -180px;
+    width: 330px;
+    height: 330px;
+    box-shadow: 0 0 0 22px rgba(255, 255, 255, .025), 0 0 0 45px rgba(255, 255, 255, .02);
+}
+
+.about-hero-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+}
+
+.about-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 18px;
+    color: #edc9a5;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .28em;
+}
+
+.about-eyebrow span {
+    width: 24px;
+    height: 1px;
+    background: currentColor;
+    opacity: .7;
+}
+
+.about-hero h1 {
+    margin: 0;
+    font: 400 clamp(42px, 7vw, 78px)/.98 Georgia, "Times New Roman", serif;
+    letter-spacing: .035em;
+}
+
+.about-hero h1 em {
+    color: #f0c9a2;
+    font-weight: 400;
+}
+
+.about-lead {
+    max-width: 700px;
+    margin: 24px auto 0;
+    color: rgba(255, 250, 246, .86);
+    font: 400 clamp(18px, 2.7vw, 25px)/1.5 Georgia, "Times New Roman", serif;
+}
+
+.about-lead strong {
+    color: #fff;
+    font-weight: 400;
+}
+
+.about-hero-mark {
+    position: absolute;
+    right: 6%;
+    bottom: -105px;
+    color: rgba(255, 255, 255, .045);
+    font: 400 370px/.8 Georgia, "Times New Roman", serif;
+    user-select: none;
+}
+
+.about-hero-caption {
+    position: absolute;
+    right: 28px;
+    bottom: 18px;
+    z-index: 1;
+    margin: 0;
+    color: rgba(255, 246, 238, .62);
+    font-size: 8px;
+    letter-spacing: .2em;
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: minmax(180px, .62fr) minmax(0, 1.38fr);
+    gap: clamp(35px, 7vw, 92px);
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 72px 38px 64px;
+}
+
+.about-belief {
+    align-self: start;
+    padding: 10px 0 0 20px;
+    border-left: 2px solid #d5b38f;
+}
+
+.about-section-number,
+.about-manifesto > span,
+.about-mission > span {
+    color: #9a6b56;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .2em;
+}
+
+.about-belief-rule {
+    width: 34px;
+    height: 1px;
+    margin: 24px 0 18px;
+    background: #c89f80;
+}
+
+.about-belief p {
+    margin: 0;
+    color: #6a5055;
+    font: 400 22px/1.45 Georgia, "Times New Roman", serif;
+}
+
+.about-belief-mark {
+    display: block;
+    margin-top: 24px;
+    color: #b78568;
+    font-size: 25px;
+}
+
+.about-story {
+    color: #625257;
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+.about-story p {
+    margin: 0 0 20px;
+}
+
+.about-story .about-emphasis {
+    margin: 0 0 18px;
+    color: var(--about-wine);
+    font: 400 clamp(27px, 3vw, 36px)/1.2 Georgia, "Times New Roman", serif;
+}
+
+.about-manifesto {
+    position: relative;
+    display: grid;
+    min-height: 210px;
+    place-content: center;
+    overflow: hidden;
+    padding: 35px 20px;
+    background:
+        radial-gradient(ellipse at 50% 120%, rgba(204, 163, 131, .18), transparent 55%),
+        #f7efeb;
+    text-align: center;
+}
+
+.about-manifesto > span {
+    color: #9a6b56;
+}
+
+.about-manifesto p {
+    position: relative;
+    z-index: 1;
+    margin: 15px 0 0;
+    color: #49363c;
+    font: 400 clamp(28px, 4.4vw, 48px)/1.3 Georgia, "Times New Roman", serif;
+}
+
+.about-manifesto em {
+    color: var(--about-wine);
+    font-weight: 400;
+}
+
+.about-manifesto i {
+    position: absolute;
+    left: 50%;
+    bottom: -128px;
+    width: 250px;
+    height: 250px;
+    border: 1px solid rgba(104, 20, 46, .11);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 0 18px rgba(104, 20, 46, .025), 0 0 0 38px rgba(104, 20, 46, .02);
+}
+
+.about-mission {
+    display: grid;
+    grid-template-columns: .55fr 1.45fr;
+    align-items: center;
+    gap: 28px;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 58px 38px 54px;
+}
+
+.about-mission > span {
+    color: #9a6b56;
+}
+
+.about-mission p {
+    margin: 0;
+    color: #725b60;
+    font: 400 19px/1.7 Georgia, "Times New Roman", serif;
+}
+
+.about-mission strong {
+    color: var(--about-wine);
+    font-weight: 400;
+}
+
+.about-signoff {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    padding: 0 24px 52px;
+    color: var(--about-wine);
+    text-align: center;
+    letter-spacing: .16em;
+}
+
+.about-signoff .about-welcome {
+    margin: 0 0 16px;
+    color: #49363c;
+    font: 400 27px/1.3 Georgia, "Times New Roman", serif;
+    letter-spacing: 0;
+}
+
+.about-signoff span {
+    color: #806b68;
+    font-size: 12px;
+    font-style: italic;
+    letter-spacing: .04em;
+}
+
+@media (max-width: 700px) {
+    .about-page {
+        width: calc(100% - 24px);
+        margin: 24px auto 48px;
+        border-radius: 12px;
+    }
+
+    .about-hero {
+        min-height: 330px;
+        padding: 48px 24px;
+    }
+
+    .about-hero-caption {
+        right: 0;
+        left: 0;
+        text-align: center;
+    }
+
+    .about-hero-mark {
+        right: -22px;
+        bottom: -66px;
+        font-size: 260px;
+    }
+
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        padding: 44px 26px 40px;
+    }
+
+    .about-belief {
+        max-width: 300px;
+    }
+
+    .about-belief p {
+        max-width: 270px;
+        font-size: 20px;
+    }
+
+    .about-mission {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 42px 26px;
+    }
+
+    .about-mission p {
+        font-size: 18px;
+    }
+
+    .about-signoff {
+        padding-bottom: 38px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .about-page *,
+    .about-page *::before,
+    .about-page *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+    }
+}

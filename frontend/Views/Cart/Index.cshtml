@@ -1,6 +1,7 @@
 @model List<CartItemViewModel>
 @{
     ViewData["Title"] = "Your cart";
+    ViewData["MetaDescription"] = "Review your Ubhaya Fashions cart and continue to checkout.";
     var total = Model.Sum(item => item.Price * item.Quantity);
     var cartVariants = ViewBag.CartVariants as Dictionary<int, List<ProductVariantViewModel>> ?? new();
 }

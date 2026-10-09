@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Payment Failed";
+    ViewData["MetaDescription"] = "Your Ubhaya Fashions payment could not be completed. Review your order and try again.";
     var orderId = (int?)ViewBag.OrderId;
     var message = ViewBag.FailureMessage as string ?? "Your payment was not completed.";
 }

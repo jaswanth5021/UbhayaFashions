@@ -1,87 +1,289 @@
-@model LadiesDressStore.Web.Models.LoginViewModel
-
+@model LadiesDressStore.Web.Models.LoginExperienceViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign In";
+    ViewData["MetaDescription"] = "Sign in to your Ubhaya Fashions account to shop, manage orders, and save your favorite styles.";
+    var showSignup = (ViewBag.ShowSignup as bool?) == true;
 }
 
-<div class="auth-card login-card">
-    <div class="login-heading">
-        <p class="login-eyebrow">UBHAYA FASHIONS</p>
-        <h1>Welcome back</h1>
-        <p>Login to continue shopping.</p>
+<section class="login-showcase @(showSignup ? "is-signup" : "")" aria-labelledby="loginShowcaseTitle" data-account-layout>
+    <div class="login-showcase-visual">
+        <a class="login-showcase-brand" asp-controller="Home" asp-action="Index" aria-label="Ubhaya Fashions home">U</a>
+        <div class="login-showcase-quote">
+            <span>THE UBHAYA EDIT</span>
+            <h1 id="loginShowcaseTitle">Feel at home<br />in your style.</h1>
+            <p>Thoughtfully chosen. Beautifully you.</p>
+            <div class="login-showcase-signature">
+                <span>COMFORT</span><i aria-hidden="true"></i><span>GRACE</span><i aria-hidden="true"></i><span>YOU</span>
+            </div>
+        </div>
+        <span class="login-showcase-index" aria-hidden="true">UBHAYA FASHIONS · EST. WITH LOVE</span>
     </div>
 
-    @if (TempData["SignupSuccess"] is string signupSuccess)
-    {
-        <div class="success">@signupSuccess</div>
-    }
+    <div class="login-showcase-panel">
+        <div class="login-mode-viewport @(showSignup ? "is-signup" : "")" data-login-modes>
+            <div class="login-mode-track">
+                <section class="login-new-card login-mode-panel" data-login-panel aria-labelledby="loginHeading" aria-hidden="@(showSignup ? "true" : "false")" inert="@(showSignup ? "" : null)">
+                    <p class="login-new-eyebrow">YOUR ACCOUNT</p>
+                    <h2 id="loginHeading" tabindex="-1">Welcome back</h2>
+                    <p class="login-new-intro">Sign in to continue to your Ubhaya experience.</p>
 
+                    @if (TempData["SuccessMessage"] is string successMessage)
+                    {
+                        <div class="login-new-message is-success" role="status">@successMessage</div>
+                    }
+                    @if (!showSignup)
+                    {
+                        <div asp-validation-summary="ModelOnly" class="login-new-message is-error validation-summary-valid" role="alert"></div>
+                    }
 
-    @if (TempData["SuccessMessage"] is string success)
-    {
-        <div class="success">
-            @success
+                    <form asp-controller="Account" asp-action="Login" method="post" class="login-new-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                        <label asp-for="Login.Identifier">Email or mobile number</label>
+                        <input asp-for="Login.Identifier" autocomplete="username" placeholder="Enter your email or mobile" />
+                        <span asp-validation-for="Login.Identifier" class="login-new-field-error"></span>
+
+                        <div class="login-new-password-heading">
+                            <label asp-for="Login.Password">Password</label>
+                            <a asp-controller="Account" asp-action="ForgotPassword">Forgot password?</a>
+                        </div>
+                        <div class="login-new-password-wrap">
+                            <input asp-for="Login.Password" autocomplete="current-password" placeholder="Enter your password" />
+                            <button type="button" class="login-new-password-toggle" aria-label="Show password" aria-pressed="false" data-password-toggle="Login_Password">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Login.Password" class="login-new-field-error"></span>
+
+                        <button type="submit" class="login-new-submit">SIGN IN <span aria-hidden="true">→</span></button>
+                    </form>
+
+                    <p class="login-new-signup">New to Ubhaya? <button type="button" class="login-mode-link" data-show-signup>Create an account</button></p>
+                    <div class="login-new-secure"><span aria-hidden="true">✦</span> A little more you, with every visit.</div>
+                </section>
+
+                <section class="login-new-card login-mode-panel" data-signup-panel aria-labelledby="signupHeading" aria-hidden="@(showSignup ? "false" : "true")" inert="@(showSignup ? null : "")">
+                    <p class="login-new-eyebrow">JOIN UBHAYA</p>
+                    <h2 id="signupHeading" tabindex="-1">Create account</h2>
+                    <p class="login-new-intro">A beautiful start to a more personal shopping experience.</p>
+                    <div class="login-new-message is-error login-signup-client-feedback" data-signup-feedback role="alert" aria-live="assertive"></div>
+                    @if (showSignup)
+                    {
+                        <div asp-validation-summary="ModelOnly" class="login-new-message is-error validation-summary-valid" role="alert"></div>
+                    }
+
+                    <form asp-controller="Account" asp-action="SignupFromLogin" method="post" class="login-new-form login-new-signup-form" data-signup-form novalidate>
+                        @Html.AntiForgeryToken()
+                        <div class="login-signup-field">
+                            <label asp-for="Signup.Name">Full name</label>
+                            <input asp-for="Signup.Name" autocomplete="name" placeholder="Enter your full name" required />
+                            <span asp-validation-for="Signup.Name" class="login-new-field-error"></span>
+                        </div>
+
+                        <div class="login-signup-field">
+                            <label asp-for="Signup.Email">Email address</label>
+                            <input asp-for="Signup.Email" type="email" autocomplete="email" placeholder="you@example.com" required />
+                            <span asp-validation-for="Signup.Email" class="login-new-field-error"></span>
+                        </div>
+
+                        <div class="login-signup-field">
+                            <label asp-for="Signup.Mobile">Mobile number</label>
+                            <input asp-for="Signup.Mobile" type="tel" autocomplete="tel" placeholder="Enter your mobile number" required />
+                            <span asp-validation-for="Signup.Mobile" class="login-new-field-error"></span>
+                        </div>
+
+                        <div class="login-signup-field">
+                            <label asp-for="Signup.DateOfBirth">Date of birth</label>
+                            <input asp-for="Signup.DateOfBirth" type="date" max="@DateTime.Today.AddYears(-18).ToString("yyyy-MM-dd")" autocomplete="bday" required />
+                            <span asp-validation-for="Signup.DateOfBirth" class="login-new-field-error"></span>
+                        </div>
+
+                        <div class="login-signup-field">
+                            <label asp-for="Signup.Password">Password</label>
+                            <div class="login-new-password-wrap">
+                                <input asp-for="Signup.Password" autocomplete="new-password" placeholder="At least 6 characters" minlength="6" required />
+                                <button type="button" class="login-new-password-toggle" aria-label="Show password" aria-pressed="false" data-password-toggle="Signup_Password">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Signup.Password" class="login-new-field-error"></span>
+                        </div>
+
+                        <div class="login-signup-field">
+                            <label asp-for="Signup.ConfirmPassword">Confirm password</label>
+                            <input asp-for="Signup.ConfirmPassword" autocomplete="new-password" placeholder="Enter your password again" required />
+                            <span asp-validation-for="Signup.ConfirmPassword" class="login-new-field-error"></span>
+                        </div>
+
+                        <button type="submit" class="login-new-submit">CREATE ACCOUNT <span aria-hidden="true">→</span></button>
+                    </form>
+
+                    <p class="login-new-signup">Already have an account? <button type="button" class="login-mode-link" data-show-login>Sign in</button></p>
+                    <div class="login-new-secure"><span aria-hidden="true">✦</span> Your Ubhaya experience starts here.</div>
+                </section>
+            </div>
         </div>
-    }
-
-
-    @if (!string.IsNullOrWhiteSpace(ViewBag.Error))
-    {
-        <div class="error">
-            @ViewBag.Error
-        </div>
-    }
-
-
-    <div asp-validation-summary="ModelOnly"
-         class="error">
     </div>
+</section>
 
+@if (TempData["SignupSuccess"] is string signupSuccess)
+{
+    <div class="login-account-toast" role="status" data-signup-success>
+        <span class="login-account-toast-icon" aria-hidden="true">✓</span>
+        <span>@signupSuccess</span>
+        <button type="button" aria-label="Dismiss message" data-dismiss-toast>×</button>
+    </div>
+}
 
-    <form asp-action="Login"
-          method="post">
+@section Scripts {
+    <script>
+        (() => {
+            const modes = document.querySelector('[data-login-modes]');
+            if (!modes) return;
+            const accountLayout = document.querySelector('[data-account-layout]');
+            const loginPanel = modes.querySelector('[data-login-panel]');
+            const signupPanel = modes.querySelector('[data-signup-panel]');
 
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            const showMode = (signup) => {
+                modes.classList.toggle('is-signup', signup);
+                accountLayout?.classList.toggle('is-signup', signup);
+                loginPanel.setAttribute('aria-hidden', String(signup));
+                signupPanel.setAttribute('aria-hidden', String(!signup));
+                if (signup) {
+                    loginPanel.setAttribute('inert', '');
+                    signupPanel.removeAttribute('inert');
+                } else {
+                    signupPanel.setAttribute('inert', '');
+                    loginPanel.removeAttribute('inert');
+                }
+                (signup ? signupPanel : loginPanel).querySelector('h2')?.focus({ preventScroll: true });
+            };
 
+            modes.querySelector('[data-show-signup]')?.addEventListener('click', () => showMode(true));
+            modes.querySelector('[data-show-login]')?.addEventListener('click', () => showMode(false));
 
-        <label asp-for="Identifier"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Email or mobile number</label>
+            modes.querySelectorAll('[data-password-toggle]').forEach(toggle => {
+                const password = document.getElementById(toggle.dataset.passwordToggle);
+                if (!password) return;
+                toggle.addEventListener('click', () => {
+                    const show = password.type === 'password';
+                    password.type = show ? 'text' : 'password';
+                    toggle.setAttribute('aria-pressed', String(show));
+                    toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+                });
+            });
 
-        <input asp-for="Identifier" autocomplete="username" placeholder="Email address or mobile number" />
+            const signupForm = modes.querySelector('[data-signup-form]');
+            const feedback = modes.querySelector('[data-signup-feedback]');
+            const setSignupFeedback = (message, state) => {
+                feedback.textContent = message;
+                feedback.classList.toggle('is-visible', Boolean(message));
+                feedback.classList.toggle('is-pending', state === 'pending');
+                feedback.classList.toggle('is-error', state === 'error');
+            };
 
-        <span asp-validation-for="Identifier">
-        </span>
+            const showSignupToast = message => {
+                let toast = document.querySelector('[data-signup-success]');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.className = 'login-account-toast';
+                    toast.dataset.signupSuccess = '';
+                    toast.setAttribute('role', 'status');
+                    document.body.append(toast);
+                }
 
+                toast.replaceChildren();
+                const icon = document.createElement('span');
+                icon.className = 'login-account-toast-icon';
+                icon.setAttribute('aria-hidden', 'true');
+                icon.textContent = '✓';
+                const text = document.createElement('span');
+                text.textContent = message;
+                const close = document.createElement('button');
+                close.type = 'button';
+                close.setAttribute('aria-label', 'Dismiss message');
+                close.textContent = '×';
+                close.addEventListener('click', () => toast.remove());
+                toast.append(icon, text, close);
+                window.setTimeout(() => toast?.remove(), 9000);
+            };
 
-        <label asp-for="Password"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3M12 14v3"/></svg>Password
-        </label>
+            signupForm?.addEventListener('submit', event => {
+                setSignupFeedback('', '');
+                const dateInput = signupForm.querySelector('[name="Signup.DateOfBirth"]');
+                const confirmInput = signupForm.querySelector('[name="Signup.ConfirmPassword"]');
+                const passwordInput = signupForm.querySelector('[name="Signup.Password"]');
 
-        <input asp-for="Password" autocomplete="current-password" />
+                if (dateInput?.value) {
+                    const date = new Date(`${dateInput.value}T00:00:00`);
+                    const today = new Date();
+                    const oldestAllowed = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+                    const youngestAllowed = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+                    dateInput.setCustomValidity(date < oldestAllowed || date > youngestAllowed
+                        ? 'You must be between 18 and 120 years old.'
+                        : '');
+                }
 
-        <span asp-validation-for="Password">
-        </span>
+                if (confirmInput && passwordInput)
+                    confirmInput.setCustomValidity(confirmInput.value === passwordInput.value ? '' : 'Passwords do not match.');
 
-        <div class="auth-forgot-link"><a asp-action="ForgotPassword">Forgot password?</a></div>
+                const invalid = [...signupForm.querySelectorAll('input')].find(input => !input.checkValidity());
+                if (invalid) {
+                    event.preventDefault();
+                    setSignupFeedback(invalid.validationMessage || 'Please check the highlighted fields and try again.', 'error');
+                    invalid.reportValidity();
+                    invalid.focus();
+                    return;
+                }
 
+                event.preventDefault();
+                const submitButton = signupForm.querySelector('[type="submit"]');
+                const originalButtonText = submitButton?.innerHTML ?? '';
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = 'CREATING ACCOUNT…';
+                }
+                setSignupFeedback('Submitting your details securely…', 'pending');
 
-        <button class="button full login-submit"
-                type="submit">
+                fetch(signupForm.action, {
+                    method: 'POST',
+                    body: new FormData(signupForm),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(async response => {
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.message || 'We could not create your account. Please try again.');
+                        return result;
+                    })
+                    .then(result => {
+                        signupForm.reset();
+                        setSignupFeedback('', '');
+                        showMode(false);
+                        showSignupToast(result.message || 'Your account was created successfully.');
+                    })
+                    .catch(error => {
+                        setSignupFeedback(error.message || 'We could not create your account. Please try again.', 'error');
+                    })
+                    .finally(() => {
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalButtonText;
+                        }
+                    });
+            });
 
-            Login
+            signupForm?.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => {
+                    if (feedback.classList.contains('is-pending')) return;
+                    setSignupFeedback('', '');
+                });
+            });
 
-        </button>
-
-    </form>
-
-
-    <p class="login-signup">
-
-        Don't have an account?
-
-        <a asp-action="Signup">
-            Create one
-        </a>
-
-    </p>
-
-</div>
+            const toast = document.querySelector('[data-signup-success]');
+            const dismissToast = () => toast?.remove();
+            document.querySelector('[data-dismiss-toast]')?.addEventListener('click', dismissToast);
+            if (toast) window.setTimeout(dismissToast, 9000);
+        })();
+    </script>
+}

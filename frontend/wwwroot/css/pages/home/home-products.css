@@ -215,6 +215,9 @@
 }
 
 .add-to-bag:disabled,.wishlist-button:disabled { opacity:.6; cursor:wait; }
+.product-card-feedback { margin: -8px 18px 12px; color: #9b2338; font-size: 12px; line-height: 1.4; }
+.product-card-feedback[hidden] { display: none; }
+.product-card-feedback.is-error { color: #9b2338; }
 .new-arrivals-toast { position:fixed; z-index:10000; top:24px; right:24px; max-width:min(380px,calc(100vw - 32px)); padding:15px 20px; border:1px solid #cce3d4; border-radius:10px; background:#f1faf4; color:#28633c; box-shadow:0 10px 32px rgba(30,20,20,.18); font-size:14px; line-height:1.45; opacity:0; transform:translateY(-10px); transition:opacity .2s ease,transform .2s ease; }
 .new-arrivals-toast[hidden] { display:none; }
 .new-arrivals-toast.is-visible { opacity:1; transform:translateY(0); }

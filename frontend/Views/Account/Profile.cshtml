@@ -2,6 +2,7 @@
 @using LadiesDressStore.Web.Models
 @{
     ViewData["Title"] = "My Profile";
+    ViewData["MetaDescription"] = "Manage your Ubhaya Fashions profile, addresses, and orders.";
     var addresses = ViewBag.SavedAddresses as List<SavedAddressViewModel> ?? [];
     var activeTab = ViewBag.ActiveTab as string ?? "details";
     var firstLetter = string.IsNullOrWhiteSpace(Model.Name) ? "U" : Model.Name.Trim()[0].ToString().ToUpperInvariant();

@@ -351,27 +351,6 @@
         </div> *@
 
 
-        @if (TempData["CartError"] is string cartError)
-        {
-            <div class="product-purchase-warning product-toast"
-                 role="alert"
-                 aria-live="assertive">
-
-                <span>
-                    @cartError
-                </span>
-
-                <button type="button"
-                        class="product-toast-close"
-                        aria-label="Dismiss warning">
-
-                    &#215;
-
-                </button>
-
-            </div>
-        }
-
 
         <p class="product-details-description">
             @Model.Description
@@ -483,8 +462,7 @@
 
                         <span class="product-size-error"
                               id="productSizeError"
-                              role="alert">
-                        </span>
+                              role="alert">@(TempData["CartError"] as string)</span>
 
                     </fieldset>
                 }
@@ -1606,147 +1584,12 @@
     });
 
 
-    /* =========================================================
-       PRODUCT TOAST
-       ========================================================= */
+    /* Product purchase errors stay inline below the size selector. */
 
-    const showProductToast =
-        message => {
-
-            let toast =
-                document.querySelector(
-                    ".product-toast"
-                );
-
-
-            if (!toast) {
-
-                toast =
-                    document.createElement(
-                        "div"
-                    );
-
-                toast.className =
-                    "product-purchase-warning product-toast";
-
-                toast.setAttribute(
-                    "role",
-                    "alert"
-                );
-
-                toast.setAttribute(
-                    "aria-live",
-                    "assertive"
-                );
-
-
-                toast.innerHTML =
-                    '<span></span>' +
-                    '<button type="button" ' +
-                    'class="product-toast-close" ' +
-                    'aria-label="Dismiss warning">' +
-                    '&#215;' +
-                    '</button>';
-
-
-                document.body.appendChild(
-                    toast
-                );
-
-            }
-
-
-            toast
-                .querySelector("span")
-                .textContent =
-                message;
-
-
-            toast.classList.add(
-                "is-visible"
-            );
-
-
-            clearTimeout(
-                toast.dismissTimer
-            );
-
-
-            toast.dismissTimer =
-                setTimeout(
-                    () =>
-                        toast.classList
-                            .remove(
-                                "is-visible"
-                            ),
-                    6000
-                );
-
-        };
-
-
-    document
-        .querySelectorAll(
-            ".product-toast"
-        )
-        .forEach(
-            toast => {
-
-                toast.classList.add(
-                    "is-visible"
-                );
-
-
-                toast
-                    .querySelector(
-                        ".product-toast-close"
-                    )
-                    ?.addEventListener(
-                        "click",
-                        () =>
-                            toast.classList
-                                .remove(
-                                    "is-visible"
-                                )
-                    );
-
-
-                setTimeout(
-                    () =>
-                        toast.classList
-                            .remove(
-                                "is-visible"
-                            ),
-                    6000
-                );
-
-            });
-
-
-    document.addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target.closest(
-                    ".product-toast-close"
-                )
-            ) {
-
-                event.target
-                    .closest(
-                        ".product-toast"
-                    )
-                    ?.classList
-                    .remove(
-                        "is-visible"
-                    );
-
-            }
-
-        });
-
-
+    const showInlinePurchaseError = message => {
+        const inlineError = document.getElementById("productSizeError");
+        if (inlineError) inlineError.textContent = message;
+    };
     /* =========================================================
        PRODUCT GALLERY
        ========================================================= */
@@ -2124,19 +1967,9 @@
                            ----------------------------------------- */
 
                         if (quantityInput) {
-
-                            quantityInput.max =
-                                stock;
-
-
-                            quantityInput.value =
-                                Math.min(
-                                    Number(
-                                        quantityInput.value
-                                    ) || 1,
-                                    stock
-                                );
-
+                            quantityInput.max = stock;
+                            quantityInput.value = "1";
+                            document.getElementById("productQuantityError").textContent = "";
                         }
 
 
@@ -2364,7 +2197,7 @@
                     event.preventDefault();
 
 
-                    showProductToast(
+                    showInlinePurchaseError(
                         errors.join(" ")
                     );
 

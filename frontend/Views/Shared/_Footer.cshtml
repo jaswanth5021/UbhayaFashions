@@ -12,7 +12,7 @@
             <ul>
                 <li><a asp-controller="Products" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></span>Collections</a></li>
                 <li><a asp-controller="Products" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1 12H5L4 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span>Shop All</a></li>
-                <li><a asp-controller="Home" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.6 5.2L19 10l-5.4 1.8L12 17l-1.6-5.2L5 10l5.4-1.8L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span>About Ubhaya</a></li>
+                <li><a asp-controller="Home" asp-action="About"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.6 5.2L19 10l-5.4 1.8L12 17l-1.6-5.2L5 10l5.4-1.8L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span>About Ubhaya</a></li>
                 <li><a asp-controller="Contact" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H9l-5 4V5Z"/><path d="M8 9h8M8 13h5"/></svg></span>Contact Us</a></li>
             </ul>
         </div>
@@ -22,8 +22,8 @@
             <ul>
                 <li><a asp-controller="Shipping" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg></span>Shipping Info</a></li>
                 @* <li><a asp-controller="Shipping" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8V4h4M4.5 4.5 9 9"/><path d="M5 13a7 7 0 0 0 12 4l2-2M20 16v4h-4M19.5 19.5 15 15"/></svg></span>Returns &amp; Exchanges</a></li> *@
-                <li><a href="/Home/Privacy"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3Z"/><path d="M9 12h6M10 9h4v6h-4z"/></svg></span>Privacy Policy</a></li>
-                <li><a href="/Home/Terms"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg></span>Terms and Conditions</a></li>
+                <li><a asp-controller="Home" asp-action="Privacy"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3Z"/><path d="M9 12h6M10 9h4v6h-4z"/></svg></span>Privacy Policy</a></li>
+                <li><a asp-controller="Home" asp-action="Terms"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg></span>Terms and Conditions</a></li>
             </ul>
         </div>
 
@@ -47,7 +47,7 @@
             <ul>
                 <li><a asp-controller="Products" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></span>Collections</a></li>
                 <li><a asp-controller="Products" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1 12H5L4 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span>Shop All</a></li>
-                <li><a asp-controller="Home" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.6 5.2L19 10l-5.4 1.8L12 17l-1.6-5.2L5 10l5.4-1.8L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span>About Ubhaya</a></li>
+                <li><a asp-controller="Home" asp-action="About"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.6 5.2L19 10l-5.4 1.8L12 17l-1.6-5.2L5 10l5.4-1.8L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span>About Ubhaya</a></li>
                 <li><a asp-controller="Contact" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H9l-5 4V5Z"/><path d="M8 9h8M8 13h5"/></svg></span>Contact Us</a></li>
             </ul>
         </details>
@@ -57,8 +57,8 @@
             <ul>
                 <li><a asp-controller="Shipping" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg></span>Shipping Info</a></li>
                 @* <li><a asp-controller="Shipping" asp-action="Index"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8V4h4M4.5 4.5 9 9"/><path d="M5 13a7 7 0 0 0 12 4l2-2M20 16v4h-4M19.5 19.5 15 15"/></svg></span>Returns &amp; Exchanges</a></li> *@
-                <li><a href="/Home/Privacy"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3Z"/><path d="M9 12h6M10 9h4v6h-4z"/></svg></span>Privacy Policy</a></li>
-                <li><a href="/Home/Terms"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg></span>Terms and Conditions</a></li>
+                <li><a asp-controller="Home" asp-action="Privacy"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3Z"/><path d="M9 12h6M10 9h4v6h-4z"/></svg></span>Privacy Policy</a></li>
+                <li><a asp-controller="Home" asp-action="Terms"><span class="footer-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg></span>Terms and Conditions</a></li>
             </ul>
         </details>
 
@@ -93,9 +93,9 @@
     <div class="footer-bottom">
         <div class="footer-copyright">© @DateTime.Now.Year <strong>UBHAYA FASHIONS</strong></div>
         <div class="footer-links">
-            <a href="/Home/Privacy">Privacy Policy</a><span>·</span>
+            <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a><span>·</span>
             <a asp-controller="Shipping" asp-action="Index">Shipping Info</a><span>·</span>
-            <a href="/Home/Terms">Terms and Conditions</a>
+            <a asp-controller="Home" asp-action="Terms">Terms and Conditions</a>
         </div>
     </div>
 </footer>

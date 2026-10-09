@@ -18,12 +18,19 @@ public class LoginViewModel
     public string Password { get; set; } = "";
 }
 
+// Shared model for the sign-in and animated sign-up panels on Account/Login.
+public class LoginExperienceViewModel
+{
+    public LoginViewModel Login { get; set; } = new();
+    public SignupViewModel Signup { get; set; } = new();
+}
+
 
 // =====================================================
 // SIGNUP
 // =====================================================
 
-public class SignupViewModel
+public class SignupViewModel : IValidatableObject
 {
     [Required]
     [StringLength(100)]
@@ -38,8 +45,15 @@ public class SignupViewModel
     [Display(Name = "Mobile number")]
     public string Mobile { get; set; } = "";
 
-    [Range(18, 120)]
-    public int Age { get; set; }
+    [Required]
+    [DataType(DataType.Date)]
+    [Display(Name = "Date of birth")]
+    public DateTime? DateOfBirth { get; set; }
+
+    // Keep sending age for compatibility with the current signup API contract.
+    public int Age => DateOfBirth is DateTime dateOfBirth
+        ? CalculateAge(dateOfBirth, DateTime.Today)
+        : 0;
 
     [Required]
     [MinLength(6)]
@@ -50,6 +64,22 @@ public class SignupViewModel
     [Compare(nameof(Password))]
     [DataType(DataType.Password)]
     public string ConfirmPassword { get; set; } = "";
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (DateOfBirth is not DateTime dateOfBirth) yield break;
+
+        var age = CalculateAge(dateOfBirth, DateTime.Today);
+        if (dateOfBirth.Date > DateTime.Today || age < 18 || age > 120)
+            yield return new ValidationResult("You must be between 18 and 120 years old.", [nameof(DateOfBirth)]);
+    }
+
+    private static int CalculateAge(DateTime dateOfBirth, DateTime today)
+    {
+        var age = today.Year - dateOfBirth.Year;
+        if (dateOfBirth.Date > today.AddYears(-age)) age--;
+        return age;
+    }
 }
 
 public class VerifySignupEmailViewModel

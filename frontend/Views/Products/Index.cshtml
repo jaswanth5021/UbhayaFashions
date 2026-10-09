@@ -18,9 +18,16 @@
     var pageCount = (int)ViewBag.PageCount;
     ViewData["Title"] = !string.IsNullOrWhiteSpace(search)
         ? $"Search: {search}"
-        : newArrivalsOnly ? "New Arrival" : bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category)
+        : newArrivalsOnly ? "New Arrival" : bestSellersOnly ? "Best Sellers" : string.Equals(selectedSort, "discount", StringComparison.OrdinalIgnoreCase) ? "Offers" : string.IsNullOrWhiteSpace(category)
         ? "Shop All"
         : category;
+    ViewData["MetaDescription"] = !string.IsNullOrWhiteSpace(search)
+        ? $"Search Ubhaya Fashions for {search} and explore women’s fashion in our collection."
+        : string.Equals(selectedSort, "discount", StringComparison.OrdinalIgnoreCase)
+            ? "Shop products currently on offer at Ubhaya Fashions. Products without a discount are excluded."
+        : !string.IsNullOrWhiteSpace(category)
+            ? $"Shop {category} at Ubhaya Fashions. Explore women’s fashion, new arrivals, and customer favorites."
+            : "Shop the Ubhaya Fashions collection of women’s dresses and ethnic wear, including new arrivals and best sellers.";
 }
 
 <section class="catalog-page">
@@ -34,7 +41,7 @@
             }
             else
             {
-                <h1>@(newArrivalsOnly ? "New Arrival" : bestSellersOnly ? "Best Sellers" : string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
+                <h1>@(newArrivalsOnly ? "New Arrival" : bestSellersOnly ? "Best Sellers" : string.Equals(selectedSort, "discount", StringComparison.OrdinalIgnoreCase) ? "Offers" : string.IsNullOrWhiteSpace(category) ? "Shop All" : category)</h1>
             }
             <p class="catalog-count">@productCount @(productCount == 1 ? "style" : "styles")</p>
         </div>

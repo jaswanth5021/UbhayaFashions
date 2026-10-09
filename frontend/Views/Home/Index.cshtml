@@ -4,6 +4,12 @@
     ViewData["Title"] = "Ubhaya Fashions";
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var homeCategories = ViewBag.HomeCategories as List<CategoryViewModel> ?? [];
+    var catalogUnavailable = (bool?)ViewBag.CatalogUnavailable == true;
+}
+
+@if (catalogUnavailable)
+{
+    <p class="home-catalog-status" role="status">Our collection is temporarily unavailable. Please try again shortly.</p>
 }
 
 @if (TempData["SuccessMessage"] is string success)
@@ -395,6 +401,8 @@
                             }
                         </div>
                     }
+
+                    <p class="product-card-feedback" data-card-feedback role="alert" hidden></p>
 
 
                     <!-- ================================

@@ -542,6 +542,15 @@
     color: var(--arrival-accent);
 }
 
+.home-page .featured-products .size-options button.is-selected,
+.home-page .featured-products .size-options button.is-selected:hover {
+    border-color: color-mix(in srgb, var(--arrival-accent) 82%, #28151c);
+    background: color-mix(in srgb, var(--arrival-accent) 82%, #28151c);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--arrival-accent) 24%, transparent);
+}
+
 .home-page .featured-products .add-to-bag {
     border-color: var(--arrival-accent);
     background: var(--arrival-accent);

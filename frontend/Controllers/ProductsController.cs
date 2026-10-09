@@ -39,6 +39,15 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
             sort,
             newArrivals);
 
+        if (string.Equals(sort, "discount", StringComparison.OrdinalIgnoreCase))
+        {
+            products = products
+                .Where(product => product.Discount > 0)
+                .OrderByDescending(product => product.Discount)
+                .ThenByDescending(product => product.Id)
+                .ToList();
+        }
+
         if (User.Identity?.IsAuthenticated == true)
         {
             try

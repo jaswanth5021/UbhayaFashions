@@ -122,6 +122,8 @@ if (!app.Environment.IsDevelopment())
         "/Home/Error");
 }
 
+app.UseStatusCodePagesWithReExecute("/Home/NotFoundPage");
+
 // =====================================================
 // HTTPS
 // =====================================================

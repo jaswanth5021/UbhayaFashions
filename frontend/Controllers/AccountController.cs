@@ -19,7 +19,7 @@ public class AccountController(ApiService api) : Controller
     {
         ViewBag.Error = error;
         ViewBag.ReturnUrl = returnUrl;
-        return View();
+        return View(new LoginExperienceViewModel());
     }
 
 
@@ -29,14 +29,18 @@ public class AccountController(ApiService api) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+    public async Task<IActionResult> Login(LoginExperienceViewModel model, string? returnUrl = null)
     {
         ViewBag.ReturnUrl = returnUrl;
+
+        // Validate only the form that was submitted; the hidden signup form has its own required fields.
+        foreach (var key in ModelState.Keys.Where(key => key.StartsWith("Signup.", StringComparison.OrdinalIgnoreCase)).ToList())
+            ModelState.Remove(key);
 
         if (!ModelState.IsValid)
             return View(model);
 
-        var result = await api.LoginAsync(model);
+        var result = await api.LoginAsync(model.Login);
 
         if (!result.Success || result.Data == null)
         {
@@ -61,6 +65,54 @@ public class AccountController(ApiService api) : Controller
         return RedirectToAction(
             "Index",
             "Home");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SignupFromLogin(LoginExperienceViewModel model)
+    {
+        // Ignore login fields while validating the signup form.
+        foreach (var key in ModelState.Keys.Where(key => key.StartsWith("Login.", StringComparison.OrdinalIgnoreCase)).ToList())
+            ModelState.Remove(key);
+
+        ViewBag.ShowSignup = true;
+        if (!ModelState.IsValid)
+        {
+            if (IsAjaxRequest())
+                return BadRequest(new { message = FirstModelError("Please check the form fields and try again.") });
+            return View("Login", model);
+        }
+
+        (bool Success, string Message) result;
+        try
+        {
+            result = await api.SignupAsync(model.Signup);
+        }
+        catch (HttpRequestException)
+        {
+            if (IsAjaxRequest())
+                return StatusCode(503, new { message = "We couldn't reach the account service. Please try again in a moment." });
+            ModelState.AddModelError("", "We couldn't reach the account service. Please try again in a moment.");
+            return View("Login", model);
+        }
+
+        if (!result.Success)
+        {
+            var message = string.IsNullOrWhiteSpace(result.Message)
+                ? "We couldn't create your account. Please check your details and try again."
+                : result.Message.Trim('"');
+            if (IsAjaxRequest())
+                return BadRequest(new { message });
+            ModelState.AddModelError("", message);
+            return View("Login", model);
+        }
+
+        const string signupSuccessMessage = "Your account is ready. Sign in now; you can verify your email later from your profile.";
+        if (IsAjaxRequest())
+            return Ok(new { message = signupSuccessMessage });
+
+        TempData["SignupSuccess"] = signupSuccessMessage;
+        return RedirectToAction(nameof(Login));
     }
 
 
@@ -492,4 +544,13 @@ public class AccountController(ApiService api) : Controller
                 DateTimeOffset.UtcNow.AddHours(2)
         });
 }
+
+    private bool IsAjaxRequest() =>
+        string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+
+    private string FirstModelError(string fallback) =>
+        ModelState.Values
+            .SelectMany(entry => entry.Errors)
+            .Select(error => error.ErrorMessage)
+            .FirstOrDefault(message => !string.IsNullOrWhiteSpace(message)) ?? fallback;
 }
