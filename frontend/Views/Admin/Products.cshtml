@@ -1,8 +1,8 @@
 ﻿@model List<AdminProductInput>
 @{ var productCount = (int)ViewBag.ProductCount; var currentPage = (int)ViewBag.CurrentPage; var pageCount = (int)ViewBag.PageCount; var pageSize = (int)ViewBag.PageSize; var categories = ViewBag.Categories as List<CategoryViewModel> ?? []; var sizes = ViewBag.Sizes as List<string> ?? []; var discounts = ViewBag.Discounts as List<decimal> ?? []; var selectedCategoryId = (int)ViewBag.SelectedCategoryId; var selectedSize = ViewBag.SelectedSize as string; decimal? selectedDiscount = ViewBag.SelectedDiscount; ViewData["Title"] = "Products"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
 <div class="page-head"><div><h1>Products</h1><p>@productCount matching @(productCount == 1 ? "product" : "products") · Page @currentPage of @pageCount</p></div><a class="primary" asp-action="CreateProduct">+ Add product</a></div>
-@if (TempData["ProductMessage"] is string productMessage) { <p class="alert success" role="status">@productMessage</p> }
-@if (TempData["ProductError"] is string productError) { <p class="alert error" role="alert">@productError</p> }
+@if (TempData["ProductMessage"] is string productMessage) { <p class="alert success" role="status" data-app-notification="success">@productMessage</p> }
+@if (TempData["ProductError"] is string productError) { <p class="alert error" role="alert" data-app-notification="warning">@productError</p> }
 <form class="admin-product-filters" asp-action="Products" method="get">
     <label>Category
         <select name="categoryId">

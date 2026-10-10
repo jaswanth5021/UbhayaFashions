@@ -1,8 +1,8 @@
 @model List<AdminAccountViewModel>
 @{ ViewData["Title"] = "Admin accounts"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
 <div class="page-head"><div><h1>Admin accounts</h1><p><span id="adminAccountCount">@Model.Count</span> matching admin account@(Model.Count == 1 ? "" : "s")</p></div></div>
-@if (TempData["AccountMessage"] is string message) { <div class="category-notice success">@message</div> }
-@if (TempData["AccountError"] is string error) { <div class="category-notice error">@error</div> }
+@if (TempData["AccountMessage"] is string message) { <div class="category-notice success" data-app-notification="success">@message</div> }
+@if (TempData["AccountError"] is string error) { <div class="category-notice error" data-app-notification="warning">@error</div> }
 @if (ViewBag.Error is string loadError) { <div class="category-notice error">Could not load admin accounts: @loadError</div> }
 
 <section class="category-card admin-account-create">

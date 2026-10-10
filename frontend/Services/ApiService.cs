@@ -318,6 +318,33 @@ public class ApiService(
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<NotificationListViewModel> GetNotificationsAsync(int take = 50)
+    {
+        var limit = take <= 0 ? 0 : Math.Clamp(take, 1, 100);
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/notifications?take={limit}");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException("Could not load notifications.", null, response.StatusCode);
+        return await response.Content.ReadFromJsonAsync<NotificationListViewModel>() ?? new();
+    }
+
+    public async Task<bool> MarkNotificationReadAsync(int id)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/notifications/{id}/read");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DismissNotificationAsync(int id)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, $"api/notifications/{id}");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        return response.IsSuccessStatusCode;
+    }
+
 
     // =====================================================
     // SIGNUP

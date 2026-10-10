@@ -19,8 +19,8 @@
             </div>
         </header>
 
-        @if (TempData["ProfileSuccess"] is string success) { <div class="profile-success">@success</div> }
-        @if (TempData["ProfileError"] is string error) { <div class="profile-error">@error</div> }
+        @if (TempData["ProfileSuccess"] is string success) { <div class="profile-success" data-app-notification="success">@success</div> }
+        @if (TempData["ProfileError"] is string error) { <div class="profile-error" data-app-notification="warning">@error</div> }
         @if (!string.IsNullOrWhiteSpace(ViewBag.Error)) { <div class="profile-error">@ViewBag.Error</div> }
 
         <nav class="profile-tabs" aria-label="Profile sections">

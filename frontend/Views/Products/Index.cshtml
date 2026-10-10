@@ -269,11 +269,11 @@
 
             @if (TempData["WishlistMessage"] is string wishlistMessage)
             {
-                <div class="wishlist-notice" role="status">@wishlistMessage</div>
+                <div class="wishlist-notice" role="status" data-app-notification="success">@wishlistMessage</div>
             }
             @if (TempData["WishlistError"] is string wishlistError)
             {
-                <div class="wishlist-notice error" role="alert">@wishlistError</div>
+                <div class="wishlist-notice error" role="alert" data-app-notification="warning">@wishlistError</div>
             }
 
             @if (Model.Count > 0)

@@ -24,6 +24,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
     public DbSet<ProductReviewImage> ProductReviewImages => Set<ProductReviewImage>();
     public DbSet<ProductReviewVote> ProductReviewVotes => Set<ProductReviewVote>();
+    public DbSet<StoreNotification> Notifications => Set<StoreNotification>();
+    public DbSet<CustomerNotificationState> CustomerNotificationStates => Set<CustomerNotificationState>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,10 +81,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ProductReviewVote>().HasIndex(x => new { x.CustomerId, x.ProductReviewId }).IsUnique();
         modelBuilder.Entity<ProductReviewVote>().HasOne<ProductReview>().WithMany().HasForeignKey(x => x.ProductReviewId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductReviewVote>().HasOne<Customer>().WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.NoAction);
+        modelBuilder.Entity<StoreNotification>().Property(x => x.Title).HasMaxLength(200).IsRequired();
+        modelBuilder.Entity<StoreNotification>().Property(x => x.Message).HasMaxLength(500).IsRequired();
+        modelBuilder.Entity<StoreNotification>().Property(x => x.Link).HasMaxLength(512).IsRequired();
+        modelBuilder.Entity<StoreNotification>().HasIndex(x => x.CreatedDate);
+        modelBuilder.Entity<StoreNotification>().HasOne(x => x.Product).WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<CustomerNotificationState>().HasKey(x => new { x.CustomerId, x.NotificationId });
+        modelBuilder.Entity<CustomerNotificationState>().HasIndex(x => x.NotificationId);
+        modelBuilder.Entity<CustomerNotificationState>().HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<CustomerNotificationState>().HasOne(x => x.Notification).WithMany().HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Category>().Property(x => x.Name).HasMaxLength(250).IsRequired();
         modelBuilder.Entity<Category>().Property(x => x.ImageUrl).HasMaxLength(2048).IsRequired();
         modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique();
         modelBuilder.Entity<Product>().HasOne(x => x.CategoryNavigation).WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
     }
 }
-

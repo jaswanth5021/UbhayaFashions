@@ -10,11 +10,11 @@
 
     @if (TempData["SignupCodeSent"] is string sent)
     {
-        <div class="success" role="status">@sent</div>
+        <div class="success" role="status" data-app-notification="success">@sent</div>
     }
     @if (TempData["SignupCodeError"] is string resendError)
     {
-        <div class="error" role="alert">@resendError</div>
+        <div class="error" role="alert" data-app-notification="warning">@resendError</div>
     }
 
     <div asp-validation-summary="ModelOnly" class="error"></div>

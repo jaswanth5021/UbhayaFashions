@@ -389,8 +389,7 @@
     transition: opacity .18s ease, visibility .18s ease, transform .18s ease;
 }
 
-.account-menu:hover .account-dropdown,
-.account-menu:focus-within .account-dropdown {
+.account-menu.is-open .account-dropdown {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;

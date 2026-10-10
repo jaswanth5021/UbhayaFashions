@@ -1,0 +1,86 @@
+.app-notification-stack {
+    position: fixed;
+    z-index: 3000;
+    top: max(18px, env(safe-area-inset-top));
+    right: max(18px, env(safe-area-inset-right));
+    display: grid;
+    width: min(390px, calc(100vw - 32px));
+    gap: 10px;
+    pointer-events: none;
+}
+
+.app-notification {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 30px;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 14px 14px 16px;
+    border: 1px solid #d7e8dc;
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 12px 34px rgba(43, 31, 34, .16);
+    color: #302522;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.45;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(-8px) scale(.985);
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.app-notification.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+
+.app-notification-icon {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border-radius: 50%;
+    background: #eaf5ed;
+    color: #34744d;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.app-notification-message { overflow-wrap: anywhere; }
+
+.app-notification-close {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #786a6d;
+    cursor: pointer;
+    font: inherit;
+    font-size: 21px;
+    line-height: 1;
+}
+
+.app-notification-close:hover { background: #f5efed; color: #68142e; }
+.app-notification-close:focus-visible { outline: 2px solid #8c2947; outline-offset: 2px; }
+
+.app-notification[data-kind="warning"],
+.app-notification[data-kind="error"] { border-color: #edcbd0; }
+
+.app-notification[data-kind="warning"] .app-notification-icon,
+.app-notification[data-kind="error"] .app-notification-icon { background: #fff0f0; color: #a33a45; }
+
+.app-notification[data-kind="info"] { border-color: #d9e4ee; }
+.app-notification[data-kind="info"] .app-notification-icon { background: #eef4fa; color: #456a89; }
+
+@media (max-width: 600px) {
+    .app-notification-stack {
+        top: max(10px, env(safe-area-inset-top));
+        right: max(10px, env(safe-area-inset-right));
+        left: max(10px, env(safe-area-inset-left));
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-notification { transition: none; }
+}

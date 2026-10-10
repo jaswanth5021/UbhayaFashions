@@ -24,11 +24,11 @@
         }
         @if (TempData["ProductImageMessage"] is string imageMessage)
         {
-            <p class="admin-image-feedback success" role="status">@imageMessage</p>
+            <p class="admin-image-feedback success" role="status" data-app-notification="success">@imageMessage</p>
         }
         @if (TempData["ProductImageError"] is string imageError)
         {
-            <p class="admin-image-feedback error" role="alert">@imageError</p>
+            <p class="admin-image-feedback error" role="alert" data-app-notification="warning">@imageError</p>
         }
 
         <div class="form-grid">

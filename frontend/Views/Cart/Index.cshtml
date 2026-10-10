@@ -18,11 +18,11 @@
 
     @if (TempData["CartMessage"] is string cartMessage)
     {
-        <p class="shopping-cart-message success" role="status">@cartMessage</p>
+        <p class="shopping-cart-message success" role="status" data-app-notification="success">@cartMessage</p>
     }
     @if (TempData["CartError"] is string cartError)
     {
-        <p class="shopping-cart-message error" role="alert">@cartError</p>
+        <p class="shopping-cart-message error" role="alert" data-app-notification="warning">@cartError</p>
     }
 
     @if (Model.Count == 0)

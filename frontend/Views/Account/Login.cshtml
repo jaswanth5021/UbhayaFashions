@@ -29,7 +29,7 @@
 
                     @if (TempData["SuccessMessage"] is string successMessage)
                     {
-                        <div class="login-new-message is-success" role="status">@successMessage</div>
+                        <div class="login-new-message is-success" role="status" data-app-notification="success">@successMessage</div>
                     }
                     @if (!showSignup)
                     {
@@ -129,7 +129,7 @@
 
 @if (TempData["SignupSuccess"] is string signupSuccess)
 {
-    <div class="login-account-toast" role="status" data-signup-success>
+    <div class="login-account-toast" role="status" data-signup-success data-app-notification="success">
         <span class="login-account-toast-icon" aria-hidden="true">✓</span>
         <span>@signupSuccess</span>
         <button type="button" aria-label="Dismiss message" data-dismiss-toast>×</button>
@@ -184,6 +184,10 @@
             };
 
             const showSignupToast = message => {
+                if (window.AppNotifications) {
+                    window.AppNotifications.show(message, 'success', 7500);
+                    return;
+                }
                 let toast = document.querySelector('[data-signup-success]');
                 if (!toast) {
                     toast = document.createElement('div');

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -11,9 +12,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261010071848_AddCustomerNotifications")]
+    partial class AddCustomerNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,25 +223,43 @@ namespace backend.Migrations
                     b.ToTable("CustomerAddresses");
                 });
 
-            modelBuilder.Entity("backend.Models.CustomerNotificationState", b =>
+            modelBuilder.Entity("backend.Models.CustomerNotification", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("NotificationId")
-                        .HasColumnType("int");
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
-                    b.Property<DateTime?>("DismissedDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("ReadDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("CustomerId", "NotificationId");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.HasIndex("NotificationId");
+                    b.HasKey("Id");
 
-                    b.ToTable("CustomerNotificationStates");
+                    b.HasIndex("CustomerId", "CreatedDate");
+
+                    b.ToTable("CustomerNotifications");
                 });
 
             modelBuilder.Entity("backend.Models.ExternalLogin", b =>
@@ -749,44 +770,6 @@ namespace backend.Migrations
                     b.ToTable("RecentlyViewedProducts");
                 });
 
-            modelBuilder.Entity("backend.Models.StoreNotification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedDate");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Notifications");
-                });
-
             modelBuilder.Entity("backend.Models.WishlistItem", b =>
                 {
                     b.Property<int>("Id")
@@ -825,7 +808,7 @@ namespace backend.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("backend.Models.CustomerNotificationState", b =>
+            modelBuilder.Entity("backend.Models.CustomerNotification", b =>
                 {
                     b.HasOne("backend.Models.Customer", "Customer")
                         .WithMany()
@@ -833,15 +816,7 @@ namespace backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("backend.Models.StoreNotification", "Notification")
-                        .WithMany()
-                        .HasForeignKey("NotificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Customer");
-
-                    b.Navigation("Notification");
                 });
 
             modelBuilder.Entity("backend.Models.ExternalLogin", b =>
@@ -978,16 +953,6 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("backend.Models.StoreNotification", b =>
-                {
-                    b.HasOne("backend.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Product");
                 });

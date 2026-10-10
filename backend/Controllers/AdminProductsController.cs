@@ -47,6 +47,15 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
+        db.Notifications.Add(new StoreNotification
+        {
+            ProductId = product.Id,
+            Title = $"New arrival: {product.Name}",
+            Message = $"A new style has arrived. Take a look at {product.Name}.",
+            Link = $"/Products/Details/{product.Id}",
+            CreatedDate = DateTime.UtcNow
+        });
+
         foreach (var variant in product.Variants.Where(variant => variant.Stock > 0))
             AddInventory(product.Id, variant.Size, "Stock In", variant.Stock, variant.Stock, "Initial stock");
         await db.SaveChangesAsync();

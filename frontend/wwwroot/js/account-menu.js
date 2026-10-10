@@ -9,31 +9,28 @@
         toggle.setAttribute('aria-expanded', String(expanded));
     };
 
-    accountMenu.addEventListener('pointerenter', () => {
-        accountMenu.classList.remove('is-dismissed');
-        setExpanded(true);
+    const closeMenu = () => {
+        accountMenu.classList.remove('is-open');
+        setExpanded(false);
+    };
+
+    toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        accountMenu.classList.toggle('is-open', !expanded);
+        setExpanded(!expanded);
     });
 
-    accountMenu.addEventListener('pointerleave', () => {
-        if (!accountMenu.contains(document.activeElement))
-            setExpanded(false);
-        accountMenu.classList.remove('is-dismissed');
-    });
-
-    accountMenu.addEventListener('focusin', () => {
-        accountMenu.classList.remove('is-dismissed');
-        setExpanded(true);
+    document.addEventListener('click', event => {
+        if (!accountMenu.contains(event.target)) closeMenu();
     });
 
     accountMenu.addEventListener('focusout', event => {
-        if (!accountMenu.contains(event.relatedTarget))
-            setExpanded(false);
+        if (!accountMenu.contains(event.relatedTarget)) closeMenu();
     });
 
     accountMenu.addEventListener('keydown', event => {
         if (event.key !== 'Escape') return;
-        accountMenu.classList.add('is-dismissed');
-        setExpanded(false);
-        document.activeElement.blur();
+        closeMenu();
+        toggle.focus();
     });
 })();

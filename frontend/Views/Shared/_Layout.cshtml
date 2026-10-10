@@ -171,6 +171,8 @@
           asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/search-polish.css?v=search-polish-2026-10-07-2" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/site-fixes.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/notifications.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/customer-notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/account/login.css?v=account-login-layout-20261009-4" asp-append-version="true" />
     @if (currentController == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile")
     {
@@ -306,6 +308,24 @@
 
             </button>
 
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="customer-notification-menu" id="customerNotificationMenu">
+                    <button type="button" class="header-icon customer-notification-toggle" id="customerNotificationToggle"
+                            aria-label="Notifications" aria-controls="customerNotificationPanel" aria-expanded="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg>
+                        <span class="customer-notification-count" id="customerNotificationCount" hidden></span>
+                    </button>
+                    <section class="customer-notification-panel" id="customerNotificationPanel" aria-label="Recent notifications" hidden>
+                        <header><div><strong>Notifications</strong><span>New arrivals and store updates</span></div></header>
+                        <div class="customer-notification-items" id="customerNotificationItems" aria-live="polite">
+                            <p class="customer-notification-loading">Loading updates…</p>
+                        </div>
+                        <a class="customer-notification-view-all" asp-controller="Notifications" asp-action="Index">View all notifications</a>
+                    </section>
+                </div>
+            }
+
 
             <!-- ACCOUNT -->
 
@@ -315,31 +335,22 @@
                     <button type="button"
                             class="header-icon header-account-icon account-menu-toggle"
                             id="accountMenuToggle"
-                            aria-label="My account menu"
+                            aria-label="Account menu for @accountName"
                             aria-controls="accountMenuDropdown"
                             aria-expanded="false">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="12" cy="8" r="4" />
-                            <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
-                        </svg>
+                        <span class="account-menu-name">@accountName</span>
+                        <svg class="account-menu-toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
                     </button>
                     <section class="account-dropdown" id="accountMenuDropdown" aria-label="My account">
-                        <div class="account-dropdown-greeting">
-                            <strong>Hello, @accountName</strong>
-                            @if (!string.IsNullOrWhiteSpace(accountMobile))
-                            {
-                                <span>@accountMobile</span>
-                            }
-                        </div>
                         <nav class="account-dropdown-links" aria-label="Account links">
-                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9M8 5.3l8 4.6"/></svg><span>Orders</span></a>
-                            <a asp-controller="Wishlist" asp-action="Index"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.5 5.5 0 0 0-7.8 0L12 5.9l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.3 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg><span>Wishlist</span></a>
-                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="addresses"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Saved addresses</span></a>
-                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="details"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Edit profile</span></a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9M8 5.3l8 4.6"/></svg><span>Orders</span><svg class="account-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></a>
+                            <a asp-controller="Wishlist" asp-action="Index"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.5 5.5 0 0 0-7.8 0L12 5.9l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.3 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg><span>Wishlist</span><svg class="account-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="addresses"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Saved addresses</span><svg class="account-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></a>
+                            <a asp-controller="Account" asp-action="Profile" asp-route-tab="details"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Edit profile</span><svg class="account-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></a>
                         </nav>
                         <form asp-controller="Account" asp-action="Logout" method="post" class="account-dropdown-logout-form">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="account-dropdown-logout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg><span>Log out</span></button>
+                            <button type="submit" class="account-dropdown-logout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg><span>Logout</span></button>
                         </form>
                     </section>
                 </div>
@@ -463,11 +474,11 @@
         <div class="cart-drawer-columns"><span>Product</span><span>Total</span></div>
         @if (TempData["CartMessage"] is string drawerCartMessage)
         {
-            <p class="cart-drawer-notice" role="status">@drawerCartMessage</p>
+            <p class="cart-drawer-notice" role="status" data-app-notification="success">@drawerCartMessage</p>
         }
         @if (TempData["CartError"] is string drawerCartError)
         {
-            <p class="cart-drawer-notice is-error" role="alert">@drawerCartError</p>
+            <p class="cart-drawer-notice is-error" role="alert" data-app-notification="warning">@drawerCartError</p>
         }
         <div class="cart-drawer-items" id="cartDrawerItemsStep">
             @if (cartItems.Count == 0)
@@ -686,6 +697,11 @@
         "Scripts",
         required: false
     )
+
+    <div class="app-notification-stack" id="appNotificationStack" aria-live="polite" aria-relevant="additions" aria-atomic="false"></div>
+    <div class="customer-notification-antiforgery" hidden>@Html.AntiForgeryToken()</div>
+    <script src="~/js/customer-notifications.js" asp-append-version="true"></script>
+    <script src="~/js/app-notifications.js" asp-append-version="true"></script>
 
 </body>
 
