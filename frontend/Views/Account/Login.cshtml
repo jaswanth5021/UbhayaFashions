@@ -33,7 +33,11 @@
                     }
                     @if (!showSignup)
                     {
-                        <div asp-validation-summary="ModelOnly" class="login-new-message is-error validation-summary-valid" role="alert"></div>
+                        <div asp-validation-summary="ModelOnly" class="login-new-message is-error" role="alert" data-app-notification="error"></div>
+                        @if (ViewBag.Error is string loginError)
+                        {
+                            <div class="login-new-message is-error" role="alert" data-app-notification="error">@loginError</div>
+                        }
                     }
 
                     <form asp-controller="Account" asp-action="Login" method="post" class="login-new-form">
@@ -41,7 +45,7 @@
                         <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
                         <label asp-for="Login.Identifier">Email or mobile number</label>
-                        <input asp-for="Login.Identifier" autocomplete="username" placeholder="Enter your email or mobile" />
+                        <input asp-for="Login.Identifier" autocomplete="section-customer username" placeholder="Enter your email or mobile" />
                         <span asp-validation-for="Login.Identifier" class="login-new-field-error"></span>
 
                         <div class="login-new-password-heading">
@@ -49,7 +53,7 @@
                             <a asp-controller="Account" asp-action="ForgotPassword">Forgot password?</a>
                         </div>
                         <div class="login-new-password-wrap">
-                            <input asp-for="Login.Password" autocomplete="current-password" placeholder="Enter your password" />
+                            <input asp-for="Login.Password" autocomplete="section-customer current-password" placeholder="Enter your password" />
                             <button type="button" class="login-new-password-toggle" aria-label="Show password" aria-pressed="false" data-password-toggle="Login_Password">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
                             </button>
@@ -70,7 +74,7 @@
                     <div class="login-new-message is-error login-signup-client-feedback" data-signup-feedback role="alert" aria-live="assertive"></div>
                     @if (showSignup)
                     {
-                        <div asp-validation-summary="ModelOnly" class="login-new-message is-error validation-summary-valid" role="alert"></div>
+                        <div asp-validation-summary="ModelOnly" class="login-new-message is-error" role="alert" data-app-notification="error"></div>
                     }
 
                     <form asp-controller="Account" asp-action="SignupFromLogin" method="post" class="login-new-form login-new-signup-form" data-signup-form novalidate>

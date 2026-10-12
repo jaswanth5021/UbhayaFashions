@@ -1,0 +1,20 @@
+@if (TempData["LoginSuccess"] is string loginSuccess)
+{
+    <div hidden data-app-notification="success">@loginSuccess</div>
+}
+@if (TempData["AdminLoginSuccess"] is string adminLoginSuccess)
+{
+    <div hidden data-app-notification="success">@adminLoginSuccess</div>
+}
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div hidden data-app-notification="success">@successMessage</div>
+}
+@if (TempData["Error"] is string errorMessage)
+{
+    <div hidden data-app-notification="error">@errorMessage</div>
+}
+@if (TempData["SignupSuccess"] is string signupSuccess)
+{
+    <div hidden data-app-notification="success">@signupSuccess</div>
+}

@@ -29,6 +29,8 @@
         close.setAttribute('aria-label', 'Dismiss notification');
         close.textContent = '\u00d7';
 
+        notice.append(icon, content, close);
+
         let timer;
         const dismiss = () => {
             window.clearTimeout(timer);
@@ -47,13 +49,33 @@
 
     window.AppNotifications = { show };
 
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('[data-app-notification], .wishlist-notice:not([data-app-notification]), .product-review-notice:not([data-app-notification]), .auth-card > .success:not([data-app-notification])').forEach(element => {
-            const kind = element.dataset.appNotification || (element.classList.contains('error') ? 'warning' : 'success');
-            show(element.textContent, kind);
+    const noticeText = element => {
+        const copy = element.cloneNode(true);
+        copy.querySelectorAll('script, style, [hidden], [aria-hidden="true"]').forEach(node => node.remove());
+        copy.querySelectorAll('li').forEach(item => {
+            if (item.hidden || item.style.display === 'none') item.remove();
+        });
+        return (copy.textContent || '').replace(/\s+/g, ' ').trim();
+    };
+
+    const publishPageNotices = () => {
+        document.querySelectorAll('[data-app-notification], .alert.error, .alert.success, .wishlist-notice:not([data-app-notification]), .product-review-notice:not([data-app-notification]), .auth-card > .success:not([data-app-notification])').forEach(element => {
+            const text = noticeText(element);
+            if (!text) {
+                element.remove();
+                return;
+            }
+            const kind = element.dataset.appNotification
+                || (element.classList.contains('error') ? 'error' : element.classList.contains('success') ? 'success' : 'info');
+            show(text, kind);
             element.remove();
         });
-    });
+    };
+
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', publishPageNotices);
+    else
+        publishPageNotices();
 
     // Replace blocking browser alerts with the shared, dismissible warning toast.
     window.alert = message => show(message, 'warning', 7500);

@@ -1156,7 +1156,8 @@ body.cart-drawer-open { overflow: hidden; }
 }
 
 .desktop-primary-nav .desktop-nav-dropdown-menu a::after { display: none; }
-.desktop-primary-nav .desktop-nav-dropdown-menu a:hover { background: #fbf1ef; color: #68142e; }
+.desktop-primary-nav .desktop-nav-dropdown-menu a:hover,
+.desktop-primary-nav .desktop-nav-dropdown-menu a.is-current { background: #fbf1ef; color: #68142e; font-weight: 700; }
 
 @media (max-width: 900px) {
     .desktop-nav-dropdown { display: none; }

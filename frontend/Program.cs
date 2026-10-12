@@ -1,6 +1,9 @@
+using LadiesDressStore.Web;
 using LadiesDressStore.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.FileProviders;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,9 +68,20 @@ builder.Services.AddScoped<AdminApiService>();
 // =====================================================
 
 builder.Services
-    .AddAuthentication(
-        CookieAuthenticationDefaults
-            .AuthenticationScheme)
+    .AddAuthentication(options =>
+    {
+        // Store pages use the customer cookie. Admin pages use a separate cookie.
+        options.DefaultScheme = AuthSchemes.Frontend;
+        options.DefaultAuthenticateScheme = AuthSchemes.Frontend;
+        options.DefaultChallengeScheme = AuthSchemes.Frontend;
+    })
+    .AddPolicyScheme(AuthSchemes.Frontend, AuthSchemes.Frontend, options =>
+    {
+        options.ForwardDefaultSelector = context =>
+            context.Request.Path.StartsWithSegments("/Admin")
+                ? AuthSchemes.Admin
+                : CookieAuthenticationDefaults.AuthenticationScheme;
+    })
     .AddCookie(
         CookieAuthenticationDefaults
             .AuthenticationScheme,
@@ -98,7 +112,18 @@ builder.Services
 
             options.SlidingExpiration =
                 true;
-        });
+        })
+    .AddCookie(AuthSchemes.Admin, options =>
+    {
+        options.Cookie.Name = "UbhayaAdminAuth";
+        options.LoginPath = "/Admin/Login";
+        options.AccessDeniedPath = "/Admin/Login";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.SlidingExpiration = true;
+    });
 
 // =====================================================
 // AUTHORIZATION
@@ -164,6 +189,20 @@ app.UseRouting();
 // =====================================================
 
 app.UseAuthentication();
+
+// An older admin login was stored in the customer cookie. Drop that session
+// on the store so the shopper is asked to sign in with a customer account.
+app.Use(async (context, next) =>
+{
+    if (!context.Request.Path.StartsWithSegments("/Admin")
+        && context.User.HasClaim("AdminSession", "true"))
+    {
+        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        context.User = new ClaimsPrincipal(new ClaimsIdentity());
+    }
+
+    await next();
+});
 
 app.UseAuthorization();
 

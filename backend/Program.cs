@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Middleware;
 using backend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -207,6 +208,10 @@ app.UseRouting();
 
 app.UseAuthentication();
 
+// Confirm the token belongs to an active account before any API runs.
+// Customer accounts are rejected on admin routes.
+app.UseMiddleware<ValidateLoginUserMiddleware>();
+
 app.UseAuthorization();
 
 
@@ -221,13 +226,15 @@ app.MapControllers();
 // DATABASE
 // =====================================================
 
-using (var scope = app.Services.CreateScope())
+await using (var scope = app.Services.CreateAsyncScope())
 {
     var db =
         scope.ServiceProvider
             .GetRequiredService<ApplicationDbContext>();
 
-    db.Database.ExecuteSqlRaw("""
+    await db.Database.MigrateAsync();
+
+    await db.Database.ExecuteSqlRawAsync("""
         IF OBJECT_ID(N'dbo.Categories', N'U') IS NULL
         BEGIN
             CREATE TABLE dbo.Categories
@@ -369,6 +376,7 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE dbo.Products ADD UpdatedDate datetime2 NULL;
         """);
 
+   
     // If you are using EF migrations:
     //
     // db.Database.Migrate();

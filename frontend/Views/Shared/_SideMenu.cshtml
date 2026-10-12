@@ -1,3 +1,8 @@
+@model List<LadiesDressStore.Web.Models.CategoryViewModel>?
+@{
+    var sideMenuCategories = Model ?? [];
+    var sideMenuCategory = Context.Request.Query["category"].ToString();
+}
 <!-- Mobile / slide-out navigation -->
 <div class="menu-overlay" id="menuOverlay"></div>
 
@@ -29,9 +34,14 @@
                         <span class="menu-item-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg></span>
                     </summary>
                     <ul class="menu-category-sublist">
-                        <li><a asp-controller="Products" asp-action="Index" asp-route-category="Dresses">Dresses</a></li>
-                        <li><a asp-controller="Products" asp-action="Index" asp-route-category="2-piece sets">2-Piece Sets</a></li>
-                        <li><a asp-controller="Products" asp-action="Index" asp-route-category="3-piece sets">3-Piece Sets</a></li>
+                        @foreach (var category in sideMenuCategories)
+                        {
+                            <li><a class="@(string.Equals(category.Name, sideMenuCategory, StringComparison.OrdinalIgnoreCase) ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">@category.Name</a></li>
+                        }
+                        @if (sideMenuCategories.Count == 0)
+                        {
+                            <li><a asp-controller="Products" asp-action="Categories">All categories</a></li>
+                        }
                     </ul>
                 </details>
             </li>

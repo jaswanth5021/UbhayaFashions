@@ -12,14 +12,6 @@
     <p class="home-catalog-status" role="status">Our collection is temporarily unavailable. Please try again shortly.</p>
 }
 
-@if (TempData["SuccessMessage"] is string success)
-{
-    <div class="global-success-message" data-app-notification="success">
-        @success
-    </div>
-}
-
-
 <!-- =====================================================
      HERO
      ===================================================== -->
@@ -178,6 +170,7 @@
 
         <a asp-controller="Products"
            asp-action="Index"
+           asp-route-newArrivals="true"
            class="shop-all-link">
 
             SHOP ALL

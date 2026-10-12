@@ -76,6 +76,18 @@
     var savedCheckoutAddresses = new List<LadiesDressStore.Web.Models.SavedAddressViewModel>();
     var accountName = User.Identity?.Name ?? "My account";
     var accountMobile = "";
+    var navCategories = new List<LadiesDressStore.Web.Models.CategoryViewModel>();
+    try
+    {
+        navCategories = await ProductCache.GetOrCreateAsync("store-nav-categories", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            return await Api.GetCategoriesAsync();
+        }) ?? [];
+    }
+    catch (HttpRequestException) { }
+    catch (JsonException) { }
+    var activeCategory = navQuery["category"].ToString();
 
     var wishlistCount = 0;
     if (User.Identity?.IsAuthenticated == true)
@@ -198,6 +210,7 @@
 </head>
 
 <body class="@(isHomePage ? "home-page" : string.Empty)">
+<partial name="_FlashMessages" />
 
     <!-- =========================================
          ANNOUNCEMENT BAR
@@ -252,9 +265,14 @@
             <details class="desktop-nav-dropdown @(isCategoryNavActive ? "is-active" : "")">
                 <summary>Categories</summary>
                 <div class="desktop-nav-dropdown-menu">
-                    <a asp-controller="Products" asp-action="Index" asp-route-category="Dresses">Dresses</a>
-                    <a asp-controller="Products" asp-action="Index" asp-route-category="2-piece sets">2-Piece Sets</a>
-                    <a asp-controller="Products" asp-action="Index" asp-route-category="3-piece sets">3-Piece Sets</a>
+                    @foreach (var category in navCategories)
+                    {
+                        <a class="@(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">@category.Name</a>
+                    }
+                    @if (navCategories.Count == 0)
+                    {
+                        <a asp-controller="Products" asp-action="Categories">All categories</a>
+                    }
                 </div>
             </details>
             <a class="@(isBestSellersNavActive ? "is-active" : "")" aria-current="@(isBestSellersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">Best Sellers</a>
@@ -452,7 +470,7 @@
          HAMBURGER SIDE MENU
          ========================================= -->
 
-    @await Html.PartialAsync("_SideMenu")
+    @await Html.PartialAsync("_SideMenu", navCategories)
 
 
     <!-- =========================================

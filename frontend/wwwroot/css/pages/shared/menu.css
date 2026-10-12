@@ -405,6 +405,7 @@ body.menu-open { overflow: hidden; }
     font-weight: 400;
 }
 
+.menu-category-sublist a.is-current,
 .menu-category-sublist a:hover {
     padding-right: 9px;
     padding-left: 15px;

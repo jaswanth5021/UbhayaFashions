@@ -316,6 +316,8 @@
 
 /* Let the banner image define the hero height so no empty bands frame it. */
 .home-page .home-hero {
+    position: relative;
+    z-index: 1;
     display: block;
     width: min(100%, 1600px);
     height: auto;

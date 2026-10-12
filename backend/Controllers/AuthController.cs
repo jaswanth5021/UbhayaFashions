@@ -783,7 +783,11 @@ public class AuthController(
 
         new Claim(
             ClaimTypes.Email,
-            customer.Email ?? "")
+            customer.Email ?? ""),
+
+        new Claim(
+            ClaimTypes.Role,
+            "Customer")
     };
 
         var token =
