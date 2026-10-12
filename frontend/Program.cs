@@ -1,4 +1,5 @@
 using LadiesDressStore.Web;
+using LadiesDressStore.Web.Middleware;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -11,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // MVC
 // =====================================================
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => options.Filters.AddService<UserErrorLogFilter>());
 builder.Services.AddMemoryCache();
 
 // =====================================================
@@ -62,6 +63,8 @@ builder.Services
 
 builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<AdminApiService>();
+builder.Services.AddSingleton<IErrorLog, ErrorLog>();
+builder.Services.AddScoped<UserErrorLogFilter>();
 
 // =====================================================
 // FRONTEND COOKIE AUTHENTICATION
@@ -189,6 +192,7 @@ app.UseRouting();
 // =====================================================
 
 app.UseAuthentication();
+app.UseMiddleware<ErrorLogMiddleware>();
 
 // An older admin login was stored in the customer cookie. Drop that session
 // on the store so the shopper is asked to sign in with a customer account.

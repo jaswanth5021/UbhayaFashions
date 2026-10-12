@@ -29,6 +29,7 @@
                 <a asp-action="Orders">Orders</a>
                 <a asp-action="Customers">Customers</a>
                 <a asp-action="Payments">Payments</a>
+                <a asp-action="Logs">Error logs</a>
                 @if (string.Equals(Context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value, "admin@ubhaya.com", StringComparison.OrdinalIgnoreCase)) { <a asp-action="AdminAccounts">Admin accounts</a> }
                 <a asp-action="ChangePassword">Change password</a>
             </nav>

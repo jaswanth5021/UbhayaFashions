@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // CONTROLLERS
 // =====================================================
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.AddService<ApiErrorLogFilter>());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -52,6 +52,8 @@ builder.Services.AddHttpClient("Razorpay", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddScoped<IOrderConfirmationEmailService, OrderConfirmationEmailService>();
+builder.Services.AddSingleton<IErrorLog, ErrorLog>();
+builder.Services.AddScoped<ApiErrorLogFilter>();
 
 
 // =====================================================
@@ -207,6 +209,7 @@ app.UseRouting();
 // =====================================================
 
 app.UseAuthentication();
+app.UseMiddleware<ErrorLogMiddleware>();
 
 // Confirm the token belongs to an active account before any API runs.
 // Customer accounts are rejected on admin routes.

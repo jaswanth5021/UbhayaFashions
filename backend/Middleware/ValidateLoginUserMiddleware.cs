@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -6,7 +7,7 @@ namespace backend.Middleware;
 
 public class ValidateLoginUserMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, ApplicationDbContext db)
+    public async Task InvokeAsync(HttpContext context, ApplicationDbContext db, IErrorLog errorLog)
     {
         if (HttpMethods.IsOptions(context.Request.Method))
         {
@@ -20,7 +21,7 @@ public class ValidateLoginUserMiddleware(RequestDelegate next)
 
         if (hasAuthorization && !authenticated)
         {
-            await WriteError(context, StatusCodes.Status401Unauthorized, "Login user is not valid.");
+            await WriteError(context, errorLog, StatusCodes.Status401Unauthorized, "Login user is not valid.");
             return;
         }
 
@@ -28,7 +29,7 @@ public class ValidateLoginUserMiddleware(RequestDelegate next)
         {
             if (IsProtectedAdminApi(context.Request))
             {
-                await WriteError(context, StatusCodes.Status401Unauthorized, "Login user is not valid.");
+                await WriteError(context, errorLog, StatusCodes.Status401Unauthorized, "Login user is not valid.");
                 return;
             }
 
@@ -38,13 +39,13 @@ public class ValidateLoginUserMiddleware(RequestDelegate next)
 
         if (!TryGetUserId(user, out var userId) || !await IsActiveAccountAsync(db, user, userId))
         {
-            await WriteError(context, StatusCodes.Status401Unauthorized, "Login user is not valid.");
+            await WriteError(context, errorLog, StatusCodes.Status401Unauthorized, "Login user is not valid.");
             return;
         }
 
         if (!IsAdmin(user) && context.Request.Path.StartsWithSegments("/api/admin"))
         {
-            await WriteError(context, StatusCodes.Status403Forbidden, "Customers cannot access admin APIs.");
+            await WriteError(context, errorLog, StatusCodes.Status403Forbidden, "Customers cannot access admin APIs.");
             return;
         }
 
@@ -94,8 +95,16 @@ public class ValidateLoginUserMiddleware(RequestDelegate next)
         return null;
     }
 
-    private static Task WriteError(HttpContext context, int statusCode, string message)
+    private static Task WriteError(HttpContext context, IErrorLog errorLog, int statusCode, string message)
     {
+        var path = context.Request.Path + context.Request.QueryString;
+        errorLog.Write(
+            ErrorLogMiddleware.Username(context.User),
+            message,
+            $"HTTP {statusCode} {context.Request.Method} {path}",
+            path,
+            "application");
+        context.Items[ErrorLogMiddleware.LoggedItemKey] = true;
         context.Response.StatusCode = statusCode;
         return context.Response.WriteAsJsonAsync(message);
     }

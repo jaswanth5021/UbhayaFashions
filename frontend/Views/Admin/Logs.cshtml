@@ -1,0 +1,119 @@
+@model IReadOnlyList<LadiesDressStore.Web.Services.AppErrorLogEntry>
+@{
+    var itemCount = (int)ViewBag.ItemCount;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var pageCount = (int)ViewBag.PageCount;
+    var pageSize = (int)ViewBag.PageSize;
+    var search = ViewBag.Search as string;
+    var selectedUsername = ViewBag.SelectedUsername as string;
+    var selectedArea = ViewBag.SelectedArea as string;
+    var selectedSource = ViewBag.SelectedSource as string;
+    var sort = ViewBag.Sort as string ?? "date";
+    var direction = ViewBag.Direction as string ?? "desc";
+    var usernames = ViewBag.Usernames as List<string> ?? [];
+    var areas = ViewBag.Areas as List<string> ?? [];
+    var sources = ViewBag.Sources as List<string> ?? [];
+    ViewData["Title"] = "Error logs";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string NextDirection(string column) => string.Equals(sort, column, StringComparison.OrdinalIgnoreCase) && direction == "asc" ? "desc" : "asc";
+    string SortMark(string column) => string.Equals(sort, column, StringComparison.OrdinalIgnoreCase) ? (direction == "asc" ? "▲" : "▼") : "↕";
+}
+<div class="page-head"><div><h1>Error logs</h1><p>@itemCount matching @(itemCount == 1 ? "error" : "errors") · Page @currentPage of @pageCount</p></div></div>
+<form class="admin-product-filters" asp-action="Logs" method="get">
+    <input type="hidden" name="sort" value="@sort" />
+    <input type="hidden" name="direction" value="@direction" />
+    <label>Search<input type="search" name="search" value="@search" placeholder="Username, message, or page" /></label>
+    <label>Username
+        <select name="username">
+            <option value="">All usernames</option>
+            @foreach (var value in usernames) { <option value="@value" selected="@(string.Equals(selectedUsername, value, StringComparison.OrdinalIgnoreCase))">@value</option> }
+        </select>
+    </label>
+    <label>Area
+        <select name="area">
+            <option value="">All areas</option>
+            @foreach (var value in areas) { <option value="@value" selected="@(string.Equals(selectedArea, value, StringComparison.OrdinalIgnoreCase))">@value</option> }
+        </select>
+    </label>
+    <label>Source
+        <select name="source">
+            <option value="">All sources</option>
+            @foreach (var value in sources) { <option value="@value" selected="@(string.Equals(selectedSource, value, StringComparison.OrdinalIgnoreCase))">@value</option> }
+        </select>
+    </label>
+    <button class="primary" type="submit">Apply filters</button>
+    <a class="admin-filter-clear" asp-action="Logs">Clear</a>
+</form>
+<p class="admin-log-path">Log file: @ViewBag.LogFile</p>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th><a class="admin-sort-link @(sort == "username" ? "is-active" : null)" asp-action="Logs" asp-route-sort="username" asp-route-direction="@NextDirection("username")" asp-route-page="1" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource">Username <span class="sort-mark">@SortMark("username")</span></a></th>
+                <th><a class="admin-sort-link @(sort == "date" ? "is-active" : null)" asp-action="Logs" asp-route-sort="date" asp-route-direction="@NextDirection("date")" asp-route-page="1" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource">Date <span class="sort-mark">@SortMark("date")</span></a></th>
+                <th><a class="admin-sort-link @(sort == "time" ? "is-active" : null)" asp-action="Logs" asp-route-sort="time" asp-route-direction="@NextDirection("time")" asp-route-page="1" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource">Time <span class="sort-mark">@SortMark("time")</span></a></th>
+                <th><a class="admin-sort-link @(sort == "area" ? "is-active" : null)" asp-action="Logs" asp-route-sort="area" asp-route-direction="@NextDirection("area")" asp-route-page="1" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource">Area <span class="sort-mark">@SortMark("area")</span></a></th>
+                <th><a class="admin-sort-link @(sort == "message" ? "is-active" : null)" asp-action="Logs" asp-route-sort="message" asp-route-direction="@NextDirection("message")" asp-route-page="1" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource">Error message <span class="sort-mark">@SortMark("message")</span></a></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var entry in Model)
+        {
+            <tr>
+                <td>@entry.Username</td>
+                <td>@entry.Date</td>
+                <td>@entry.Time</td>
+                <td><span class="badge">@entry.Area</span><small>@entry.Source</small></td>
+                <td>
+                    <strong>@entry.Message</strong>
+                    <small>@entry.Path</small>
+                    @if (!string.IsNullOrWhiteSpace(entry.Detail))
+                    {
+                        <details class="admin-log-detail">
+                            <summary>View detail</summary>
+                            <pre>@entry.Detail</pre>
+                        </details>
+                    }
+                </td>
+            </tr>
+        }
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="5" class="inventory-empty">No errors match these filters.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
+<div class="admin-grid-footer">
+    @if (pageCount > 1)
+    {
+        <nav class="admin-pagination" aria-label="Error log pages">
+            @if (currentPage > 1) { <a asp-action="Logs" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource" asp-route-sort="@sort" asp-route-direction="@direction">← Previous</a> } else { <span class="is-disabled" aria-disabled="true">← Previous</span> }
+            <div class="admin-page-numbers">
+                @for (var pageNumber = 1; pageNumber <= pageCount; pageNumber++)
+                {
+                    if (pageNumber == currentPage) { <span class="is-current" aria-current="page">@pageNumber</span> }
+                    else { <a asp-action="Logs" asp-route-page="@pageNumber" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource" asp-route-sort="@sort" asp-route-direction="@direction" aria-label="Page @pageNumber">@pageNumber</a> }
+                }
+            </div>
+            @if (currentPage < pageCount) { <a asp-action="Logs" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-username="@selectedUsername" asp-route-area="@selectedArea" asp-route-source="@selectedSource" asp-route-sort="@sort" asp-route-direction="@direction">Next →</a> } else { <span class="is-disabled" aria-disabled="true">Next →</span> }
+        </nav>
+    }
+    <form class="admin-page-size" asp-action="Logs" method="get">
+        <input type="hidden" name="search" value="@search" />
+        <input type="hidden" name="username" value="@selectedUsername" />
+        <input type="hidden" name="area" value="@selectedArea" />
+        <input type="hidden" name="source" value="@selectedSource" />
+        <input type="hidden" name="sort" value="@sort" />
+        <input type="hidden" name="direction" value="@direction" />
+        <label for="logs-page-size">Rows per page</label>
+        <select id="logs-page-size" name="pageSize" onchange="this.form.submit()">
+            <option value="5" selected="@(pageSize == 5)">5</option>
+            <option value="10" selected="@(pageSize == 10)">10</option>
+            <option value="15" selected="@(pageSize == 15)">15</option>
+            <option value="50" selected="@(pageSize == 50)">50</option>
+            <option value="100" selected="@(pageSize == 100)">100</option>
+            <option value="0" selected="@(pageSize == 0)">All</option>
+        </select>
+    </form>
+</div>

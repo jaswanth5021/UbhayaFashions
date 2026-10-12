@@ -349,3 +349,11 @@
         display: none;
     }
 }
+
+.admin-log-path { margin: -6px 0 14px; color: #806f6a; font-size: 12px; }
+.admin-sort-link { display: inline-flex; align-items: center; gap: 6px; color: inherit; font: inherit; text-decoration: none; }
+.admin-sort-link .sort-mark { color: #c4a36a; font-size: 11px; }
+.admin-sort-link.is-active { color: #68142e; }
+.admin-log-detail { margin-top: 8px; }
+.admin-log-detail summary { color: #68142e; cursor: pointer; font-size: 12px; }
+.admin-log-detail pre { max-height: 220px; margin: 8px 0 0; padding: 10px; overflow: auto; border-radius: 8px; background: #fff7f5; color: #3d3033; font-size: 12px; white-space: pre-wrap; }

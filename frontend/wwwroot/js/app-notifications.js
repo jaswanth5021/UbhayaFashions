@@ -4,9 +4,23 @@
 
     const symbols = { success: '\u2713', warning: '!', error: '\u00d7', info: 'i' };
 
+    const report = (message, detail) => {
+        const text = String(message || '').trim();
+        if (!text) return;
+        const body = new URLSearchParams({
+            message: text.slice(0, 1000),
+            detail: String(detail || '').slice(0, 4000),
+            path: location.pathname + location.search
+        });
+        if (navigator.sendBeacon) navigator.sendBeacon('/client-log', body);
+    };
+
+    let publishingPageNotice = false;
+
     const show = (message, kind = 'info', duration = 6000) => {
         const text = String(message ?? '').trim();
         if (!text) return;
+        if (kind === 'error' && !publishingPageNotice) report(text, 'Shown in the page notification.');
         if (!Object.hasOwn(symbols, kind)) kind = 'info';
 
         const notice = document.createElement('div');
@@ -59,6 +73,7 @@
     };
 
     const publishPageNotices = () => {
+        publishingPageNotice = true;
         document.querySelectorAll('[data-app-notification], .alert.error, .alert.success, .wishlist-notice:not([data-app-notification]), .product-review-notice:not([data-app-notification]), .auth-card > .success:not([data-app-notification])').forEach(element => {
             const text = noticeText(element);
             if (!text) {
@@ -70,7 +85,14 @@
             show(text, kind);
             element.remove();
         });
+        publishingPageNotice = false;
     };
+
+    window.addEventListener('error', event => {
+        if (event.target && event.target !== window) return;
+        report(event.message, event.error && event.error.stack);
+    });
+    window.addEventListener('unhandledrejection', event => report(event.reason && (event.reason.message || event.reason), event.reason && event.reason.stack));
 
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', publishPageNotices);
