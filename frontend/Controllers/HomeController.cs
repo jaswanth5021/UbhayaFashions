@@ -9,6 +9,8 @@ public class HomeController(ApiService api, ILogger<HomeController> logger) : Co
 
     public IActionResult Terms() => View();
 
+    public IActionResult Returns() => View();
+
     public IActionResult About() => View();
 
     public IActionResult NotFoundPage()
