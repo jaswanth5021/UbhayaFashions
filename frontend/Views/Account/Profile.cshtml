@@ -224,6 +224,7 @@
                                     <footer class="profile-order-footer">
                                         <span><small>Delivery address</small>@order.ShippingAddress</span>
                                         @if (!string.IsNullOrWhiteSpace(order.RazorpayOrderId)) { <small>Payment reference: @order.RazorpayOrderId</small> }
+                                        <span><small>Product issue?</small><a asp-controller="Home" asp-action="Returns">How to report a damaged, defective, missing, or incorrect item</a></span>
                                     </footer>
                                 </div>
                             </article>
