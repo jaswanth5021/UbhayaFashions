@@ -186,7 +186,7 @@ app.UseSwaggerUI();
 // MIDDLEWARE
 // =====================================================
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
 var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
 Directory.CreateDirectory(uploadsPath);
