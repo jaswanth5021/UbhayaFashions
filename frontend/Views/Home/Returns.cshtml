@@ -4,32 +4,78 @@
 }
 
 <main class="policy-page returns-policy-page">
-    <h1>Returns, Refunds &amp; Product Issues Policy</h1>
-    <p>If something is not right with your Ubhaya Fashions order, please contact us. We will review the details and explain the available next steps under our policies and applicable law.</p>
+    <header class="returns-hero">
+        <p class="returns-eyebrow">UBHAYA FASHIONS · CUSTOMER CARE</p>
+        <h1>Returns, Refunds &amp; Product Issues</h1>
+        <p>If something is not right with your order, we’re here to help. Learn how to report an issue and what information can help our team review it.</p>
+    </header>
 
-    <h2>Report a problem with your order</h2>
-    <p>Please contact us as soon as reasonably possible if your parcel contains a damaged, defective, missing, or incorrect item. Include your order number, the product name and size, and a short description of what happened.</p>
+    <section class="returns-quick-grid" aria-label="Quick guide">
+        <article class="returns-quick-card">
+            <span class="returns-quick-icon" aria-hidden="true">◎</span>
+            <div><strong>Tell us what happened</strong><span>Share your order number and a short description of the issue.</span></div>
+        </article>
+        <article class="returns-quick-card">
+            <span class="returns-quick-icon" aria-hidden="true">▧</span>
+            <div><strong>Share clear photos</strong><span>5–6 photos can help show the item, parcel and issue.</span></div>
+        </article>
+        <article class="returns-quick-card">
+            <span class="returns-quick-icon" aria-hidden="true">♡</span>
+            <div><strong>We’ll review your concern</strong><span>Our team will explain the next steps for your case.</span></div>
+        </article>
+    </section>
 
-    <h2>Photos and unboxing video</h2>
-    <ul>
-        <li>Please provide <strong>5–6 clear photos</strong> where possible: the full item, close-ups of the issue, the parcel label, and the outer packaging.</li>
-        <li>If possible, record a continuous unboxing video showing the sealed parcel and the item as it is unpacked. This can help us understand the issue.</li>
-        <li>An unboxing video is helpful evidence, but it is not an absolute condition for contacting us. Please report the issue even if you do not have a video.</li>
-        <li>Keep the item, tags, parcel and original packaging until we respond, where practical.</li>
-    </ul>
+    <section class="returns-section">
+        <div class="returns-section-heading">
+            <span class="returns-section-number">01</span>
+            <h2>Report a problem with your order</h2>
+        </div>
+        <p>Please contact us as soon as reasonably possible if your parcel contains a damaged, defective, missing, or incorrect item. Include your order number, product name and size, and a short description of what happened.</p>
+    </section>
 
-    <h2>How to contact us</h2>
-    <ol>
-        <li>Use the <a asp-controller="Contact" asp-action="Index">Contact Us page</a> to describe the issue and provide your order reference.</li>
-        <li>Because the website contact form does not currently support file attachments or send messages by email, send your photos and any available video to <a href="mailto:ubhayafashions@gmail.com">ubhayafashions@gmail.com</a>. Put your order number in the email subject.</li>
-        <li>Our team will review the information and contact you about the next steps. Please do not send passwords, OTPs, or full payment-card details.</li>
-    </ol>
+    <section class="returns-section">
+        <div class="returns-section-heading">
+            <span class="returns-section-number">02</span>
+            <h2>Photos and unboxing video</h2>
+        </div>
+        <p>When reporting an issue, the following information can help us understand what happened:</p>
+        <ul class="returns-checklist">
+            <li>Provide <strong>5–6 clear photos</strong> where possible: the full item, close-ups of the issue, the parcel label, and the outer packaging.</li>
+            <li>If possible, record a continuous unboxing video showing the sealed parcel and the item as it is unpacked.</li>
+            <li>Keep the item, tags, parcel and original packaging until we respond, where practical.</li>
+        </ul>
+        <div class="returns-note">
+            <strong>No unboxing video? That’s okay.</strong>
+            An unboxing video is helpful evidence, but it is not an absolute condition for contacting us. Please report the issue even if you do not have a video.
+        </div>
+    </section>
 
-    <h2>Returns, replacements and refunds</h2>
-    <p>Whether a return, replacement, repair, or refund is available depends on the nature of the issue, the order details, and applicable law. Contact us for an individual review before sending an item back. Please wait for return instructions so the parcel can be handled correctly.</p>
-    <p>We do not use missing photos or an unavailable unboxing video alone as a reason to stop you from raising a concern. Nothing in this policy is intended to remove any consumer rights or remedies that apply under Indian law.</p>
+    <section class="returns-section">
+        <div class="returns-section-heading">
+            <span class="returns-section-number">03</span>
+            <h2>How to contact us</h2>
+        </div>
+        <p>To help us review your concern, please follow these steps:</p>
+        <ul class="returns-checklist">
+            <li>Use our <a asp-controller="Contact" asp-action="Index">Contact Us page</a> to describe the issue and provide your order reference.</li>
+            <li>The website contact form does not currently support file attachments or send messages by email. Send your photos and any available video to <a href="mailto:ubhayafashions@gmail.com">ubhayafashions@gmail.com</a>, and include your order number in the subject.</li>
+            <li>Our team will review the information and contact you about the next steps. Never send passwords, OTPs, or full payment-card details.</li>
+        </ul>
+        <div class="returns-contact-card">
+            <div>
+                <strong>Need help with an order?</strong>
+                <p>Email us with your order number and a short description of the issue.</p>
+            </div>
+            <a href="mailto:ubhayafashions@gmail.com">Email customer care <span aria-hidden="true">&nbsp;→</span></a>
+        </div>
+    </section>
 
-    <h2>Contact details</h2>
-    <p>Email: <a href="mailto:ubhayafashions@gmail.com">ubhayafashions@gmail.com</a></p>
-    <p>For other questions, visit our <a asp-controller="Contact" asp-action="Index">Contact Us page</a>.</p>
+    <section class="returns-section">
+        <div class="returns-section-heading">
+            <span class="returns-section-number">04</span>
+            <h2>Returns, replacements and refunds</h2>
+        </div>
+        <p>Whether a return, replacement, repair, or refund is available depends on the nature of the issue, the order details, and applicable law. Contact us for an individual review before sending an item back, and wait for return instructions so the parcel can be handled correctly.</p>
+        <p>We do not use missing photos or an unavailable unboxing video alone as a reason to stop you from raising a concern. Nothing in this policy is intended to remove any consumer rights or remedies that apply under Indian law.</p>
+    </section>
 </main>
