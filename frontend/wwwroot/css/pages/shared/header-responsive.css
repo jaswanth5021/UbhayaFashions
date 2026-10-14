@@ -11,8 +11,8 @@
 .header .account-menu-name{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .header .customer-notification-menu,.header .wishlist-header-icon,.header .cart-icon,.header .header-icon{flex:0 0 auto}
 
-/* At typical laptop widths, avoid a crowded single-line header by using the hamburger drawer. */
-@media(max-width:1480px){
+/* At narrow laptop/tablet widths, switch to the hamburger drawer. */
+@media(max-width:1180px){
  .header{justify-content:flex-start;gap:clamp(10px,1.1vw,16px);padding-inline:clamp(16px,2vw,28px)}
  .header>.brand{position:static;left:auto;top:auto;transform:none;flex:0 0 82px;width:82px;margin:0 auto 0 0}
  .header>.brand img{width:82px;max-height:58px}
@@ -43,3 +43,21 @@
  .announcement-bar{gap:8px;height:auto;min-height:28px;padding:5px 8px;font-size:8px;letter-spacing:1.2px;line-height:1.4}
 }
 @media(max-width:600px){.header{gap:0;padding-inline:12px}}
+
+/* Keep the full desktop navigation visible on standard laptop and desktop screens. */
+@media (min-width: 1181px) and (max-width: 1480px) {
+ .header { gap: 10px; padding-inline: 18px; }
+ .header > .menu-button { flex-basis: 30px; width: 30px; min-width: 30px; }
+ .header > .brand { flex: 0 0 70px; width: 70px; }
+ .header > .brand img { width: 70px; max-height: 54px; }
+ .header .desktop-primary-nav { display: flex !important; flex: 1 1 auto; min-width: 0; gap: clamp(8px, .85vw, 13px); white-space: nowrap; }
+ .header .desktop-primary-nav > a,
+ .header .desktop-primary-nav > details > summary { font-size: 12px; }
+ .header .desktop-header-search { display: flex !important; flex: 0 1 160px; min-width: 125px; width: 160px; }
+ .header .desktop-header-search input { min-width: 0; font-size: 11px; }
+ .header .header-search-button { display: none !important; }
+ .header .header-actions { gap: 5px; }
+ .header .account-menu-toggle { max-width: 160px; padding-inline: 10px; }
+ .header .account-menu-name { max-width: 112px; font-size: 12px; }
+ .header .header-actions .header-icon { width: 34px; min-width: 34px; flex-basis: 34px; }
+}
