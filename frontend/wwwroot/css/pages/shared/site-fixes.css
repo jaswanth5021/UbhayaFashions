@@ -86,6 +86,102 @@ iframe {
     min-width: 0;
 }
 
+.contact-info {
+    background: linear-gradient(145deg, #68142e, #842b47 72%, #a2475b);
+    color: #fff;
+}
+
+.contact-info .contact-info-intro,
+.contact-info .contact-info-intro h2,
+.contact-info .contact-info-intro p,
+.contact-info .contact-item,
+.contact-info .contact-item strong,
+.contact-info .contact-item span,
+.contact-info .contact-item a,
+.contact-info .contact-issue-title,
+.contact-info .contact-issue-kicker,
+.contact-info .contact-issue-title h2,
+.contact-info .contact-issue-description,
+.contact-info .contact-evidence-list li,
+.contact-info .contact-evidence-list strong,
+.contact-info .contact-evidence-list small,
+.contact-info .contact-issue-footnote,
+.contact-info .contact-policy-link {
+    color: #fff;
+}
+
+.contact-info .contact-evidence-list li {
+    background: rgba(255, 255, 255, .1);
+    border-color: rgba(255, 255, 255, .16);
+}
+
+.contact-info .contact-evidence-list strong,
+.contact-info .contact-evidence-list small {
+    color: #fff;
+}
+
+.contact-info .contact-info-kicker,
+.contact-info .contact-issue-kicker {
+    color: #f6d7ab;
+}
+
+.contact-info .contact-item {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .18);
+    color: #fff;
+}
+
+.contact-info .contact-item-icon,
+.contact-info .contact-issue-icon,
+.contact-info .contact-evidence-list li > span {
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+}
+
+.contact-info .contact-item strong,
+.contact-info .contact-evidence-list strong {
+    color: #f7d991;
+}
+
+.contact-info .contact-item a,
+.contact-info .contact-policy-link {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.contact-info .contact-item a:hover,
+.contact-info .contact-item a:focus-visible,
+.contact-info .contact-policy-link:hover,
+.contact-info .contact-policy-link:focus-visible {
+    color: #f6d7ab;
+}
+
+.contact-info .contact-product-issue-help {
+    border-color: rgba(255, 255, 255, .2);
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+}
+
+.contact-info .contact-issue-footnote,
+.contact-info .contact-issue-description,
+.contact-info .contact-evidence-list small,
+.contact-info .contact-item span {
+    color: rgba(255, 255, 255, .96);
+}
+
+.contact-info .contact-issue-footnote p,
+.contact-info .contact-issue-description,
+.contact-info .contact-evidence-list small {
+    color: rgba(255, 255, 255, .94);
+}
+
+.contact-info .contact-issue-footnote svg,
+.contact-info .contact-item-icon svg,
+.contact-info .contact-issue-icon svg {
+    stroke: currentColor;
+}
+
 .contact-item a {
     color: #fff;
     overflow-wrap: anywhere;
