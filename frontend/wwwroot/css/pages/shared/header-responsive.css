@@ -277,3 +277,70 @@
     .header .desktop-primary-nav *,
     .header .desktop-nav-dropdown-menu * { transition: none !important; }
 }
+
+
+/* Logged-in desktop header: keep the customer name visible and balance the logo position. */
+@media (min-width: 1181px) {
+    .header > .brand {
+        margin-left: 18px;
+        margin-right: 8px;
+    }
+
+    .header .header-actions .account-menu {
+        display: flex !important;
+        flex: 0 0 auto !important;
+        min-width: max-content;
+        visibility: visible !important;
+    }
+
+    .header .header-actions .account-menu .account-menu-toggle {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        width: auto;
+        min-width: 164px;
+        max-width: 205px;
+        padding: 0 13px;
+        overflow: visible;
+    }
+
+    .header .header-actions .account-menu .account-menu-name {
+        display: inline-block !important;
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 150px;
+        overflow: hidden;
+        color: #49363a !important;
+        font-size: 12px;
+        font-weight: 650;
+        line-height: 1.2;
+        opacity: 1 !important;
+        visibility: visible !important;
+        text-indent: 0;
+        white-space: nowrap;
+    }
+
+    .header .header-actions .account-menu .account-menu-toggle-chevron {
+        display: block !important;
+        flex: 0 0 14px;
+        width: 14px;
+        height: 14px;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}
+
+@media (min-width: 1181px) and (max-width: 1480px) {
+    .header { gap: 9px; }
+    .header > .brand { margin-left: 14px; margin-right: 4px; }
+    .header .header-actions .account-menu .account-menu-toggle {
+        min-width: 155px;
+        max-width: 185px;
+        padding-inline: 10px;
+    }
+    .header .header-actions .account-menu .account-menu-name {
+        max-width: 128px;
+        font-size: 11.5px;
+    }
+}
