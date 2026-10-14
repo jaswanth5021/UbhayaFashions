@@ -131,10 +131,52 @@ public sealed class OrderConfirmationEmailService(
                         <div style="margin-bottom:6px;color:#9a6b64;font-size:11px;font-weight:700;letter-spacing:1.2px;">DELIVERING TO</div>
                         <div style="font-size:13px;line-height:1.6;color:#665557;">{encodedAddress}</div>
                       </div>
-                      <div style="margin-top:24px;padding:16px;border:1px solid #ead8c8;border-radius:8px;background:#fff8ef;">
-                        <h2 style="margin:0 0 8px;color:#68142e;font-size:16px;">A quick tip when your parcel arrives</h2>
-                        <p style="margin:0 0 8px;font-size:13px;line-height:1.7;color:#665557;">If possible, record a continuous unboxing video showing the sealed parcel and the item as you unpack it.</p>
-                        <p style="margin:0;font-size:13px;line-height:1.7;color:#665557;">If an item is damaged, defective, missing, or incorrect, keep the packaging and take <strong>5–6 clear photos</strong> of the item, issue, parcel label, and outer packaging. A video is helpful but not a strict requirement for raising a concern. Email <a href="mailto:ubhayafashions@gmail.com" style="color:#68142e;">ubhayafashions@gmail.com</a> with your order number. Please see our Returns, Refunds &amp; Product Issues Policy on the website.</p>
+                      <div style="margin-top:24px;padding:20px;border:1px solid #e5c7c3;border-radius:14px;background:#fffaf8;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;">
+                          <tr>
+                            <td valign="middle" style="width:48px;padding-right:12px;">
+                              <div style="width:42px;height:42px;border-radius:12px;background:#f5e5e3;color:#813c40;text-align:center;font-size:22px;line-height:42px;">&#128247;</div>
+                            </td>
+                            <td valign="middle">
+                              <div style="margin-bottom:3px;color:#9a6b64;font-size:10px;font-weight:700;letter-spacing:1.5px;">A LITTLE PRECAUTION</div>
+                              <h2 style="margin:0;color:#492d30;font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1.3;">Care Instruction Guide</h2>
+                            </td>
+                          </tr>
+                        </table>
+                        <p style="margin:14px 0 12px;font-size:13px;line-height:1.7;color:#665557;">If there’s a problem with your parcel, these simple steps can help us understand it and assist you.</p>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;border-spacing:0 8px;">
+                          <tr>
+                            <td valign="top" style="width:38px;padding:12px 8px;border:1px solid #efdfdd;border-right:0;border-radius:10px 0 0 10px;background:#fff;">
+                              <div style="width:30px;height:30px;border-radius:50%;background:#f5e5e3;color:#813c40;text-align:center;font-weight:700;font-size:13px;line-height:30px;">1</div>
+                            </td>
+                            <td valign="top" style="padding:12px;border:1px solid #efdfdd;border-left:0;border-radius:0 10px 10px 0;background:#fff;">
+                              <div style="margin:0 0 4px;color:#492d30;font-size:14px;font-weight:700;">Record an unboxing video</div>
+                              <div style="font-size:12px;line-height:1.65;color:#746668;">If possible, record a continuous video showing the sealed parcel and the item as you unpack it.</div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td valign="top" style="width:38px;padding:12px 8px;border:1px solid #efdfdd;border-right:0;border-radius:10px 0 0 10px;background:#fff;">
+                              <div style="width:30px;height:30px;border-radius:50%;background:#f5e5e3;color:#813c40;text-align:center;font-weight:700;font-size:13px;line-height:30px;">2</div>
+                            </td>
+                            <td valign="top" style="padding:12px;border:1px solid #efdfdd;border-left:0;border-radius:0 10px 10px 0;background:#fff;">
+                              <div style="margin:0 0 4px;color:#492d30;font-size:14px;font-weight:700;">Take 5–6 clear photos</div>
+                              <div style="font-size:12px;line-height:1.65;color:#746668;">Show the item, the issue, the parcel label, and the outer packaging if anything is damaged, defective, missing, or incorrect.</div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td valign="top" style="width:38px;padding:12px 8px;border:1px solid #efdfdd;border-right:0;border-radius:10px 0 0 10px;background:#fff;">
+                              <div style="width:30px;height:30px;border-radius:50%;background:#f5e5e3;color:#813c40;text-align:center;font-weight:700;font-size:13px;line-height:30px;">3</div>
+                            </td>
+                            <td valign="top" style="padding:12px;border:1px solid #efdfdd;border-left:0;border-radius:0 10px 10px 0;background:#fff;">
+                              <div style="margin:0 0 4px;color:#492d30;font-size:14px;font-weight:700;">Keep packaging and contact us</div>
+                              <div style="font-size:12px;line-height:1.65;color:#746668;">Keep the original packaging and email <a href="mailto:ubhayafashions@gmail.com" style="color:#813c40;font-weight:700;">ubhayafashions@gmail.com</a> with your order number.</div>
+                            </td>
+                          </tr>
+                        </table>
+                        <div style="margin-top:8px;padding:13px 14px;border:1px solid #ead8c8;border-radius:10px;background:#f8f0e8;">
+                          <div style="margin:0 0 4px;color:#694c42;font-size:13px;font-weight:700;">No video? That’s okay.</div>
+                          <div style="font-size:12px;line-height:1.7;color:#665557;">A video is helpful, but it is not a strict requirement for raising a concern. Please see our Returns, Refunds &amp; Product Issues Policy on the website.</div>
+                        </div>
                       </div>
                       <p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:#665557;">Thank you for choosing Ubhaya Fashions. You can check your order status anytime in <strong>My Orders</strong>.</p>
                     </td></tr>
