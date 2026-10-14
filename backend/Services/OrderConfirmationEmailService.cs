@@ -51,6 +51,13 @@ public sealed class OrderConfirmationEmailService(
             Order total: {order.TotalAmount.ToString("C", currency)}
             Delivery address: {order.ShippingAddress}
 
+            PARCEL ARRIVAL TIP
+            If possible, record a continuous unboxing video showing the sealed parcel and the item as you unpack it.
+            If an item is damaged, defective, missing, or incorrect, keep the packaging and take 5-6 clear photos
+            of the item, issue, parcel label, and outer packaging. Contact us with your order number.
+            A video is helpful but is not a strict requirement for raising a concern. See our Returns, Refunds &
+            Product Issues Policy, or email ubhayafashions@gmail.com for help.
+
             Thank you for shopping with Ubhaya Fashions.
             """;
 
@@ -123,6 +130,11 @@ public sealed class OrderConfirmationEmailService(
                       <div style="margin-top:20px;">
                         <div style="margin-bottom:6px;color:#9a6b64;font-size:11px;font-weight:700;letter-spacing:1.2px;">DELIVERING TO</div>
                         <div style="font-size:13px;line-height:1.6;color:#665557;">{encodedAddress}</div>
+                      </div>
+                      <div style="margin-top:24px;padding:16px;border:1px solid #ead8c8;border-radius:8px;background:#fff8ef;">
+                        <h2 style="margin:0 0 8px;color:#68142e;font-size:16px;">A quick tip when your parcel arrives</h2>
+                        <p style="margin:0 0 8px;font-size:13px;line-height:1.7;color:#665557;">If possible, record a continuous unboxing video showing the sealed parcel and the item as you unpack it.</p>
+                        <p style="margin:0;font-size:13px;line-height:1.7;color:#665557;">If an item is damaged, defective, missing, or incorrect, keep the packaging and take <strong>5–6 clear photos</strong> of the item, issue, parcel label, and outer packaging. A video is helpful but not a strict requirement for raising a concern. Email <a href="mailto:ubhayafashions@gmail.com" style="color:#68142e;">ubhayafashions@gmail.com</a> with your order number. Please see our Returns, Refunds &amp; Product Issues Policy on the website.</p>
                       </div>
                       <p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:#665557;">Thank you for choosing Ubhaya Fashions. You can check your order status anytime in <strong>My Orders</strong>.</p>
                     </td></tr>
