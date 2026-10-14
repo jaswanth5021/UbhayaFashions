@@ -1,0 +1,45 @@
+/* Responsive header: keep navigation and account controls inside the viewport. */
+.header{width:100%;min-width:0;gap:clamp(8px,1.1vw,18px);padding-inline:clamp(12px,2vw,30px)}
+.header>.menu-button{flex:0 0 38px;width:38px;min-width:38px;height:42px;padding:0}
+.header>.brand{flex:0 0 88px;min-width:0}
+.header>.brand img{display:block;width:88px;max-width:100%;max-height:58px;object-fit:contain}
+.header .desktop-primary-nav{min-width:0;flex:1 1 auto}
+.header .desktop-header-search{flex:0 1 190px;min-width:125px;width:190px}
+.header .header-actions{display:flex;flex:0 0 auto;align-items:center;justify-content:flex-end;gap:clamp(4px,.65vw,10px);min-width:0}
+.header .account-menu{flex:0 1 auto;min-width:0}
+.header .account-menu-toggle{max-width:clamp(118px,14vw,190px);min-width:0}
+.header .account-menu-name{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header .customer-notification-menu,.header .wishlist-header-icon,.header .cart-icon,.header .header-icon{flex:0 0 auto}
+
+/* At laptop widths, put the full navigation in the existing hamburger drawer. */
+@media(max-width:1280px){
+ .header{justify-content:flex-start;gap:12px;padding-inline:18px}
+ .header>.brand{position:static;left:auto;top:auto;transform:none;flex:0 0 82px;width:82px;margin:0 auto 0 0}
+ .header>.brand img{width:82px;max-height:58px}
+ .header .desktop-primary-nav,.header .desktop-header-search{display:none!important}
+ .header>.menu-button{display:flex!important;flex:0 0 38px}
+ .header .header-actions{margin-left:auto;gap:9px}
+ .header .header-search-button{display:inline-flex!important}
+ .header .account-menu-toggle{max-width:190px}
+}
+@media(max-width:900px){
+ .header{height:72px;min-height:72px;gap:9px;padding-inline:14px}
+ .header .header-actions{gap:5px}
+ .header .account-menu-toggle{max-width:150px;height:38px;padding-inline:10px}
+ .header .account-menu-name{max-width:112px;font-size:12px}
+ .header .header-actions .header-icon{width:36px;min-width:36px;height:40px;min-height:40px;flex-basis:36px}
+ .announcement-bar{padding-inline:10px;font-size:10px;letter-spacing:2px;text-align:center}
+}
+@media(max-width:760px) and (min-width:601px){
+ .header{height:68px;min-height:68px;padding-inline:10px;gap:7px}
+ .header>.brand{flex-basis:70px;width:70px}
+ .header>.brand img{width:70px;max-height:52px}
+ .header .header-actions{gap:2px}
+ .header .account-menu-toggle{max-width:112px;height:35px;padding-inline:8px}
+ .header .account-menu-name{max-width:82px;font-size:11px}
+ .header .account-menu-toggle-chevron{width:13px;height:13px;flex-basis:13px}
+ .header .header-actions .header-icon{width:32px;min-width:32px;height:38px;min-height:38px;flex-basis:32px}
+ .header .header-actions .header-icon svg{width:20px;height:20px}
+ .announcement-bar{gap:8px;height:auto;min-height:28px;padding:5px 8px;font-size:8px;letter-spacing:1.2px;line-height:1.4}
+}
+@media(max-width:600px){.header{gap:0;padding-inline:12px}}
