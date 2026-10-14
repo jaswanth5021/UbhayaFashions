@@ -61,3 +61,219 @@
  .header .account-menu-name { max-width: 112px; font-size: 12px; }
  .header .header-actions .header-icon { width: 34px; min-width: 34px; flex-basis: 34px; }
 }
+
+
+/* Premium desktop navigation and category dropdown styling. */
+.header .desktop-primary-nav {
+    align-items: center;
+    justify-content: center;
+    gap: clamp(13px, 1.35vw, 22px);
+}
+
+.header .desktop-primary-nav > a,
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 42px;
+    padding: 0 1px;
+    color: #39272b;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .005em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .18s ease;
+}
+
+.header .desktop-primary-nav > a::after,
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary::after {
+    position: absolute;
+    right: 0;
+    bottom: 5px;
+    left: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: #8a2945;
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform .18s ease;
+}
+
+.header .desktop-primary-nav > a:hover,
+.header .desktop-primary-nav > a:focus-visible,
+.header .desktop-primary-nav > a.is-active,
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary:hover,
+.header .desktop-primary-nav > .desktop-nav-dropdown.is-active > summary {
+    color: #8a2945;
+}
+
+.header .desktop-primary-nav > a:hover::after,
+.header .desktop-primary-nav > a:focus-visible::after,
+.header .desktop-primary-nav > a.is-active::after,
+.header .desktop-primary-nav > .desktop-nav-dropdown > summary:hover::after,
+.header .desktop-primary-nav > .desktop-nav-dropdown.is-active > summary::after {
+    transform: scaleX(1);
+}
+
+.header .desktop-nav-dropdown {
+    position: relative;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+}
+
+.header .desktop-nav-dropdown > summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.header .desktop-nav-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.header .desktop-nav-dropdown > summary::before {
+    width: 7px;
+    height: 7px;
+    margin-top: -4px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    content: "";
+    order: 2;
+    transform: rotate(45deg);
+    transition: transform .18s ease;
+}
+
+.header .desktop-nav-dropdown[open] > summary::before {
+    margin-top: 3px;
+    transform: rotate(225deg);
+}
+
+.header .desktop-nav-dropdown-menu {
+    position: absolute;
+    z-index: 1000;
+    top: calc(100% - 1px);
+    left: 50%;
+    display: block;
+    width: 286px;
+    max-height: min(70vh, 460px);
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #efdfdf;
+    border-radius: 15px;
+    background: rgba(255, 253, 251, .98);
+    box-shadow: 0 18px 48px rgba(63, 20, 36, .16);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 8px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+}
+
+.header .desktop-nav-dropdown[open] .desktop-nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+.header .desktop-nav-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-height: 48px;
+    margin: 2px 0;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: #4c373b;
+    font-size: 12px;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.header .desktop-nav-dropdown-menu a:hover,
+.header .desktop-nav-dropdown-menu a:focus-visible,
+.header .desktop-nav-dropdown-menu a.is-current {
+    border-color: #f1dfe3;
+    background: #fff1f3;
+    color: #711c39;
+}
+
+.header .desktop-nav-dropdown-menu .desktop-category-feature {
+    min-height: 62px;
+}
+
+.header .desktop-category-icon {
+    display: inline-grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 10px;
+    background: #fbedf0;
+    color: #7b1f3c;
+}
+
+.header .desktop-category-icon svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.header .desktop-category-copy {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.header .desktop-category-copy strong {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.header .desktop-category-copy small {
+    color: #8c777b;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.header .desktop-category-chevron {
+    margin-left: auto;
+    color: #a7838b;
+    font-size: 21px;
+    line-height: 1;
+    transition: transform .18s ease, color .18s ease;
+}
+
+.header .desktop-nav-dropdown-menu a:hover .desktop-category-chevron {
+    color: #7b1f3c;
+    transform: translateX(2px);
+}
+
+.header .desktop-category-divider {
+    display: block;
+    height: 1px;
+    margin: 7px 8px;
+    background: #f0e3e1;
+}
+
+@media (max-width: 1480px) and (min-width: 1181px) {
+    .header .desktop-primary-nav { gap: clamp(9px, .9vw, 14px); }
+    .header .desktop-primary-nav > a,
+    .header .desktop-primary-nav > .desktop-nav-dropdown > summary { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .header .desktop-primary-nav *,
+    .header .desktop-nav-dropdown-menu * { transition: none !important; }
+}
