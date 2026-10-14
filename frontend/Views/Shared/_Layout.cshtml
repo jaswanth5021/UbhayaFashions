@@ -263,26 +263,23 @@
 
         <nav class="desktop-primary-nav" aria-label="Main navigation">
             <a class="@(isHomePage ? "is-active" : "")" aria-current="@(isHomePage ? "page" : null)" asp-controller="Home" asp-action="Index">Home</a>
-            <a class="desktop-view-all-link @(isViewAllNavActive ? "is-active" : "")" aria-current="@(isViewAllNavActive ? "page" : null)" asp-controller="Products" asp-action="Index">
-                <span>View All</span>
-            </a>
             <a class="@(isNewArrivalsNavActive ? "is-active" : "")" aria-current="@(isNewArrivalsNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-newArrivals="true">New Arrivals</a>
-            <details class="desktop-nav-dropdown @(isCategoryNavActive ? "is-active" : "")">
+            <details class="desktop-nav-dropdown @(isCategoryNavActive || isViewAllNavActive || isBestSellersNavActive ? "is-active" : "")">
                 <summary>Categories</summary>
                 <div class="desktop-nav-dropdown-menu">
+                    <a class="@(isViewAllNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index">View All Products</a>
+                    <a class="@(isBestSellersNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">Best Sellers</a>
                     @foreach (var category in navCategories)
                     {
                         <a class="@(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">@category.Name</a>
                     }
                     @if (navCategories.Count == 0)
                     {
-                        <a asp-controller="Products" asp-action="Categories">All categories</a>
+                        <a asp-controller="Products" asp-action="Categories">Browse all categories</a>
                     }
                 </div>
             </details>
-            <a class="@(isBestSellersNavActive ? "is-active" : "")" aria-current="@(isBestSellersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">Best Sellers</a>
             <a class="@(isOffersNavActive ? "is-active" : "")" aria-current="@(isOffersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-sort="discount">Offers</a>
-            <a class="@(isAboutNavActive ? "is-active" : "")" aria-current="@(isAboutNavActive ? "page" : null)" asp-controller="Home" asp-action="About">About</a>
             <a class="@(isContactPage ? "is-active" : "")" aria-current="@(isContactPage ? "page" : null)" asp-controller="Contact" asp-action="Index">Contact</a>
         </nav>
 
