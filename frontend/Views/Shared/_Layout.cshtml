@@ -267,15 +267,32 @@
             <details class="desktop-nav-dropdown @(isCategoryNavActive || isViewAllNavActive || isBestSellersNavActive ? "is-active" : "")">
                 <summary>Categories</summary>
                 <div class="desktop-nav-dropdown-menu">
-                    <a class="@(isViewAllNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index">View All Products</a>
-                    <a class="@(isBestSellersNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">Best Sellers</a>
+                    <a class="desktop-category-feature @(isViewAllNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index">
+                        <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></span>
+                        <span class="desktop-category-copy"><strong>View All Products</strong><small>Explore the collection</small></span>
+                        <span class="desktop-category-chevron" aria-hidden="true">›</span>
+                    </a>
+                    <a class="desktop-category-feature @(isBestSellersNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">
+                        <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17.5 8.2 12l4 3.2L20.5 6"/><path d="M15.5 6h5v5"/></svg></span>
+                        <span class="desktop-category-copy"><strong>Best Sellers</strong><small>Customer favourites</small></span>
+                        <span class="desktop-category-chevron" aria-hidden="true">›</span>
+                    </a>
+                    <span class="desktop-category-divider" aria-hidden="true"></span>
                     @foreach (var category in navCategories)
                     {
-                        <a class="@(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">@category.Name</a>
+                        <a class="desktop-category-link @(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">
+                            <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m16 4 4 2-2 5-3-1v10H9V10l-3 1-2-5 4-2c1 2 2 3 4 3s3-1 4-3Z"/></svg></span>
+                            <span class="desktop-category-copy"><strong>@category.Name</strong></span>
+                            <span class="desktop-category-chevron" aria-hidden="true">›</span>
+                        </a>
                     }
                     @if (navCategories.Count == 0)
                     {
-                        <a asp-controller="Products" asp-action="Categories">Browse all categories</a>
+                        <a class="desktop-category-link" asp-controller="Products" asp-action="Categories">
+                            <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></span>
+                            <span class="desktop-category-copy"><strong>Browse all categories</strong></span>
+                            <span class="desktop-category-chevron" aria-hidden="true">›</span>
+                        </a>
                     }
                 </div>
             </details>
