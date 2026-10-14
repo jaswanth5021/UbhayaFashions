@@ -3,6 +3,25 @@
     ViewData["MetaDescription"] = "Your Ubhaya Fashions order was placed successfully.";
     var orderId = (int?)ViewBag.OrderId;
 }
+<style>
+    .order-evidence-reminder{margin:30px 0 24px;padding:clamp(20px,3vw,34px);border:1px solid #d8b5b1;border-radius:20px;background:linear-gradient(145deg,#fffaf8 0%,#fff 75%);text-align:left;box-shadow:0 8px 24px rgba(91,39,42,.05)}
+    .order-evidence-heading{display:flex;align-items:center;gap:13px;margin-bottom:10px}
+    .order-evidence-heading-icon{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:15px;background:#f5e5e3;color:#813c40}
+    .order-evidence-heading-icon svg,.order-evidence-item-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .order-evidence-heading h2{margin:0;color:#492d30;font-size:clamp(1.2rem,2.5vw,1.65rem);line-height:1.3}
+    .order-evidence-intro{margin:0 0 22px;color:#68585a;line-height:1.7}
+    .order-evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}
+    .order-evidence-item{display:flex;gap:11px;align-items:flex-start;padding:16px 13px;border:1px solid #eee0de;border-radius:14px;background:rgba(255,255,255,.9);min-width:0}
+    .order-evidence-item-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:12px;background:#f8eeec;color:#813c40}
+    .order-evidence-item strong{display:block;margin:2px 0 5px;color:#492d30;font-size:.94rem}
+    .order-evidence-item small{display:block;color:#746668;font-size:.83rem;line-height:1.5}
+    .order-evidence-note{display:flex;gap:11px;align-items:flex-start;margin-top:20px;padding:15px 16px;border-radius:12px;background:#f7f0e9;color:#66534c;font-size:.92rem;line-height:1.65}
+    .order-evidence-note svg{flex:0 0 21px;width:21px;height:21px;margin-top:2px;fill:none;stroke:#8a5a45;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .order-evidence-note p{margin:0}
+    .order-evidence-note a{color:#813c40;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+    .order-evidence-reminder .order-evidence-video-note{margin:0;color:#746668;font-size:.88rem;line-height:1.6}
+    @media(max-width:700px){.order-evidence-grid{grid-template-columns:1fr}.order-evidence-item{padding:14px}.order-evidence-reminder{margin:24px 0;padding:20px 16px}.order-evidence-heading{align-items:flex-start}.order-evidence-heading-icon{flex-basis:42px;width:42px;height:42px;border-radius:13px}.order-evidence-heading-icon svg{width:22px;height:22px}}
+</style>
 <section class="order-result-page order-success-page">
     <div class="order-result-card">
         <div class="order-result-confetti" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
@@ -41,10 +60,40 @@
         </div>
 
         <section class="order-evidence-reminder" aria-labelledby="orderEvidenceHeading">
-            <h2 id="orderEvidenceHeading">A quick tip when your parcel arrives</h2>
-            <p>If possible, record a continuous unboxing video before opening the parcel, showing the sealed package and the item as you unpack it. This can help us understand any delivery or product issue.</p>
-            <p>If an item is damaged, defective, missing, or incorrect, please keep the packaging and take <strong>5–6 clear photos</strong> of the item, the issue, parcel label, and outer packaging. Contact us with your order number and these details.</p>
-            <p>A video is helpful but not a strict requirement to contact us. We’ll review the information you can provide under our <a asp-controller="Home" asp-action="Returns">Returns, Refunds &amp; Product Issues Policy</a> and applicable consumer rights.</p>
+            <div class="order-evidence-heading">
+                <span class="order-evidence-heading-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 7.5h3l1.5-2h7l1.5 2h3A1.5 1.5 0 0 1 21.5 9v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                </span>
+                <h2 id="orderEvidenceHeading">A quick tip when your parcel arrives</h2>
+            </div>
+            <p class="order-evidence-intro">A few simple steps can help us understand a delivery or product issue more clearly.</p>
+
+            <div class="order-evidence-grid">
+                <div class="order-evidence-item">
+                    <span class="order-evidence-item-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="m10 10 5 2.5-5 2.5z"/><path d="M7 3.5h10"/></svg>
+                    </span>
+                    <div><strong>1. Record if possible</strong><small>Film one continuous video of the sealed parcel and unpacking.</small></div>
+                </div>
+                <div class="order-evidence-item">
+                    <span class="order-evidence-item-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><path d="M15 15h2v2h-2zM19 13v2M13 19h2M19 18v3"/></svg>
+                    </span>
+                    <div><strong>2. Take 5–6 photos</strong><small>Show the item, any damage, the parcel label and outer packaging.</small></div>
+                </div>
+                <div class="order-evidence-item">
+                    <span class="order-evidence-item-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="m3 8 9-5 9 5-9 5-9-5Z"/><path d="M3 8v9l9 5 9-5V8M12 13v9"/><path d="m8 5.8 9 5"/></svg>
+                    </span>
+                    <div><strong>3. Keep the packaging</strong><small>Save the parcel and share your order number when contacting us.</small></div>
+                </div>
+            </div>
+
+            <p class="order-evidence-video-note">Please report any damaged, defective, missing or incorrect item as soon as you can.</p>
+            <div class="order-evidence-note">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg>
+                <p><strong>Don’t have a video? That’s okay.</strong> A video is helpful, but it is not a strict requirement to contact us. We’ll review the information you can provide under our <a asp-controller="Home" asp-action="Returns">Returns, Refunds &amp; Product Issues Policy</a> and applicable consumer rights.</p>
+            </div>
         </section>
 
         <div class="order-result-actions">
