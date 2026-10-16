@@ -23,6 +23,9 @@ body.admin-body {
 .admin-sidebar {
     z-index: 2;
     min-width: 0;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
     padding: 30px 18px 20px;
     background: linear-gradient(180deg, #4a1023 0%, #35101c 100%);
 }
@@ -86,6 +89,27 @@ body.admin-body {
     background: #f5e9ed;
     color: #68142e;
     font-weight: 700;
+}
+
+.admin-user-name {
+    min-width: 0;
+}
+
+.admin-logout {
+    margin-left: 6px;
+    padding: 7px 12px;
+    border: 1px solid #eadde1;
+    border-radius: 5px;
+    color: #68142e;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.admin-logout:hover {
+    background: #f8eef1;
 }
 
 .admin-content {
@@ -576,7 +600,7 @@ body.admin-body {
 }
 
 @media (max-width: 480px) {
-    .admin-user > span:last-child {
+    .admin-user-name {
         max-width: 104px;
         overflow: hidden;
         text-overflow: ellipsis;

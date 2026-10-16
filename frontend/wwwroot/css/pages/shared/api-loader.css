@@ -1,0 +1,115 @@
+/* Full-screen liquid loader shown while a page or same-origin request is loading. */
+.api-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    background: rgba(255, 248, 246, 0.78);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.api-loader.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.api-loader-card {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    min-width: 148px;
+    padding: 24px 32px 22px;
+    border: 1px solid rgba(114, 25, 50, 0.12);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 18px 50px rgba(72, 18, 32, 0.12);
+}
+
+.api-loader-liquid {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 2px solid rgba(114, 25, 50, 0.2);
+    background: linear-gradient(145deg, #fff 10%, #f8e9ed 100%);
+    box-shadow: inset 0 0 12px rgba(114, 25, 50, 0.08), 0 5px 14px rgba(114, 25, 50, 0.1);
+}
+
+.api-loader-liquid::before {
+    position: absolute;
+    right: -18%;
+    bottom: -48%;
+    left: -18%;
+    height: 100%;
+    border-radius: 42% 58% 0 0 / 18% 22% 0 0;
+    background: linear-gradient(155deg, #a64865 0%, #721932 58%, #4b1025 100%);
+    box-shadow: 0 -2px 5px rgba(255, 255, 255, 0.4);
+    content: "";
+    animation: api-loader-wave 1.8s ease-in-out infinite alternate;
+}
+
+.api-loader-liquid::after {
+    position: absolute;
+    top: 13px;
+    left: 19px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 18px 15px 0 -1px rgba(255, 255, 255, 0.9), 8px 31px 0 -2px rgba(255, 255, 255, 0.75);
+    content: "";
+    animation: api-loader-bubbles 1.8s ease-in-out infinite;
+}
+
+.api-loader-brand {
+    color: #721932;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+}
+
+.api-loader-label {
+    color: #6d545c;
+    font-size: 13px;
+}
+
+@keyframes api-loader-wave {
+    from {
+        transform: translateX(-5%) rotate(-7deg);
+    }
+
+    to {
+        transform: translateX(5%) rotate(7deg);
+    }
+}
+
+@keyframes api-loader-bubbles {
+    0%, 100% {
+        opacity: 0.4;
+        transform: translateY(5px);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .api-loader {
+        transition: none;
+    }
+
+    .api-loader-liquid::before,
+    .api-loader-liquid::after {
+        animation: none;
+    }
+}

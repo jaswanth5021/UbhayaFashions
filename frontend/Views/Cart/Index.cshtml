@@ -53,6 +53,10 @@
                         <div class="shopping-cart-item-info">
                             <p class="shopping-cart-category">UBHAYA COLLECTION</p>
                             <h2><a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId">@item.Name</a></h2>
+                            @if (!string.IsNullOrWhiteSpace(item.Color))
+                            {
+                                <p class="shopping-cart-color">Color: @item.Color</p>
+                            }
                             <form asp-controller="Cart" asp-action="Update" method="post" class="shopping-cart-update" data-cart-update>
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
@@ -86,6 +90,7 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
                                 <input type="hidden" name="size" value="@item.Size" />
+                                <input type="hidden" name="color" value="@item.Color" />
                                 <button type="submit">Remove item</button>
                             </form>
                         </div>

@@ -58,8 +58,9 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(color))
         {
-            var normalizedColor = color.Trim();
-            query = query.Where(x => EF.Functions.Like(x.Colors, $"%{normalizedColor}%"));
+            var colorToken = "," + ProductColorCatalog.Canonical(color).Replace(" ", "") + ",";
+            query = query.Where(x =>
+                ("," + (x.Colors ?? "").Replace(" ", "") + ",").Contains(colorToken));
         }
 
         if (minPrice.HasValue)
@@ -108,6 +109,34 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
 
         var products = await query.ToListAsync();
         return Ok(await AttachReviewSummariesAsync(products));
+    }
+
+    [HttpGet("colors")]
+    public async Task<IActionResult> GetColors()
+    {
+        var stored = await db.Products.AsNoTracking()
+            .Select(product => product.Colors)
+            .ToListAsync();
+        var colors = stored
+            .SelectMany(ProductColorCatalog.Split)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name =>
+            {
+                var index = Array.FindIndex(ProductColorCatalog.Names, known => known.Equals(name, StringComparison.OrdinalIgnoreCase));
+                return index < 0 ? int.MaxValue : index;
+            })
+            .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        return Ok(colors);
+    }
+
+    [HttpGet("price-bounds")]
+    public async Task<IActionResult> GetPriceBounds()
+    {
+        var prices = await db.ProductVariants.AsNoTracking()
+            .Select(variant => variant.Price)
+            .ToListAsync();
+        return Ok(new { min = 0, max = ProductColorCatalog.PriceCeiling(prices) });
     }
 
     [HttpGet("{id:int}")]

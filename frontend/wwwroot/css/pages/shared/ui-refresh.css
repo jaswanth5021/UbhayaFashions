@@ -1347,6 +1347,13 @@ body {
     font-weight: 600;
 }
 
+.cart-drawer-item-color,
+.shopping-cart-color {
+    margin: 0 0 8px;
+    color: #7d656b;
+    font-size: 12px;
+}
+
 .cart-drawer-update select {
     border-color: #e4cfca;
     border-radius: 5px;

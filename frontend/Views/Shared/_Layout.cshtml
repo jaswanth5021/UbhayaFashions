@@ -68,6 +68,15 @@
         catch (HttpRequestException) { return (Id: id, Variants: (List<LadiesDressStore.Web.Models.ProductVariantViewModel>?)null); }
         catch (JsonException) { return (Id: id, Variants: (List<LadiesDressStore.Web.Models.ProductVariantViewModel>?)null); }
     });
+    var categoriesTask = ProductCache.GetOrCreateAsync("store-nav-categories", async entry =>
+    {
+        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+        return await Api.GetCategoriesAsync();
+    });
+    var accountIsSignedIn = User.Identity?.IsAuthenticated == true;
+    var wishlistTask = accountIsSignedIn ? Api.GetWishlistAsync() : null;
+    var addressesTask = accountIsSignedIn ? Api.GetMyAddressesAsync() : null;
+    var profileTask = accountIsSignedIn ? Api.GetMyProfileAsync() : null;
     foreach (var productData in await Task.WhenAll(cartProductTasks))
     {
         if (productData.Variants is not null) cartVariants[productData.Id] = productData.Variants;
@@ -79,38 +88,31 @@
     var navCategories = new List<LadiesDressStore.Web.Models.CategoryViewModel>();
     try
     {
-        navCategories = await ProductCache.GetOrCreateAsync("store-nav-categories", async entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-            return await Api.GetCategoriesAsync();
-        }) ?? [];
+        navCategories = await categoriesTask ?? [];
     }
     catch (HttpRequestException) { }
     catch (JsonException) { }
     var activeCategory = navQuery["category"].ToString();
 
     var wishlistCount = 0;
-    if (User.Identity?.IsAuthenticated == true)
+    if (accountIsSignedIn)
     {
-        var wishlistTask = Api.GetWishlistAsync();
-        var addressesTask = Api.GetMyAddressesAsync();
-        var profileTask = Api.GetMyProfileAsync();
         try
         {
-            wishlistCount = (await wishlistTask).Count;
+            wishlistCount = (await wishlistTask!).Count;
         }
         catch (HttpRequestException) { }
 
         try
         {
-            savedCheckoutAddresses = await addressesTask;
+            savedCheckoutAddresses = await addressesTask!;
         }
         catch (HttpRequestException) { }
         catch (JsonException) { }
 
         try
         {
-            var profileResult = await profileTask;
+            var profileResult = await profileTask!;
             if (profileResult.Data is not null)
             {
                 accountName = string.IsNullOrWhiteSpace(profileResult.Data.Name) ? accountName : profileResult.Data.Name;
@@ -183,6 +185,7 @@
           asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/search-polish.css?v=search-polish-2026-10-07-2" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/site-fixes.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/api-loader.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/customer-notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/account/login.css?v=account-login-layout-20261009-4" asp-append-version="true" />
@@ -215,6 +218,7 @@
 </head>
 
 <body class="@(isHomePage ? "home-page" : string.Empty)">
+<partial name="_ApiLoader" />
 <partial name="_FlashMessages" />
 
     <!-- =========================================
@@ -530,10 +534,15 @@
                         <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
                         <div class="cart-drawer-item-info">
                             <h3>@item.Name</h3>
+                            @if (!string.IsNullOrWhiteSpace(item.Color))
+                            {
+                                <p class="cart-drawer-item-color">Color: @item.Color</p>
+                            }
                             <form asp-controller="Cart" asp-action="Update" method="post" class="cart-item-update cart-drawer-update" data-cart-update>
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
                                 <input type="hidden" name="currentSize" value="@item.Size" />
+                                <input type="hidden" name="color" value="@item.Color" />
                                 <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
                                 <label>Size <select name="size" data-cart-size>
                                     @foreach (var variant in cartVariants.GetValueOrDefault(item.ProductId, []).Where(variant => variant.Stock > 0).OrderBy(variant => variant.Size))
@@ -555,6 +564,7 @@
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@item.ProductId" />
                             <input type="hidden" name="size" value="@item.Size" />
+                            <input type="hidden" name="color" value="@item.Color" />
                             <button type="submit" aria-label="Remove @item.Name from cart">×</button>
                         </form>
                     </article>

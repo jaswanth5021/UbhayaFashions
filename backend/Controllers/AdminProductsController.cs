@@ -39,7 +39,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
             Description = request.Description?.Trim() ?? string.Empty,
             CategoryId = category.Id,
             CategoryNavigation = category,
-            Colors = request.Colors?.Trim() ?? string.Empty,
+            Colors = ProductColorCatalog.Normalize(request.Colors),
             ImageUrl = request.ImageUrl?.Trim() ?? string.Empty,
             IsBestSeller = request.IsBestSeller,
             Variants = request.Variants.Select(ToVariant).ToList()
@@ -82,7 +82,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         product.Description = request.Description?.Trim() ?? string.Empty;
         product.CategoryId = category.Id;
         product.CategoryNavigation = category;
-        product.Colors = request.Colors?.Trim() ?? string.Empty;
+        product.Colors = ProductColorCatalog.Normalize(request.Colors);
         product.ImageUrl = request.ImageUrl?.Trim() ?? string.Empty;
         product.IsBestSeller = request.IsBestSeller;
         product.UpdatedDate = DateTime.UtcNow;

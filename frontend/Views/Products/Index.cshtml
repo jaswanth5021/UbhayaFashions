@@ -12,6 +12,8 @@
     var availability = ViewBag.Availability as string;
     var selectedSort = newArrivalsOnly ? "newest" : ViewBag.Sort as string ?? "recommended";
     var categories = ViewBag.Categories as List<CategoryViewModel> ?? new List<CategoryViewModel>();
+    var customColors = ViewBag.CustomColors as List<string> ?? [];
+    var priceCeiling = ViewBag.PriceCeiling as int? ?? 10000;
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var productCount = (int)ViewBag.ProductCount;
     var currentPage = (int)ViewBag.CurrentPage;
@@ -106,10 +108,16 @@
                 <input type="hidden" name="bestSellers" value="true" />
             }
             @if (newArrivalsOnly) { <input type="hidden" name="newArrivals" value="true" /> }
+            <input type="hidden" name="size" value="@selectedSize" />
+            <input type="hidden" name="color" value="@selectedColor" />
+            <input type="hidden" name="minPrice" value="@minPrice" />
+            <input type="hidden" name="maxPrice" value="@maxPrice" />
+            <input type="hidden" name="availability" value="@availability" />
+            <input type="hidden" name="sort" value="@selectedSort" />
             <button type="submit">SEARCH</button>
             @if (!string.IsNullOrWhiteSpace(search))
             {
-                <a asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly">CLEAR</a>
+                <a asp-action="Index" asp-route-category="@category" asp-route-bestSellers="@bestSellersOnly" asp-route-newArrivals="@newArrivalsOnly" asp-route-size="@selectedSize" asp-route-color="@selectedColor" asp-route-minPrice="@minPrice" asp-route-maxPrice="@maxPrice" asp-route-availability="@availability" asp-route-sort="@selectedSort">CLEAR</a>
             }
         </div>
     </form>
@@ -125,7 +133,7 @@
                    asp-route-newArrivals="@newArrivalsOnly">Clear All</a>
             </div>
 
-            <form asp-action="Index" method="get" class="catalog-sidebar-form">
+            <form asp-action="Index" method="get" class="catalog-sidebar-form" data-price-ceiling="@priceCeiling">
                 <input type="hidden" name="search" value="@search" />
                 @if (bestSellersOnly)
                 {
@@ -168,28 +176,23 @@
 
                 <section class="filter-section">
                     <h3>Color</h3>
+                    <p class="filter-color-help">Choose a color saved on the product.</p>
                     <div class="filter-color-list">
-                        @{
-                            var filterColors = new[]
-                            {
-                                ("Black", "#171717"),
-                                ("White", "#ffffff"),
-                                ("Red", "#b3263b"),
-                                ("Pink", "#e98aa9"),
-                                ("Green", "#72a66a"),
-                                ("Blue", "#6288c8"),
-                                ("Yellow", "#e7b84c"),
-                                ("Maroon", "#68142e"),
-                                ("Purple", "#8b68ad"),
-                                ("Beige", "#d8c2a7"),
-                                ("Orange", "#e77932")
-                            };
-                        }
-                        @foreach (var item in filterColors)
+                        @foreach (var item in ProductColorCatalog.All)
                         {
-                            <label class="filter-color-option @(string.Equals(item.Item1, selectedColor, StringComparison.OrdinalIgnoreCase) ? "is-selected" : "")" title="@item.Item1">
-                                <input type="radio" name="color" value="@item.Item1" checked="@string.Equals(item.Item1, selectedColor, StringComparison.OrdinalIgnoreCase)" />
-                                <span style="--filter-color:@item.Item2"></span>
+                            var isSelected = string.Equals(item.Name, selectedColor, StringComparison.OrdinalIgnoreCase);
+                            <label class="filter-color-option @(isSelected ? "is-selected" : "")" title="@item.Name">
+                                <input type="radio" name="color" value="@item.Name" checked="@(isSelected ? "checked" : null)" />
+                                <span style="--filter-color:@item.Hex"></span>
+                            </label>
+                        }
+                        @foreach (var colorName in customColors)
+                        {
+                            var isSelected = string.Equals(colorName, selectedColor, StringComparison.OrdinalIgnoreCase);
+                            <label class="filter-color-option filter-color-option-named @(isSelected ? "is-selected" : "")" title="@colorName">
+                                <input type="radio" name="color" value="@colorName" checked="@(isSelected ? "checked" : null)" />
+                                <span style="--filter-color:#c8b7b0"></span>
+                                <small>@colorName</small>
                             </label>
                         }
                     </div>
@@ -199,15 +202,15 @@
                     <h3>Price</h3>
                     <div class="filter-price-values">
                         <span id="priceMinLabel">₹@(minPrice ?? 0)</span>
-                        <span id="priceMaxLabel">₹@(maxPrice ?? 10000)</span>
+                        <span id="priceMaxLabel">₹@(maxPrice ?? priceCeiling)</span>
                     </div>
                     <div class="filter-range-wrap">
-                        <input id="minPriceRange" type="range" min="0" max="10000" step="100" value="@(minPrice ?? 0)" aria-label="Minimum price" />
-                        <input id="maxPriceRange" type="range" min="0" max="10000" step="100" value="@(maxPrice ?? 10000)" aria-label="Maximum price" />
+                        <input id="minPriceRange" type="range" min="0" max="@priceCeiling" step="100" value="@(minPrice ?? 0)" aria-label="Minimum price" />
+                        <input id="maxPriceRange" type="range" min="0" max="@priceCeiling" step="100" value="@(maxPrice ?? priceCeiling)" aria-label="Maximum price" />
                     </div>
                     <div class="filter-price-inputs">
-                        <input id="minPriceInput" name="minPrice" type="number" min="0" max="10000" step="100" value="@minPrice" placeholder="₹ Min" />
-                        <input id="maxPriceInput" name="maxPrice" type="number" min="0" max="10000" step="100" value="@maxPrice" placeholder="₹ Max" />
+                        <input id="minPriceInput" name="minPrice" type="number" min="0" max="@priceCeiling" step="100" value="@minPrice" placeholder="₹ Min" />
+                        <input id="maxPriceInput" name="maxPrice" type="number" min="0" max="@priceCeiling" step="100" value="@maxPrice" placeholder="₹ Max" />
                     </div>
                 </section>
 
@@ -240,6 +243,13 @@
                     <input name="search" value="@search" type="search" placeholder="Search dresses, kurtis..." autocomplete="off" />
                     @if (!string.IsNullOrWhiteSpace(category)) { <input type="hidden" name="category" value="@category" /> }
                     @if (bestSellersOnly) { <input type="hidden" name="bestSellers" value="true" /> }
+                    @if (newArrivalsOnly) { <input type="hidden" name="newArrivals" value="true" /> }
+                    <input type="hidden" name="size" value="@selectedSize" />
+                    <input type="hidden" name="color" value="@selectedColor" />
+                    <input type="hidden" name="minPrice" value="@minPrice" />
+                    <input type="hidden" name="maxPrice" value="@maxPrice" />
+                    <input type="hidden" name="availability" value="@availability" />
+                    <input type="hidden" name="sort" value="@selectedSort" />
                     <button type="submit">SEARCH</button>
                 </form>
                 <div class="catalog-mobile-toolbar-actions">
@@ -538,6 +548,7 @@
     }
 
     const filterForm = document.querySelector(".catalog-sidebar-form");
+    const priceCeiling = Number(filterForm?.dataset.priceCeiling) || 10000;
     filterForm?.addEventListener("change", (event) => {
         if (event.target.matches('input[type="radio"], input[type="range"], input[type="number"]')) {
             filterForm.requestSubmit();
@@ -563,12 +574,12 @@
         }
 
         min = Math.max(0, min);
-        max = Math.min(10000, max);
+        max = Math.min(priceCeiling, max);
 
         minRange.value = min;
         maxRange.value = max;
         minInput.value = min > 0 ? min : '';
-        maxInput.value = max < 10000 ? max : '';
+        maxInput.value = max < priceCeiling ? max : '';
         minLabel.textContent = '₹' + min.toLocaleString('en-IN');
         maxLabel.textContent = '₹' + max.toLocaleString('en-IN');
     }

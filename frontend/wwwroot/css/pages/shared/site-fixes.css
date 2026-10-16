@@ -560,3 +560,100 @@ iframe {
 @media (max-width: 760px) {
     .header .account-dropdown { right: 0; width: min(270px, calc(100vw - 20px)); }
 }
+
+@media (min-width: 601px) and (max-width: 980px) {
+    .header {
+        position: relative;
+        height: 68px;
+        min-height: 68px;
+        padding: 0 18px;
+        box-sizing: border-box;
+    }
+
+    .header > .menu-button {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        margin: 0;
+        padding: 0;
+        color: #68142e;
+        font-size: 0;
+    }
+
+    .header > .menu-button::before,
+    .header > .menu-button::after {
+        position: absolute;
+        left: 11px;
+        width: 21px;
+        height: 2px;
+        border-radius: 2px;
+        background: currentColor;
+        content: "";
+    }
+
+    .header > .menu-button::before {
+        top: 15px;
+        box-shadow: 0 7px 0 currentColor;
+    }
+
+    .header > .menu-button::after {
+        display: none;
+    }
+
+    .header > .brand {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 1;
+        width: 116px;
+        height: 56px;
+        margin: 0;
+        transform: translate(-50%, -50%);
+    }
+
+    .desktop-primary-nav,
+    .desktop-header-search {
+        display: none !important;
+    }
+
+    .header-actions {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 2px;
+        height: 100%;
+        margin-left: auto;
+        min-width: 0;
+        flex-wrap: nowrap;
+    }
+
+    .header-actions .header-icon:not(.account-menu-toggle) {
+        position: relative;
+        display: inline-flex;
+        width: 40px;
+        height: 42px;
+        flex: 0 0 40px;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 981px) {
+    .header > .menu-button {
+        display: none;
+    }
+}
+
+@media (min-width: 1100px) {
+    .header > .menu-button {
+        display: flex;
+        flex: 0 0 42px;
+        margin: 0;
+        padding: 0;
+        color: #68142e;
+    }
+}

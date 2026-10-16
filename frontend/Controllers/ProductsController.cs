@@ -71,6 +71,37 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
             ViewBag.Categories = new List<CategoryViewModel>();
         }
 
+        try
+        {
+            var savedColors = await api.GetProductColorsAsync();
+            var customColors = savedColors
+                .Where(name => !ProductColorCatalog.All.Any(item => item.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+            if (!string.IsNullOrWhiteSpace(color)
+                && !ProductColorCatalog.All.Any(item => item.Name.Equals(color, StringComparison.OrdinalIgnoreCase))
+                && !customColors.Contains(color, StringComparer.OrdinalIgnoreCase))
+            {
+                customColors.Add(ProductColorCatalog.Canonical(color));
+            }
+            ViewBag.CustomColors = customColors;
+        }
+        catch (HttpRequestException)
+        {
+            ViewBag.CustomColors = new List<string>();
+        }
+
+        var priceCeiling = 10000;
+        try
+        {
+            priceCeiling = await api.GetPriceCeilingAsync();
+        }
+        catch (HttpRequestException)
+        {
+            priceCeiling = 10000;
+        }
+        if (maxPrice.HasValue) priceCeiling = Math.Max(priceCeiling, (int)Math.Ceiling(maxPrice.Value));
+        ViewBag.PriceCeiling = priceCeiling;
+
         const int pageSize = 12;
         var productCount = products.Count;
         var pageCount = Math.Max(1, (int)Math.Ceiling(productCount / (double)pageSize));

@@ -373,7 +373,6 @@
 .home-page .home-hero-dots { bottom: 13px; }
 
 @media (max-width: 600px) {
-    .home-page .home-hero { width: 100%; }
     .home-page .home-hero-content { inset: auto auto 10px 12px; }
     .home-page .hero-shop-button { min-height: 34px; min-width: 150px; padding: 0 12px; font-size: 9px; }
     .home-page .home-hero-dots { bottom: 8px; }
@@ -970,11 +969,12 @@
 /* Final hero geometry: natural image height, no crop, overlay action. */
 .home-page .home-hero {
     display: block;
-    width: min(100%, 1600px);
+    width: 100vw;
+    max-width: none;
     height: auto;
     min-height: 0;
     aspect-ratio: auto;
-    margin: 0 auto;
+    margin: 0 0 0 calc(50% - 50vw);
     overflow: hidden;
     background: #f5ece5;
 }
@@ -1025,7 +1025,6 @@
 .home-page .home-hero-dots { bottom: 13px; }
 
 @media (max-width: 600px) {
-    .home-page .home-hero { width: 100%; }
     .home-page .home-hero-content { inset: auto auto 10px 12px; }
     .home-page .hero-shop-button { min-height: 34px; min-width: 150px; padding: 0 12px; font-size: 9px; }
     .home-page .home-hero-dots { bottom: 8px; }

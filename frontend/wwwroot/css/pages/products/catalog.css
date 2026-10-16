@@ -1006,6 +1006,13 @@
     color: #fff;
 }
 
+.filter-color-help {
+    margin: -2px 0 10px;
+    color: #7d6b68;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 .filter-color-list {
     display: flex;
     flex-wrap: wrap;
@@ -1042,6 +1049,19 @@
 .filter-color-option.is-selected > span {
     box-shadow: 0 0 0 3px #fff, 0 0 0 4px #68142e;
     transform: scale(.92);
+}
+
+.filter-color-option-named {
+    width: auto;
+    height: auto;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-color-option-named small {
+    color: #5c4d4a;
+    font-size: 11px;
+    line-height: 1.2;
 }
 
 .filter-price-values {
