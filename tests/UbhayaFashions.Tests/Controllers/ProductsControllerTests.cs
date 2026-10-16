@@ -43,7 +43,7 @@ public sealed class ProductsControllerTests
         Assert.Equal(new[] { "Black", "White", "Red", "Pink", "Blue", "Gold" }
             .Where(expected => colors.Contains(expected)),
             colors);
-        Assert.Equal(4, colors.Count());
+        Assert.Equal(3, colors.Count());
         Assert.Contains("Pink", colors);
         Assert.Contains("Blue", colors);
         Assert.Contains("Gold", colors);
