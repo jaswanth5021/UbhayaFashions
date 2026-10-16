@@ -1,12 +1,29 @@
 using LadiesDressStore.Web.Controllers;
 using LadiesDressStore.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Http;
 using Xunit;
 
 namespace LadiesDressStore.Web.Tests.Controllers;
 
 public sealed class ContactControllerTests
 {
+    private static ContactController CreateController()
+    {
+        var controller = new ContactController();
+        var httpContext = new DefaultHttpContext();
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        controller.TempData = new TempDataDictionary(httpContext, new TestTempDataProvider());
+        return controller;
+    }
+
+    private sealed class TestTempDataProvider : ITempDataProvider
+    {
+        public IDictionary<string, object> LoadTempData(HttpContext context) => new Dictionary<string, object>();
+        public void SaveTempData(HttpContext context, IDictionary<string, object> values) { }
+    }
+
     [Fact]
     public void GetIndex_ReturnsView()
     {
@@ -17,7 +34,7 @@ public sealed class ContactControllerTests
     [Fact]
     public void PostIndex_InvalidModel_ReturnsSameViewAndModel()
     {
-        var controller = new ContactController();
+        var controller = CreateController();
         controller.ModelState.AddModelError(nameof(ContactViewModel.Email), "Invalid email");
         var model = new ContactViewModel { Name = "Test", Email = "bad", Subject = "Question", Message = "Hello" };
 
@@ -31,7 +48,7 @@ public sealed class ContactControllerTests
     [Fact]
     public void PostIndex_ValidModel_RedirectsAndSetsSuccessMessage()
     {
-        var controller = new ContactController();
+        var controller = CreateController();
         var model = new ContactViewModel
         {
             Name = "Test Customer",
