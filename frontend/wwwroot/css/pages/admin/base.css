@@ -9,11 +9,13 @@
 }
 
 .admin-sidebar {
-    position: sticky;
-    top: 0;
+    position: relative;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    align-self: stretch;
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
     padding: 28px 16px 20px;
     background: #451020;
     color: #fff;
@@ -40,7 +42,9 @@
 
 .admin-sidebar nav {
     display: grid;
+    flex: 0 0 auto;
     gap: 6px;
+    overflow: visible;
 }
 
 .admin-sidebar nav a,
@@ -61,6 +65,7 @@
 
 .admin-side-bottom {
     display: grid;
+    flex: 0 0 auto;
     gap: 4px;
     margin-top: auto;
     padding-top: 18px;
@@ -371,12 +376,35 @@
     gap: 8px;
 }
 
-.form-grid input:not([type="hidden"]),
+.form-grid input:not([type="hidden"]):not([type="checkbox"]),
 .form-grid select,
 .form-grid textarea {
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
+}
+
+.admin-content input[type="checkbox"],
+.form-grid input[type="checkbox"] {
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    accent-color: #68142e;
+    vertical-align: middle;
+}
+
+.admin-bestseller-choice label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    cursor: pointer;
 }
 
 .form-grid .full {
@@ -448,10 +476,65 @@
     white-space: nowrap;
 }
 
-.form-grid label {
+.form-grid label,
+.admin-field-label {
     color: #473a37;
     font-size: 13px;
     font-weight: 700;
+}
+
+.admin-color-help {
+    margin: 0;
+    color: #786d69;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.admin-color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    margin-top: 4px;
+}
+
+.admin-color-option {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    width: 64px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.form-grid .admin-color-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    max-width: 1px;
+    margin: 0;
+    opacity: 0;
+}
+
+.admin-color-option span {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(50, 35, 35, 0.2);
+    border-radius: 50%;
+    background: var(--swatch);
+}
+
+.admin-color-option small {
+    color: #5c4d4a;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.admin-color-option:has(input:checked) span {
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px #68142e;
 }
 
 .form-grid textarea {

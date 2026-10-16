@@ -43,7 +43,7 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Add(int productId, string? size, int quantity = 1, bool buyNow = false)
+    public async Task<IActionResult> Add(int productId, string? size, string? color, int quantity = 1, bool buyNow = false)
     {
         var isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest";
         var product = await api.GetProductAsync(productId);
@@ -79,9 +79,11 @@ public class CartController : Controller
             return RedirectToAction("Details", "Products", new { id = productId });
         }
 
+        var normalizedColor = string.IsNullOrWhiteSpace(color) ? null : color.Trim();
         var cart = GetCart();
         var item = cart.FirstOrDefault(x => x.ProductId == productId &&
-            string.Equals(x.Size, normalizedSize, StringComparison.OrdinalIgnoreCase));
+            string.Equals(x.Size, normalizedSize, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(x.Color ?? "", normalizedColor ?? "", StringComparison.OrdinalIgnoreCase));
 
         if ((item?.Quantity ?? 0) + quantity > variant.Stock)
         {
@@ -99,6 +101,7 @@ public class CartController : Controller
                 Price = variant.Price,
                 ImageUrl = product.ImageUrl,
                 Size = variant.Size,
+                Color = normalizedColor,
                 Quantity = quantity
             });
         }
@@ -115,11 +118,13 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Remove(int productId, string? size)
+    public IActionResult Remove(int productId, string? size, string? color)
     {
         var isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest";
         var cart = GetCart();
-        cart.RemoveAll(x => x.ProductId == productId && x.Size == size);
+        cart.RemoveAll(x => x.ProductId == productId
+            && string.Equals(x.Size, size, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(x.Color ?? "", color ?? "", StringComparison.OrdinalIgnoreCase));
         SaveCart(cart);
         if (isAjax)
             return Json(new { success = true, cartCount = cart.Sum(x => x.Quantity), cartTotal = cart.Sum(x => x.Price * x.Quantity), isEmpty = cart.Count == 0 });

@@ -15,8 +15,10 @@
     <link rel="stylesheet" href="~/css/pages/admin/management.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/admin/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/notifications.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/api-loader.css" asp-append-version="true" />
 </head>
 <body class="admin-body">
+    <partial name="_ApiLoader" />
     <partial name="_FlashMessages" />
     <div class="admin-shell">
         <aside class="admin-sidebar">
@@ -33,15 +35,15 @@
                 @if (string.Equals(Context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value, "admin@ubhaya.com", StringComparison.OrdinalIgnoreCase)) { <a asp-action="AdminAccounts">Admin accounts</a> }
                 <a asp-action="ChangePassword">Change password</a>
             </nav>
-            <div class="admin-side-bottom">
-                <a href="/" target="_blank" rel="noopener">View Store <span aria-hidden="true">?</span></a>
-                <a asp-action="Logout">Logout</a>
-            </div>
         </aside>
         <main class="admin-main">
             <header class="admin-top">
                 <div class="admin-top-title"><span>UBHAYA FASHIONS</span><strong>Administration</strong></div>
-                <div class="admin-user"><span class="admin-user-avatar" aria-hidden="true">@adminName[..1].ToUpperInvariant()</span><span>@adminName</span></div>
+                <div class="admin-user">
+                    <span class="admin-user-avatar" aria-hidden="true">@adminName[..1].ToUpperInvariant()</span>
+                    <span class="admin-user-name">@adminName</span>
+                    <a class="admin-logout" asp-controller="Admin" asp-action="Logout">Logout</a>
+                </div>
             </header>
             <div class="admin-content">@RenderBody()</div>
         </main>

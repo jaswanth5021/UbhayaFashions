@@ -31,6 +31,15 @@
     border-color: color-mix(in srgb, var(--catalog-accent) 28%, white);
 }
 
+.catalog-page .catalog-card .catalog-size-options {
+    margin-bottom: 8px;
+}
+
+.catalog-page .catalog-card .catalog-stock-desktop,
+.catalog-page .catalog-card .catalog-stock-mobile {
+    margin-top: 16px;
+}
+
 .catalog-page .catalog-card .catalog-action {
     border-color: var(--catalog-accent);
     background: var(--catalog-accent) !important;
@@ -184,6 +193,11 @@
 .catalog-page .filter-color-option {
     width: 30px;
     height: 30px;
+}
+
+.catalog-page .filter-color-option-named {
+    width: auto;
+    height: auto;
 }
 
 .catalog-page .filter-color-option > span {

@@ -472,7 +472,7 @@
                      COLOR
                      ================================================= -->
 
-                 @* @if (productColors.Count > 0)
+                @if (productColors.Count > 0)
                 {
                     <fieldset class="product-color-fieldset">
                         <legend>
@@ -483,6 +483,8 @@
                         <div class="product-color-options" role="radiogroup" aria-label="Choose color">
                             @foreach (var color in productColors)
                             {
+                                var knownColor = ProductColorCatalog.All.FirstOrDefault(item => item.Name.Equals(color, StringComparison.OrdinalIgnoreCase));
+                                var colorHex = knownColor.Name is null ? "#c8b7b0" : knownColor.Hex;
                                 <button type="button"
                                         class="product-color-option @(color.Equals(productColors[0], StringComparison.OrdinalIgnoreCase) ? "selected" : "")"
                                         data-color="@color"
@@ -490,13 +492,15 @@
                                         aria-pressed="@(color.Equals(productColors[0], StringComparison.OrdinalIgnoreCase) ? "true" : "false")">
                                     <span class="product-color-swatch"
                                           data-color-name="@color"
+                                          style="background:@colorHex"
                                           aria-hidden="true"></span>
                                     <span class="product-color-name">@color</span>
                                 </button>
                             }
                         </div>
                     </fieldset>
-                } *@
+                    <input type="hidden" name="color" id="selectedProductColor" value="@productColors[0]" />
+                }
 
 
                 <!-- =================================================
@@ -1748,6 +1752,8 @@
                 if (label) {
                     label.textContent = button.dataset.color || "";
                 }
+                const colorInput = document.getElementById("selectedProductColor");
+                if (colorInput) colorInput.value = button.dataset.color || "";
             });
         });
 

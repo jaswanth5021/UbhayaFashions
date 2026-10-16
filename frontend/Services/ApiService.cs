@@ -85,6 +85,15 @@ public class ApiService(
         return await Client.GetFromJsonAsync<List<ProductViewModel>>(url) ?? [];
     }
 
+    public async Task<List<string>> GetProductColorsAsync()
+        => await Client.GetFromJsonAsync<List<string>>("api/products/colors") ?? [];
+
+    public async Task<int> GetPriceCeilingAsync()
+    {
+        var bounds = await Client.GetFromJsonAsync<PriceBoundsResponse>("api/products/price-bounds");
+        return bounds?.Max > 0 ? bounds.Max : 10000;
+    }
+
 
     public async Task<ProductViewModel?>
         GetProductAsync(int id)
@@ -606,7 +615,7 @@ public class ApiService(
                                 x.Size,
 
                             color =
-                                (string?)null
+                                x.Color
                         })
                 });
 
@@ -639,7 +648,7 @@ public class ApiService(
                 productId = x.ProductId,
                 quantity = x.Quantity,
                 size = x.Size,
-                color = (string?)null
+                color = x.Color
             })
         });
 
@@ -672,7 +681,7 @@ public class ApiService(
                 productId = x.ProductId,
                 quantity = x.Quantity,
                 size = x.Size,
-                color = (string?)null
+                color = x.Color
             })
         });
 
@@ -863,4 +872,8 @@ public class ApiService(
 
     return (true, "");
 }
+
+sealed record PriceBoundsResponse(
+    [property: System.Text.Json.Serialization.JsonPropertyName("min")] int Min,
+    [property: System.Text.Json.Serialization.JsonPropertyName("max")] int Max);
 }

@@ -85,9 +85,30 @@
                     }
                 </div>
             </div>
-            <div>
-                <label asp-for="Colors">Colors</label>
-                <input asp-for="Colors" placeholder="Pink,Blue" />
+            <div class="full admin-color-field">
+                @{
+                    var selectedProductColors = ProductColorCatalog.Parse(Model.Colors);
+                    var extraProductColors = selectedProductColors
+                        .Where(color => !ProductColorCatalog.All.Any(item => item.Name.Equals(color, StringComparison.OrdinalIgnoreCase)))
+                        .OrderBy(color => color, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+                }
+                <p class="admin-field-label">Colors</p>
+                <p class="admin-color-help">Tick a color, or type another color below. Separate extra colors with commas.</p>
+                <input type="hidden" name="colorSelection" value="1" />
+                <div class="admin-color-picker">
+                    @foreach (var item in ProductColorCatalog.All)
+                    {
+                        var isSelected = selectedProductColors.Contains(item.Name);
+                        <label class="admin-color-option" title="@item.Name">
+                            <input type="checkbox" name="selectedColors" value="@item.Name" checked="@(isSelected ? "checked" : null)" />
+                            <span style="--swatch:@item.Hex"></span>
+                            <small>@item.Name</small>
+                        </label>
+                    }
+                </div>
+                <label for="customColors">Other color</label>
+                <input id="customColors" name="customColors" type="text" value="@string.Join(", ", extraProductColors)" placeholder="Navy, Wine" autocomplete="off" />
             </div>
 
             <div class="full admin-product-images">
