@@ -49,7 +49,8 @@ public static class ProductColorCatalog
 
     public static IEnumerable<string> Split(string? colors) =>
         (colors ?? string.Empty)
-            .Split([',', '|', '/'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            // Use an explicit char array to resolve CS0121 between the char[] and string Split overloads.
+            .Split(new char[] { ',', '|', '/' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .Select(Canonical);
 }
