@@ -1,0 +1,70 @@
+name: UBHAYA Automated Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Existing unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run backend unit tests
+        run: dotnet test "Test/Backend unittest/UbhayaFashions.Tests.csproj" --logger "trx;LogFileName=backend-tests.trx"
+
+      - name: Run frontend unit tests
+        run: dotnet test "Test/Frontend unittest/LadiesDressStore.Web.Tests.csproj" --logger "trx;LogFileName=frontend-tests.trx"
+
+  api-smoke-tests:
+    name: API smoke tests
+    if: ${{ vars.UBHAYA_API_BASE_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run API smoke tests
+        env:
+          UBHAYA_API_BASE_URL: ${{ vars.UBHAYA_API_BASE_URL }}
+        run: dotnet test "Test/Automation Tests/UbhayaFashions.Automation.Tests.csproj" --filter FullyQualifiedName~ApiSmokeTests
+
+  ui-smoke-tests:
+    name: Browser UI smoke tests
+    if: ${{ vars.UBHAYA_UI_BASE_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build automation project
+        run: dotnet build "Test/Automation Tests/UbhayaFashions.Automation.Tests.csproj"
+
+      - name: Install Playwright Chromium and OS dependencies
+        run: pwsh "Test/Automation Tests/bin/Debug/net8.0/playwright.ps1" install --with-deps chromium
+
+      - name: Run browser UI smoke tests
+        env:
+          UBHAYA_UI_BASE_URL: ${{ vars.UBHAYA_UI_BASE_URL }}
+        run: dotnet test "Test/Automation Tests/UbhayaFashions.Automation.Tests.csproj" --filter FullyQualifiedName~WebsiteSmokeTests
