@@ -83,7 +83,13 @@
     }
     var openCartDrawer = TempData["OpenCartDrawer"] as bool? == true;
     var savedCheckoutAddresses = new List<LadiesDressStore.Web.Models.SavedAddressViewModel>();
-    var accountName = User.Identity?.Name ?? "My account";
+    // Prefer a full display-name claim; identity names can sometimes contain only an initial.
+    var accountName =
+        User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ??
+        User.FindFirst("name")?.Value ??
+        User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ??
+        User.Identity?.Name ??
+        "My account";
     var accountMobile = "";
     var navCategories = new List<LadiesDressStore.Web.Models.CategoryViewModel>();
     try
@@ -115,7 +121,12 @@
             var profileResult = await profileTask!;
             if (profileResult.Data is not null)
             {
-                accountName = string.IsNullOrWhiteSpace(profileResult.Data.Name) ? accountName : profileResult.Data.Name;
+                var profileName = profileResult.Data.Name?.Trim();
+                // Do not replace a useful claim-based name with a single-character/initial profile value.
+                if (!string.IsNullOrWhiteSpace(profileName) && profileName.Length > 2)
+                {
+                    accountName = profileName;
+                }
                 accountMobile = profileResult.Data.Mobile ?? "";
             }
         }
