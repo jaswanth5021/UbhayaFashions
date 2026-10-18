@@ -671,6 +671,10 @@ namespace backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("Discount")
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
@@ -691,7 +695,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId", "Size")
+                    b.HasIndex("ProductId", "Color", "Size")
                         .IsUnique();
 
                     b.ToTable("ProductVariants");
