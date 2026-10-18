@@ -213,7 +213,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
     {
         if (variants is null || variants.Count == 0) return "Add at least one size variant.";
         if (variants.Any(variant => string.IsNullOrWhiteSpace(variant.Size))) return "Every variant must have a size.";
-        if (variants.GroupBy(variant => $"{variant.Color.Trim()}|{variant.Size.Trim()}", StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1)) return "Each color and size combination can only be added once.";
+        if (variants.GroupBy(variant => $"{(variant.Color ?? string.Empty).Trim()}|{variant.Size.Trim()}", StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1)) return "Each color and size combination can only be added once.";
         if (variants.Any(variant => variant.Price < 0 || variant.Discount < 0 || variant.Discount > 100 || variant.Stock < 0)) return "Variant price, discount, or stock is invalid.";
         return null;
     }
