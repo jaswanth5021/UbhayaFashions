@@ -200,6 +200,10 @@
     <link rel="stylesheet" href="~/css/pages/shared/notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/customer-notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/account/login.css?v=account-login-layout-20261009-4" asp-append-version="true" />
+    @if (currentController == "Account" && currentAction == "ResetPassword")
+    {
+        <link rel="stylesheet" href="~/css/pages/account/password-reset.css" asp-append-version="true" />
+    }
     @if (currentController == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile")
     {
         <link rel="stylesheet" href="~/css/pages/account/profile-tabs-polish.css?v=profile-tabs-2026-10-07-1" asp-append-version="true" />
