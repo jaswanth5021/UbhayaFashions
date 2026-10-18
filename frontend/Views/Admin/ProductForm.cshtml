@@ -61,15 +61,16 @@
             </div>
             <div class="full variant-editor">
                 <div class="variant-editor-heading">
-                    <div><h2>Size variants</h2><p>Set the price, discount, and stock for every size.</p></div>
+                    <div><h2>Size variants</h2><p>Set color, size, price, discount, and stock for every combination. Leave Color blank for products that use one shared size list.</p></div>
                     <button class="secondary" type="button" id="addVariantRow">+ Add size</button>
                 </div>
-                <div class="variant-row variant-row-header" aria-hidden="true"><span>Size</span><span>Price (INR)</span><span>Discount (%)</span><span>Stock</span><span></span></div>
+                <div class="variant-row variant-row-header" aria-hidden="true"><span>Color</span><span>Size</span><span>Price (INR)</span><span>Discount (%)</span><span>Stock</span><span></span></div>
                 <div id="variantRows">
                     @for (var index = 0; index < Model.Variants.Count; index++)
                     {
                         var variant = Model.Variants[index];
                         <div class="variant-row" data-variant-row>
+                            <input name="Variants[@index].Color" data-variant-field="Color" type="text" value="@variant.Color" placeholder="e.g. Wine" aria-label="Color" />
                             <select name="Variants[@index].Size" data-variant-field="Size" required>
                                 <option value="">Choose size</option>
                                 @foreach (var size in new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" })
@@ -167,6 +168,7 @@
 
 <template id="variantRowTemplate">
     <div class="variant-row" data-variant-row>
+        <input name="Variants[__index__].Color" data-variant-field="Color" type="text" placeholder="e.g. Wine" aria-label="Color" />
         <select name="Variants[__index__].Size" data-variant-field="Size" required>
             <option value="">Choose size</option><option value="S">S</option><option value="M">M</option><option value="L">L</option>
             <option value="XL">XL</option><option value="XXL">XXL</option><option value="3XL">3XL</option><option value="FREE SIZE">FREE SIZE</option>
