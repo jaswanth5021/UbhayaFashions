@@ -48,7 +48,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             CustomerId = customerId,
             ShippingAddress = request.ShippingAddress,
             Status = "Pending",
-            PaymentStatus = "Pending"
+            PaymentStatus = "Pending",
+            PaymentMethod = "Prepaid"
         };
 
         foreach (var item in request.Items)
@@ -177,7 +178,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
                 CustomerId = customerId,
                 ShippingAddress = request.ShippingAddress,
                 Status = "Processing",
-                PaymentStatus = "Paid"
+                PaymentStatus = "Paid",
+                PaymentMethod = "Prepaid"
             };
 
             foreach (var item in request.Items)
