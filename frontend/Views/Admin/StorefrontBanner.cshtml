@@ -64,6 +64,11 @@
                             </label>
                             <span style="font-size:.8rem;font-weight:700;color:@(banner.IsActive ? "#16803c" : "#8a5a12")">@(banner.IsActive ? "VISIBLE" : "HIDDEN")</span>
                         </form>
+                        <form asp-action="DeleteStorefrontBanner" method="post" onsubmit="return confirm('Delete this banner image permanently? This cannot be undone.');" style="margin-top:2px">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="fileName" value="@banner.FileName" />
+                            <button type="submit" class="danger" style="width:100%;padding:9px 12px;border:1px solid #c62828;border-radius:7px;background:#fff;color:#b42318;font-weight:700;cursor:pointer">Delete image</button>
+                        </form>
                     </div>
                 </article>
             }
