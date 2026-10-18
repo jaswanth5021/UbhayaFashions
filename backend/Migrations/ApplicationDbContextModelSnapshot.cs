@@ -328,6 +328,12 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("COD");
+
                     b.Property<string>("RazorpayOrderId")
                         .HasColumnType("nvarchar(max)");
 
@@ -348,6 +354,32 @@ namespace backend.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("backend.Models.DelhiveryShipment", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Address").IsRequired().HasMaxLength(500).HasColumnType("nvarchar(500)");
+                    b.Property<int>("AttemptCount").HasColumnType("int");
+                    b.Property<string>("City").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+                    b.Property<string>("Country").IsRequired().HasMaxLength(60).HasColumnType("nvarchar(60)");
+                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("datetime2");
+                    b.Property<string>("LastError").HasMaxLength(2000).HasColumnType("nvarchar(2000)");
+                    b.Property<string>("LabelUrl").HasMaxLength(2048).HasColumnType("nvarchar(2048)");
+                    b.Property<int>("OrderId").HasColumnType("int");
+                    b.Property<string>("PickupLocation").HasMaxLength(200).HasColumnType("nvarchar(200)");
+                    b.Property<string>("PostalCode").IsRequired().HasMaxLength(10).HasColumnType("nvarchar(10)");
+                    b.Property<string>("RecipientName").IsRequired().HasMaxLength(150).HasColumnType("nvarchar(150)");
+                    b.Property<string>("RecipientPhone").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
+                    b.Property<string>("ShipmentStatus").IsRequired().HasMaxLength(60).HasColumnType("nvarchar(60)");
+                    b.Property<string>("State").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+                    b.Property<int>("WeightGrams").HasColumnType("int");
+                    b.Property<string>("Waybill").HasMaxLength(100).HasColumnType("nvarchar(100)");
+                    b.Property<DateTime?>("UpdatedAtUtc").HasColumnType("datetime2");
+                    b.HasKey("Id");
+                    b.HasIndex("OrderId").IsUnique();
+                    b.ToTable("DelhiveryShipments");
                 });
 
             modelBuilder.Entity("backend.Models.OrderItem", b =>
@@ -877,6 +909,16 @@ namespace backend.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("backend.Models.DelhiveryShipment", b =>
+                {
+                    b.HasOne("backend.Models.Order", "Order")
+                        .WithOne("DelhiveryShipment")
+                        .HasForeignKey("backend.Models.DelhiveryShipment", "OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("backend.Models.OrderItem", b =>
                 {
                     b.HasOne("backend.Models.Order", "Order")
@@ -1022,8 +1064,8 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Order", b =>
                 {
+                    b.Navigation("DelhiveryShipment");
                     b.Navigation("Items");
-
                     b.Navigation("Payments");
                 });
 
