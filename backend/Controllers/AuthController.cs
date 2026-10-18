@@ -822,9 +822,15 @@ public class AuthController(
 
     private string GetFrontendUrl()
     {
-        return
-            config["FrontendUrl"]?.TrimEnd('/')
-            ?? "https://ubhaya1.duckdns.org";
+        var configuredUrl = config["FrontendUrl"]?.TrimEnd('/');
+        if (Uri.TryCreate(configuredUrl, UriKind.Absolute, out var configuredUri)
+            && !configuredUri.IsLoopback
+            && (configuredUri.Scheme == Uri.UriSchemeHttps || configuredUri.Scheme == Uri.UriSchemeHttp))
+        {
+            return configuredUri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+        }
+
+        return "https://ubhaya1.duckdns.org";
     }
 }
 
