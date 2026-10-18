@@ -27,7 +27,7 @@
             ? Math.Round(startingVariant.Price / (1 - startingVariant.Discount / 100), 2)
             : startingVariant?.Price ?? 0;
 
-    var galleryItems = new List<(string Url, bool IsVideo)>();
+    var galleryItems = new List<(string Url, bool IsVideo, string Color)>();
 
     var relatedProducts =
         ViewBag.RelatedProducts as List<RelatedProductViewModel> ?? [];
@@ -43,7 +43,8 @@
             ImageUrlHelper.Resolve(
                 Model.ImageUrl,
                 Configuration["ApiBaseUrl"]),
-            false));
+            false,
+            string.Empty));
     }
 
     galleryItems.AddRange(
@@ -54,7 +55,8 @@
                     image.ImageUrl,
                     Configuration["ApiBaseUrl"]))
             .Where(url => !string.IsNullOrWhiteSpace(url))
-            .Select(url => (url, false)));
+            .Select(image => (Url: ImageUrlHelper.Resolve(image.ImageUrl, Configuration["ApiBaseUrl"]), IsVideo: false, Color: image.Color ?? string.Empty))
+            .Where(item => !string.IsNullOrWhiteSpace(item.Url)));
 
     galleryItems.AddRange(
         (Model.Videos ?? [])
@@ -64,7 +66,7 @@
                     video.VideoUrl,
                     Configuration["ApiBaseUrl"]))
             .Where(url => !string.IsNullOrWhiteSpace(url))
-            .Select(url => (url, true)));
+            .Select(url => (url, true, string.Empty)));
 }
 
 <main class="product-details-page">
@@ -127,6 +129,7 @@
                             class="product-gallery-thumbnail @(index == 0 ? "active" : string.Empty)"
                             data-gallery-media="@galleryItem.Url"
                             data-gallery-type="@(galleryItem.IsVideo ? "video" : "image")"
+                            data-gallery-color="@galleryItem.Color"
                             data-gallery-alt="@Model.Name, @(galleryItem.IsVideo ? "video" : "image") @(index + 1)"
                             aria-label="Show @(galleryItem.IsVideo ? "video" : "image") @(index + 1)"
                             aria-pressed="@(index == 0 ? "true" : "false")">
