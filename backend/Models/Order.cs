@@ -8,6 +8,8 @@ public class Order
     public decimal TotalAmount { get; set; }
     public string Status { get; set; } = "Pending";
     public string PaymentStatus { get; set; } = "Pending";
+    public string PaymentMethod { get; set; } = "COD";
+    public DelhiveryShipment? DelhiveryShipment { get; set; }
     public string ShippingAddress { get; set; } = "";
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public string? RazorpayOrderId { get; set; }
