@@ -16,6 +16,9 @@ public partial class AddDelhiveryShipmentTracking : Migration
         migrationBuilder.AddColumn<string>(name: "PaymentMethod", table: "Orders",
             type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "COD");
 
+        // Preserve legacy prepaid orders when migrating existing production data.
+        migrationBuilder.Sql("UPDATE Orders SET PaymentMethod = 'Prepaid' WHERE PaymentStatus = 'Paid' OR RazorpayOrderId IS NOT NULL");
+
         migrationBuilder.CreateTable(
             name: "DelhiveryShipments",
             columns: table => new
