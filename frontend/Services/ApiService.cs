@@ -96,30 +96,35 @@ public class ApiService(
 
     public async Task<List<string>> GetStorefrontBannerUrlsAsync()
     {
+        // Always show the bundled default banner first, followed by active uploaded banners.
+        var images = new List<string> { "/images/dress-banner.jpeg" };
+
         using var response = await Client.GetAsync("api/storefront/banner");
-        if (!response.IsSuccessStatusCode) return [];
+        if (!response.IsSuccessStatusCode)
+            return images;
 
-        using var document = await System.Text.Json.JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         var root = document.RootElement;
-        if (root.ValueKind != System.Text.Json.JsonValueKind.Object) return [];
+        if (root.ValueKind != JsonValueKind.Object)
+            return images;
 
-        if (root.TryGetProperty("imageUrls", out var urls) && urls.ValueKind == System.Text.Json.JsonValueKind.Array)
+        if (root.TryGetProperty("imageUrls", out var urls) && urls.ValueKind == JsonValueKind.Array)
         {
-            var images = urls.EnumerateArray()
-                .Where(item => item.ValueKind == System.Text.Json.JsonValueKind.String)
+            images.AddRange(urls.EnumerateArray()
+                .Where(item => item.ValueKind == JsonValueKind.String)
                 .Select(item => item.GetString())
                 .Where(url => !string.IsNullOrWhiteSpace(url))
-                .Cast<string>()
-                .ToList();
-            if (images.Count > 0) return images;
+                .Cast<string>());
+        }
+        else if (root.TryGetProperty("imageUrl", out var imageUrl) &&
+                 imageUrl.ValueKind == JsonValueKind.String &&
+                 !string.IsNullOrWhiteSpace(imageUrl.GetString()))
+        {
+            images.Add(imageUrl.GetString()!);
         }
 
-        if (root.TryGetProperty("imageUrl", out var imageUrl) &&
-            imageUrl.ValueKind == System.Text.Json.JsonValueKind.String &&
-            !string.IsNullOrWhiteSpace(imageUrl.GetString()))
-            return [imageUrl.GetString()!];
-
-        return [];
+        // Avoid showing the default image twice if an older upload used the same path.
+        return images.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     public async Task<string?> GetStorefrontBannerUrlAsync()
