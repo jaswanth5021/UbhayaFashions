@@ -49,8 +49,10 @@ public class CartController : Controller
         var product = await api.GetProductAsync(productId);
         if (product is null) return isAjax ? NotFound(new { success = false, message = "Product not found." }) : NotFound();
         var normalizedSize = size?.Trim();
+        var normalizedColor = string.IsNullOrWhiteSpace(color) ? null : color.Trim();
         var variant = product.Variants.FirstOrDefault(item =>
-            string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase));
+            string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase) &&
+            (string.IsNullOrWhiteSpace(item.Color) || string.Equals(item.Color, normalizedColor, StringComparison.OrdinalIgnoreCase)));
         if (variant is null)
         {
             if (isAjax) return BadRequest(new { success = false, message = "Please select an available size." });
@@ -79,7 +81,6 @@ public class CartController : Controller
             return RedirectToAction("Details", "Products", new { id = productId });
         }
 
-        var normalizedColor = string.IsNullOrWhiteSpace(color) ? null : color.Trim();
         var cart = GetCart();
         var item = cart.FirstOrDefault(x => x.ProductId == productId &&
             string.Equals(x.Size, normalizedSize, StringComparison.OrdinalIgnoreCase) &&
