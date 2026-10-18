@@ -335,16 +335,16 @@
         @* <div class="product-shipping-promos">
 
             <p>
-                🚚 <strong>Free Shipping</strong> above &#8377;999
+                ð <strong>Free Shipping</strong> above &#8377;999
             </p>
 
             <p>
-                🔥 <strong>Most Loved:</strong>
+                ð¥ <strong>Most Loved:</strong>
                 Buy any 2 &amp; save &#8377;99
             </p>
 
             <p>
-                💛 <strong>Best Value:</strong>
+                ð <strong>Best Value:</strong>
                 Buy any 3 &amp; save &#8377;199
             </p>
 
@@ -838,7 +838,7 @@
                             <div class="review-meta-row">
                                 <div class="product-review-meta">
                                     <strong>@review.CustomerName</strong>
-                                    <span>�</span>
+                                    <span>·</span>
                                     <time datetime="@review.CreatedDate.ToString("yyyy-MM-dd")">@review.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</time>
                                 </div>
                                 <div class="product-review-votes" data-review-vote-group="@review.Id">
@@ -1753,7 +1753,49 @@
                     label.textContent = button.dataset.color || "";
                 }
                 const colorInput = document.getElementById("selectedProductColor");
-                if (colorInput) colorInput.value = button.dataset.color || "";
+                const selectedColor = (button.dataset.color || "").trim();
+                if (colorInput) colorInput.value = selectedColor;
+
+                // If uploaded image filenames/URLs contain a color name, show only
+                // those matching images. If no color-specific filenames exist, keep
+                // the shared product gallery unchanged for backward compatibility.
+                const gallery = document.querySelector("[data-product-detail-gallery]");
+                const thumbnails = Array.from(document.querySelectorAll(".product-gallery-thumbnail"));
+                if (gallery && thumbnails.length) {
+                    const normalize = value => (value || "")
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\\u0300-\\u036f]/g, "")
+                        .replace(/[^a-z0-9]+/g, " ")
+                        .trim();
+                    const colorKey = normalize(selectedColor);
+                    const matchesColor = thumbnail => {
+                        const mediaUrl = thumbnail.dataset.galleryMedia || "";
+                        const alt = thumbnail.dataset.galleryAlt || "";
+                        const source = normalize(mediaUrl + " " + alt);
+                        return colorKey && source.split(" ").includes(colorKey);
+                    };
+                    const colorSpecific = thumbnails.filter(matchesColor);
+                    const visibleThumbnails = colorSpecific.length ? colorSpecific : thumbnails;
+
+                    thumbnails.forEach(thumbnail => {
+                        const visible = visibleThumbnails.includes(thumbnail);
+                        thumbnail.hidden = !visible;
+                        thumbnail.classList.toggle("active", false);
+                        thumbnail.setAttribute("aria-pressed", "false");
+                    });
+
+                    const first = visibleThumbnails[0];
+                    if (first) {
+                        first.click();
+                    }
+                    const counter = gallery.querySelector("[data-gallery-counter]");
+                    if (counter) {
+                        counter.textContent = visibleThumbnails.length
+                            ? "1/" + visibleThumbnails.length
+                            : "";
+                    }
+                }
             });
         });
 
