@@ -1822,7 +1822,7 @@
                         thumbnail.setAttribute("aria-pressed", "false");
                     });
 
-                    const first = visibleThumbnails[0];
+                    const first = selectedMatches[0] || visibleThumbnails[0];
                     if (first) first.click();
                 const counter = gallery.querySelector("[data-gallery-counter]");
                     if (counter) {
