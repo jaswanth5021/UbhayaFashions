@@ -272,15 +272,15 @@
             <span class="product-details-price"
                   id="productSalePrice">
 
-                &#8377;@Model.Price.ToString("N0")
+                &#8377;@(startingVariant?.Price ?? Model.Price).ToString("N0")
 
             </span>
 
             <span class="product-details-sale-badge"
                   id="productSaleBadge"
-                  style="@(Model.Discount > 0 ? null : "display:none")">
+                  style="@((startingVariant?.Discount ?? Model.Discount) > 0 ? null : "display:none")">
 
-                -@Model.Discount% SALE
+                -@(startingVariant?.Discount ?? Model.Discount)% SALE
 
             </span>
 
