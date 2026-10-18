@@ -13,6 +13,32 @@ public class AdminApiService(IHttpClientFactory factory,IHttpContextAccessor acc
  public async Task<List<AdminProductInput>> Products()=>await Send<List<AdminProductInput>>(Request(HttpMethod.Get,"api/admin/products"))??[];
  public async Task<List<CategoryViewModel>> Categories()=>await Send<List<CategoryViewModel>>(Request(HttpMethod.Get,"api/admin/categories"))??[];
  public async Task<CategoryViewModel> SaveCategory(CategoryViewModel category){var r=Request(category.Id==0?HttpMethod.Post:HttpMethod.Put,category.Id==0?"api/admin/categories":$"api/admin/categories/{category.Id}");r.Content=JsonContent.Create(category);var x=await Client.SendAsync(r);if(!x.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(x.Content));return await x.Content.ReadFromJsonAsync<CategoryViewModel>()??throw new InvalidOperationException("The backend did not return the saved category.");}
+ public async Task<List<StorefrontBannerViewModel>> StorefrontBanners()
+ {
+  var result = await Send<List<StorefrontBannerViewModel>>(Request(HttpMethod.Get,"api/admin/storefront-banner"));
+  return result ?? [];
+ }
+ public async Task UploadStorefrontBanners(IReadOnlyList<IFormFile> files)
+ {
+  using var form = new MultipartFormDataContent();
+  foreach (var file in files.Where(file => file is { Length: > 0 }))
+  {
+   var content = new StreamContent(file.OpenReadStream());
+   content.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType ?? "application/octet-stream");
+   form.Add(content, "banners", file.FileName);
+  }
+  using var request = Request(HttpMethod.Post,"api/admin/storefront-banner");
+  request.Content = form;
+  using var response = await Client.SendAsync(request);
+  if (!response.IsSuccessStatusCode) throw new InvalidOperationException(await ReadError(response.Content));
+ }
+ public async Task SetStorefrontBannerActive(string fileName, bool isActive)
+ {
+  using var request = Request(HttpMethod.Put,$"api/admin/storefront-banner/{Uri.EscapeDataString(fileName)}/status");
+  request.Content = JsonContent.Create(new { isActive });
+  using var response = await Client.SendAsync(request);
+  if (!response.IsSuccessStatusCode) throw new InvalidOperationException(await ReadError(response.Content));
+ }
  public async Task<string?> UploadCategoryImage(int id,IFormFile file){using var form=new MultipartFormDataContent();await using var stream=file.OpenReadStream();var content=new StreamContent(stream);content.Headers.ContentType=new MediaTypeHeaderValue(file.ContentType??"application/octet-stream");form.Add(content,"file",file.FileName);var r=Request(HttpMethod.Post,$"api/admin/categories/{id}/image");r.Content=form;var x=await Client.SendAsync(r);if(!x.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(x.Content));var data=await x.Content.ReadFromJsonAsync<Dictionary<string,string>>();return data?["imageUrl"];}
  public async Task DeleteCategory(int id){var x=await Client.SendAsync(Request(HttpMethod.Delete,$"api/admin/categories/{id}"));if(!x.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(x.Content));}
  public async Task<AdminProductInput?> Product(int id)=>await Send<AdminProductInput>(Request(HttpMethod.Get,$"api/admin/products/{id}"));

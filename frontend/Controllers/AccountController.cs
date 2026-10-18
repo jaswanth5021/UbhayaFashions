@@ -44,12 +44,13 @@ public class AccountController(ApiService api) : Controller
 
         if (!result.Success || result.Data == null)
         {
-            ModelState.AddModelError(
-                "",
-                result.Message.Trim('"'));
+            var loginMessage = result.Message.Trim('"');
+            if (loginMessage.Contains("not registered", StringComparison.OrdinalIgnoreCase))
+                ViewBag.LoginWarning = loginMessage;
+            else
+                ModelState.AddModelError("", loginMessage);
 
             ViewBag.ReturnUrl = returnUrl;
-
             return View(model);
         }
 

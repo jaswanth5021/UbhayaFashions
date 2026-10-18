@@ -107,7 +107,12 @@ public class AdminAuthController(
         admin.PasswordResetExpiresUtc = DateTime.UtcNow.AddHours(1);
         await db.SaveChangesAsync();
 
-        var frontendUrl = config["FrontendUrl"]?.TrimEnd('/') ?? "https://localhost:5001";
+        var configuredFrontendUrl = config["FrontendUrl"]?.TrimEnd('/');
+        var frontendUrl = Uri.TryCreate(configuredFrontendUrl, UriKind.Absolute, out var configuredFrontendUri)
+            && !configuredFrontendUri.IsLoopback
+            && (configuredFrontendUri.Scheme == Uri.UriSchemeHttps || configuredFrontendUri.Scheme == Uri.UriSchemeHttp)
+                ? configuredFrontendUri.GetLeftPart(UriPartial.Authority).TrimEnd('/')
+                : "https://ubhaya1.duckdns.org";
         var resetUrl = $"{frontendUrl}/Admin/ResetPassword?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
         try
         {

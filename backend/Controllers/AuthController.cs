@@ -42,11 +42,15 @@ public class AuthController(
         catch (FormatException) { return BadRequest("Enter a valid email address."); }
         var mobile = request.Mobile?.Trim() ?? "";
         var mobileDigits = NormalizePhone(mobile);
-        if (mobileDigits.Length is < 7 or > 15) return BadRequest("Enter a valid mobile number.");
+        if (mobileDigits.Length == 12 && mobileDigits.StartsWith("91", StringComparison.Ordinal)) mobileDigits = mobileDigits[2..];
+        else if (mobileDigits.Length == 11 && mobileDigits.StartsWith("0", StringComparison.Ordinal)) mobileDigits = mobileDigits[1..];
+        if (mobileDigits.Length != 10) return BadRequest("Enter a valid 10-digit mobile number.");
         if (await db.Customers.AnyAsync(x => x.Email == email))
             return Conflict("An account with this email already exists. Please login.");
         if (await db.Customers.AnyAsync(x => x.Mobile != null &&
-            x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == mobileDigits))
+            (x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == mobileDigits ||
+             x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == "91" + mobileDigits ||
+             x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == "0" + mobileDigits)))
             return Conflict("An account with this mobile number already exists. Please login.");
 
         db.Customers.Add(new Customer
@@ -219,14 +223,21 @@ public class AuthController(
         else
         {
             var mobileDigits = NormalizePhone(identifier);
+            if (mobileDigits.Length == 12 && mobileDigits.StartsWith("91", StringComparison.Ordinal)) mobileDigits = mobileDigits[2..];
+            else if (mobileDigits.Length == 11 && mobileDigits.StartsWith("0", StringComparison.Ordinal)) mobileDigits = mobileDigits[1..];
+            if (mobileDigits.Length != 10)
+                return NotFound("This mobile number is not registered. Please create an account first.");
             customer = await db.Customers.FirstOrDefaultAsync(x => x.Mobile != null &&
-                x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == mobileDigits);
+                (x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == mobileDigits ||
+                 x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == "91" + mobileDigits ||
+                 x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == "0" + mobileDigits));
         }
 
         if (customer is null)
         {
-            return Unauthorized(
-                "Invalid email or password.");
+            return NotFound(identifier.Contains('@')
+                ? "This email is not registered. Please create an account first."
+                : "This mobile number is not registered. Please create an account first.");
         }
 
         if (string.IsNullOrWhiteSpace(
@@ -811,11 +822,15 @@ public class AuthController(
 
     private string GetFrontendUrl()
     {
-        return
-            config["FrontendUrl"]?
-                .TrimEnd('/')
-            ??
-            "http://localhost:5001";
+        var configuredUrl = config["FrontendUrl"]?.TrimEnd('/');
+        if (Uri.TryCreate(configuredUrl, UriKind.Absolute, out var configuredUri)
+            && !configuredUri.IsLoopback
+            && (configuredUri.Scheme == Uri.UriSchemeHttps || configuredUri.Scheme == Uri.UriSchemeHttp))
+        {
+            return configuredUri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+        }
+
+        return "https://ubhaya1.duckdns.org";
     }
 }
 

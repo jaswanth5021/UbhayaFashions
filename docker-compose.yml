@@ -17,18 +17,27 @@ services:
       Jwt__Key: "ChangeThisToALongRandomProductionSecretAtLeast32Chars"
       Jwt__Issuer: "LadiesDressStore"
       Jwt__Audience: "LadiesDressStoreWeb"
-      FrontendUrl: "http://localhost:5173"
+      FrontendUrl: "${FRONTEND_URL:-https://ubhaya1.duckdns.org}"
+      UploadsPath: /data/uploads
     ports:
       - "5000:5000"
+    volumes:
+      - store-uploads:/data/uploads
     depends_on:
       - db
 
   web:
     build: ./frontend
+    environment:
+      ApiBaseUrl: "http://api:5000/"
+      UploadsPath: /data/uploads
     ports:
       - "5173:80"
+    volumes:
+      - store-uploads:/data/uploads
     depends_on:
       - api
 
 volumes:
   sql-data:
+  store-uploads:

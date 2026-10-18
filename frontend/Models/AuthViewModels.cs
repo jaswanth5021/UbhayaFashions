@@ -67,6 +67,12 @@ public class SignupViewModel : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        var digits = System.Text.RegularExpressions.Regex.Replace(Mobile ?? "", @"\D", "");
+        if (digits.Length == 12 && digits.StartsWith("91", StringComparison.Ordinal)) digits = digits[2..];
+        else if (digits.Length == 11 && digits.StartsWith("0", StringComparison.Ordinal)) digits = digits[1..];
+        if (digits.Length != 10)
+            yield return new ValidationResult("Enter a valid 10-digit mobile number.", [nameof(Mobile)]);
+
         if (DateOfBirth is not DateTime dateOfBirth) yield break;
 
         var age = CalculateAge(dateOfBirth, DateTime.Today);

@@ -140,6 +140,11 @@
     </div>
 }
 
+@if (ViewBag.LoginWarning is string loginWarning)
+{
+    <div hidden data-app-notification="warning" role="alert">@loginWarning</div>
+}
+
 @section Scripts {
     <script>
         (() => {

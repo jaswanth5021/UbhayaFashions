@@ -5,6 +5,7 @@
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var homeCategories = ViewBag.HomeCategories as List<CategoryViewModel> ?? [];
     var catalogUnavailable = (bool?)ViewBag.CatalogUnavailable == true;
+    var heroBannerUrls = ViewBag.HeroBannerUrls as List<string> ?? [];
 }
 
 @if (catalogUnavailable)
@@ -18,48 +19,54 @@
 
 <section class="home-hero" data-hero-slider>
     <div class="home-hero-slides">
-        <div class="home-hero-slide is-active" data-hero-slide>
-            <img src="/images/dress-banner.jpeg"
-                 alt="The Ubhaya Edit"
-                 class="home-hero-image" />
-            <div class="home-hero-overlay"></div>
-            <div class="home-hero-content">
-                <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
-                @* <h1>Timeless elegance.<br /><em>Contemporary style.</em></h1>
-                <p class="hero-description">Thoughtfully curated women’s fashion for every occasion.</p> *@
-                <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
-                    <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
-                </a>
+        @if (heroBannerUrls.Count > 0)
+        {
+            @for (var bannerIndex = 0; bannerIndex < heroBannerUrls.Count; bannerIndex++)
+            {
+                <div class="home-hero-slide @(bannerIndex == 0 ? "is-active" : string.Empty)" data-hero-slide>
+                    <img src="@ImageUrlHelper.Resolve(heroBannerUrls[bannerIndex], Configuration["ApiBaseUrl"])"
+                         alt="The Ubhaya Edit - banner @(bannerIndex + 1)"
+                         class="home-hero-image"
+                         loading="@(bannerIndex == 0 ? "eager" : "lazy")" />
+                    <div class="home-hero-overlay"></div>
+                    <div class="home-hero-content">
+                        <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
+                        <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
+                            <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="home-hero-slide is-active" data-hero-slide>
+                <img src="/images/dress-banner.jpeg"
+                     alt="The Ubhaya Edit"
+                     class="home-hero-image"
+                     fetchpriority="high" />
+                <div class="home-hero-overlay"></div>
+                <div class="home-hero-content">
+                    <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
+                    <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
+                        <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
+                    </a>
+                </div>
             </div>
-        </div>
-
-        <div class="home-hero-slide" data-hero-slide>
-            <img src="/images/dress-banner-2.png"
-                 alt="The Ubhaya Edit"
-                 class="home-hero-image" />
-            <div class="home-hero-overlay"></div>
-            <div class="home-hero-content">
-                @* <p class="hero-location">THE UBHAYA COLLECTION</p> *@
-                  <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
-                @* <h1>Made for every<br /><em>beautiful moment.</em></h1>
-                <p class="hero-description">Discover elegant silhouettes, effortless styles and new-season favourites.</p>
-                <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
-                    <span>EXPLORE COLLECTION</span><span class="hero-arrow">→</span>
-                </a> *@
-                 <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
-                    <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
-                </a>
-            </div>
-        </div>
+        }
     </div>
 
-    <button type="button" class="home-hero-arrow home-hero-arrow-prev" data-hero-prev aria-label="Previous banner">‹</button>
-    <button type="button" class="home-hero-arrow home-hero-arrow-next" data-hero-next aria-label="Next banner">›</button>
-
-    <div class="home-hero-dots" aria-label="Hero banners">
-        <button type="button" class="is-active" data-hero-dot="0" aria-label="Banner 1"></button>
-        <button type="button" data-hero-dot="1" aria-label="Banner 2"></button>
-    </div>
+    @if (heroBannerUrls.Count > 1)
+    {
+        <button type="button" class="home-hero-arrow home-hero-arrow-prev" data-hero-prev aria-label="Previous banner">‹</button>
+        <button type="button" class="home-hero-arrow home-hero-arrow-next" data-hero-next aria-label="Next banner">›</button>
+        <div class="home-hero-dots" aria-label="Hero banners">
+            @for (var bannerIndex = 0; bannerIndex < heroBannerUrls.Count; bannerIndex++)
+            {
+                <button type="button" class="@(bannerIndex == 0 ? "is-active" : string.Empty)" data-hero-dot="@bannerIndex" aria-label="Banner @(bannerIndex + 1)"></button>
+            }
+        </div>
+    }
 </section>
 
 <section class="home-benefits" aria-label="Ubhaya Fashions benefits">
