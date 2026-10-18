@@ -140,7 +140,19 @@
     </div>
 }
 
+@if (ViewBag.LoginWarning is string loginWarning)
+{
+    <div hidden data-login-warning>@loginWarning</div>
+}
+
 @section Scripts {
+    <script>
+        (() => {
+            const warning = document.querySelector('[data-login-warning]')?.textContent?.trim();
+            if (warning && window.AppNotifications)
+                window.AppNotifications.show(warning, 'warning', 8000);
+        })();
+    </script>
     <script>
         (() => {
             const modes = document.querySelector('[data-login-modes]');
