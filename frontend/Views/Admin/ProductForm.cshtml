@@ -124,6 +124,9 @@
             </div>
 
             <div class="full admin-product-images">
+                <label for="subImagesColor">Images belong to color (optional)</label>
+                <input id="subImagesColor" name="subImagesColor" type="text" placeholder="e.g. Wine — leave blank for shared images" />
+                <small>Choose a color name matching the Colors and variant fields above. Leave blank if these images are shared by every color. This color applies to all files selected below.</small>
                 <label for="subImages">Additional product images</label>
                 <input id="subImages" name="subImages" type="file" accept="image/jpeg,image/png,image/webp" multiple />
                 <small>Select one or more extra product images. Existing additional images are kept.</small>
@@ -134,6 +137,7 @@
                         {
                             <div class="admin-image-item">
                                 <img src="@ImageUrlHelper.Resolve(productImage.ImageUrl, Configuration["ApiBaseUrl"])" alt="Additional image for @Model.Name" />
+                                @if (!string.IsNullOrWhiteSpace(productImage.Color)) { <small class="admin-image-color-label">@productImage.Color</small> } else { <small class="admin-image-color-label">Shared</small> }
                                 <button class="admin-image-remove" type="button" data-delete-image-url="@Url.Action("DeleteProductImage", "Admin")" data-product-id="@Model.Id" data-image-id="@productImage.Id" aria-label="Remove additional image" title="Remove image">
                                     <span aria-hidden="true">×</span>
                                 </button>
