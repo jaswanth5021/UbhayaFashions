@@ -94,6 +94,16 @@ public class ApiService(
         return bounds?.Max > 0 ? bounds.Max : 10000;
     }
 
+    public async Task<string?> GetStorefrontBannerUrlAsync()
+    {
+        using var response = await Client.GetAsync("api/storefront/banner");
+        if (!response.IsSuccessStatusCode) return null;
+        var data = await response.Content.ReadFromJsonAsync<Dictionary<string, string?>>();
+        return data is not null && data.TryGetValue("imageUrl", out var imageUrl)
+            ? imageUrl
+            : null;
+    }
+
 
     public async Task<ProductViewModel?>
         GetProductAsync(int id)
