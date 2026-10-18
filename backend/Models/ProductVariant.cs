@@ -8,6 +8,7 @@ public class ProductVariant
     public int ProductId { get; set; }
     [JsonIgnore]
     public Product Product { get; set; } = null!;
+    public string Color { get; set; } = string.Empty;
     public string Size { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public decimal Discount { get; set; }
