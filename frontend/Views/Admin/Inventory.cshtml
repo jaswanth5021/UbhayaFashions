@@ -30,9 +30,9 @@
 @foreach (var item in Model)
 {
     <tr>
-        <td><b>@item.Name</b><small>@item.Category</small></td><td><span class="badge">@item.Size</span></td><td>₹@item.Price.ToString("N0")</td>
+        <td><b>@item.Name</b><small>@item.Category</small></td><td>@if (!string.IsNullOrWhiteSpace(item.Color)) { <span class="badge">@item.Color</span> } <span class="badge">@item.Size</span></td><td>₹@item.Price.ToString("N0")</td>
         <td><span class="stock @(item.Stock <= 5 ? "danger" : "")">@item.Stock</span></td>
-        <td><form class="inline-form" asp-action="AdjustStock" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@item.Id" /><input type="hidden" name="size" value="@item.Size" /><input type="hidden" name="page" value="@currentPage" /><input type="hidden" name="pageSize" value="@pageSize" /><input type="hidden" name="search" value="@search" /><input type="hidden" name="category" value="@selectedCategory" /><input type="hidden" name="sizeFilter" value="@selectedSize" /><input type="hidden" name="stockStatus" value="@stockStatus" /><input name="quantity" type="number" placeholder="+10 / -2" required /><select name="type"><option>Stock In</option><option>Adjustment</option><option>Return</option><option>Damage</option></select><input name="note" placeholder="Note" /><button class="secondary" type="submit">Update</button></form></td>
+        <td><form class="inline-form" asp-action="AdjustStock" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@item.Id" /><input type="hidden" name="color" value="@item.Color" /><input type="hidden" name="size" value="@item.Size" /><input type="hidden" name="page" value="@currentPage" /><input type="hidden" name="pageSize" value="@pageSize" /><input type="hidden" name="search" value="@search" /><input type="hidden" name="category" value="@selectedCategory" /><input type="hidden" name="sizeFilter" value="@selectedSize" /><input type="hidden" name="stockStatus" value="@stockStatus" /><input name="quantity" type="number" placeholder="+10 / -2" required /><select name="type"><option>Stock In</option><option>Adjustment</option><option>Return</option><option>Damage</option></select><input name="note" placeholder="Note" /><button class="secondary" type="submit">Update</button></form></td>
     </tr>
 }
 @if (Model.Count == 0)
