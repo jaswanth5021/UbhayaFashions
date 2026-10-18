@@ -47,7 +47,7 @@ public sealed class StorefrontBannerController(IConfiguration configuration, IWe
         await using (var stream = System.IO.File.Create(destination))
             await banner.CopyToAsync(stream, cancellationToken);
 
-        return Ok(new { success = true, imageUrl = "/uploads/" + fileName, message = "Homepage banner updated." });
+        return Ok(new { imageUrl = "/uploads/" + fileName, message = "Homepage banner updated." });
     }
 
     [AllowAnonymous]
