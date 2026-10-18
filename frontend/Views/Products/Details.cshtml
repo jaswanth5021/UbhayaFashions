@@ -263,7 +263,7 @@
 
             <span class="product-details-regular-price"
                   id="productRegularPrice"
-                  style="@(Model.Discount > 0 ? null : "display:none")">
+                  style="@((startingVariant?.Discount ?? Model.Discount) > 0 ? null : "display:none")">
 
                 &#8377;@regularPrice.ToString("N0")
 
