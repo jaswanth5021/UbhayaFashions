@@ -22,6 +22,7 @@ public class AdminInventoryController(ApplicationDbContext db) : ControllerBase
                 Id = variant.ProductId,
                 variant.Product.Name,
                 Category = variant.Product.CategoryNavigation.Name,
+                variant.Color,
                 variant.Size,
                 variant.Stock,
                 variant.Price,
@@ -38,7 +39,7 @@ public class AdminInventoryController(ApplicationDbContext db) : ControllerBase
     public async Task<IActionResult> Adjust(int productId, InventoryAdjustmentRequest request)
     {
         var variant = await db.ProductVariants.FirstOrDefaultAsync(item =>
-            item.ProductId == productId && item.Size == request.Size);
+            item.ProductId == productId && item.Size == request.Size && string.Equals(item.Color, request.Color, StringComparison.OrdinalIgnoreCase));
         if (variant is null) return NotFound("Product size variant not found.");
 
         var newStock = variant.Stock + request.Quantity;
@@ -54,6 +55,6 @@ public class AdminInventoryController(ApplicationDbContext db) : ControllerBase
             Note = request.Note
         });
         await db.SaveChangesAsync();
-        return Ok(new { variant.ProductId, variant.Size, variant.Stock });
+        return Ok(new { variant.ProductId, variant.Color, variant.Size, variant.Stock });
     }
 }
