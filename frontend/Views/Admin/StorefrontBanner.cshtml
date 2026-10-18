@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Homepage banner";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="page-head">
+    <div>
+        <h1>Homepage banner</h1>
+        <p>Upload the hero image shown on the storefront homepage.</p>
+    </div>
+</div>
+
+@if (TempData["BannerMessage"] is string message)
+{
+    <p class="alert success" role="status" data-app-notification="success">@message</p>
+}
+@if (TempData["BannerError"] is string error)
+{
+    <p class="alert error" role="alert" data-app-notification="warning">@error</p>
+}
+
+<section class="admin-card" style="max-width:760px;display:block">
+    <h2>Replace the homepage banner</h2>
+    <p>Supported formats: JPG, PNG, WEBP. Maximum file size: 10 MB. The new image will replace the default banner on the homepage.</p>
+    <form asp-action="UploadStorefrontBanner" method="post" enctype="multipart/form-data" style="display:grid;gap:16px;margin-top:20px">
+        @Html.AntiForgeryToken()
+        <label for="banner">Choose banner image</label>
+        <input id="banner" name="banner" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
+        <button type="submit" class="primary" style="justify-self:start">Upload banner</button>
+    </form>
+</section>
