@@ -58,6 +58,7 @@ public class RelatedProductViewModel
 public class ProductVariantViewModel
 {
     public int Id { get; set; }
+    public string Color { get; set; } = string.Empty;
     public string Size { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public decimal Discount { get; set; }
