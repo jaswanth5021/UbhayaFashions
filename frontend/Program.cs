@@ -172,14 +172,12 @@ app.UseStaticFiles();
 // Configure UploadsPath to the same directory used by the API, especially on EC2.
 var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
 var fullUploadsPath = Path.GetFullPath(uploadsPath);
-if (Directory.Exists(fullUploadsPath))
+Directory.CreateDirectory(fullUploadsPath);
+app.UseStaticFiles(new StaticFileOptions
 {
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(fullUploadsPath),
-        RequestPath = "/uploads"
-    });
-}
+    FileProvider = new PhysicalFileProvider(fullUploadsPath),
+    RequestPath = "/uploads"
+});
 
 // =====================================================
 // ROUTING
