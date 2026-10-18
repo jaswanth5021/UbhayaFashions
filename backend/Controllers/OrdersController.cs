@@ -34,7 +34,10 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
         foreach (var item in request.Items)
         {
             var product = products.Single(product => product.Id == item.ProductId);
-            var variant = product.Variants.FirstOrDefault(variant => variant.Size == item.Size);
+            var hasColorVariants = product.Variants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
+            var variant = hasColorVariants
+                ? product.Variants.FirstOrDefault(variant => variant.Size == item.Size && string.Equals(variant.Color, item.Color, StringComparison.OrdinalIgnoreCase))
+                : product.Variants.FirstOrDefault(variant => variant.Size == item.Size);
             if (variant is null) return BadRequest($"{product.Name} does not have size {item.Size}.");
             if (variant.Stock < item.Quantity) return BadRequest($"{product.Name} ({variant.Size}) has insufficient stock.");
 
