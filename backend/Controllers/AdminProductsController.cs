@@ -76,7 +76,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         var product = await db.Products.Include(x => x.Variants).FirstOrDefaultAsync(x => x.Id == id);
         if (product is null) return NotFound();
 
-        var previousStock = product.Variants.ToDictionary(x => x.Size, x => x.Stock, StringComparer.OrdinalIgnoreCase);
+        var previousStock = product.Variants.ToDictionary(x => $"{x.Color}|{x.Size}", x => x.Stock, StringComparer.OrdinalIgnoreCase);
         var previousImageUrl = product.ImageUrl;
         product.Name = request.Name.Trim();
         product.Description = request.Description?.Trim() ?? string.Empty;
@@ -96,7 +96,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
 
         foreach (var variant in product.Variants)
         {
-            previousStock.TryGetValue(variant.Size, out var oldStock);
+            previousStock.TryGetValue($"{variant.Color}|{variant.Size}", out var oldStock);
             if (oldStock != variant.Stock)
                 AddInventory(product.Id, variant.Size, "Adjustment", variant.Stock - oldStock, variant.Stock, "Variant stock edited by admin");
         }
@@ -213,13 +213,13 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
     {
         if (variants is null || variants.Count == 0) return "Add at least one size variant.";
         if (variants.Any(variant => string.IsNullOrWhiteSpace(variant.Size))) return "Every variant must have a size.";
-        if (variants.GroupBy(variant => variant.Size.Trim(), StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1)) return "Each size can only be added once.";
+        if (variants.GroupBy(variant => $"{variant.Color.Trim()}|{variant.Size.Trim()}", StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1)) return "Each color and size combination can only be added once.";
         if (variants.Any(variant => variant.Price < 0 || variant.Discount < 0 || variant.Discount > 100 || variant.Stock < 0)) return "Variant price, discount, or stock is invalid.";
         return null;
     }
 
     private static ProductVariant ToVariant(AdminProductVariantRequest variant)
-        => new() { Size = variant.Size.Trim().ToUpperInvariant(), Price = variant.Price, Discount = variant.Discount, Stock = variant.Stock };
+        => new() { Color = variant.Color?.Trim() ?? string.Empty, Size = variant.Size.Trim().ToUpperInvariant(), Price = variant.Price, Discount = variant.Discount, Stock = variant.Stock };
 
     private static bool IsValidImageUrl(string? value, int? productId = null)
     {
