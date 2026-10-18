@@ -31,16 +31,36 @@ public class HomeController(ApiService api, ILogger<HomeController> logger) : Co
         // network/database latency does not accumulate on the homepage.
         var productsTask = LoadNewArrivalsAsync();
         var categoriesTask = LoadHomeCategoriesAsync();
+        var bannerTask = LoadHeroBannerUrlAsync();
         var wishlistTask = User.Identity?.IsAuthenticated == true
             ? LoadWishlistedProductIdsAsync()
             : Task.FromResult(new HashSet<int>());
 
         var (products, catalogUnavailable) = await productsTask;
         ViewBag.HomeCategories = await categoriesTask;
+        ViewBag.HeroBannerUrl = await bannerTask;
         ViewBag.WishlistedProductIds = await wishlistTask;
         ViewBag.CatalogUnavailable = catalogUnavailable;
 
         return View(products);
+    }
+
+    private async Task<string?> LoadHeroBannerUrlAsync()
+    {
+        try
+        {
+            return await api.GetStorefrontBannerUrlAsync();
+        }
+        catch (HttpRequestException exception)
+        {
+            logger.LogWarning(exception, "The banner API is unavailable; using the default homepage banner.");
+            return null;
+        }
+        catch (System.Text.Json.JsonException exception)
+        {
+            logger.LogWarning(exception, "The banner API returned invalid data; using the default homepage banner.");
+            return null;
+        }
     }
 
     private async Task<(List<LadiesDressStore.Web.Models.ProductViewModel> Products, bool Unavailable)> LoadNewArrivalsAsync()
