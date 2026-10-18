@@ -107,7 +107,7 @@ public class AdminAuthController(
         admin.PasswordResetExpiresUtc = DateTime.UtcNow.AddHours(1);
         await db.SaveChangesAsync();
 
-        var frontendUrl = config["FrontendUrl"]?.TrimEnd('/') ?? "https://localhost:5001";
+        var frontendUrl = config["FrontendUrl"]?.TrimEnd('/') ?? "https://ubhaya1.duckdns.org";
         var resetUrl = $"{frontendUrl}/Admin/ResetPassword?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
         try
         {
