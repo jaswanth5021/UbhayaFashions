@@ -50,12 +50,10 @@
     galleryItems.AddRange(
         (Model.Images ?? [])
             .OrderBy(image => image.SortOrder)
-            .Select(image =>
-                ImageUrlHelper.Resolve(
-                    image.ImageUrl,
-                    Configuration["ApiBaseUrl"]))
-            .Where(url => !string.IsNullOrWhiteSpace(url))
-            .Select(image => (Url: ImageUrlHelper.Resolve(image.ImageUrl, Configuration["ApiBaseUrl"]), IsVideo: false, Color: image.Color ?? string.Empty))
+            .Select(image => (
+                Url: ImageUrlHelper.Resolve(image.ImageUrl, Configuration["ApiBaseUrl"]),
+                IsVideo: false,
+                Color: image.Color ?? string.Empty))
             .Where(item => !string.IsNullOrWhiteSpace(item.Url)));
 
     galleryItems.AddRange(
@@ -1803,27 +1801,19 @@
                     }
                 }
 
-                // If uploaded image filenames/URLs contain a color name, show only
-                // those matching images. If no color-specific filenames exist, keep
-                // the shared product gallery unchanged for backward compatibility.
+                // Explicit image-color association: show shared images and images
+                // assigned to the selected color; hide images assigned to other colors.
                 const gallery = document.querySelector("[data-product-detail-gallery]");
                 const thumbnails = Array.from(document.querySelectorAll(".product-gallery-thumbnail"));
                 if (gallery && thumbnails.length) {
-                    const normalize = value => (value || "")
-                        .toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\\u0300-\\u036f]/g, "")
-                        .replace(/[^a-z0-9]+/g, " ")
-                        .trim();
-                    const colorKey = normalize(selectedColor);
-                    const matchesColor = thumbnail => {
-                        const mediaUrl = thumbnail.dataset.galleryMedia || "";
-                        const alt = thumbnail.dataset.galleryAlt || "";
-                        const source = normalize(mediaUrl + " " + alt);
-                        return colorKey && source.split(" ").includes(colorKey);
-                    };
-                    const colorSpecific = thumbnails.filter(matchesColor);
-                    const visibleThumbnails = colorSpecific.length ? colorSpecific : thumbnails;
+                    const normalize = value => (value || "").trim().toLowerCase();
+                    const assigned = thumbnails.filter(thumbnail => normalize(thumbnail.dataset.galleryColor));
+                    const selectedMatches = assigned.filter(thumbnail =>
+                        normalize(thumbnail.dataset.galleryColor) === normalize(selectedColor));
+                    const visibleThumbnails = assigned.length && selectedMatches.length
+                        ? thumbnails.filter(thumbnail => !normalize(thumbnail.dataset.galleryColor) ||
+                            normalize(thumbnail.dataset.galleryColor) === normalize(selectedColor))
+                        : thumbnails.filter(thumbnail => !normalize(thumbnail.dataset.galleryColor));
 
                     thumbnails.forEach(thumbnail => {
                         const visible = visibleThumbnails.includes(thumbnail);
@@ -1833,10 +1823,8 @@
                     });
 
                     const first = visibleThumbnails[0];
-                    if (first) {
-                        first.click();
-                    }
-                    const counter = gallery.querySelector("[data-gallery-counter]");
+                    if (first) first.click();
+                const counter = gallery.querySelector("[data-gallery-counter]");
                     if (counter) {
                         counter.textContent = visibleThumbnails.length
                             ? "1/" + visibleThumbnails.length
