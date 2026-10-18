@@ -34,6 +34,8 @@ public class AdminOrdersController(ApplicationDbContext db) : ControllerBase
                 order.PaymentStatus,
                 order.ShippingAddress,
                 order.CreatedDate,
+                ShippingStatus = db.DelhiveryShipments.Where(s => s.OrderId == order.Id).Select(s => s.ShipmentStatus).FirstOrDefault(),
+                ShippingWaybill = db.DelhiveryShipments.Where(s => s.OrderId == order.Id).Select(s => s.Waybill).FirstOrDefault(),
                 Items = order.Items.Select(item => new
                 {
                     item.ProductId,
