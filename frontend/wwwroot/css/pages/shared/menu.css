@@ -1309,3 +1309,11 @@ body.menu-open { overflow: hidden; }
     }
     .menu-category-sublist a { min-height: 42px; font-size: 14px; }
 }
+
+
+/* Hide trailing arrows on individual category links in the side menu.
+   Keep the Categories expand/collapse chevron on the section header. */
+.menu-category-sublist a::after {
+    display: none !important;
+    content: none !important;
+}
