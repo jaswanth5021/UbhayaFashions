@@ -38,28 +38,28 @@ public class HomeController(ApiService api, ILogger<HomeController> logger) : Co
 
         var (products, catalogUnavailable) = await productsTask;
         ViewBag.HomeCategories = await categoriesTask;
-        ViewBag.HeroBannerUrl = await bannerTask;
+        ViewBag.HeroBannerUrls = await bannerTask;
         ViewBag.WishlistedProductIds = await wishlistTask;
         ViewBag.CatalogUnavailable = catalogUnavailable;
 
         return View(products);
     }
 
-    private async Task<string?> LoadHeroBannerUrlAsync()
+    private async Task<List<string>> LoadHeroBannerUrlAsync()
     {
         try
         {
-            return await api.GetStorefrontBannerUrlAsync();
+            return await api.GetStorefrontBannerUrlsAsync();
         }
         catch (HttpRequestException exception)
         {
             logger.LogWarning(exception, "The banner API is unavailable; using the default homepage banner.");
-            return null;
+            return [];
         }
         catch (System.Text.Json.JsonException exception)
         {
             logger.LogWarning(exception, "The banner API returned invalid data; using the default homepage banner.");
-            return null;
+            return [];
         }
     }
 
