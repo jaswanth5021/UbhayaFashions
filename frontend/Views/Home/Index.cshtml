@@ -5,6 +5,7 @@
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var homeCategories = ViewBag.HomeCategories as List<CategoryViewModel> ?? [];
     var catalogUnavailable = (bool?)ViewBag.CatalogUnavailable == true;
+    var heroBannerUrl = ViewBag.HeroBannerUrl as string;
 }
 
 @if (catalogUnavailable)
@@ -19,9 +20,18 @@
 <section class="home-hero" data-hero-slider>
     <div class="home-hero-slides">
         <div class="home-hero-slide is-active" data-hero-slide>
-            <img src="/images/dress-banner.jpeg"
-                 alt="The Ubhaya Edit"
-                 class="home-hero-image" />
+            @if (!string.IsNullOrWhiteSpace(heroBannerUrl))
+            {
+                <img src="@ImageUrlHelper.Resolve(heroBannerUrl, Configuration["ApiBaseUrl"])"
+                     alt="The Ubhaya Edit"
+                     class="home-hero-image" />
+            }
+            else
+            {
+                <img src="/images/dress-banner.jpeg"
+                     alt="The Ubhaya Edit"
+                     class="home-hero-image" />
+            }
             <div class="home-hero-overlay"></div>
             <div class="home-hero-content">
                 <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
@@ -33,6 +43,8 @@
             </div>
         </div>
 
+        @if (string.IsNullOrWhiteSpace(heroBannerUrl))
+        {
         <div class="home-hero-slide" data-hero-slide>
             <img src="/images/dress-banner-2.png"
                  alt="The Ubhaya Edit"
@@ -53,6 +65,10 @@
         </div>
     </div>
 
+        }
+
+    @if (string.IsNullOrWhiteSpace(heroBannerUrl))
+    {
     <button type="button" class="home-hero-arrow home-hero-arrow-prev" data-hero-prev aria-label="Previous banner">‹</button>
     <button type="button" class="home-hero-arrow home-hero-arrow-next" data-hero-next aria-label="Next banner">›</button>
 
@@ -60,6 +76,7 @@
         <button type="button" class="is-active" data-hero-dot="0" aria-label="Banner 1"></button>
         <button type="button" data-hero-dot="1" aria-label="Banner 2"></button>
     </div>
+    }
 </section>
 
 <section class="home-benefits" aria-label="Ubhaya Fashions benefits">
