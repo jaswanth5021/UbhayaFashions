@@ -3,45 +3,29 @@
 @{
     ViewData["Title"] = Model.Name;
 
-    var variants = Model.Variants
-        .OrderBy(variant => variant.Size)
-        .ToList();
-
-    var standardSizes = new[]
-    {
-        "S",
-        "M",
-        "L",
-        "XL",
-        "XXL",
-        "3XL",
-        "FREE SIZE"
-    };
-
-    var availableSizes = new HashSet<string>(
-        variants
-            .Where(variant => variant.Stock > 0)
-            .Select(variant => variant.Size),
-        StringComparer.OrdinalIgnoreCase);
-
-    var startingVariant = variants
-        .OrderBy(variant => variant.Price)
-        .FirstOrDefault();
-
-    var regularPrice =
-        startingVariant is not null &&
-        startingVariant.Discount > 0 &&
-        startingVariant.Discount < 100
-            ? Math.Round(
-                startingVariant.Price /
-                (1 - startingVariant.Discount / 100),
-                2)
-            : startingVariant?.Price ?? 0;
-
     var productColors = (Model.Colors ?? "")
         .Split(new[] { ',', '|', '/' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .ToList();
+
+    var allVariants = Model.Variants.OrderBy(variant => variant.Size).ToList();
+    var hasColorVariants = allVariants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
+    var initialColor = productColors.FirstOrDefault() ?? "";
+    var variants = (hasColorVariants
+        ? allVariants.Where(variant => string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
+        : allVariants)
+        .OrderBy(variant => variant.Size)
+        .ToList();
+
+    var standardSizes = new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" };
+    var availableSizes = new HashSet<string>(
+        variants.Where(variant => variant.Stock > 0).Select(variant => variant.Size),
+        StringComparer.OrdinalIgnoreCase);
+    var startingVariant = variants.OrderBy(variant => variant.Price).FirstOrDefault();
+    var regularPrice =
+        startingVariant is not null && startingVariant.Discount > 0 && startingVariant.Discount < 100
+            ? Math.Round(startingVariant.Price / (1 - startingVariant.Discount / 100), 2)
+            : startingVariant?.Price ?? 0;
 
     var galleryItems = new List<(string Url, bool IsVideo)>();
 
@@ -382,6 +366,7 @@
                 <input type="hidden"
                        name="productId"
                        value="@Model.Id" />
+                <div id="productVariantData" data-variants="@System.Text.Json.JsonSerializer.Serialize(allVariants)" hidden></div>
 
 
                 <!-- =================================================
@@ -1756,6 +1741,65 @@
                 const selectedColor = (button.dataset.color || "").trim();
                 if (colorInput) colorInput.value = selectedColor;
 
+                // Refresh the available size, stock and price for the chosen color.
+                const variantData = document.getElementById("productVariantData");
+                let allVariants = [];
+                try { allVariants = JSON.parse(variantData?.dataset.variants || "[]"); } catch { allVariants = []; }
+                const hasColorVariants = allVariants.some(item => (item.color || item.Color || "").trim());
+                const sizeButtons = Array.from(document.querySelectorAll(".product-size-option"));
+                const matchingVariants = hasColorVariants
+                    ? allVariants.filter(item => (item.color || item.Color || "").toLowerCase() === selectedColor.toLowerCase())
+                    : allVariants;
+                sizeButtons.forEach(sizeButton => {
+                    const variant = matchingVariants.find(item =>
+                        (item.size || item.Size || "").toLowerCase() === (sizeButton.dataset.size || "").toLowerCase());
+                    const stock = Number(variant?.stock ?? variant?.Stock ?? 0);
+                    const price = Number(variant?.price ?? variant?.Price ?? 0);
+                    const discount = Number(variant?.discount ?? variant?.Discount ?? 0);
+                    sizeButton.dataset.stock = String(stock);
+                    sizeButton.dataset.price = String(price);
+                    sizeButton.dataset.discount = String(discount);
+                    sizeButton.disabled = !variant || stock < 1;
+                    sizeButton.classList.toggle("available", !sizeButton.disabled);
+                    sizeButton.classList.toggle("unavailable", sizeButton.disabled);
+                    sizeButton.title = sizeButton.disabled ? "Out of stock" : (sizeButton.dataset.size || "");
+                    const priceLabel = sizeButton.querySelector(".product-size-price");
+                    const stockLabel = sizeButton.querySelector(".product-size-stock");
+                    if (priceLabel) priceLabel.textContent = "₹" + Math.round(price).toLocaleString("en-IN");
+                    if (stockLabel) stockLabel.textContent = sizeButton.disabled ? "Out of stock" : "";
+                    if (!stockLabel && sizeButton.disabled) {
+                        const span = document.createElement("span");
+                        span.className = "product-size-stock";
+                        span.textContent = "Out of stock";
+                        sizeButton.querySelector(".product-size-label")?.after(span);
+                    } else if (stockLabel && !sizeButton.disabled) stockLabel.remove();
+                    sizeButton.setAttribute("aria-pressed", "false");
+                });
+                const selectedSizeInput = document.getElementById("productSize");
+                const selectedSizeLabel = document.getElementById("selectedSizeLabel");
+                if (selectedSizeInput) selectedSizeInput.value = "";
+                if (selectedSizeLabel) selectedSizeLabel.textContent = "Select a size";
+                const stockMessage = document.getElementById("productStockMessage");
+                if (stockMessage) stockMessage.textContent = matchingVariants.some(item => Number(item.stock ?? item.Stock ?? 0) > 0)
+                    ? "Select a size to see availability" : "This color is currently out of stock";
+                const firstAvailable = matchingVariants.filter(item => Number(item.stock ?? item.Stock ?? 0) > 0).sort((a,b) => (a.size || a.Size).localeCompare(b.size || b.Size))[0];
+                if (firstAvailable) {
+                    const price = Number(firstAvailable.price ?? firstAvailable.Price ?? 0);
+                    const discount = Number(firstAvailable.discount ?? firstAvailable.Discount ?? 0);
+                    const salePrice = document.getElementById("productSalePrice");
+                    const regularPrice = document.getElementById("productRegularPrice");
+                    const saleBadge = document.getElementById("productSaleBadge");
+                    if (salePrice) salePrice.textContent = "₹" + Math.round(price).toLocaleString("en-IN");
+                    if (regularPrice) {
+                        regularPrice.textContent = "₹" + Math.round(discount > 0 && discount < 100 ? price / (1 - discount / 100) : price).toLocaleString("en-IN");
+                        regularPrice.style.display = discount > 0 ? "inline" : "none";
+                    }
+                    if (saleBadge) {
+                        saleBadge.textContent = "-" + discount + "% SALE";
+                        saleBadge.style.display = discount > 0 ? "inline-block" : "none";
+                    }
+                }
+
                 // If uploaded image filenames/URLs contain a color name, show only
                 // those matching images. If no color-specific filenames exist, keep
                 // the shared product gallery unchanged for backward compatibility.
@@ -1839,7 +1883,7 @@
 
     document
         .querySelectorAll(
-            ".product-size-option.available"
+            ".product-size-option"
         )
         .forEach(
             option => {
@@ -1847,6 +1891,7 @@
                 option.addEventListener(
                     "click",
                     () => {
+                        if (option.disabled) return;
 
                         /* -----------------------------------------
                            Selected size
