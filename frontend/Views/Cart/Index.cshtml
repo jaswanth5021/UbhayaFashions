@@ -40,8 +40,11 @@
             <div class="shopping-cart-items">
                 @foreach (var item in Model)
                 {
-                    var variants = cartVariants.GetValueOrDefault(item.ProductId, [])
-                        .Where(variant => variant.Stock > 0)
+                    var allProductVariants = cartVariants.GetValueOrDefault(item.ProductId, []);
+                    var hasColorVariants = allProductVariants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
+                    var variants = allProductVariants
+                        .Where(variant => variant.Stock > 0 &&
+                            (!hasColorVariants || string.Equals(variant.Color, item.Color, StringComparison.OrdinalIgnoreCase)))
                         .OrderBy(variant => variant.Size)
                         .ToList();
                     var selectedVariant = variants.FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase));
@@ -61,6 +64,8 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
                                 <input type="hidden" name="currentSize" value="@item.Size" />
+                                <input type="hidden" name="currentColor" value="@item.Color" />
+                                <input type="hidden" name="color" value="@item.Color" />
                                 <input type="hidden" name="returnUrl" value="/Cart" />
                                 <label>Size
                                     <select name="size" data-cart-size>
