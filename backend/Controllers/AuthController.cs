@@ -436,14 +436,51 @@ public class AuthController(
         await db.SaveChangesAsync();
 
         var resetUrl = $"{GetFrontendUrl()}/Account/ResetPassword?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+        var safeResetUrl = WebUtility.HtmlEncode(resetUrl);
+        var html = $"""
+            <!doctype html>
+            <html lang="en">
+            <body style="margin:0;padding:0;background:#f8f3f0;font-family:Arial,Helvetica,sans-serif;color:#302522;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8f3f0;padding:30px 12px;">
+                <tr><td align="center">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;border:1px solid #efdfdf;border-radius:14px;background:#fffdfb;overflow:hidden;">
+                    <tr><td style="padding:30px 24px;background:#68142e;text-align:center;color:#fff;">
+                      <div style="font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#f0d8a7;">UBHAYA FASHIONS</div>
+                      <h1 style="margin:14px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;">Reset your password</h1>
+                    </td></tr>
+                    <tr><td style="padding:30px 28px;">
+                      <p style="margin:0 0 12px;font-size:16px;">Hello,</p>
+                      <p style="margin:0;font-size:15px;line-height:1.75;color:#665557;">We received a request to reset the password for your Ubhaya Fashions account. Use the secure button below to choose a new password.</p>
+                      <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto;">
+                        <tr><td align="center" bgcolor="#68142e" style="border-radius:7px;">
+                          <a href="{safeResetUrl}" style="display:inline-block;padding:15px 28px;color:#fff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.7px;">RESET MY PASSWORD</a>
+                        </td></tr>
+                      </table>
+                      <div style="padding:16px;border:1px solid #efdfdf;border-radius:10px;background:#fffaf8;">
+                        <div style="margin-bottom:6px;color:#68142e;font-size:12px;font-weight:700;">This link expires in one hour</div>
+                        <div style="font-size:13px;line-height:1.7;color:#665557;">For your security, the link can only be used once. If you did not request a password reset, you can safely ignore this email.</div>
+                      </div>
+                      <p style="margin:22px 0 8px;font-size:12px;line-height:1.6;color:#80645f;">If the button doesn't work, copy and paste this link into your browser:</p>
+                      <p style="margin:0;overflow-wrap:anywhere;font-size:12px;line-height:1.6;"><a href="{safeResetUrl}" style="color:#68142e;">{safeResetUrl}</a></p>
+                    </td></tr>
+                    <tr><td style="padding:18px 20px;border-top:1px solid #eee5e1;text-align:center;color:#9a918a;font-size:12px;">Tradition meets today · Ubhaya Fashions</td></tr>
+                  </table>
+                </td></tr>
+              </table>
+            </body>
+            </html>
+            """;
+        var plainText = $"Use this one-time link to reset your password. It expires in one hour:\n\n{resetUrl}\n\nIf you did not request this, you can ignore this email.";
         try
         {
             using var message = new MailMessage(from, email)
             {
                 Subject = "Reset your Ubhaya Fashions password",
-                Body = $"Use this one-time link to reset your password. It expires in one hour:\n\n{resetUrl}\n\nIf you did not request this, you can ignore this email.",
-                IsBodyHtml = false
+                Body = html,
+                IsBodyHtml = true
             };
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
             var port = int.TryParse(smtp["Port"], out var configuredPort) ? configuredPort : 587;
             using var client = new SmtpClient(host, port)
             {
