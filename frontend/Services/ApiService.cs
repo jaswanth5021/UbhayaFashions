@@ -94,15 +94,36 @@ public class ApiService(
         return bounds?.Max > 0 ? bounds.Max : 10000;
     }
 
-    public async Task<string?> GetStorefrontBannerUrlAsync()
+    public async Task<List<string>> GetStorefrontBannerUrlsAsync()
     {
         using var response = await Client.GetAsync("api/storefront/banner");
-        if (!response.IsSuccessStatusCode) return null;
-        var data = await response.Content.ReadFromJsonAsync<Dictionary<string, string?>>();
-        return data is not null && data.TryGetValue("imageUrl", out var imageUrl)
-            ? imageUrl
-            : null;
+        if (!response.IsSuccessStatusCode) return [];
+
+        using var document = await System.Text.Json.JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+        var root = document.RootElement;
+        if (root.ValueKind != System.Text.Json.JsonValueKind.Object) return [];
+
+        if (root.TryGetProperty("imageUrls", out var urls) && urls.ValueKind == System.Text.Json.JsonValueKind.Array)
+        {
+            var images = urls.EnumerateArray()
+                .Where(item => item.ValueKind == System.Text.Json.JsonValueKind.String)
+                .Select(item => item.GetString())
+                .Where(url => !string.IsNullOrWhiteSpace(url))
+                .Cast<string>()
+                .ToList();
+            if (images.Count > 0) return images;
+        }
+
+        if (root.TryGetProperty("imageUrl", out var imageUrl) &&
+            imageUrl.ValueKind == System.Text.Json.JsonValueKind.String &&
+            !string.IsNullOrWhiteSpace(imageUrl.GetString()))
+            return [imageUrl.GetString()!];
+
+        return [];
     }
+
+    public async Task<string?> GetStorefrontBannerUrlAsync()
+        => (await GetStorefrontBannerUrlsAsync()).FirstOrDefault();
 
 
     public async Task<ProductViewModel?>
