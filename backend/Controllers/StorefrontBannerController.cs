@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,10 @@ namespace backend.Controllers;
 [Authorize(Roles = "Admin")]
 public sealed class StorefrontBannerController(IConfiguration configuration, IWebHostEnvironment environment) : ControllerBase
 {
+    private const long MaxImageSize = 10 * 1024 * 1024;
+    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
+
     private string UploadDirectory
     {
         get
@@ -22,44 +27,121 @@ public sealed class StorefrontBannerController(IConfiguration configuration, IWe
         }
     }
 
-    [HttpPost]
-    [RequestSizeLimit(10 * 1024 * 1024)]
-    public async Task<IActionResult> Upload([FromForm] IFormFile? banner, CancellationToken cancellationToken)
+    private string MetadataPath => Path.Combine(UploadDirectory, "storefront-banners.json");
+
+    public sealed class BannerEntry
     {
-        if (banner is null || banner.Length == 0)
-            return BadRequest("Choose a banner image to upload.");
-        if (banner.Length > 10 * 1024 * 1024)
-            return BadRequest("The banner image must be 10 MB or smaller.");
+        public string FileName { get; set; } = "";
+        public bool IsActive { get; set; } = true;
+        public DateTime UploadedAtUtc { get; set; } = DateTime.UtcNow;
+        public string ImageUrl => "/uploads/" + FileName;
+    }
 
-        var extension = Path.GetExtension(banner.FileName).ToLowerInvariant();
-        if (extension is not (".jpg" or ".jpeg" or ".png" or ".webp"))
-            return BadRequest("Upload a JPG, PNG, or WEBP image.");
+    public sealed class BannerStatusRequest
+    {
+        public bool IsActive { get; set; }
+    }
 
-        if (!banner.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            return BadRequest("The selected file must be an image.");
+    private List<BannerEntry> ReadBanners()
+    {
+        if (System.IO.File.Exists(MetadataPath))
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<List<BannerEntry>>(System.IO.File.ReadAllText(MetadataPath), JsonOptions) ?? [];
+            }
+            catch (JsonException)
+            {
+                return [];
+            }
+        }
 
-        var directory = UploadDirectory;
-        foreach (var existing in Directory.EnumerateFiles(directory, "dress-banner.*"))
-            System.IO.File.Delete(existing);
+        // Migrate the previous single-banner upload so it remains visible after upgrading.
+        var legacy = Directory.EnumerateFiles(UploadDirectory, "dress-banner.*")
+            .Where(path => AllowedExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
+            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .Select(path => new BannerEntry
+            {
+                FileName = Path.GetFileName(path),
+                IsActive = true,
+                UploadedAtUtc = System.IO.File.GetLastWriteTimeUtc(path)
+            }).ToList();
 
-        var fileName = "dress-banner" + extension;
-        var destination = Path.Combine(directory, fileName);
-        await using (var stream = System.IO.File.Create(destination))
+        if (legacy.Count > 0)
+            WriteBanners(legacy);
+
+        return legacy;
+    }
+
+    private void WriteBanners(List<BannerEntry> banners)
+        => System.IO.File.WriteAllText(MetadataPath, JsonSerializer.Serialize(banners, JsonOptions));
+
+    [HttpGet]
+    public IActionResult List()
+        => Ok(ReadBanners().OrderByDescending(banner => banner.UploadedAtUtc));
+
+    [HttpPost]
+    [RequestSizeLimit(60 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 60 * 1024 * 1024)]
+    public async Task<IActionResult> Upload([FromForm] List<IFormFile>? banners, CancellationToken cancellationToken)
+    {
+        if (banners is null || banners.Count == 0)
+            return BadRequest("Choose one or more banner images to upload.");
+
+        var existing = ReadBanners();
+        foreach (var banner in banners)
+        {
+            if (banner is null || banner.Length == 0)
+                continue;
+            if (banner.Length > MaxImageSize)
+                return BadRequest($"Each banner image must be 10 MB or smaller: {Path.GetFileName(banner.FileName)}");
+
+            var extension = Path.GetExtension(banner.FileName).ToLowerInvariant();
+            if (!AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+                return BadRequest("Upload JPG, PNG, or WEBP images only.");
+            if (!banner.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                return BadRequest("Each selected file must be an image.");
+
+            var fileName = $"banner-{Guid.NewGuid():N}{extension}";
+            var destination = Path.Combine(UploadDirectory, fileName);
+            await using var stream = System.IO.File.Create(destination);
             await banner.CopyToAsync(stream, cancellationToken);
+            existing.Add(new BannerEntry { FileName = fileName, IsActive = true, UploadedAtUtc = DateTime.UtcNow });
+        }
 
-        return Ok(new { imageUrl = "/uploads/" + fileName, message = "Homepage banner updated." });
+        if (existing.Count == 0)
+            return BadRequest("No valid banner images were uploaded.");
+
+        WriteBanners(existing);
+        return Ok(new { message = "Banner images uploaded.", banners = existing.OrderByDescending(b => b.UploadedAtUtc) });
+    }
+
+    [HttpPut("{fileName}/status")]
+    public IActionResult UpdateStatus(string fileName, [FromBody] BannerStatusRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(fileName) || fileName != Path.GetFileName(fileName))
+            return BadRequest("Invalid banner filename.");
+
+        var banners = ReadBanners();
+        var banner = banners.FirstOrDefault(item => string.Equals(item.FileName, fileName, StringComparison.OrdinalIgnoreCase));
+        if (banner is null)
+            return NotFound("Banner image not found.");
+
+        banner.IsActive = request.IsActive;
+        WriteBanners(banners);
+        return Ok(new { success = true, banner });
     }
 
     [AllowAnonymous]
     [HttpGet("/api/storefront/banner")]
     public IActionResult Current()
     {
-        var directory = UploadDirectory;
-        var image = Directory.EnumerateFiles(directory, "dress-banner.*")
-            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-            .FirstOrDefault(path => new[] { ".jpg", ".jpeg", ".png", ".webp" }
-                .Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase));
+        var active = ReadBanners()
+            .Where(banner => banner.IsActive && System.IO.File.Exists(Path.Combine(UploadDirectory, banner.FileName)))
+            .OrderBy(banner => banner.UploadedAtUtc)
+            .Select(banner => banner.ImageUrl)
+            .ToList();
 
-        return Ok(new { imageUrl = image is null ? null : "/uploads/" + Path.GetFileName(image) });
+        return Ok(new { imageUrl = active.FirstOrDefault(), imageUrls = active });
     }
 }
