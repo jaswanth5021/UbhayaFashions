@@ -93,6 +93,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Category>().Property(x => x.Name).HasMaxLength(250).IsRequired();
         modelBuilder.Entity<Category>().Property(x => x.ImageUrl).HasMaxLength(2048).IsRequired();
         modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique();
+        modelBuilder.Entity<ProductVariant>().HasIndex(x => new { x.ProductId, x.Color, x.Size }).IsUnique();
         modelBuilder.Entity<Product>().HasOne(x => x.CategoryNavigation).WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
     }
 }
