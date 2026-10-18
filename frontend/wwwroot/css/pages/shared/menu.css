@@ -1170,3 +1170,142 @@ body.menu-open { overflow: hidden; }
         box-shadow: 0 8px 20px rgba(90, 47, 53, .05);
     }
 }
+
+
+/* Colorful, responsive category accordion for desktop and mobile sidebars. */
+.menu-categories-dropdown {
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+    overflow: hidden;
+    border: 1px solid #f0d9dc;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #fff8f6 0%, #fff0f2 100%);
+    box-shadow: 0 5px 16px rgba(104, 20, 46, .055);
+}
+
+.menu-categories-dropdown > summary.menu-item {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 30px !important;
+    align-items: center;
+    gap: 9px;
+    min-height: 60px;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(110deg, #fbe5e8 0%, #fff1eb 100%);
+    color: #761b36;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+
+.menu-categories-dropdown > summary::-webkit-details-marker { display: none; }
+.menu-categories-dropdown > summary::marker { content: ""; }
+
+.menu-categories-dropdown > summary .menu-item-icon {
+    width: 40px;
+    height: 40px;
+    background: #efd0d8;
+    color: #761b36;
+}
+
+.menu-categories-dropdown > summary .menu-item-arrow {
+    display: grid !important;
+    position: static;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,.8);
+    color: #761b36;
+    transform: none;
+    transition: transform .2s ease, background .2s ease;
+}
+
+.menu-categories-dropdown > summary .menu-item-arrow svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.menu-categories-dropdown[open] > summary .menu-item-arrow {
+    transform: rotate(180deg);
+    background: #fff;
+}
+
+.menu-category-sublist {
+    list-style: none;
+    margin: 0 !important;
+    padding: 7px 9px 9px 16px !important;
+    background: linear-gradient(180deg, #fff8f6, #fffdfb);
+}
+
+.menu-category-sublist li { margin: 0; padding: 0; }
+
+.menu-category-sublist li + li {
+    border-top: 1px solid #f1e3e0;
+}
+
+.menu-category-sublist a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 42px;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 9px;
+    color: #61464d;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: background .18s ease, color .18s ease, padding .18s ease;
+}
+
+.menu-category-sublist a::after {
+    content: "›";
+    color: #b27b87;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.menu-category-sublist a:hover,
+.menu-category-sublist a.is-current {
+    padding-left: 16px;
+    background: #f8e7eb;
+    color: #761b36;
+}
+
+.menu-category-sublist a:hover::after,
+.menu-category-sublist a.is-current::after { color: #761b36; }
+
+@media (min-width: 601px) {
+    .menu-categories-dropdown > summary.menu-item { min-height: 62px; }
+    .menu-category-sublist { padding: 9px 10px 11px 18px !important; }
+    .menu-category-sublist a { min-height: 44px; font-size: 14px; }
+}
+
+@media (max-width: 600px) {
+    .menu-categories-dropdown { margin: 5px 0; border-radius: 14px; }
+    .menu-categories-dropdown > summary.menu-item {
+        grid-template-columns: 44px minmax(0, 1fr) 28px !important;
+        min-height: 58px;
+        padding: 8px 9px;
+        font-size: 15px;
+    }
+    .menu-category-sublist {
+        margin: 0 !important;
+        padding: 5px 8px 8px 13px !important;
+    }
+    .menu-category-sublist a { min-height: 42px; font-size: 14px; }
+}
