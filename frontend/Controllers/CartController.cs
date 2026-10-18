@@ -138,7 +138,7 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(int productId, string? currentSize, string? size, int quantity = 1, string? returnUrl = null)
+    public async Task<IActionResult> Update(int productId, string? currentSize, string? currentColor, string? color, string? size, int quantity = 1, string? returnUrl = null)
     {
         IActionResult RedirectBack()
         {
@@ -156,10 +156,13 @@ public class CartController : Controller
         }
 
         var cart = GetCart();
-        var item = cart.FirstOrDefault(x => x.ProductId == productId && string.Equals(x.Size, currentSize, StringComparison.OrdinalIgnoreCase));
+        var item = cart.FirstOrDefault(x => x.ProductId == productId && string.Equals(x.Size, currentSize, StringComparison.OrdinalIgnoreCase) && string.Equals(x.Color ?? "", currentColor ?? "", StringComparison.OrdinalIgnoreCase));
         if (item is null) return RedirectBack();
         var product = await api.GetProductAsync(productId);
-        var variant = product?.Variants.FirstOrDefault(x => string.Equals(x.Size, size?.Trim(), StringComparison.OrdinalIgnoreCase));
+        var hasColorVariants = product?.Variants.Any(x => !string.IsNullOrWhiteSpace(x.Color)) == true;
+        var variant = hasColorVariants
+            ? product?.Variants.FirstOrDefault(x => string.Equals(x.Size, size?.Trim(), StringComparison.OrdinalIgnoreCase) && string.Equals(x.Color, currentColor, StringComparison.OrdinalIgnoreCase))
+            : product?.Variants.FirstOrDefault(x => string.Equals(x.Size, size?.Trim(), StringComparison.OrdinalIgnoreCase));
         if (variant is null || variant.Stock < 1)
         {
             TempData["CartError"] = "That size is not available. Please choose another size.";
@@ -171,7 +174,7 @@ public class CartController : Controller
             return RedirectBack();
         }
 
-        var sameVariant = cart.FirstOrDefault(x => x != item && x.ProductId == productId && string.Equals(x.Size, variant.Size, StringComparison.OrdinalIgnoreCase));
+        var sameVariant = cart.FirstOrDefault(x => x != item && x.ProductId == productId && string.Equals(x.Size, variant.Size, StringComparison.OrdinalIgnoreCase) && string.Equals(x.Color ?? "", item.Color ?? "", StringComparison.OrdinalIgnoreCase));
         if (sameVariant is not null)
         {
             if (quantity + sameVariant.Quantity > variant.Stock)
