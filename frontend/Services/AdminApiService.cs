@@ -32,6 +32,12 @@ public class AdminApiService(IHttpClientFactory factory,IHttpContextAccessor acc
   using var response = await Client.SendAsync(request);
   if (!response.IsSuccessStatusCode) throw new InvalidOperationException(await ReadError(response.Content));
  }
+ public async Task DeleteStorefrontBanner(string fileName)
+ {
+  using var request = Request(HttpMethod.Delete,$"api/admin/storefront-banner/{Uri.EscapeDataString(fileName)}");
+  using var response = await Client.SendAsync(request);
+  if (!response.IsSuccessStatusCode) throw new InvalidOperationException(await ReadError(response.Content));
+ }
  public async Task SetStorefrontBannerActive(string fileName, bool isActive)
  {
   using var request = Request(HttpMethod.Put,$"api/admin/storefront-banner/{Uri.EscapeDataString(fileName)}/status");
