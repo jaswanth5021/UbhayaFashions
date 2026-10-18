@@ -40,7 +40,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ProductVariant>().Property(x => x.Price).HasPrecision(18, 2);
         modelBuilder.Entity<ProductVariant>().Property(x => x.Discount).HasPrecision(5, 2);
         modelBuilder.Entity<Product>().HasMany(x => x.Variants).WithOne(x => x.Product).HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<ProductVariant>().HasIndex(x => new { x.ProductId, x.Size }).IsUnique();
+        modelBuilder.Entity<ProductVariant>().HasIndex(x => new { x.ProductId, x.Color, x.Size }).IsUnique();
         modelBuilder.Entity<Order>().Property(x => x.TotalAmount).HasPrecision(18, 2);
         modelBuilder.Entity<Order>().HasMany(x => x.Payments).WithOne(x => x.Order).HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Payment>().Property(x => x.Amount).HasPrecision(18, 2);
