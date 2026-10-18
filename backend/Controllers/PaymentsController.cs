@@ -54,7 +54,10 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         foreach (var item in request.Items)
         {
             var product = products.Single(x => x.Id == item.ProductId);
-            var variant = product.Variants.FirstOrDefault(x => x.Size == item.Size);
+            var hasColorVariants = product.Variants.Any(x => !string.IsNullOrWhiteSpace(x.Color));
+            var variant = hasColorVariants
+                ? product.Variants.FirstOrDefault(x => x.Size == item.Size && string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase))
+                : product.Variants.FirstOrDefault(x => x.Size == item.Size);
 
             if (variant is null)
                 return BadRequest($"{product.Name} does not have size {item.Size}.");
