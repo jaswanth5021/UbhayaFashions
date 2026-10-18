@@ -50,9 +50,13 @@ public class CartController : Controller
         if (product is null) return isAjax ? NotFound(new { success = false, message = "Product not found." }) : NotFound();
         var normalizedSize = size?.Trim();
         var normalizedColor = string.IsNullOrWhiteSpace(color) ? null : color.Trim();
-        var variant = product.Variants.FirstOrDefault(item =>
-            string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase) &&
-            (string.IsNullOrWhiteSpace(item.Color) || string.Equals(item.Color, normalizedColor, StringComparison.OrdinalIgnoreCase)));
+        var hasColorVariants = product.Variants.Any(item => !string.IsNullOrWhiteSpace(item.Color));
+        var variant = hasColorVariants
+            ? product.Variants.FirstOrDefault(item =>
+                string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(item.Color, normalizedColor, StringComparison.OrdinalIgnoreCase))
+            : product.Variants.FirstOrDefault(item =>
+                string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase));
         if (variant is null)
         {
             if (isAjax) return BadRequest(new { success = false, message = "Please select an available size." });
