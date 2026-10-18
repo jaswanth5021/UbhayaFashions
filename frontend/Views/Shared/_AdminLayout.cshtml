@@ -51,5 +51,6 @@
     </div>
     <div class="app-notification-stack" id="appNotificationStack" aria-live="polite" aria-relevant="additions" aria-atomic="false"></div>
     <script src="~/js/app-notifications.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
