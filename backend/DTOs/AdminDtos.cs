@@ -28,7 +28,7 @@ public class AdminProductRequest
 
 public class AdminProductVariantRequest
 {
-    public string Color { get; set; } = string.Empty;
+    public string? Color { get; set; }
     public string Size { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public decimal Discount { get; set; }
