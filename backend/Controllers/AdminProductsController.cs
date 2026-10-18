@@ -142,7 +142,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
 
     [HttpPost("{id:int}/images")]
     [RequestSizeLimit(50000000)]
-    public async Task<IActionResult> AdditionalImages(int id, List<IFormFile> files)
+    public async Task<IActionResult> AdditionalImages(int id, List<IFormFile> files, [FromForm] string? color)
     {
         var product = await db.Products.FindAsync(id);
         if (product is null) return NotFound();
@@ -154,7 +154,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         {
             var imageUrl = await SaveImage(id, file);
             if (imageUrl is null) return BadRequest("Only JPG, JPEG, PNG and WEBP images are supported.");
-            db.ProductImages.Add(new ProductImage { ProductId = id, ImageUrl = imageUrl, SortOrder = ++nextSortOrder });
+            db.ProductImages.Add(new ProductImage { ProductId = id, ImageUrl = imageUrl, Color = color?.Trim() ?? string.Empty, SortOrder = ++nextSortOrder });
             addedUrls.Add(imageUrl);
         }
         await db.SaveChangesAsync();
