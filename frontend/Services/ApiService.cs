@@ -824,6 +824,17 @@ public class ApiService(
     // MY ORDERS
     // =====================================================
 
+    public async Task<OrderTrackingViewModel?> GetOrderTrackingAsync(int orderId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/orders/{orderId}/tracking");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<OrderTrackingViewModel>(
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    }
+
     public async Task<string>
         GetMyOrdersAsync()
     {
