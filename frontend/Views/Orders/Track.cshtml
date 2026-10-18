@@ -1,0 +1,65 @@
+@model LadiesDressStore.Web.Models.OrderTrackingViewModel
+
+@{
+    ViewData["Title"] = $"Track Order #{Model.OrderId}";
+    var status = string.IsNullOrWhiteSpace(Model.ShippingStatus) ? "Not yet shipped" : Model.ShippingStatus;
+    var normalized = status.ToLowerInvariant();
+    var delivered = normalized.Contains("delivered");
+    var cancelled = normalized.Contains("cancel");
+}
+
+<section class="ubhaya-tracking">
+    <a class="tracking-back" asp-controller="Account" asp-action="Profile" asp-route-tab="orders">← Back to My Orders</a>
+    <header class="tracking-header">
+        <span>UBHAYA FASHIONS</span>
+        <h1>Track your order</h1>
+        <p>Order #@Model.OrderId · @Model.OrderDate.ToLocalTime().ToString("dd MMM yyyy")</p>
+    </header>
+    <div class="tracking-card">
+        <div class="tracking-row"><span>Order status</span><strong>@Model.OrderStatus</strong></div>
+        <div class="tracking-row"><span>Payment status</span><strong>@Model.PaymentStatus</strong></div>
+        <div class="tracking-row"><span>Shipment status</span><strong>@status</strong></div>
+        @if (!string.IsNullOrWhiteSpace(Model.Waybill))
+        {
+            <div class="tracking-row"><span>Delhivery AWB / tracking number</span><strong>@Model.Waybill</strong></div>
+        }
+        @if (Model.LastTrackingUpdateUtc.HasValue)
+        {
+            <div class="tracking-updated">Last carrier update: @Model.LastTrackingUpdateUtc.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</div>
+        }
+    </div>
+    @if (delivered)
+    {
+        <div class="tracking-message tracking-delivered">Your order is marked as delivered. Thank you for shopping with UBHAYA.</div>
+    }
+    else if (cancelled)
+    {
+        <div class="tracking-message">This shipment is marked as cancelled. Please contact customer support if you need help.</div>
+    }
+    else if (string.IsNullOrWhiteSpace(Model.Waybill))
+    {
+        <div class="tracking-message">Your order is being processed. Carrier tracking will appear here after the shipment has been created.</div>
+    }
+    else
+    {
+        <div class="tracking-message">This is the latest shipment status available from Delhivery.</div>
+    }
+</section>
+
+<style>
+    .ubhaya-tracking{max-width:760px;margin:36px auto 72px;padding:0 18px}
+    .tracking-back{display:inline-block;margin-bottom:28px;color:inherit;text-decoration:none}
+    .tracking-header{margin-bottom:24px}
+    .tracking-header>span{font-size:11px;letter-spacing:3px;font-weight:700}
+    .tracking-header h1{font-size:clamp(28px,5vw,40px);margin:10px 0}
+    .tracking-header p{color:#776c66}
+    .tracking-card{border:1px solid #e8ded8;border-radius:14px;overflow:hidden}
+    .tracking-row{display:flex;justify-content:space-between;gap:16px;padding:17px;border-bottom:1px solid #eee7e2}
+    .tracking-row:last-of-type{border-bottom:0}
+    .tracking-row span,.tracking-updated{color:#776c66;font-size:14px}
+    .tracking-row strong{text-align:right;overflow-wrap:anywhere}
+    .tracking-updated{padding:14px 17px;background:#faf7f4}
+    .tracking-message{margin-top:20px;padding:17px;border-radius:12px;background:#f7f1ec;line-height:1.6}
+    .tracking-delivered{background:#edf7ef}
+    @media(max-width:480px){.tracking-row{flex-direction:column;gap:6px}.tracking-row strong{text-align:left}}
+</style>
