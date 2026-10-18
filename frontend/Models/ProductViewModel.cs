@@ -71,6 +71,8 @@ public class ProductImageViewModel
 
     public string ImageUrl { get; set; } = string.Empty;
 
+    public string Color { get; set; } = string.Empty;
+
     public int SortOrder { get; set; }
 }
 
