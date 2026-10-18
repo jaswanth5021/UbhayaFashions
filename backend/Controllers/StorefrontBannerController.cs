@@ -132,6 +132,28 @@ public sealed class StorefrontBannerController(IConfiguration configuration, IWe
         return Ok(new { success = true, banner });
     }
 
+    [HttpDelete("{fileName}")]
+    public IActionResult Delete(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName) || fileName != Path.GetFileName(fileName))
+            return BadRequest("Invalid banner filename.");
+
+        var banners = ReadBanners();
+        var banner = banners.FirstOrDefault(item =>
+            string.Equals(item.FileName, fileName, StringComparison.OrdinalIgnoreCase));
+        if (banner is null)
+            return NotFound("Banner image not found.");
+
+        var imagePath = Path.Combine(UploadDirectory, banner.FileName);
+        banners.Remove(banner);
+        WriteBanners(banners);
+
+        if (System.IO.File.Exists(imagePath))
+            System.IO.File.Delete(imagePath);
+
+        return Ok(new { success = true, message = "Banner image deleted." });
+    }
+
     [AllowAnonymous]
     [HttpGet("/api/storefront/banner")]
     public IActionResult Current()
