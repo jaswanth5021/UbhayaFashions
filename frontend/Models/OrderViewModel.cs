@@ -19,6 +19,8 @@ public class MyOrderViewModel
     public string ShippingAddress { get; set; } = "";
     public DateTimeOffset CreatedDate { get; set; }
     public string RazorpayOrderId { get; set; } = "";
+    public string? ShippingStatus { get; set; }
+    public string? ShippingWaybill { get; set; }
     public List<MyOrderItemViewModel> Items { get; set; } = [];
 }
 
