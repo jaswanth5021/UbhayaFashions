@@ -1798,3 +1798,59 @@
     }
 
 }
+
+
+/* Final search-button flush fit: remove the white sliver at the right edge of the field. */
+@media (min-width: 901px) {
+    .header > .desktop-header-search {
+        display: flex !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+        padding: 0 !important;
+        border: 1px solid #e5d6df !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        background: #fff !important;
+    }
+
+    .header > .desktop-header-search input {
+        display: block !important;
+        flex: 1 1 0% !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+        border: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .header > .desktop-header-search button {
+        display: flex !important;
+        flex: 0 0 40px !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        align-self: stretch !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: -1px -1px -1px 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-sizing: border-box !important;
+        background: #a20b5b !important;
+        color: #fff !important;
+        line-height: 1 !important;
+    }
+
+    .header > .desktop-header-search button svg {
+        display: block !important;
+        flex: 0 0 18px !important;
+        width: 18px !important;
+        min-width: 18px !important;
+        height: 18px !important;
+        margin: 0 !important;
+    }
+}
