@@ -1712,3 +1712,95 @@
         margin: 0 !important;
     }
 }
+
+
+/* Search submit button sizing + account dropdown must layer above the burgundy nav. */
+@media (min-width: 901px) {
+    .header > .desktop-header-search {
+        display: flex !important;
+        align-items: stretch !important;
+        box-sizing: border-box !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 !important;
+        border: 1px solid #e5d6df !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        background: #fff !important;
+    }
+
+    .header > .desktop-header-search input {
+        box-sizing: border-box !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 12px !important;
+        line-height: normal !important;
+    }
+
+    .header > .desktop-header-search button {
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        align-self: stretch !important;
+        flex: 0 0 42px !important;
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: #a20b5b !important;
+        color: #fff !important;
+        line-height: 1 !important;
+    }
+
+    .header > .desktop-header-search button svg {
+        display: block !important;
+        width: 19px !important;
+        height: 19px !important;
+        flex: 0 0 19px !important;
+        stroke: currentColor !important;
+        stroke-width: 2 !important;
+    }
+
+    /* Lift the whole actions column above the nav row; child z-index alone cannot
+       escape if its parent is below the navigation stacking layer. */
+    .header > .header-actions {
+        position: relative !important;
+        z-index: 30 !important;
+        align-self: center !important;
+    }
+
+    .header .header-actions .account-menu {
+        position: relative !important;
+        z-index: 31 !important;
+        isolation: isolate !important;
+    }
+
+    .header .header-actions .account-dropdown {
+        position: absolute !important;
+        top: calc(100% + 8px) !important;
+        right: 0 !important;
+        left: auto !important;
+        z-index: 9999 !important;
+        display: none;
+        min-width: 270px !important;
+        width: max-content !important;
+        max-width: min(320px, 90vw) !important;
+        background: #fffafc !important;
+        border: 1px solid #ead8e2 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 14px 36px rgb(48 18 34 / 18%) !important;
+        overflow: hidden !important;
+    }
+
+    .header .header-actions .account-menu.is-open .account-dropdown,
+    .header .header-actions .account-menu.open .account-dropdown,
+    .header .header-actions .account-menu [aria-expanded="true"] + .account-dropdown {
+        display: block !important;
+    }
+}
