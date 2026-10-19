@@ -194,6 +194,7 @@
 }
 
 
+/* Desktop-only reference layout. All mobile styles are preserved below. */
 /* Final header layout: utility row first, full-width category navigation second.
    Matches the supplied second reference image. */
 .announcement-bar { display: none !important; }
@@ -408,6 +409,85 @@
     }
 }
 
+
+/* Mobile/tablet safety override: preserve the existing responsive header unchanged. */
 @media (max-width: 900px) {
     .announcement-bar { display: flex !important; }
+    .header {
+        display: flex !important;
+        grid-template-columns: none !important;
+        grid-template-rows: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: revert !important;
+        background: revert !important;
+        border: revert !important;
+        box-shadow: revert !important;
+        overflow: visible !important;
+    }
+    .header > .menu-button { display: flex !important; }
+    .header > .brand {
+        grid-column: auto !important;
+        grid-row: auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        margin: revert !important;
+        padding: revert !important;
+        position: revert !important;
+        transform: revert !important;
+    }
+    .header > .brand img {
+        width: revert !important;
+        max-width: 100% !important;
+        max-height: revert !important;
+        object-position: center !important;
+    }
+    .header .desktop-header-search { display: none !important; }
+    .header .header-actions {
+        grid-column: auto !important;
+        grid-row: auto !important;
+        gap: revert !important;
+        padding: revert !important;
+        margin: revert !important;
+    }
+    .header .header-actions .header-search-button { display: revert !important; }
+    .header .header-actions .header-icon {
+        display: revert !important;
+        width: revert !important;
+        min-width: revert !important;
+        height: revert !important;
+        min-height: revert !important;
+        flex-basis: revert !important;
+        padding: revert !important;
+        font-size: revert !important;
+    }
+    .header .account-menu { min-width: 0 !important; }
+    .header .account-menu-toggle {
+        display: revert !important;
+        flex-direction: revert !important;
+        width: revert !important;
+        max-width: revert !important;
+        min-width: revert !important;
+        height: revert !important;
+        padding: revert !important;
+        border: revert !important;
+        border-radius: revert !important;
+        background: revert !important;
+    }
+    .header .account-menu-toggle::before { display: none !important; }
+    .header .account-menu-name {
+        display: revert !important;
+        max-width: revert !important;
+        font-size: revert !important;
+    }
+    .header .account-menu-toggle-chevron { display: revert !important; }
+    .header .desktop-primary-nav {
+        grid-column: auto !important;
+        grid-row: auto !important;
+        display: none !important;
+        height: auto !important;
+        padding: revert !important;
+        background: revert !important;
+        box-shadow: revert !important;
+    }
 }
