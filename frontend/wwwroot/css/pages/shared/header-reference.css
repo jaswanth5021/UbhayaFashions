@@ -1854,3 +1854,357 @@
         margin: 0 !important;
     }
 }
+
+
+/* Clean desktop reference header — logo left, long search center, shopping actions right,
+   and a full-bleed burgundy category row below. Keep mobile rules untouched. */
+@media (min-width: 901px) {
+    .announcement-bar { display: none !important; }
+
+    .header {
+        position: relative !important;
+        display: grid !important;
+        grid-template-columns: minmax(245px, 285px) minmax(320px, 1fr) max-content !important;
+        grid-template-rows: 76px 48px !important;
+        align-items: center !important;
+        justify-content: stretch !important;
+        column-gap: clamp(18px, 2.2vw, 34px) !important;
+        row-gap: 0 !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: 124px !important;
+        min-height: 124px !important;
+        margin-left: calc(50% - 50vw) !important;
+        margin-right: calc(50% - 50vw) !important;
+        padding: 0 28px !important;
+        overflow: visible !important;
+        background: #fff !important;
+        border: 0 !important;
+        box-shadow: 0 2px 8px rgb(40 15 28 / 8%) !important;
+    }
+
+    .header > .menu-button { display: none !important; }
+
+    .header > .brand {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 76px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 1 !important;
+    }
+
+    .header > .brand img {
+        display: block !important;
+        flex: 0 0 auto !important;
+        width: 58px !important;
+        max-width: 58px !important;
+        height: 58px !important;
+        max-height: 58px !important;
+        object-fit: contain !important;
+        object-position: center !important;
+    }
+
+    /* Wordmark next to the existing logo image, like the reference screenshot. */
+    .header > .brand::after {
+        content: "UBHAYA\\A Ladies Dress Store";
+        display: block !important;
+        white-space: pre-line !important;
+        color: #19131a !important;
+        font-family: Georgia, "Times New Roman", serif !important;
+        font-size: 25px !important;
+        font-weight: 700 !important;
+        line-height: 1.02 !important;
+        letter-spacing: .3px !important;
+    }
+
+    .header .desktop-header-search {
+        position: relative !important;
+        inset: auto !important;
+        transform: none !important;
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        display: flex !important;
+        align-items: stretch !important;
+        justify-self: stretch !important;
+        align-self: center !important;
+        gap: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 2px solid #e6e8eb !important;
+        border-radius: 9px !important;
+        overflow: hidden !important;
+        background: #fff !important;
+        box-shadow: 0 1px 4px rgb(30 20 30 / 4%) !important;
+        z-index: 2 !important;
+    }
+
+    .header .desktop-header-search input {
+        display: block !important;
+        flex: 1 1 0% !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 16px !important;
+        border: 0 !important;
+        outline: none !important;
+        background: #fff !important;
+        color: #51474e !important;
+        font-size: 13px !important;
+        line-height: normal !important;
+        box-sizing: border-box !important;
+    }
+
+    .header .desktop-header-search button {
+        display: flex !important;
+        flex: 0 0 48px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 48px !important;
+        min-width: 48px !important;
+        max-width: 48px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        align-self: stretch !important;
+        margin: -1px -1px -1px 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: #a20b5b !important;
+        color: #fff !important;
+        box-sizing: border-box !important;
+    }
+
+    .header .desktop-header-search button svg {
+        display: block !important;
+        flex: 0 0 22px !important;
+        width: 22px !important;
+        min-width: 22px !important;
+        height: 22px !important;
+        margin: 0 !important;
+        fill: none !important;
+        stroke: currentColor !important;
+        stroke-width: 1.9 !important;
+    }
+
+    .header .header-actions {
+        position: relative !important;
+        inset: auto !important;
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: clamp(14px, 1.6vw, 24px) !important;
+        width: max-content !important;
+        min-width: 0 !important;
+        height: 76px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 4 !important;
+    }
+
+    .header .header-actions .header-search-button { display: none !important; }
+
+    .header .header-actions .account-menu {
+        position: relative !important;
+        display: flex !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 155px !important;
+        z-index: 10 !important;
+    }
+
+    .header .header-actions .account-menu-toggle {
+        display: inline-flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        width: auto !important;
+        max-width: 155px !important;
+        min-width: 54px !important;
+        height: 58px !important;
+        min-height: 58px !important;
+        padding: 2px 5px !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: #27202a !important;
+        overflow: visible !important;
+    }
+
+    .header .header-actions .account-menu-toggle::before {
+        content: "♙" !important;
+        display: block !important;
+        font-family: Arial, sans-serif !important;
+        font-size: 24px !important;
+        line-height: 22px !important;
+    }
+
+    .header .header-actions .account-menu-name {
+        display: block !important;
+        max-width: 145px !important;
+        overflow: hidden !important;
+        color: #2d252d !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        line-height: 1.15 !important;
+        text-align: center !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .header .header-actions .account-menu-toggle-chevron { display: none !important; }
+
+    .header .header-actions > .header-account-icon:not(.account-menu-toggle) {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        width: 68px !important;
+        min-width: 68px !important;
+        height: 58px !important;
+        min-height: 58px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: #27202a !important;
+        text-decoration: none !important;
+    }
+
+    .header .header-actions > .header-account-icon:not(.account-menu-toggle)::after {
+        content: "My Account";
+        font-size: 11px !important;
+        line-height: 1.15 !important;
+        white-space: nowrap !important;
+    }
+
+    .header .header-actions > .header-icon.wishlist-header-icon,
+    .header .header-actions > .header-icon.cart-icon {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        flex: 0 0 58px !important;
+        width: 58px !important;
+        min-width: 58px !important;
+        height: 58px !important;
+        min-height: 58px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: #27202a !important;
+        text-decoration: none !important;
+    }
+
+    .header .header-actions > .header-icon.wishlist-header-icon::after {
+        content: "Wishlist";
+        font-size: 11px !important;
+        line-height: 1.15 !important;
+    }
+
+    .header .header-actions > .header-icon.cart-icon::after {
+        content: "Cart";
+        font-size: 11px !important;
+        line-height: 1.15 !important;
+    }
+
+    .header .header-actions > .header-icon svg {
+        display: block !important;
+        width: 26px !important;
+        height: 26px !important;
+        flex: 0 0 26px !important;
+    }
+
+    .header .header-actions .header-icon-count,
+    .header .header-actions .customer-notification-count {
+        top: 0 !important;
+        right: 3px !important;
+    }
+
+    .header .header-actions .customer-notification-menu { display: none !important; }
+
+    .header > .desktop-primary-nav {
+        position: relative !important;
+        inset: auto !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: clamp(18px, 2.2vw, 38px) !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        margin-left: calc(50% - 50vw) !important;
+        margin-right: calc(50% - 50vw) !important;
+        padding: 0 22px !important;
+        background: #990956 !important;
+        color: #fff !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        z-index: 5 !important;
+    }
+
+    .header > .desktop-primary-nav > a {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 auto !important;
+        min-height: 48px !important;
+        padding: 0 1px !important;
+        color: #fff !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+    }
+
+    .header > .desktop-primary-nav > a:hover,
+    .header > .desktop-primary-nav > a.is-active {
+        color: #fff !important;
+        text-decoration: underline !important;
+        text-decoration-color: #f4c5dd !important;
+        text-underline-offset: 6px !important;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1250px) {
+    .header {
+        grid-template-columns: minmax(190px, 235px) minmax(220px, 1fr) max-content !important;
+        column-gap: 14px !important;
+        padding-inline: 18px !important;
+    }
+    .header > .brand img { width: 48px !important; height: 48px !important; }
+    .header > .brand::after { font-size: 20px !important; }
+    .header .header-actions { gap: 8px !important; }
+    .header .header-actions > .header-icon.wishlist-header-icon,
+    .header .header-actions > .header-icon.cart-icon { flex-basis: 48px !important; width: 48px !important; min-width: 48px !important; }
+    .header .header-actions > .header-account-icon:not(.account-menu-toggle) { width: 60px !important; min-width: 60px !important; }
+    .header > .desktop-primary-nav { gap: clamp(10px, 1.5vw, 20px) !important; }
+}
