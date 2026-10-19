@@ -1212,3 +1212,332 @@
         font-size: 10px !important;
     }
 }
+
+
+/* Stable desktop header repair after screenshot review.
+   Restore the search form, full-bleed burgundy nav row, and the established premium icon styling. */
+@media (min-width: 901px) {
+    .header {
+        position: relative !important;
+        display: grid !important;
+        grid-template-columns: 42px minmax(0, 1fr) minmax(230px, 300px) auto !important;
+        grid-template-rows: 64px 40px !important;
+        align-items: center !important;
+        justify-content: stretch !important;
+        column-gap: 12px !important;
+        row-gap: 0 !important;
+        width: 100vw !important;
+        max-width: none !important;
+        min-height: 104px !important;
+        height: 104px !important;
+        margin-left: calc(50% - 50vw) !important;
+        margin-right: calc(50% - 50vw) !important;
+        padding: 0 24px !important;
+        overflow: visible !important;
+        background: #fff !important;
+        border: 0 !important;
+        box-shadow: 0 2px 8px rgb(54 32 27 / 8%) !important;
+    }
+
+    .header > .menu-button {
+        display: flex !important;
+        position: relative !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 38px !important;
+        min-width: 38px !important;
+        height: 42px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #4b3330 !important;
+        background: transparent !important;
+        font-size: 25px !important;
+    }
+
+    .header > .brand {
+        position: absolute !important;
+        left: 50% !important;
+        top: 0 !important;
+        transform: translateX(-50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        grid-column: auto !important;
+        grid-row: 1 !important;
+        width: 82px !important;
+        min-width: 82px !important;
+        height: 64px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 3 !important;
+    }
+
+    .header > .brand img {
+        display: block !important;
+        width: 78px !important;
+        max-width: 78px !important;
+        max-height: 52px !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+
+    /* Keep search in the grid; avoid the old absolute positioning that hid it. */
+    .header > .desktop-header-search {
+        display: flex !important;
+        position: relative !important;
+        inset: auto !important;
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        align-self: center !important;
+        justify-self: stretch !important;
+        width: 100% !important;
+        max-width: 300px !important;
+        min-width: 0 !important;
+        height: 40px !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        border: 1px solid #e5dce2 !important;
+        border-radius: 8px !important;
+        background: #fff !important;
+        box-shadow: 0 2px 8px rgb(54 32 27 / 5%) !important;
+        z-index: 2 !important;
+    }
+
+    .header > .desktop-header-search input {
+        display: block !important;
+        flex: 1 1 auto !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        height: 100% !important;
+        padding: 0 12px !important;
+        border: 0 !important;
+        outline: none !important;
+        background: #fff !important;
+        color: #433532 !important;
+        font-size: 11px !important;
+    }
+
+    .header > .desktop-header-search button {
+        display: grid !important;
+        place-items: center !important;
+        flex: 0 0 38px !important;
+        width: 38px !important;
+        height: 40px !important;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: #a20b5b !important;
+        color: #fff !important;
+    }
+
+    .header > .desktop-header-search button svg {
+        width: 18px !important;
+        height: 18px !important;
+        fill: none !important;
+        stroke: currentColor !important;
+        stroke-width: 1.8 !important;
+    }
+
+    .header > .header-actions {
+        position: relative !important;
+        inset: auto !important;
+        grid-column: 4 !important;
+        grid-row: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
+        width: auto !important;
+        min-width: max-content !important;
+        height: 64px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 4 !important;
+    }
+
+    .header .header-actions .header-search-button { display: none !important; }
+
+    /* Restore the rounded, softly tinted account pill and the matching icon buttons. */
+    .header .header-actions .account-menu {
+        display: flex !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 190px !important;
+    }
+
+    .header .header-actions .account-menu-toggle {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 190px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        flex: 0 1 auto !important;
+        padding: 0 12px !important;
+        border: 1px solid #e5d6df !important;
+        border-radius: 24px !important;
+        background: #fbf4f8 !important;
+        color: #4b2638 !important;
+        box-shadow: 0 2px 7px rgb(75 38 56 / 7%) !important;
+        white-space: nowrap !important;
+    }
+
+    .header .header-actions .account-menu-toggle .account-menu-name {
+        display: inline-block !important;
+        position: static !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 126px !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        color: #4b2638 !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        line-height: 1.2 !important;
+        text-indent: 0 !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .header .header-actions .account-menu-toggle .account-menu-toggle-chevron {
+        display: block !important;
+        position: static !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 12px !important;
+        height: 12px !important;
+        flex: 0 0 12px !important;
+    }
+
+    .header .header-actions > .header-icon,
+    .header .header-actions .customer-notification-toggle {
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 38px !important;
+        width: 38px !important;
+        min-width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 !important;
+        border: 1px solid #eadde5 !important;
+        border-radius: 50% !important;
+        background: #fff8fc !important;
+        color: #4b2638 !important;
+        box-shadow: 0 2px 7px rgb(75 38 56 / 6%) !important;
+        transition: background .18s ease, border-color .18s ease, transform .18s ease !important;
+    }
+
+    .header .header-actions > .header-icon:hover,
+    .header .header-actions .customer-notification-toggle:hover {
+        background: #f7e7f0 !important;
+        border-color: #d8b5c8 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    .header .header-actions > .header-icon svg,
+    .header .header-actions .customer-notification-toggle svg {
+        width: 21px !important;
+        height: 21px !important;
+        flex: 0 0 21px !important;
+    }
+
+    .header .header-actions .header-icon-count,
+    .header .header-actions .customer-notification-count {
+        position: absolute !important;
+        top: -5px !important;
+        right: -4px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 17px !important;
+        height: 17px !important;
+        padding: 0 4px !important;
+        border: 2px solid #fff !important;
+        border-radius: 999px !important;
+        background: #8e0b4f !important;
+        color: #fff !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+    }
+
+    /* Full-bleed burgundy nav row, including the left and right edges. */
+    .header > .desktop-primary-nav {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: clamp(18px, 2.1vw, 30px) !important;
+        position: relative !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        margin-left: calc(50% - 50vw) !important;
+        margin-right: calc(50% - 50vw) !important;
+        padding: 0 18px !important;
+        background: #990956 !important;
+        color: #fff !important;
+        box-shadow: none !important;
+        z-index: 5 !important;
+    }
+
+    .header > .desktop-primary-nav > a,
+    .header > .desktop-primary-nav > .desktop-nav-dropdown > summary {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 40px !important;
+        padding: 0 2px !important;
+        color: #fff !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+    }
+
+    .header > .desktop-primary-nav > a:hover,
+    .header > .desktop-primary-nav > a.is-active,
+    .header > .desktop-primary-nav > .desktop-nav-dropdown[open] > summary {
+        color: #fff !important;
+        text-decoration: underline !important;
+        text-decoration-color: #f1c7dc !important;
+        text-underline-offset: 5px !important;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .header {
+        grid-template-columns: 36px minmax(0, 1fr) minmax(190px, 230px) auto !important;
+        column-gap: 7px !important;
+        padding-inline: 14px !important;
+    }
+    .header .header-actions { gap: 4px !important; }
+    .header .header-actions .account-menu-toggle { padding-inline: 7px !important; }
+    .header .header-actions .account-menu-name { max-width: 76px !important; font-size: 10px !important; }
+    .header .header-actions > .header-icon,
+    .header .header-actions .customer-notification-toggle {
+        flex-basis: 32px !important;
+        width: 32px !important;
+        min-width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+    }
+    .header .header-actions > .header-icon svg,
+    .header .header-actions .customer-notification-toggle svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+}
