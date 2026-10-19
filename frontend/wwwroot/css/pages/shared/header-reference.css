@@ -662,3 +662,26 @@
     .header .desktop-primary-nav > a,
     .header .desktop-primary-nav > .desktop-nav-dropdown > summary { font-size: 12px !important; }
 }
+
+/* Desktop-only benefit strip: free shipping, premium quality, secure payments. */
+@media (min-width: 901px) {
+  .announcement-bar {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(14px, 2vw, 28px);
+    width: 100%;
+    min-height: 28px;
+    height: 28px;
+    padding: 0 16px;
+    background: #292326;
+    color: #f8f1f5;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .announcement-bar i { color: #d5a9c0; font-style: normal; font-size: 12px; }
+}
