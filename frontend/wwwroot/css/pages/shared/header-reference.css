@@ -1001,3 +1001,89 @@
     .header .header-actions .header-icon { min-width: 30px !important; }
     .header .desktop-primary-nav { gap: 14px !important; }
 }
+
+
+/* Fix the two highlighted desktop issues: account label visibility and edge spacing. */
+@media (min-width: 901px) {
+    .header {
+        padding-left: 18px !important;
+        padding-right: 28px !important;
+    }
+
+    .header > .menu-button {
+        justify-self: center !important;
+    }
+
+    /* More specific than the generic .header-icon rules, which otherwise stack
+       the account control vertically and hide the name under the profile icon. */
+    .header .header-actions .account-menu-toggle {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 6px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 190px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        flex-basis: auto !important;
+        padding: 0 4px !important;
+        white-space: nowrap !important;
+    }
+
+    .header .header-actions .account-menu-toggle .account-menu-name {
+        display: inline-block !important;
+        position: static !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 128px !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        color: #21191e !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        line-height: 1.2 !important;
+        text-indent: 0 !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        clip: auto !important;
+        clip-path: none !important;
+    }
+
+    .header .header-actions .account-menu-toggle .account-menu-toggle-chevron {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: static !important;
+        width: 12px !important;
+        height: 12px !important;
+        flex: 0 0 12px !important;
+    }
+
+    .header .header-actions {
+        gap: 10px !important;
+        padding-right: 0 !important;
+    }
+
+    .header .header-actions .header-icon {
+        flex-shrink: 0 !important;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .header {
+        padding-left: 14px !important;
+        padding-right: 16px !important;
+        grid-template-columns: 34px minmax(0, 1fr) minmax(160px, 210px) auto !important;
+    }
+
+    .header .header-actions { gap: 5px !important; }
+    .header .header-actions .account-menu-toggle .account-menu-name {
+        max-width: 82px !important;
+        font-size: 10px !important;
+    }
+}
