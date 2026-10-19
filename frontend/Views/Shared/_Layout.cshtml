@@ -83,10 +83,18 @@
     }
     var openCartDrawer = TempData["OpenCartDrawer"] as bool? == true;
     var savedCheckoutAddresses = new List<LadiesDressStore.Web.Models.SavedAddressViewModel>();
-    // Prefer a full display-name claim; identity names can sometimes contain only an initial.
+    // Prefer a full display-name claim; some identity providers put only an initial in GivenName.
     var accountName =
-        User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ??
-        User.FindFirst("name")?.Value ??
+        User.Claims
+            .Where(claim =>
+                (claim.Type == "name" ||
+                 claim.Type == "full_name" ||
+                 claim.Type == System.Security.Claims.ClaimTypes.Name ||
+                 claim.Type == System.Security.Claims.ClaimTypes.GivenName) &&
+                !string.IsNullOrWhiteSpace(claim.Value) &&
+                claim.Value.Trim().Length > 2)
+            .Select(claim => claim.Value.Trim())
+            .FirstOrDefault() ??
         User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ??
         User.Identity?.Name ??
         "My account";
