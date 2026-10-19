@@ -1787,7 +1787,6 @@
         right: 0 !important;
         left: auto !important;
         z-index: 9999 !important;
-        display: none;
         min-width: 270px !important;
         width: max-content !important;
         max-width: min(320px, 90vw) !important;
@@ -1798,9 +1797,4 @@
         overflow: hidden !important;
     }
 
-    .header .header-actions .account-menu.is-open .account-dropdown,
-    .header .header-actions .account-menu.open .account-dropdown,
-    .header .header-actions .account-menu [aria-expanded="true"] + .account-dropdown {
-        display: block !important;
-    }
 }
