@@ -685,3 +685,145 @@
   }
   .announcement-bar i { color: #d5a9c0; font-style: normal; font-size: 12px; }
 }
+
+
+/* Desktop header refinements from the latest UI review.
+   Keep all changes above 900px so the mobile header remains unchanged. */
+@media (min-width: 901px) {
+    .header {
+        grid-template-columns: 36px minmax(140px, 190px) minmax(220px, 460px) minmax(max-content, 1fr) !important;
+        grid-template-rows: 64px 40px !important;
+        column-gap: clamp(8px, 1vw, 14px) !important;
+        justify-content: space-between !important;
+    }
+
+    .header > .menu-button {
+        display: flex !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 34px !important;
+        min-width: 34px !important;
+        height: 38px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 6px !important;
+        background: transparent !important;
+        color: #34262d !important;
+        font-size: 25px !important;
+        line-height: 1 !important;
+        cursor: pointer !important;
+    }
+
+    .header > .menu-button:hover,
+    .header > .menu-button:focus-visible {
+        background: #f7eaf1 !important;
+        color: #970d56 !important;
+    }
+
+    .header > .brand {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        padding-left: 0 !important;
+        justify-content: flex-start !important;
+        min-width: 0 !important;
+    }
+
+    .header > .brand img {
+        width: min(100%, 165px) !important;
+        max-width: 165px !important;
+        max-height: 46px !important;
+    }
+
+    .header .desktop-header-search {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        max-width: 460px !important;
+        min-width: 0 !important;
+        justify-self: start !important;
+        height: 36px !important;
+    }
+
+    .header .desktop-header-search input {
+        min-width: 0 !important;
+        padding-inline: 11px !important;
+        font-size: 12px !important;
+    }
+
+    .header .desktop-header-search button {
+        flex-basis: 38px !important;
+        width: 38px !important;
+        height: 36px !important;
+    }
+
+    .header .header-actions {
+        grid-column: 4 !important;
+        grid-row: 1 !important;
+        justify-self: end !important;
+        gap: clamp(7px, .8vw, 12px) !important;
+        padding: 0 clamp(16px, 2vw, 28px) 0 0 !important;
+        min-width: max-content !important;
+    }
+
+    /* After sign-in, show the actual account name beside the profile icon. */
+    .header .account-menu {
+        min-width: 0 !important;
+        flex: 0 1 auto !important;
+    }
+
+    .header .account-menu-toggle {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 210px !important;
+        height: 40px !important;
+        padding: 0 3px !important;
+        white-space: nowrap !important;
+    }
+
+    .header .account-menu-toggle::before {
+        display: block !important;
+        width: 21px !important;
+        height: 21px !important;
+        flex: 0 0 21px !important;
+    }
+
+    .header .account-menu-name {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        max-width: 150px !important;
+        overflow: hidden !important;
+        color: #21191e !important;
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .header .account-menu-toggle-chevron {
+        display: block !important;
+        width: 12px !important;
+        height: 12px !important;
+        flex: 0 0 12px !important;
+    }
+
+    /* Keep the category links grouped instead of spreading them to the edges. */
+    .header .desktop-primary-nav {
+        justify-content: center !important;
+        gap: clamp(18px, 2.2vw, 30px) !important;
+        padding-inline: 16px !important;
+    }
+
+    .header .desktop-primary-nav > a,
+    .header .desktop-primary-nav > .desktop-nav-dropdown > summary {
+        padding-inline: 2px !important;
+    }
+}
