@@ -827,3 +827,177 @@
         padding-inline: 2px !important;
     }
 }
+
+
+/* Final desktop alignment: centered logo, search on the right, full account name visible.
+   This block intentionally does not affect tablet/mobile layouts. */
+@media (min-width: 901px) {
+    .header {
+        position: relative !important;
+        display: grid !important;
+        grid-template-columns: 38px minmax(0, 1fr) minmax(190px, 300px) auto !important;
+        grid-template-rows: 64px 40px !important;
+        column-gap: clamp(8px, 1vw, 14px) !important;
+        align-items: center !important;
+        padding: 0 22px 0 8px !important;
+        overflow: visible !important;
+    }
+
+    .header > .menu-button {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        display: flex !important;
+        width: 34px !important;
+        min-width: 34px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        justify-self: start !important;
+        color: #34262d !important;
+        background: transparent !important;
+        font-size: 25px !important;
+        line-height: 1 !important;
+    }
+
+    .header > .brand {
+        position: absolute !important;
+        left: 50% !important;
+        top: 0 !important;
+        z-index: 2 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: max-content !important;
+        min-width: 0 !important;
+        height: 64px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .header > .brand img {
+        display: block !important;
+        width: auto !important;
+        max-width: 150px !important;
+        height: auto !important;
+        max-height: 48px !important;
+        object-fit: contain !important;
+        object-position: center !important;
+    }
+
+    .header .desktop-header-search {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        justify-self: end !important;
+        width: 100% !important;
+        max-width: 300px !important;
+        min-width: 0 !important;
+        height: 36px !important;
+        margin: 0 !important;
+        border: 1px solid #e5dce2 !important;
+        border-radius: 7px !important;
+    }
+
+    .header .desktop-header-search input {
+        min-width: 0 !important;
+        padding: 0 10px !important;
+        font-size: 11px !important;
+    }
+
+    .header .desktop-header-search button {
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .header .header-actions {
+        grid-column: 4 !important;
+        grid-row: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
+        min-width: max-content !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .header .header-actions .header-search-button { display: none !important; }
+
+    .header .account-menu {
+        display: flex !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 180px !important;
+    }
+
+    .header .account-menu-toggle {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 5px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 180px !important;
+        height: 40px !important;
+        padding: 0 2px !important;
+        overflow: visible !important;
+        white-space: nowrap !important;
+    }
+
+    .header .account-menu-toggle::before {
+        display: block !important;
+        width: 20px !important;
+        height: 20px !important;
+        flex: 0 0 20px !important;
+    }
+
+    .header .account-menu-name {
+        display: inline-block !important;
+        flex: 0 1 auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: auto !important;
+        max-width: 125px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        color: #21191e !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        line-height: 1.2 !important;
+        text-indent: 0 !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .header .account-menu-toggle-chevron {
+        display: block !important;
+        width: 12px !important;
+        height: 12px !important;
+        flex: 0 0 12px !important;
+    }
+
+    .header .desktop-primary-nav {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        justify-content: center !important;
+        gap: clamp(18px, 2.2vw, 30px) !important;
+        width: 100% !important;
+        height: 40px !important;
+        padding: 0 12px !important;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .header {
+        grid-template-columns: 34px minmax(0, 1fr) minmax(170px, 230px) auto !important;
+        column-gap: 7px !important;
+        padding-right: 12px !important;
+    }
+    .header > .brand img { max-width: 124px !important; }
+    .header .desktop-header-search { max-width: 230px !important; }
+    .header .header-actions { gap: 5px !important; }
+    .header .account-menu-name { max-width: 86px !important; font-size: 10px !important; }
+    .header .header-actions .header-icon { min-width: 30px !important; }
+    .header .desktop-primary-nav { gap: 14px !important; }
+}
