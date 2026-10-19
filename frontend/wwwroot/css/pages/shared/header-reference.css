@@ -1541,3 +1541,85 @@
         height: 18px !important;
     }
 }
+
+
+/* Latest desktop overlap fix: one search control only, with space reserved for long account names. */
+@media (min-width: 901px) {
+    /* The inline search form is the desktop search. Keep the separate modal-search
+       trigger for mobile/tablet only so the magnifier is never duplicated. */
+    .header .header-actions > #headerSearchOpen,
+    .header .header-actions > .header-search-button {
+        display: none !important;
+    }
+
+    .header .header-actions .account-menu {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 170px !important;
+    }
+
+    .header .header-actions .account-menu-toggle {
+        min-width: 0 !important;
+        max-width: 170px !important;
+        overflow: hidden !important;
+    }
+
+    .header .header-actions .account-menu-name {
+        min-width: 0 !important;
+        max-width: clamp(72px, 8vw, 112px) !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+}
+
+@media (min-width: 1181px) {
+    .header .desktop-header-search {
+        left: calc(50% + 76px) !important;
+        width: clamp(175px, 17vw, 230px) !important;
+        max-width: 230px !important;
+    }
+
+    .header .header-actions {
+        right: 22px !important;
+        gap: 7px !important;
+    }
+
+    .header .header-actions .account-menu {
+        max-width: 165px !important;
+    }
+
+    .header .header-actions .account-menu-toggle {
+        max-width: 165px !important;
+        padding-inline: 8px !important;
+    }
+
+    .header .header-actions .account-menu-name {
+        max-width: clamp(78px, 7.5vw, 108px) !important;
+    }
+}
+
+/* On narrower desktop widths, reduce the search field and account label before they collide. */
+@media (min-width: 901px) and (max-width: 1180px) {
+    .header .desktop-header-search {
+        left: auto !important;
+        right: 330px !important;
+        width: clamp(150px, 20vw, 205px) !important;
+        max-width: 205px !important;
+    }
+
+    .header .header-actions {
+        right: 14px !important;
+        gap: 4px !important;
+    }
+
+    .header .header-actions .account-menu,
+    .header .header-actions .account-menu-toggle {
+        max-width: 115px !important;
+    }
+
+    .header .header-actions .account-menu-name {
+        max-width: 65px !important;
+        font-size: 10px !important;
+    }
+}
