@@ -577,3 +577,88 @@
     .header .desktop-primary-nav > a,
     .header .desktop-primary-nav > .desktop-nav-dropdown > summary { font-size: 12px !important; }
 }
+
+
+/* Extra-compact desktop header: reduce whitespace while keeping controls usable.
+   Desktop only; do not alter the mobile header. */
+@media (min-width: 901px) {
+    .header {
+        grid-template-columns: minmax(170px, 240px) minmax(230px, 1fr) auto !important;
+        grid-template-rows: 64px 40px !important;
+        column-gap: clamp(8px, 1.1vw, 16px) !important;
+    }
+    .header > .brand { padding-left: clamp(16px, 2vw, 28px) !important; }
+    .header > .brand img {
+        width: min(100%, 165px) !important;
+        max-width: 165px !important;
+        max-height: 46px !important;
+    }
+    .header .desktop-header-search {
+        height: 36px !important;
+        border-radius: 7px !important;
+    }
+    .header .desktop-header-search input {
+        padding: 0 12px !important;
+        font-size: 12px !important;
+    }
+    .header .desktop-header-search button {
+        flex-basis: 38px !important;
+        width: 38px !important;
+        height: 36px !important;
+    }
+    .header .desktop-header-search button svg {
+        width: 19px !important;
+        height: 19px !important;
+    }
+    .header .header-actions {
+        gap: clamp(8px, 1vw, 14px) !important;
+        padding-right: clamp(16px, 2vw, 28px) !important;
+    }
+    .header .header-actions .header-icon {
+        min-width: 38px !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        gap: 2px !important;
+        font-size: 10px !important;
+    }
+    .header .header-actions .header-icon > svg {
+        width: 21px !important;
+        height: 21px !important;
+    }
+    .header .account-menu-toggle {
+        height: 48px !important;
+        min-width: 60px !important;
+        gap: 2px !important;
+        padding: 1px 0 !important;
+    }
+    .header .account-menu-toggle::before {
+        width: 21px !important;
+        height: 21px !important;
+        flex-basis: 21px !important;
+    }
+    .header .account-menu-name {
+        max-width: 112px !important;
+        font-size: 10px !important;
+    }
+    .header .desktop-primary-nav {
+        height: 40px !important;
+        padding: 0 clamp(16px, 2.5vw, 36px) !important;
+        gap: clamp(8px, 1.4vw, 20px) !important;
+    }
+    .header .desktop-primary-nav > a,
+    .header .desktop-primary-nav > .desktop-nav-dropdown > summary {
+        font-size: 13px !important;
+    }
+}
+@media (min-width: 901px) and (max-width: 1180px) {
+    .header {
+        grid-template-columns: minmax(140px, 185px) minmax(190px, 1fr) auto !important;
+        column-gap: 8px !important;
+    }
+    .header > .brand img { max-width: 140px !important; }
+    .header .header-actions { gap: 6px !important; }
+    .header .header-actions .header-icon { min-width: 34px !important; }
+    .header .desktop-primary-nav { gap: 8px !important; }
+    .header .desktop-primary-nav > a,
+    .header .desktop-primary-nav > .desktop-nav-dropdown > summary { font-size: 12px !important; }
+}
