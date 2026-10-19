@@ -1087,3 +1087,128 @@
         font-size: 10px !important;
     }
 }
+
+
+/* Final positioning pass based on the latest screenshot:
+   keep the logo centered independently; place search to its right and actions at the far right. */
+@media (min-width: 1181px) {
+    .header {
+        position: relative !important;
+        display: grid !important;
+        grid-template-columns: 40px minmax(0, 1fr) !important;
+        grid-template-rows: 64px 40px !important;
+        padding-left: 18px !important;
+        padding-right: 28px !important;
+        column-gap: 0 !important;
+    }
+
+    .header > .menu-button {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        justify-self: start !important;
+        align-self: center !important;
+    }
+
+    .header > .brand {
+        position: absolute !important;
+        left: 50% !important;
+        top: 0 !important;
+        transform: translateX(-50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100px !important;
+        height: 64px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 3 !important;
+    }
+
+    .header > .brand img {
+        display: block !important;
+        width: auto !important;
+        max-width: 100px !important;
+        max-height: 48px !important;
+        object-fit: contain !important;
+    }
+
+    .header .desktop-header-search {
+        position: absolute !important;
+        left: calc(50% + 90px) !important;
+        right: auto !important;
+        top: 14px !important;
+        width: 260px !important;
+        max-width: 260px !important;
+        min-width: 0 !important;
+        height: 36px !important;
+        margin: 0 !important;
+        z-index: 2 !important;
+    }
+
+    .header .desktop-header-search input {
+        min-width: 0 !important;
+        font-size: 11px !important;
+        padding: 0 10px !important;
+    }
+
+    .header .header-actions {
+        position: absolute !important;
+        top: 8px !important;
+        right: 24px !important;
+        height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 9px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 4 !important;
+    }
+
+    .header .header-actions .header-search-button {
+        display: none !important;
+    }
+
+    .header .header-actions .account-menu {
+        max-width: 180px !important;
+        flex: 0 1 auto !important;
+    }
+
+    .header .header-actions .account-menu-toggle {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 5px !important;
+        width: auto !important;
+        max-width: 180px !important;
+        min-width: 0 !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 2px !important;
+        white-space: nowrap !important;
+    }
+
+    .header .header-actions .account-menu-name {
+        display: inline-block !important;
+        max-width: 120px !important;
+        overflow: hidden !important;
+        color: #21191e !important;
+        font-size: 11px !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+    .header .desktop-header-search {
+        max-width: 220px !important;
+    }
+    .header .header-actions {
+        gap: 4px !important;
+    }
+    .header .header-actions .account-menu-name {
+        max-width: 78px !important;
+        font-size: 10px !important;
+    }
+}
