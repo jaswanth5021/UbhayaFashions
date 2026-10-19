@@ -226,6 +226,7 @@
         <link rel="stylesheet" href="~/css/pages/home/about.css" asp-append-version="true" />
     }
     <link rel="stylesheet" href="~/css/pages/shared/header-responsive.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/header-reference.css" asp-append-version="true" />
     @if (currentController == "Home" && currentAction == "Returns")
     {
         <link rel="stylesheet" href="~/css/pages/home/returns-policy.css" asp-append-version="true" />
@@ -503,6 +504,17 @@
         </section>
     </div>
 
+
+    @if (currentAction.Contains("Track", StringComparison.OrdinalIgnoreCase) || currentAction.Contains("Tracking", StringComparison.OrdinalIgnoreCase))
+    {
+        <nav class="store-breadcrumb" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg><span>Home</span></a>
+            <span class="store-breadcrumb-separator" aria-hidden="true">›</span>
+            <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders">My Orders</a>
+            <span class="store-breadcrumb-separator" aria-hidden="true">›</span>
+            <span aria-current="page">Track Order</span>
+        </nav>
+    }
 
     <!-- =========================================
          HAMBURGER SIDE MENU
