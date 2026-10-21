@@ -51,6 +51,19 @@ builder.Services.AddHttpClient("Razorpay", client =>
     client.BaseAddress = new Uri("https://api.razorpay.com/v1/");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
+
+// Delhivery B2C client. Defaults to staging; use production only after activation.
+builder.Services.AddHttpClient("Delhivery", client =>
+{
+    var baseUrl = builder.Configuration["Delhivery:BaseUrl"];
+    if (string.IsNullOrWhiteSpace(baseUrl))
+        baseUrl = "https://staging-express.delhivery.com/";
+    if (!baseUrl.EndsWith("/", StringComparison.Ordinal))
+        baseUrl += "/";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.AddScoped<IDelhiveryService, DelhiveryService>();
 builder.Services.AddScoped<IOrderConfirmationEmailService, OrderConfirmationEmailService>();
 builder.Services.AddSingleton<IErrorLog, ErrorLog>();
 builder.Services.AddScoped<ApiErrorLogFilter>();

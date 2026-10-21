@@ -13,6 +13,24 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
     public IActionResult Index() => RedirectToAction("Profile", "Account", new { tab = "orders" });
 
     [HttpGet]
+    public async Task<IActionResult> Track(int id)
+    {
+        if (id <= 0) return NotFound();
+        try
+        {
+            var tracking = await api.GetOrderTrackingAsync(id);
+            if (tracking is null) return NotFound();
+            return View("Track", tracking);
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Unable to load tracking for order {OrderId}", id);
+            TempData["Error"] = "We couldn't load tracking details. Please try again.";
+            return RedirectToAction("Profile", "Account", new { tab = "orders" });
+        }
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Checkout()
     {
         var cart = ReadCart();

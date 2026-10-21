@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProductVideo> ProductVideos => Set<ProductVideo>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<DelhiveryShipment> DelhiveryShipments => Set<DelhiveryShipment>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
@@ -42,6 +43,27 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Product>().HasMany(x => x.Variants).WithOne(x => x.Product).HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductVariant>().HasIndex(x => new { x.ProductId, x.Color, x.Size }).IsUnique();
         modelBuilder.Entity<Order>().Property(x => x.TotalAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Order>().Property(x => x.PaymentMethod).HasMaxLength(20).HasDefaultValue("COD");
+        modelBuilder.Entity<DelhiveryShipment>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.OrderId).IsUnique();
+            entity.HasOne(x => x.Order).WithOne(x => x.DelhiveryShipment)
+                .HasForeignKey<DelhiveryShipment>(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(x => x.ShipmentStatus).HasMaxLength(60).IsRequired();
+            entity.Property(x => x.Waybill).HasMaxLength(100);
+            entity.Property(x => x.LabelUrl).HasMaxLength(2048);
+            entity.Property(x => x.PickupLocation).HasMaxLength(200);
+            entity.Property(x => x.RecipientName).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.RecipientPhone).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.Address).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.City).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.State).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.PostalCode).HasMaxLength(10).IsRequired();
+            entity.Property(x => x.Country).HasMaxLength(60).IsRequired();
+            entity.Property(x => x.LastError).HasMaxLength(2000);
+        });
         modelBuilder.Entity<Order>().HasMany(x => x.Payments).WithOne(x => x.Order).HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Payment>().Property(x => x.Amount).HasPrecision(18, 2);
         modelBuilder.Entity<Payment>().HasIndex(x => x.RazorpayOrderId).IsUnique();

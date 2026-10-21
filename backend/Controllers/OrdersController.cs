@@ -12,7 +12,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/orders")]
 [Authorize]
-public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailService orderEmail) : ControllerBase
+public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, ILogger<OrdersController> logger) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(CreateOrderRequest request)
@@ -29,7 +29,7 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
 
         decimal total = 0;
         var inventoryTransactions = new List<InventoryTransaction>();
-        var order = new Order { CustomerId = customerId, ShippingAddress = request.ShippingAddress };
+        var order = new Order { CustomerId = customerId, ShippingAddress = request.ShippingAddress, PaymentMethod = "COD" };
 
         foreach (var item in request.Items)
         {
@@ -88,6 +88,8 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
                 order.ShippingAddress,
                 order.CreatedDate,
                 order.RazorpayOrderId,
+                ShippingStatus = db.DelhiveryShipments.Where(s => s.OrderId == order.Id).Select(s => s.ShipmentStatus).FirstOrDefault(),
+                ShippingWaybill = db.DelhiveryShipments.Where(s => s.OrderId == order.Id).Select(s => s.Waybill).FirstOrDefault(),
                 Items = order.Items.Select(item => new
                 {
                     item.Id,
@@ -106,5 +108,65 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
             })
             .ToListAsync();
         return Ok(orders);
+    }
+
+    [HttpGet("{id:int}/tracking")]
+    public async Task<IActionResult> TrackOrder(int id, CancellationToken cancellationToken)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
+            return Unauthorized();
+
+        var order = await db.Orders.AsNoTracking()
+            .Where(x => x.Id == id && x.CustomerId == customerId)
+            .Select(x => new
+            {
+                x.Id, x.Status, x.PaymentStatus, x.PaymentMethod, x.CreatedDate,
+                Shipment = db.DelhiveryShipments.Where(s => s.OrderId == x.Id)
+                    .Select(s => new { s.Id, s.Waybill, s.ShipmentStatus, s.UpdatedAtUtc })
+                    .FirstOrDefault()
+            }).FirstOrDefaultAsync(cancellationToken);
+
+        if (order is null) return NotFound();
+
+        if (order.Shipment is not null &&
+            !string.IsNullOrWhiteSpace(order.Shipment.Waybill) &&
+            (!order.Shipment.UpdatedAtUtc.HasValue ||
+             order.Shipment.UpdatedAtUtc.Value < DateTime.UtcNow.AddMinutes(-2)))
+        {
+            try
+            {
+                var status = await delhivery.RefreshTrackingAsync(order.Shipment.Waybill, cancellationToken);
+                var shipment = await db.DelhiveryShipments.FirstOrDefaultAsync(
+                    x => x.Id == order.Shipment.Id, cancellationToken);
+                if (shipment is not null && !string.IsNullOrWhiteSpace(status))
+                {
+                    shipment.ShipmentStatus = status;
+                    shipment.UpdatedAtUtc = DateTime.UtcNow;
+                    shipment.LastError = null;
+                    await db.SaveChangesAsync(cancellationToken);
+                    order = new
+                    {
+                        order.Id, order.Status, order.PaymentStatus, order.PaymentMethod, order.CreatedDate,
+                        Shipment = new { shipment.Id, shipment.Waybill, shipment.ShipmentStatus, shipment.UpdatedAtUtc }
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Delhivery tracking refresh failed for order {OrderId}", id);
+            }
+        }
+
+        return Ok(new
+        {
+            orderId = order.Id,
+            orderStatus = order.Status,
+            paymentStatus = order.PaymentStatus,
+            paymentMethod = order.PaymentMethod,
+            orderDate = order.CreatedDate,
+            shippingStatus = order.Shipment?.ShipmentStatus ?? "NotCreated",
+            waybill = order.Shipment?.Waybill,
+            lastTrackingUpdateUtc = order.Shipment?.UpdatedAtUtc
+        });
     }
 }
