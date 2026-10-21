@@ -10,4 +10,13 @@ public sealed class OrderTrackingViewModel
     public string ShippingStatus { get; set; } = "NotCreated";
     public string? Waybill { get; set; }
     public DateTimeOffset? LastTrackingUpdateUtc { get; set; }
+    public DateTimeOffset? ShipmentCreatedUtc { get; set; }
+    public string? PickupLocation { get; set; }
+    public decimal TotalAmount { get; set; }
+    public int ItemCount { get; set; }
+    public string? FirstItemName { get; set; }
+    public string? FirstItemImageUrl { get; set; }
+    public string? RecipientName { get; set; }
+    public string? RecipientPhone { get; set; }
+    public string? DeliveryAddress { get; set; }
 }

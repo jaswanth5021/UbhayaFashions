@@ -34,8 +34,9 @@
         @if (orderId.HasValue)
         {
             <div class="order-result-number">
-                <span>YOUR ORDER REFERENCE</span>
-                <strong>#@orderId.Value</strong>
+                <span>Your order reference</span>
+                <strong><em>#</em>@orderId.Value</strong>
+                <button type="button" class="order-ref-copy" data-order-ref="#@orderId.Value">Copy reference</button>
                 <small>Keep this number handy when you contact us.</small>
             </div>
         }
@@ -103,3 +104,18 @@
         <p class="order-result-help">Need help with your order? <a asp-controller="Contact" asp-action="Index">Contact our team</a>.</p>
     </div>
 </section>
+<script>
+    document.querySelectorAll(".order-ref-copy").forEach(function (button) {
+        button.addEventListener("click", async function () {
+            var value = button.getAttribute("data-order-ref") || "";
+            var previous = button.textContent;
+            try {
+                await navigator.clipboard.writeText(value);
+                button.textContent = "Copied";
+            } catch (error) {
+                button.textContent = value;
+            }
+            setTimeout(function () { button.textContent = previous; }, 1600);
+        });
+    });
+</script>

@@ -6,146 +6,319 @@
     var normalized = status.ToLowerInvariant();
     var delivered = normalized.Contains("deliver") && !normalized.Contains("out for delivery");
     var outForDelivery = normalized.Contains("out for delivery") || normalized.Contains("dispatched");
-    var inTransit = normalized.Contains("transit") || normalized.Contains("in transit") || outForDelivery || delivered;
+    var inTransit = normalized.Contains("transit") || outForDelivery || delivered;
     var pickedUp = inTransit || normalized.Contains("picked") || normalized.Contains("pickup");
     var shipmentCreated = !string.IsNullOrWhiteSpace(Model.Waybill);
     var cancelled = normalized.Contains("cancel") || Model.OrderStatus.Contains("cancel", StringComparison.OrdinalIgnoreCase);
     var currentStep = cancelled ? -1 : delivered ? 5 : outForDelivery ? 4 : inTransit ? 3 : pickedUp ? 2 : shipmentCreated ? 1 : 0;
-    var paymentMode = string.IsNullOrWhiteSpace(Model.PaymentMethod) ? "—" : Model.PaymentMethod;
+
+    var orderDate = Model.OrderDate.ToLocalTime();
+    var lastUpdate = Model.LastTrackingUpdateUtc?.ToLocalTime();
+    var shipmentDate = Model.ShipmentCreatedUtc?.ToLocalTime();
+    var expectedDelivery = delivered && lastUpdate.HasValue
+        ? lastUpdate.Value
+        : (shipmentDate ?? orderDate).AddDays(shipmentDate.HasValue ? 5 : 7);
+
+    var badgeText = cancelled ? "Cancelled" : delivered ? "Delivered" : shipmentCreated ? "Shipped" : "Processing";
+    var badgeClass = cancelled ? "is-cancelled" : delivered ? "is-delivered" : shipmentCreated ? "is-shipped" : "is-processing";
+    var statusTitle = cancelled ? "Cancelled"
+        : delivered ? "Delivered"
+        : outForDelivery ? "Out for Delivery"
+        : inTransit ? "In Transit"
+        : pickedUp ? "Picked Up"
+        : shipmentCreated ? "Shipment Created"
+        : "Order Processing";
+    var statusText = cancelled ? "This shipment is no longer progressing."
+        : delivered ? "Your parcel has been delivered to your address."
+        : outForDelivery ? "Our courier partner is delivering your parcel today."
+        : inTransit ? "Your parcel is in transit to the next facility."
+        : pickedUp ? "Your parcel has been picked up from our location."
+        : shipmentCreated ? "Your shipment is booked with Delhivery."
+        : "We are preparing your order for dispatch.";
+    var imageUrl = string.IsNullOrWhiteSpace(Model.FirstItemImageUrl)
+        ? null : ImageUrlHelper.Resolve(Model.FirstItemImageUrl, Configuration["ApiBaseUrl"]);
+    var itemLabel = Model.ItemCount == 1 ? "1 Item" : $"{Model.ItemCount} Items";
+
+    var steps = new[]
+    {
+        new { Title = "Order Placed", Note = "Your order has been successfully placed", Icon = "box" },
+        new { Title = "Shipment Created", Note = "Shipment booked with Delhivery", Icon = "box" },
+        new { Title = "Picked Up", Note = "Parcel picked up from our location", Icon = "box" },
+        new { Title = "In Transit", Note = "Parcel is in transit to delivery location", Icon = "truck" },
+        new { Title = "Out for Delivery", Note = "Will be out for delivery soon", Icon = "box" },
+        new { Title = "Delivered", Note = "Will be delivered to your address", Icon = "home" }
+    };
 }
+
+<link rel="stylesheet" href="~/css/pages/orders/track.css" asp-append-version="true" />
+
 <div class="track-page">
     <nav class="track-breadcrumb" aria-label="Breadcrumb">
-        <a asp-controller="Home" asp-action="Index">⌂ Home</a><span>›</span>
-        <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders">My Orders</a><span>›</span>
-        <span>Track Order #@Model.OrderId</span>
+        <a asp-controller="Home" asp-action="Index">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/></svg>
+            Home
+        </a>
+        <svg class="track-breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders">My Orders</a>
+        <svg class="track-breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <span>Track Order</span>
     </nav>
 
     <header class="track-hero">
-        <div class="track-hero-icon" aria-hidden="true">🚚</div>
-        <div><h1>Track Your Order</h1><p>Check the latest delivery status of your UBHAYA order</p></div>
-        <div class="track-hero-art" aria-hidden="true">🛍️</div>
+        <div class="track-hero-icon" aria-hidden="true">
+            <svg width="76" height="57" viewBox="0 0 64 48">
+                <path d="M2 14h8M0 22h10M4 30h6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <path d="M14 8h28v26H14z" fill="currentColor"/>
+                <path d="M42 16h10l8 9v9H42z" fill="currentColor"/>
+                <path d="M45 19h6l5 6h-11z" fill="#fff"/>
+                <circle cx="24" cy="38" r="6" fill="currentColor" stroke="#fde8f1" stroke-width="3"/>
+                <circle cx="50" cy="38" r="6" fill="currentColor" stroke="#fde8f1" stroke-width="3"/>
+            </svg>
+        </div>
+        <div class="track-hero-copy">
+            <h1>Track Your Order</h1>
+            <p>Enter your order details to check the latest delivery status</p>
+        </div>
+        <div class="track-hero-art" aria-hidden="true">
+            <svg width="200" height="140" viewBox="0 0 200 140">
+                <path d="M150 30c18-22 40-24 48-20-6 18-24 34-48 36z" fill="#3f7d4e"/>
+                <path d="M156 60c22-8 38 0 42 6-16 10-34 10-46 4z" fill="#2f6a3e"/>
+                <path d="M20 128c-6-28 4-52 22-60" stroke="#4d8a5a" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <path d="M8 78c14-6 30 0 34 10-14 6-30 2-34-10z" fill="#3f7d4e"/>
+                <rect x="58" y="46" width="70" height="94" rx="4" fill="#f4a3bf"/>
+                <path d="M74 52c0-22 38-22 38 0" stroke="#d9729a" stroke-width="5" fill="none"/>
+                <rect x="104" y="60" width="66" height="80" rx="4" fill="#e8628f"/>
+                <path d="M118 66c0-20 38-20 38 0" stroke="#c4416f" stroke-width="5" fill="none"/>
+            </svg>
+        </div>
     </header>
 
     <section class="track-main-card">
-        <div class="track-order-summary">
-            <div class="track-order-icon" aria-hidden="true">📦</div>
-            <div class="track-order-info">
-                <div class="track-order-title">Order #@Model.OrderId
-                    <span class="track-badge @(delivered ? "is-delivered" : cancelled ? "is-cancelled" : "is-shipped")">@(delivered ? "Delivered" : cancelled ? "Cancelled" : shipmentCreated ? "Shipped" : "Processing")</span>
+        <form class="track-lookup" asp-controller="Orders" asp-action="Find" method="get" role="search">
+            <input type="hidden" name="current" value="@Model.OrderId" />
+            <label for="trackOrderId">Enter Order ID</label>
+            <div class="track-lookup-row">
+                <div class="track-lookup-input">
+                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg>
+                    <input id="trackOrderId" name="orderId" type="text" inputmode="numeric" value="@Model.OrderId" autocomplete="off" placeholder="e.g. 1024" />
                 </div>
-                <p>Placed on @Model.OrderDate.ToLocalTime().ToString("dd MMM yyyy")</p>
-                <p>Payment: @Model.PaymentStatus · @paymentMode</p>
-                <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders" class="track-order-link">Back to My Orders <span aria-hidden="true">→</span></a>
+                <button type="submit">
+                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                    Track Order
+                </button>
             </div>
+        </form>
+
+        <div class="track-order-summary">
+            <div class="track-order-product">
+                <div class="track-order-thumb">
+                    @if (imageUrl is not null)
+                    {
+                        <img src="@imageUrl" alt="@Model.FirstItemName" loading="lazy" />
+                    }
+                    else
+                    {
+                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg>
+                    }
+                </div>
+                <div class="track-order-info">
+                    <div class="track-order-title">
+                        <span>Order #@Model.OrderId</span>
+                        <span class="track-badge @badgeClass">
+                            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"/></svg>
+                            @badgeText
+                        </span>
+                    </div>
+                    <p>Placed on @orderDate.ToString("dd MMM yyyy")</p>
+                    <p>@itemLabel &bull; ₹@Model.TotalAmount.ToString("N0")</p>
+                    <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders" class="track-order-link">
+                        View Order Details
+                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </a>
+                </div>
+            </div>
+
             <div class="track-carrier">
                 <div class="track-delhivery-wordmark">DELHIVERY</div>
                 <div class="track-carrier-meta">
-                    <div><span>AWB Number</span><strong>@(string.IsNullOrWhiteSpace(Model.Waybill) ? "Will appear after shipment" : Model.Waybill)</strong></div>
-                    <div><span>Courier Partner</span><strong>Delhivery</strong></div>
-                    <div><span>Last Update</span><strong>@(Model.LastTrackingUpdateUtc.HasValue ? Model.LastTrackingUpdateUtc.Value.ToLocalTime().ToString("dd MMM, hh:mm tt") : "Awaiting update")</strong></div>
+                    <div>
+                        <span>AWB Number</span>
+                        @if (shipmentCreated)
+                        {
+                            <strong class="track-awb">
+                                <span id="trackAwb">@Model.Waybill</span>
+                                <button type="button" class="track-copy" data-copy-target="trackAwb" aria-label="Copy AWB number">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>
+                                </button>
+                            </strong>
+                        }
+                        else
+                        {
+                            <strong class="track-muted">Awaiting shipment</strong>
+                        }
+                    </div>
+                    <div>
+                        <span>Courier Partner</span>
+                        <strong>Delhivery</strong>
+                    </div>
+                    <div>
+                        <span>@(delivered ? "Delivered On" : "Expected Delivery")</span>
+                        <strong class="track-date">
+                            @expectedDelivery.ToString("dd MMM yyyy")
+                            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
+                        </strong>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="track-timeline" aria-label="Shipment progress">
-            @foreach (var step in new[] {
-                new { Title = "Order Placed", Icon = "✓", Note = "Order received successfully" },
-                new { Title = "Shipment Created", Icon = "✓", Note = "Shipment booked with Delhivery" },
-                new { Title = "Picked Up", Icon = "✓", Note = "Parcel picked up by carrier" },
-                new { Title = "In Transit", Icon = "🚚", Note = "Parcel moving to next facility" },
-                new { Title = "Out for Delivery", Icon = "📦", Note = "Courier is delivering your parcel" },
-                new { Title = "Delivered", Icon = "⌂", Note = "Parcel delivered to your address" }
-            }.Select((step, index) => new { step.Title, step.Icon, step.Note, Index = index }))
+        <ol class="track-timeline @(cancelled ? "is-cancelled" : "")" aria-label="Shipment progress">
+            @for (var index = 0; index < steps.Length; index++)
             {
-                var stepClass = step.Index < currentStep ? "is-complete" : step.Index == currentStep ? "is-current" : "is-pending";
-                if (cancelled) { stepClass = "is-pending"; }
-                <div class="track-step @stepClass">
-                    <div class="track-step-dot" aria-hidden="true">@step.Icon</div>
+                var step = steps[index];
+                var stepClass = cancelled ? "is-pending"
+                    : index < currentStep ? "is-complete"
+                    : index == currentStep ? (index == 5 ? "is-complete" : "is-current")
+                    : "is-pending";
+                DateTimeOffset? stepDate = index == 0 ? orderDate
+                    : index == 1 && shipmentDate.HasValue && index <= currentStep ? shipmentDate
+                    : index == currentStep ? lastUpdate
+                    : null;
+                <li class="track-step @stepClass">
+                    <div class="track-step-dot" aria-hidden="true">
+                        @if (stepClass == "is-complete")
+                        {
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"/></svg>
+                        }
+                        else if (step.Icon == "truck")
+                        {
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>
+                        }
+                        else if (step.Icon == "home")
+                        {
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 10v9h11v-9"/><path d="M10 19v-5h4v5"/></svg>
+                        }
+                        else
+                        {
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg>
+                        }
+                    </div>
                     <strong>@step.Title</strong>
-                    <span class="track-step-date">
-                        @if (step.Index == 0) { @Model.OrderDate.ToLocalTime().ToString("dd MMM yyyy") }
-                        else if (step.Index == currentStep && Model.LastTrackingUpdateUtc.HasValue) { @Model.LastTrackingUpdateUtc.Value.ToLocalTime().ToString("dd MMM yyyy") }
-                        else if (step.Index <= currentStep) { <text>Confirmed</text> }
-                        else { <text>Pending</text> }
-                    </span>
+                    @if (stepDate.HasValue)
+                    {
+                        <span class="track-step-date">@stepDate.Value.ToString("dd MMM yyyy")</span>
+                        <span class="track-step-time">@stepDate.Value.ToString("hh:mm tt")</span>
+                    }
+                    else
+                    {
+                        <span class="track-step-date">@(stepClass == "is-complete" ? "Completed" : "Pending")</span>
+                        <span class="track-step-time">&nbsp;</span>
+                    }
                     <p>@step.Note</p>
-                </div>
+                </li>
             }
-        </div>
+        </ol>
 
         @if (cancelled)
         {
             <div class="track-alert track-alert-warning">This order or shipment is marked as cancelled. Please contact UBHAYA support if you need help.</div>
         }
-        else if (!shipmentCreated)
-        {
-            <div class="track-alert">Your order has been received. Delhivery tracking will appear here once the shipment is created by our team.</div>
-        }
-        else if (delivered)
-        {
-            <div class="track-alert track-alert-success">Your parcel is marked as delivered. Thank you for shopping with UBHAYA!</div>
-        }
-        else
-        {
-            <div class="track-alert">Showing the latest shipment status available to UBHAYA. Carrier scans may take time to update.</div>
-        }
     </section>
 
     <section class="track-bottom-grid">
         <article class="track-info-card track-status-card">
-            <header><span class="track-card-icon" aria-hidden="true">🚚</span><h2>Current Status</h2><span class="track-live"><i></i> Tracking status</span></header>
+            <header>
+                <span class="track-card-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>
+                </span>
+                <h2>Current Status</h2>
+                @if (shipmentCreated && !delivered && !cancelled)
+                {
+                    <span class="track-live"><i></i> Live Tracking</span>
+                }
+            </header>
             <div class="track-status-body">
-                <div class="track-status-icon" aria-hidden="true">@(delivered ? "✓" : cancelled ? "!" : "🚚")</div>
-                <div><h3>@(cancelled ? "Cancelled" : delivered ? "Delivered" : status == "Order processing" ? "Order Processing" : status)</h3>
-                    <p>@(delivered ? "Your parcel has been delivered." : cancelled ? "The shipment is no longer progressing." : shipmentCreated ? "This is the latest status received from Delhivery." : "We are preparing your order for dispatch.")</p>
+                <div class="track-status-icon @(delivered ? "is-delivered" : cancelled ? "is-cancelled" : "")" aria-hidden="true">
+                    @if (delivered)
+                    {
+                        <svg width="20" height="20" viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"/></svg>
+                    }
+                    else
+                    {
+                        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>
+                    }
+                </div>
+                <div>
+                    <h3>@statusTitle</h3>
+                    <p>@statusText</p>
                 </div>
             </div>
-            @if (Model.LastTrackingUpdateUtc.HasValue)
-            {
-                <div class="track-scan-note"><span aria-hidden="true">📍</span><div><strong>Last carrier update</strong><p>@Model.LastTrackingUpdateUtc.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</p></div></div>
-            }
+            <div class="track-scan-note">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5" fill="#fff"/></svg>
+                <div>
+                    @if (lastUpdate.HasValue)
+                    {
+                        <p>Last update: <strong>@status</strong></p>
+                        <p>@lastUpdate.Value.ToString("dd MMM yyyy, hh:mm tt")</p>
+                    }
+                    else
+                    {
+                        <p>Last update: <strong>Order received</strong></p>
+                        <p>@orderDate.ToString("dd MMM yyyy, hh:mm tt")</p>
+                    }
+                </div>
+            </div>
         </article>
+
         <article class="track-info-card track-delivery-card">
-            <header><span class="track-card-icon" aria-hidden="true">📍</span><h2>Delivery Information</h2></header>
-            <div class="track-delivery-row"><span aria-hidden="true">🧾</span><div><small>Order number</small><strong>#@Model.OrderId</strong></div></div>
-            <div class="track-delivery-row"><span aria-hidden="true">💳</span><div><small>Payment</small><strong>@Model.PaymentStatus (@paymentMode)</strong></div></div>
-            <div class="track-delivery-row"><span aria-hidden="true">📅</span><div><small>Order date</small><strong>@Model.OrderDate.ToLocalTime().ToString("dd MMM yyyy")</strong></div></div>
+            <header>
+                <span class="track-card-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 22s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5" fill="#fff"/></svg>
+                </span>
+                <h2>Delivery Information</h2>
+            </header>
+            <dl class="track-delivery-list">
+                <div class="track-delivery-row">
+                    <dt>
+                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+                        Delivery to
+                    </dt>
+                    <dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.RecipientName))
+                        {
+                            <strong>@Model.RecipientName</strong>
+                        }
+                        <span>@(string.IsNullOrWhiteSpace(Model.DeliveryAddress) ? "Address not available" : Model.DeliveryAddress)</span>
+                    </dd>
+                </div>
+                <div class="track-delivery-row">
+                    <dt>
+                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
+                        Contact
+                    </dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.RecipientPhone) ? "—" : Model.RecipientPhone)</dd>
+                </div>
+                <div class="track-delivery-row">
+                    <dt>
+                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
+                        @(delivered ? "Delivered On" : "Expected Delivery")
+                    </dt>
+                    <dd><strong>@expectedDelivery.ToString("dd MMM yyyy")</strong></dd>
+                </div>
+            </dl>
         </article>
     </section>
 </div>
 
-<style>
-    .track-page{max-width:1440px;margin:0 auto;padding:18px 28px 52px;color:#19172b}
-    .track-breadcrumb{display:flex;align-items:center;gap:11px;margin:0 0 22px;color:#626b82;font-size:14px;flex-wrap:wrap}
-    .track-breadcrumb a{color:inherit;text-decoration:none}.track-breadcrumb a:hover{color:#b20c61}
-    .track-hero{min-height:158px;border-radius:15px;padding:30px 38px;display:flex;align-items:center;gap:28px;position:relative;overflow:hidden;background:linear-gradient(105deg,#fce8f1 0%,#fff1f6 56%,#f8dce9 100%);margin-bottom:0}
-    .track-hero-icon{font-size:58px;z-index:1}.track-hero h1{font-size:clamp(28px,3vw,42px);margin:0 0 8px;font-weight:750;letter-spacing:-.7px}.track-hero p{font-size:18px;color:#6c7287;margin:0}
-    .track-hero-art{position:absolute;right:34px;bottom:-14px;font-size:104px;opacity:.75;transform:rotate(-8deg)}
-    .track-main-card{position:relative;background:#fff;border-radius:15px;padding:24px 20px 22px;box-shadow:0 8px 30px rgba(32,28,50,.04)}
-    .track-order-summary{border:1px solid #e4e7ee;border-radius:13px;padding:22px 24px;display:flex;align-items:center;gap:22px;min-width:0}
-    .track-order-icon{width:100px;height:100px;flex:0 0 100px;border-radius:12px;background:#fbedf3;display:grid;place-items:center;font-size:48px}
-    .track-order-info{min-width:230px;flex:1}.track-order-title{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:19px;font-weight:750}.track-order-info p{margin:8px 0;color:#6d7489;font-size:14px}
-    .track-badge{display:inline-flex;align-items:center;border-radius:8px;padding:8px 13px;font-size:13px;color:#fff;background:#1eaa59;font-weight:650}.track-badge.is-cancelled{background:#d64545}.track-badge.is-shipped{background:#20a85b}
-    .track-order-link{display:inline-block;margin-top:5px;text-decoration:none;color:#c01568;font-weight:650;font-size:14px}
-    .track-carrier{border-left:1px solid #e7e8ee;padding-left:24px;flex:1.3;min-width:0}.track-delhivery-wordmark{font-size:25px;letter-spacing:1px;font-weight:950;color:#111;margin-bottom:16px}
-    .track-carrier-meta{display:grid;grid-template-columns:1.15fr .9fr 1fr;gap:16px}.track-carrier-meta>div{min-width:0;padding-right:12px;border-right:1px solid #e4e6ed}.track-carrier-meta>div:last-child{border:0;padding:0}
-    .track-carrier-meta span{display:block;color:#737b8e;font-size:13px;margin-bottom:7px}.track-carrier-meta strong{display:block;font-size:14px;overflow-wrap:anywhere}
-    .track-timeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;position:relative;padding:24px 0 0;margin:0 4px}
-    .track-timeline:before{content:"";position:absolute;left:8.2%;right:8.2%;top:51px;height:3px;background:#d9dde4}
-    .track-step{position:relative;z-index:1;text-align:center;min-width:0;display:flex;align-items:center;flex-direction:column}
-    .track-step-dot{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:#f4f6f9;border:1px solid #dce1e9;color:#50617b;font-size:23px;margin-bottom:10px;box-shadow:0 0 0 4px #fff}
-    .track-step.is-complete .track-step-dot{background:#20a457;border-color:#20a457;color:#fff}.track-step.is-current .track-step-dot{background:#2479ed;border-color:#2479ed;color:#fff;box-shadow:0 0 0 5px #e7f0ff}
-    .track-step strong{font-size:14px;line-height:1.3;min-height:19px}.track-step-date{font-size:12px;color:#6c7489;margin:6px 0 10px;min-height:16px}
-    .track-step p{width:100%;margin:0;background:#f4f6f9;border-radius:9px;padding:11px 8px;color:#5e6b83;font-size:12px;line-height:1.5;min-height:60px;display:flex;align-items:center;justify-content:center}
-    .track-step.is-complete p{background:#eaf7ef;color:#277344}.track-step.is-current p{background:#eaf2ff;color:#1756b5}
-    .track-alert{margin:20px 4px 0;padding:14px 18px;border-radius:10px;background:#fff2f7;color:#8b2453;font-size:14px;line-height:1.55}
-    .track-alert-success{background:#eaf7ef;color:#237343}.track-alert-warning{background:#fff0ef;color:#9d3434}
-    .track-bottom-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-top:20px}
-    .track-info-card{border:1px solid #d6e6fa;border-radius:13px;overflow:hidden;background:#fff;min-width:0}.track-info-card>header{min-height:64px;display:flex;align-items:center;gap:13px;padding:15px 20px;background:#eff6ff}.track-info-card h2{font-size:18px;margin:0;font-weight:750}.track-card-icon{font-size:26px}
-    .track-live{margin-left:auto;border-radius:20px;background:#dcf7e9;color:#168148;padding:7px 12px;font-size:12px;white-space:nowrap}.track-live i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#18a75c;margin-right:5px}
-    .track-status-body{display:flex;align-items:center;gap:18px;padding:22px 20px 16px}.track-status-icon{flex:0 0 62px;width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:#2479ed;color:#fff;font-size:26px}.track-status-body h3{font-size:23px;color:#164da5;margin:0 0 6px;overflow-wrap:anywhere}.track-status-body p{margin:0;color:#36415c;font-size:14px;line-height:1.5}
-    .track-scan-note{display:flex;gap:12px;align-items:flex-start;margin:0 20px 20px;padding:15px;border-radius:9px;background:#edf5ff;color:#1d5cb8}.track-scan-note p{margin:6px 0 0;color:#35425d;font-size:13px}
-    .track-delivery-card{border-color:#ffe0c6}.track-delivery-card>header{background:#fff6ed}.track-delivery-row{display:flex;align-items:flex-start;gap:14px;padding:15px 22px;border-bottom:1px solid #f2eee9}.track-delivery-row:last-child{border-bottom:0}.track-delivery-row>span{font-size:19px;width:25px}.track-delivery-row small{display:block;color:#737b8e;margin-bottom:5px;font-size:12px}.track-delivery-row strong{font-size:14px;overflow-wrap:anywhere}
-    @@media(max-width:1050px){.track-order-summary{flex-wrap:wrap}.track-carrier{flex-basis:100%;border-left:0;border-top:1px solid #e7e8ee;padding:18px 0 0}.track-timeline{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:22px}.track-timeline:before{display:none}.track-bottom-grid{grid-template-columns:1fr}}
-    @@media(max-width:600px){.track-page{padding:14px 12px 32px}.track-hero{padding:24px 20px;min-height:140px;gap:12px}.track-hero-icon{font-size:36px}.track-hero h1{font-size:27px}.track-hero p{font-size:14px;max-width:260px}.track-hero-art{font-size:56px;right:8px;opacity:.35}.track-main-card{padding:12px}.track-order-summary{padding:14px;gap:13px}.track-order-icon{width:64px;height:64px;flex-basis:64px;font-size:30px}.track-order-info{min-width:0}.track-order-title{font-size:16px}.track-carrier-meta{grid-template-columns:1fr;gap:12px}.track-carrier-meta>div{border-right:0;border-bottom:1px solid #e4e6ed;padding:0 0 10px}.track-timeline{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 10px}.track-step-dot{width:48px;height:48px;font-size:19px}.track-step strong{font-size:13px}.track-step p{font-size:11px;min-height:54px}.track-info-card>header{padding:13px}.track-info-card h2{font-size:16px}.track-status-body{padding:18px 14px}.track-status-body h3{font-size:20px}.track-status-icon{width:50px;height:50px;flex-basis:50px}.track-scan-note{margin:0 14px 14px}}
-</style>
+<script>
+    document.querySelectorAll(".track-copy").forEach(function (button) {
+        button.addEventListener("click", function () {
+            var target = document.getElementById(button.dataset.copyTarget);
+            if (!target || !navigator.clipboard) return;
+            navigator.clipboard.writeText(target.textContent.trim()).then(function () {
+                button.classList.add("is-copied");
+                setTimeout(function () { button.classList.remove("is-copied"); }, 1500);
+            });
+        });
+    });
+</script>

@@ -157,6 +157,32 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
             }
         }
 
+        var details = await db.Orders.AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => new
+            {
+                x.TotalAmount,
+                x.ShippingAddress,
+                CustomerName = x.Customer.Name,
+                CustomerMobile = x.Customer.Mobile,
+                ItemCount = x.Items.Sum(item => (int?)item.Quantity) ?? 0,
+                FirstItemName = x.Items.OrderBy(item => item.Id).Select(item => item.ProductName).FirstOrDefault(),
+                FirstItemImage = x.Items.OrderBy(item => item.Id)
+                    .Select(item => db.Products.Where(p => p.Id == item.ProductId).Select(p => p.ImageUrl).FirstOrDefault())
+                    .FirstOrDefault(),
+                Shipment = db.DelhiveryShipments.Where(s => s.OrderId == x.Id)
+                    .Select(s => new
+                    {
+                        s.RecipientName, s.RecipientPhone, s.Address, s.City, s.State, s.PostalCode,
+                        s.PickupLocation, s.CreatedAtUtc
+                    })
+                    .FirstOrDefault()
+            })
+            .FirstAsync(cancellationToken);
+
+        var shipmentInfo = details.Shipment;
+        var hasShipmentAddress = shipmentInfo is not null && !string.IsNullOrWhiteSpace(shipmentInfo.Address);
+
         return Ok(new
         {
             orderId = order.Id,
@@ -166,7 +192,20 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
             orderDate = order.CreatedDate,
             shippingStatus = order.Shipment?.ShipmentStatus ?? "NotCreated",
             waybill = order.Shipment?.Waybill,
-            lastTrackingUpdateUtc = order.Shipment?.UpdatedAtUtc
+            lastTrackingUpdateUtc = order.Shipment?.UpdatedAtUtc,
+            shipmentCreatedUtc = shipmentInfo?.CreatedAtUtc,
+            pickupLocation = shipmentInfo?.PickupLocation,
+            totalAmount = details.TotalAmount,
+            itemCount = details.ItemCount,
+            firstItemName = details.FirstItemName,
+            firstItemImageUrl = details.FirstItemImage,
+            recipientName = hasShipmentAddress && !string.IsNullOrWhiteSpace(shipmentInfo!.RecipientName)
+                ? shipmentInfo.RecipientName : details.CustomerName,
+            recipientPhone = hasShipmentAddress && !string.IsNullOrWhiteSpace(shipmentInfo!.RecipientPhone)
+                ? shipmentInfo.RecipientPhone : details.CustomerMobile,
+            deliveryAddress = hasShipmentAddress
+                ? $"{shipmentInfo!.Address}, {shipmentInfo.City}, {shipmentInfo.State} - {shipmentInfo.PostalCode}"
+                : details.ShippingAddress
         });
     }
 }

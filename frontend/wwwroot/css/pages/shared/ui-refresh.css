@@ -2559,31 +2559,62 @@ body {
 
 .order-success-page .order-result-number {
     display: grid;
-    gap: 5px;
-    max-width: 360px;
-    margin: 24px auto 18px;
-    padding: 16px 18px;
-    border: 1px solid #ecdcd8;
-    border-radius: 12px;
-    background: linear-gradient(100deg, #fff8f1, #f9ebee);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    justify-items: center;
+    gap: 4px;
+    width: min(100%, 440px);
+    margin: 28px auto 22px;
+    padding: 22px 24px 18px;
+    border: 1px dashed #e7c3b0;
+    border-radius: 18px;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(160, 0, 84, .08), transparent 58%),
+        linear-gradient(180deg, #fff 0%, #fff7f3 100%);
+    box-shadow: 0 14px 32px rgba(104, 20, 46, .06);
 }
 
 .order-success-page .order-result-number span {
-    margin: 0;
-    color: #9a6a64;
-    font-size: 9px;
+    margin: 0 0 6px;
+    color: #a00054;
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: .22em;
+    text-transform: uppercase;
 }
 
 .order-success-page .order-result-number strong {
+    color: #3d1220;
+    font: 600 clamp(40px, 6vw, 52px)/1 Georgia, "Times New Roman", serif;
+    letter-spacing: .03em;
+}
+
+.order-success-page .order-result-number strong em {
+    margin-right: 2px;
+    color: #a00054;
+    font-style: normal;
+}
+
+.order-success-page .order-ref-copy {
+    margin: 10px 0 4px;
+    padding: 7px 16px;
+    border: 1px solid #ecc9d6;
+    border-radius: 999px;
+    background: #fff;
     color: #68142e;
-    font: 700 22px/1.1 Georgia, "Times New Roman", serif;
+    font: 700 12px/1 Arial, sans-serif;
+    letter-spacing: .04em;
+    cursor: pointer;
+}
+
+.order-success-page .order-ref-copy:hover {
+    border-color: #a00054;
+    background: #fff7fa;
 }
 
 .order-success-page .order-result-number small {
-    color: #8a7772;
-    font-size: 10px;
+    max-width: 280px;
+    color: #8a6d66;
+    font-size: 12px;
+    line-height: 1.45;
 }
 
 .order-success-page .order-result-status {

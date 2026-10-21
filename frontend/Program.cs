@@ -170,7 +170,13 @@ app.UseStaticFiles();
 
 // Expose uploaded media from the shared upload directory under /uploads.
 // Configure UploadsPath to the same directory used by the API, especially on EC2.
-var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
+var uploadsPath = builder.Configuration["UploadsPath"];
+if (string.IsNullOrWhiteSpace(uploadsPath))
+{
+    uploadsPath = OperatingSystem.IsWindows()
+        ? @"C:\UbhayaFashions\Uploads"
+        : Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "uploads"));
+}
 var fullUploadsPath = Path.GetFullPath(uploadsPath);
 Directory.CreateDirectory(fullUploadsPath);
 app.UseStaticFiles(new StaticFileOptions

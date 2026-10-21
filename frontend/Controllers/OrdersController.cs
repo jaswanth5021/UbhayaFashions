@@ -31,6 +31,30 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
     }
 
     [HttpGet]
+    public async Task<IActionResult> Find(string? orderId, int current)
+    {
+        var digits = new string((orderId ?? "").Where(char.IsDigit).ToArray());
+        if (!int.TryParse(digits, out var id) || id <= 0)
+        {
+            TempData["Error"] = "Enter a valid order ID.";
+            return current > 0 ? RedirectToAction(nameof(Track), new { id = current }) : RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            if (await api.GetOrderTrackingAsync(id) is not null)
+                return RedirectToAction(nameof(Track), new { id });
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Unable to look up order {OrderId}", id);
+        }
+
+        TempData["Error"] = $"We couldn't find order #{id} in your account.";
+        return current > 0 ? RedirectToAction(nameof(Track), new { id = current }) : RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Checkout()
     {
         var cart = ReadCart();

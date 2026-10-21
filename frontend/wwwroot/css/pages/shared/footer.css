@@ -392,6 +392,10 @@
 .site-footer {
     position: relative;
     overflow: hidden;
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     background:
         radial-gradient(ellipse at 8% 0%, rgb(171 76 91 / 24%), transparent 36%),
         radial-gradient(ellipse at 100% 75%, rgb(184 128 57 / 12%), transparent 35%),

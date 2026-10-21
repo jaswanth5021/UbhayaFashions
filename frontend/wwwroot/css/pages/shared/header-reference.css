@@ -1,5 +1,25 @@
 /* Ubhaya header: announcement → logo/search/actions → maroon nav with hamburger. */
 
+/* Icons without an explicit size paint at the browser default (300×150) and cover the page. */
+svg:not([width]) {
+    width: 24px;
+    height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    flex: 0 0 auto;
+}
+
+@media (min-width: 901px) {
+    .mobile-bottom-nav {
+        display: none !important;
+    }
+}
+
+.site-breadcrumb-band,
+.site-breadcrumb {
+    display: none !important;
+}
+
 .announcement-bar {
     display: flex;
     align-items: center;
