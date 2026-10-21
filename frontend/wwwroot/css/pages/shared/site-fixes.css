@@ -455,45 +455,7 @@ iframe {
     color: #302522;
 }
 
-.header .account-dropdown::before { display: none; }
-
-.header .account-dropdown-greeting {
-    min-height: 64px;
-    align-items: center;
-    flex-direction: row;
-    gap: 14px;
-    margin: 0 0 8px;
-    padding: 12px 15px;
-    border: 1px solid rgba(212, 230, 244, .12);
-    border-radius: 13px;
-    background: rgba(21, 43, 61, .3);
-}
-
-.header .account-dropdown-greeting > svg:first-child {
-    width: 24px;
-    height: 24px;
-    flex: 0 0 24px;
-    fill: none;
-    stroke: #d6e2ec;
-    stroke-width: 1.7;
-}
-
-.header .account-dropdown-greeting strong {
-    min-width: 0;
-    flex: 1;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-.header .account-dropdown-greeting .account-dropdown-current {
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: #91a8ba;
-    stroke-width: 1.8;
-}
-
-.header .account-dropdown-greeting .account-dropdown-mobile { display: none; }
+/* Greeting / caret keep the client-approved wine styles from site-polish.css. */
 
 .header .account-dropdown-links {
     gap: 2px;

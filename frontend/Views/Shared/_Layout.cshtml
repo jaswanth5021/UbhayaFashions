@@ -250,11 +250,20 @@
          ========================================= -->
 
     <div class="announcement-bar">
-        <span>FREE SHIPPING ACROSS INDIA</span>
-        <i aria-hidden="true">·</i>
-        <span>PREMIUM QUALITY</span>
-        <i aria-hidden="true">·</i>
-        <span>SECURE PAYMENTS</span>
+        <span class="announcement-benefit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+            FREE SHIPPING ACROSS INDIA
+        </span>
+        <i aria-hidden="true">|</i>
+        <span class="announcement-benefit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
+            PREMIUM QUALITY
+        </span>
+        <i aria-hidden="true">|</i>
+        <span class="announcement-benefit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v5c0 5-3.5 8.2-8 10-4.5-1.8-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+            SECURE PAYMENTS
+        </span>
     </div>
 
 
@@ -264,69 +273,18 @@
 
     <header class="header">
 
-        <!-- LEFT: HAMBURGER -->
-
-        <button class="menu-button"
-                id="menuOpen"
-                type="button"
-                aria-label="Open menu"
-                aria-controls="sideMenu"
-                aria-expanded="false">
-
-            ☰
-
-        </button>
-
-
-        <!-- CENTER: LOGO -->
-
         <a class="brand"
+           aria-label="Ubhaya Fashions home"
            asp-controller="Home"
            asp-action="Index">
-
-            <img src="~/images/logo.png"
-                 alt="UBHAYA FASHIONS" />
-
+            <span class="brand-mark" aria-hidden="true">
+                <img src="~/images/logo.png" alt="" />
+            </span>
+            <span class="brand-wordmark" aria-hidden="true">
+                <strong>UBHAYA</strong>
+                <small>FASHIONS</small>
+            </span>
         </a>
-
-        <nav class="desktop-primary-nav" aria-label="Main navigation">
-            <a class="@(isHomePage ? "is-active" : "")" aria-current="@(isHomePage ? "page" : null)" asp-controller="Home" asp-action="Index">Home</a>
-            <a class="@(isNewArrivalsNavActive ? "is-active" : "")" aria-current="@(isNewArrivalsNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-newArrivals="true">New Arrivals</a>
-            <details class="desktop-nav-dropdown @(isCategoryNavActive || isViewAllNavActive || isBestSellersNavActive ? "is-active" : "")">
-                <summary>Categories</summary>
-                <div class="desktop-nav-dropdown-menu">
-                    <a class="desktop-category-feature @(isViewAllNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index">
-                        <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></span>
-                        <span class="desktop-category-copy"><strong>View All Products</strong><small>Explore the collection</small></span>
-                        <span class="desktop-category-chevron" aria-hidden="true">›</span>
-                    </a>
-                    <a class="desktop-category-feature @(isBestSellersNavActive ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-bestSellers="true">
-                        <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17.5 8.2 12l4 3.2L20.5 6"/><path d="M15.5 6h5v5"/></svg></span>
-                        <span class="desktop-category-copy"><strong>Best Sellers</strong><small>Customer favourites</small></span>
-                        <span class="desktop-category-chevron" aria-hidden="true">›</span>
-                    </a>
-                    <span class="desktop-category-divider" aria-hidden="true"></span>
-                    @foreach (var category in navCategories)
-                    {
-                        <a class="desktop-category-link @(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "is-current" : null)" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">
-                            <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m16 4 4 2-2 5-3-1v10H9V10l-3 1-2-5 4-2c1 2 2 3 4 3s3-1 4-3Z"/></svg></span>
-                            <span class="desktop-category-copy"><strong>@category.Name</strong></span>
-                            <span class="desktop-category-chevron" aria-hidden="true">›</span>
-                        </a>
-                    }
-                    @if (navCategories.Count == 0)
-                    {
-                        <a class="desktop-category-link" asp-controller="Products" asp-action="Categories">
-                            <span class="desktop-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></span>
-                            <span class="desktop-category-copy"><strong>Browse all categories</strong></span>
-                            <span class="desktop-category-chevron" aria-hidden="true">›</span>
-                        </a>
-                    }
-                </div>
-            </details>
-            <a class="@(isOffersNavActive ? "is-active" : "")" aria-current="@(isOffersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-sort="discount">Offers</a>
-            <a class="@(isContactPage ? "is-active" : "")" aria-current="@(isContactPage ? "page" : null)" asp-controller="Contact" asp-action="Index">Contact</a>
-        </nav>
 
         <form class="desktop-header-search" asp-controller="Products" asp-action="Index" method="get" role="search">
             <input type="search" name="search" placeholder="Search sarees, kurtis, dresses..." aria-label="Search products" autocomplete="off" />
@@ -403,10 +361,20 @@
                             aria-label="Account menu for @accountName"
                             aria-controls="accountMenuDropdown"
                             aria-expanded="false">
+                        <span class="account-menu-avatar" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.2c.8-3.2 3.3-4.8 6.5-4.8s5.7 1.6 6.5 4.8"/></svg>
+                        </span>
                         <span class="account-menu-name">@accountName</span>
                         <svg class="account-menu-toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
                     </button>
                     <section class="account-dropdown" id="accountMenuDropdown" aria-label="My account">
+                        <div class="account-dropdown-greeting">
+                            <strong>Hello, @accountName</strong>
+                            @if (!string.IsNullOrWhiteSpace(accountMobile))
+                            {
+                                <span>@accountMobile</span>
+                            }
+                        </div>
                         <nav class="account-dropdown-links" aria-label="Account links">
                             <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9M8 5.3l8 4.6"/></svg><span>Orders</span><svg class="account-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></a>
                             <a asp-controller="Wishlist" asp-action="Index"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.5 5.5 0 0 0-7.8 0L12 5.9l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.3 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg><span>Wishlist</span><svg class="account-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></a>
@@ -443,7 +411,6 @@
                         <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
 
                     </svg>
-
                 </a>
             }
 
@@ -460,6 +427,7 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" />
                 </svg>
+                <span class="header-action-label">Wishlist</span>
             </a>
 
             <!-- SHOPPING BAG -->
@@ -489,9 +457,40 @@
                     <path d="M9 9V6a3 3 0 0 1 6 0v3" />
 
                 </svg>
+                <span class="header-action-label">Cart</span>
 
             </a>
 
+        </div>
+
+        <div class="header-nav-bar">
+            <button class="menu-button"
+                    id="menuOpen"
+                    type="button"
+                    aria-label="Open menu"
+                    aria-controls="sideMenu"
+                    aria-expanded="false">
+                <span class="menu-button-icon" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+            <nav class="desktop-primary-nav" aria-label="Main navigation">
+                <a class="@(isHomePage ? "is-active" : "")" aria-current="@(isHomePage ? "page" : null)" asp-controller="Home" asp-action="Index">Home</a>
+                @foreach (var category in navCategories)
+                {
+                    <a class="@(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "is-active" : "")"
+                       aria-current="@(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "page" : null)"
+                       asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">@category.Name</a>
+                }
+                @if (navCategories.Count == 0)
+                {
+                    <a asp-controller="Products" asp-action="Categories">Categories</a>
+                }
+                <a class="@(isNewArrivalsNavActive ? "is-active" : "")" aria-current="@(isNewArrivalsNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-newArrivals="true">New Arrivals</a>
+                <a class="@(isOffersNavActive ? "is-active" : "")" aria-current="@(isOffersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-sort="discount">Offers</a>
+            </nav>
         </div>
 
     </header>
