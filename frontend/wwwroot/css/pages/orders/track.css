@@ -825,3 +825,65 @@ body:has(.track-page) {
         min-height: 52px !important;
     }
 }
+
+
+/* Compact mobile Order ID field: target the real form and override all inherited sizing. */
+@media (max-width: 600px) {
+    .track-page .track-lookup {
+        padding: 12px !important;
+    }
+
+    .track-page .track-lookup .track-lookup-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    .track-page .track-lookup .track-lookup-row .track-lookup-input {
+        display: flex !important;
+        flex: none !important;
+        align-items: center !important;
+        gap: 10px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        padding: 0 12px !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+    }
+
+    .track-page .track-lookup .track-lookup-row .track-lookup-input > input#trackOrderId {
+        display: block !important;
+        flex: 1 1 0 !important;
+        box-sizing: border-box !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        font-size: 16px !important;
+        line-height: 20px !important;
+    }
+
+    .track-page .track-lookup .track-lookup-row .track-lookup-input > svg {
+        display: block !important;
+        flex: 0 0 20px !important;
+        width: 20px !important;
+        height: 20px !important;
+        margin: 0 !important;
+    }
+
+    .track-page .track-lookup .track-lookup-row > button {
+        width: 100% !important;
+        min-height: 48px !important;
+        height: 48px !important;
+    }
+}
