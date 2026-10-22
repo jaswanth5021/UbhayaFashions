@@ -81,7 +81,7 @@ svg:not([width]) {
     .header {
         display: grid !important;
         grid-template-columns: minmax(220px, 300px) minmax(280px, 1fr) max-content !important;
-        grid-template-rows: 78px 48px !important;
+        grid-template-rows: 78px !important;
         align-items: center !important;
         column-gap: clamp(16px, 2vw, 28px) !important;
         row-gap: 0 !important;
@@ -380,7 +380,12 @@ svg:not([width]) {
         stroke: currentColor !important;
     }
 
-    /* Maroon bar: white hamburger square + centered links (full-bleed without 100vw scroll) */
+    /* Desktop navigation is intentionally collapsed; don't reserve an empty 48px row. */
+    .header > .header-nav-bar {
+        display: none !important;
+    }
+
+    /* Maroon bar layout remains available in the tablet/mobile rules below. */
     .header > .header-nav-bar {
         grid-column: 1 / -1 !important;
         grid-row: 2 !important;
