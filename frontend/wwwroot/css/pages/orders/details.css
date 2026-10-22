@@ -65,3 +65,13 @@
 .od-muted{color:#88757c;font-size:13px}
 @media(max-width:850px){.order-details-page{padding:24px 16px 65px}.od-hero{align-items:flex-start;padding:28px;flex-direction:column}.od-total-card{width:100%;flex-basis:auto;display:grid;grid-template-columns:1fr auto;align-items:center}.od-total-card>span:first-child{grid-column:1}.od-total-card>strong{grid-column:1;grid-row:2}.od-total-card .od-status-pill{grid-column:2;grid-row:1/3;white-space:normal}.od-content-grid{grid-template-columns:1fr}.od-side-column{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.order-details-page{padding:18px 12px 55px}.od-hero{padding:23px 20px;border-radius:16px}.od-hero h1{font-size:33px}.od-hero-copy>p{font-size:13px}.od-hero-meta{flex-direction:column;gap:7px}.od-quick-grid{grid-template-columns:1fr;gap:10px}.od-quick-card{display:grid;grid-template-columns:42px minmax(0,1fr);column-gap:12px;padding:15px}.od-quick-icon{grid-row:1/4;margin:0}.od-quick-card small{margin:1px 0 5px}.od-quick-card>strong{font-size:15px}.od-quick-card p{margin-top:4px}.od-side-column{grid-template-columns:1fr}.od-panel{padding:19px 16px}.od-panel-heading h2{font-size:22px}.od-item{grid-template-columns:60px minmax(0,1fr);gap:11px}.od-item-image{width:60px;height:74px;grid-row:span 2}.od-item-price{grid-column:2;justify-self:start}.od-page-footer{align-items:flex-start;flex-direction:column}.od-total-card{padding:17px}.od-total-card>strong{font-size:27px}}
+
+.od-delivery-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.od-delivery-heading .od-panel-heading{margin:0}
+.od-delivery-heading h2{margin:7px 0 0;color:#302027;font-family:Georgia,"Times New Roman",serif;font-size:25px;font-weight:400}
+.od-courier-brand{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;color:#101218;text-decoration:none}
+.od-courier-mark{display:grid;place-items:center;width:29px;height:29px;color:#101218}
+.od-courier-mark svg{display:block;width:100%;height:100%}
+.od-courier-wordmark{font-size:15px;font-weight:900;letter-spacing:.055em;white-space:nowrap}
+.od-courier-brand:hover{opacity:.82}
+@media(max-width:560px){.od-delivery-heading h2{font-size:22px}.od-courier-wordmark{font-size:12px}.od-courier-mark{width:25px;height:25px}}
