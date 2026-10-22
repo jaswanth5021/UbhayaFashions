@@ -977,6 +977,13 @@ svg:not([width]) {
         will-change: transform;
     }
 
+    /* The nav becomes fixed while scrolling, so collapse its original grid row.
+       This prevents the empty white strip left behind when the nav slides away. */
+    .header:has(> .header-nav-bar.is-scroll-fixed) {
+        grid-template-rows: 68px 0 !important;
+        row-gap: 0 !important;
+    }
+
     .header .header-nav-bar.is-scroll-fixed {
         position: fixed !important;
         top: 0 !important;
