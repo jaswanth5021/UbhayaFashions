@@ -80,7 +80,7 @@ svg:not([width]) {
 @media (min-width: 901px) {
     .header {
         display: grid !important;
-        grid-template-columns: minmax(200px, 260px) minmax(180px, 500px) max-content !important;
+        grid-template-columns: minmax(200px, 260px) minmax(0, 1fr) max-content !important;
         grid-template-rows: 68px 44px !important;
         align-items: center !important;
         column-gap: clamp(16px, 2vw, 28px) !important;
@@ -168,6 +168,7 @@ svg:not([width]) {
         grid-template-columns: minmax(0, 1fr) 52px !important;
         width: 100% !important;
         max-width: 500px !important;
+        justify-self: end !important;
         height: 42px !important;
         min-height: 42px !important;
         max-height: 42px !important;
@@ -399,7 +400,7 @@ svg:not([width]) {
         align-items: center !important;
         width: auto !important;
         max-width: none !important;
-        height: 48px !important;
+        height: 44px !important;
         margin-left: calc(-1 * clamp(18px, 2.4vw, 40px)) !important;
         margin-right: calc(-1 * clamp(18px, 2.4vw, 40px)) !important;
         padding: 0 14px !important;
@@ -441,7 +442,7 @@ svg:not([width]) {
         gap: clamp(14px, 2vw, 34px) !important;
         width: 100% !important;
         min-width: 0 !important;
-        height: 48px !important;
+        height: 44px !important;
         margin: 0 !important;
         padding: 0 8px !important;
         background: transparent !important;
