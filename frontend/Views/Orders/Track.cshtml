@@ -131,7 +131,7 @@
                     </div>
                     <p>Placed on @orderDate.ToString("dd MMM yyyy")</p>
                     <p>@itemLabel &bull; ₹@Model.TotalAmount.ToString("N0")</p>
-                    <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders" class="track-order-link">
+                    <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId" class="track-order-link">
                         View Order Details
                         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                     </a>
