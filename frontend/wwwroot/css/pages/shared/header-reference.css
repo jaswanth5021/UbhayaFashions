@@ -648,8 +648,9 @@ svg:not([width]) {
     }
 
     .header > .brand .brand-wordmark strong {
-        font: 600 15px/1 Georgia, "Times New Roman", serif !important;
-        letter-spacing: 0.02em !important;
+        /* Match the desktop UBHAYA wordmark styling, scaled to fit mobile. */
+        font: 600 18px/1 Georgia, "Times New Roman", serif !important;
+        letter-spacing: 0.03em !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
@@ -658,7 +659,7 @@ svg:not([width]) {
     .header > .brand .brand-wordmark small {
         color: #ad8547 !important;
         font: 600 7px/1 Arial, Helvetica, sans-serif !important;
-        letter-spacing: 0.24em !important;
+        letter-spacing: 0.38em !important;
         white-space: nowrap !important;
     }
 
