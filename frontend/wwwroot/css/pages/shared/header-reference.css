@@ -97,9 +97,13 @@ svg:not([width]) {
     }
 
     .header > .brand {
-        grid-column: 1 !important;
+        grid-column: 2 !important;
         grid-row: 1 !important;
-        position: static !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
         display: flex !important;
         align-items: center !important;
         gap: 10px !important;
@@ -596,15 +600,15 @@ svg:not([width]) {
         align-items: center !important;
         gap: 8px !important;
         justify-content: center !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: max-content !important;
+        max-width: calc(100% - 130px) !important;
         min-width: 0 !important;
         height: 48px !important;
         margin: 0 !important;
         padding: 0 !important;
-        transform: none !important;
-        left: auto !important;
-        top: auto !important;
+        transform: translate(-50%, -50%) !important;
+        left: 50% !important;
+        top: 50% !important;
     }
 
     .header > .brand .brand-mark {
@@ -836,8 +840,12 @@ svg:not([width]) {
     }
 
     .header > .brand {
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
         justify-content: center !important;
         gap: 6px !important;
+        max-width: calc(100% - 112px) !important;
     }
 
     .header .header-actions {
