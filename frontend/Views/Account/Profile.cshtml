@@ -223,7 +223,8 @@
                                     </div>
                                     <footer class="profile-order-footer">
                                         <span><small>Shipment status</small>@(string.IsNullOrWhiteSpace(order.ShippingStatus) ? "Not yet shipped" : order.ShippingStatus)</span>
-                                        <span><small>Tracking</small><a asp-controller="Orders" asp-action="Track" asp-route-id="@order.Id">Track Order</a></span>
+                                        <span class="profile-order-tracking"><small>Delivery tracking</small><a class="profile-track-order-link" asp-controller="Orders" asp-action="Track" asp-route-id="@order.Id"><span aria-hidden="true">↗</span> Track your delivery</a></span>
+                                        <span class="profile-order-detail-action"><small>Full summary</small><a class="profile-order-detail-link" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">View order details <span aria-hidden="true">→</span></a></span>
                                         <span><small>Delivery address</small>@order.ShippingAddress</span>
                                         @if (!string.IsNullOrWhiteSpace(order.RazorpayOrderId)) { <small>Payment reference: @order.RazorpayOrderId</small> }
                                         <span><small>Product issue?</small><a asp-controller="Home" asp-action="Returns">How to report a damaged, defective, missing, or incorrect item</a></span>
