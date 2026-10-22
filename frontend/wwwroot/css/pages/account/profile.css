@@ -462,3 +462,15 @@
     .profile-order-footer .profile-track-order-link,
     .profile-order-footer .profile-order-detail-link { width:100%; }
 }
+
+.order-card-heading-right { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:10px 12px; }
+.order-card-heading-right .order-card-total { flex:0 0 100%; text-align:right; }
+.order-open-details-link { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px; padding:0 11px; border:1px solid #68142e; border-radius:7px; background:#68142e; color:#fff !important; font-size:11px; font-weight:800; text-decoration:none; white-space:nowrap; }
+.order-open-details-link span { font-size:15px; }
+.order-open-details-link:hover { background:#92274e; border-color:#92274e; color:#fff !important; }
+@media(max-width:600px) {
+    .profile-order-header { align-items:flex-start; }
+    .order-card-heading-right { align-items:flex-end; }
+    .order-card-heading-right .order-card-total { font-size:17px; }
+    .order-open-details-link { min-height:32px; padding:0 9px; font-size:10px; }
+}
