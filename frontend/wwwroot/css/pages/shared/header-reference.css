@@ -97,7 +97,7 @@ svg:not([width]) {
     }
 
     .header > .brand {
-        grid-column: 1 !important;
+        grid-column: 2 !important;
         grid-row: 1 !important;
         position: static !important;
         display: flex !important;
@@ -567,11 +567,12 @@ svg:not([width]) {
         height: 13px;
     }
 
-    /* Row 1: logo + icons | Row 2: search | Row 3: maroon menu */
+    /* Mobile: compact single-row header; hamburger left, centered brand, actions right. */
     .header {
+        position: relative !important;
         display: grid !important;
-        grid-template-columns: minmax(0, 1fr) auto !important;
-        grid-template-rows: 56px 50px 46px !important;
+        grid-template-columns: 40px minmax(0, 1fr) auto !important;
+        grid-template-rows: 56px !important;
         align-items: center !important;
         column-gap: 6px !important;
         row-gap: 0 !important;
@@ -592,7 +593,8 @@ svg:not([width]) {
         display: flex !important;
         align-items: center !important;
         gap: 8px !important;
-        width: auto !important;
+        justify-content: center !important;
+        width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
         height: 48px !important;
@@ -651,6 +653,7 @@ svg:not([width]) {
 
     .header > .desktop-header-search,
     .header form.desktop-header-search {
+        display: none !important;
         grid-column: 1 / -1 !important;
         grid-row: 2 !important;
         display: grid !important;
@@ -705,7 +708,7 @@ svg:not([width]) {
     }
 
     .header > .header-actions {
-        grid-column: 2 !important;
+        grid-column: 3 !important;
         grid-row: 1 !important;
         display: flex !important;
         align-items: center !important;
@@ -773,17 +776,18 @@ svg:not([width]) {
     }
 
     .header > .header-nav-bar {
-        grid-column: 1 / -1 !important;
-        grid-row: 3 !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
-        width: auto !important;
-        margin-left: -12px !important;
-        margin-right: -12px !important;
-        height: 46px !important;
-        padding: 0 12px !important;
-        background: #a00054 !important;
+        justify-content: flex-start !important;
+        gap: 0 !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        margin: 0 !important;
+        height: 44px !important;
+        padding: 0 !important;
+        background: transparent !important;
     }
 
     .header .header-nav-bar > .menu-button {
@@ -809,18 +813,31 @@ svg:not([width]) {
     }
 
     .header .header-nav-bar::after {
-        color: #fff;
-        font: 600 12px/1 Arial, Helvetica, sans-serif;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        content: "Menu";
+        display: none !important;
+        content: none !important;
     }
 }
 
 @media (max-width: 600px) {
     .header {
-        grid-template-rows: 52px 48px 44px !important;
+        grid-template-columns: 38px minmax(0, 1fr) auto !important;
+        grid-template-rows: 52px !important;
         padding-inline: 10px !important;
+    }
+
+    .header > .header-nav-bar {
+        width: 38px !important;
+        min-width: 38px !important;
+        height: 42px !important;
+    }
+
+    .header > .brand {
+        justify-content: center !important;
+        gap: 6px !important;
+    }
+
+    .header .header-actions {
+        gap: 0 !important;
     }
 
     .header > .brand .brand-wordmark small {
