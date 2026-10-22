@@ -81,7 +81,7 @@ svg:not([width]) {
     .header {
         display: grid !important;
         grid-template-columns: minmax(220px, 300px) minmax(280px, 1fr) max-content !important;
-        grid-template-rows: 78px !important;
+        grid-template-rows: 78px 48px !important;
         align-items: center !important;
         column-gap: clamp(16px, 2vw, 28px) !important;
         row-gap: 0 !important;
@@ -97,17 +97,18 @@ svg:not([width]) {
     }
 
     .header > .brand {
-        grid-column: 2 !important;
+        grid-column: 1 !important;
         grid-row: 1 !important;
-        position: absolute !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important;
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
         z-index: 10 !important;
         display: flex !important;
         align-items: center !important;
         gap: 10px !important;
-        width: 100% !important;
+        width: max-content !important;
+        max-width: 100% !important;
         min-width: 0 !important;
         height: 70px !important;
         margin: 0 !important;
@@ -384,12 +385,8 @@ svg:not([width]) {
         stroke: currentColor !important;
     }
 
-    /* Desktop navigation is intentionally collapsed; don't reserve an empty 48px row. */
+    /* Keep desktop navigation in its own second row, separate from the logo/search row. */
     .header > .header-nav-bar {
-        display: none !important;
-    }
-
-    /* Maroon bar layout remains available in the tablet/mobile rules below. */
     .header > .header-nav-bar {
         grid-column: 1 / -1 !important;
         grid-row: 2 !important;
