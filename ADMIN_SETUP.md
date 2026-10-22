@@ -32,6 +32,7 @@ Use **Forgot your password?** on `/Admin/Login`. Reset email uses the backend SM
 ```powershell
 dotnet ef database update
 ```
+
 - Signed-in admin password change with current-password confirmation
 
 ## Database note
@@ -47,11 +48,13 @@ For a production environment, convert these changes to normal EF Core migrations
 
 ## Image storage
 
-Uploaded images are saved by the backend under:
+On Windows/EC2, uploaded media is stored outside the IIS publish folders at:
 
-`backend/wwwroot/uploads/products`
+`C:\\UbhayaFashions\\Uploads`
 
-The Product.ImageUrl field is updated with the backend public URL.
+The API saves product images, additional product images, product videos, category images, review photos, and storefront banners under this shared directory (in subfolders where applicable). The frontend and API both expose the shared folder under `/uploads`, so existing image URL formats such as `/uploads/products/...` remain unchanged.
+
+Keep `UploadsPath` configured to the same physical directory for both the API and website. Do not use `backend/wwwroot/uploads` or either publish directory as the permanent upload location. Back up the shared directory separately from application deployments.
 
 ## Run
 
