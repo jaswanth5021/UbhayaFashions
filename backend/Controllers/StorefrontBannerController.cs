@@ -13,13 +13,18 @@ public sealed class StorefrontBannerController(IConfiguration configuration, IWe
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
 
+    // Keep banner uploads outside the publish directory. The configured UploadsPath
+    // should be shared with the frontend; the Windows fallback preserves existing
+    // EC2 files under C:\\UbhayaFashions\\Uploads.
     private string UploadDirectory
     {
         get
         {
             var configured = configuration["UploadsPath"];
             var path = string.IsNullOrWhiteSpace(configured)
-                ? Path.Combine(environment.ContentRootPath, "Uploads")
+                ? (OperatingSystem.IsWindows()
+                    ? @"C:\UbhayaFashions\Uploads"
+                    : Path.Combine(environment.ContentRootPath, "Uploads"))
                 : configured;
             var fullPath = Path.GetFullPath(path);
             Directory.CreateDirectory(fullPath);
