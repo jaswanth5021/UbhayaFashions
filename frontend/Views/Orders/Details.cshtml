@@ -1,0 +1,122 @@
+@model LadiesDressStore.Web.Models.MyOrderViewModel
+@{
+    ViewData["Title"] = $"Order #{Model.Id} Details";
+    ViewData["MetaDescription"] = $"Order, payment and delivery details for Ubhaya Fashions order #{Model.Id}.";
+    var paid = string.Equals(Model.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase);
+    var status = string.IsNullOrWhiteSpace(Model.ShippingStatus) || Model.ShippingStatus == "NotCreated"
+        ? "Not yet shipped" : Model.ShippingStatus;
+    var itemCount = Model.Items?.Sum(item => item.Quantity) ?? 0;
+}
+
+<link rel="stylesheet" href="~/css/pages/orders/details.css" asp-append-version="true" />
+
+<main class="order-details-page">
+    <nav class="od-breadcrumb" aria-label="Breadcrumb">
+        <a asp-controller="Account" asp-action="Profile" asp-route-tab="orders">My orders</a>
+        <span aria-hidden="true">/</span>
+        <span>Order #@Model.Id</span>
+    </nav>
+
+    <section class="od-hero">
+        <div class="od-hero-copy">
+            <span class="od-eyebrow">UBHAYA FASHIONS · ORDER SUMMARY</span>
+            <h1>Your order, <em>beautifully organised.</em></h1>
+            <p>Everything you need to know about your purchase, payment and delivery in one place.</p>
+            <div class="od-hero-meta">
+                <span>ORDER #@Model.Id</span>
+                <span>Placed @Model.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</span>
+            </div>
+        </div>
+        <div class="od-total-card">
+            <span>Order total</span>
+            <strong>₹@Model.TotalAmount.ToString("N2")</strong>
+            <span class="od-status-pill @(paid ? "is-paid" : "is-pending")"><i></i> Payment @Model.PaymentStatus</span>
+        </div>
+    </section>
+
+    <section class="od-quick-grid" aria-label="Order overview">
+        <article class="od-quick-card">
+            <span class="od-quick-icon" aria-hidden="true">✦</span>
+            <small>Order status</small>
+            <strong>@Model.Status</strong>
+            <p>Your order's current processing status.</p>
+        </article>
+        <article class="od-quick-card">
+            <span class="od-quick-icon" aria-hidden="true">₹</span>
+            <small>Payment</small>
+            <strong>@Model.PaymentStatus</strong>
+            <p>@(paid ? "Your payment is marked as received." : "Payment status shown as recorded for this order.")</p>
+        </article>
+        <article class="od-quick-card">
+            <span class="od-quick-icon" aria-hidden="true">↗</span>
+            <small>Delivery</small>
+            <strong>@status</strong>
+            <p>@(string.IsNullOrWhiteSpace(Model.ShippingWaybill) ? "Tracking details appear when your shipment is booked." : $"Waybill: {Model.ShippingWaybill}")</p>
+        </article>
+    </section>
+
+    <div class="od-content-grid">
+        <section class="od-panel od-items-panel">
+            <header class="od-panel-heading">
+                <div><span class="od-section-kicker">YOUR SELECTION</span><h2>Items in this order</h2></div>
+                <span class="od-item-count">@itemCount @(itemCount == 1 ? "item" : "items")</span>
+            </header>
+            @if (Model.Items is { Count: > 0 })
+            {
+                <div class="od-items-list">
+                    @foreach (var item in Model.Items)
+                    {
+                        var imageUrl = string.IsNullOrWhiteSpace(item.ImageUrl) ? null : ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"]);
+                        <article class="od-item">
+                            <div class="od-item-image">
+                                @if (imageUrl is not null)
+                                {
+                                    <img src="@imageUrl" alt="@item.ProductName" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <span aria-hidden="true">U</span>
+                                }
+                            </div>
+                            <div class="od-item-copy">
+                                <h3>@item.ProductName</h3>
+                                <p>Size: @(!string.IsNullOrWhiteSpace(item.Size) ? item.Size : "Standard")</p>
+                                @if (!string.IsNullOrWhiteSpace(item.Color)) { <p>Colour: @item.Color</p> }
+                                <p>Quantity: @item.Quantity</p>
+                            </div>
+                            <strong class="od-item-price">₹@((item.Price * item.Quantity).ToString("N2"))</strong>
+                        </article>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="od-muted">Item information is not available for this order.</p>
+            }
+            <div class="od-total-row"><span>Order total</span><strong>₹@Model.TotalAmount.ToString("N2")</strong></div>
+        </section>
+
+        <aside class="od-side-column">
+            <section class="od-panel od-payment-panel">
+                <header class="od-panel-heading"><div><span class="od-section-kicker">SECURE CHECKOUT</span><h2>Payment details</h2></div><span class="od-panel-symbol" aria-hidden="true">₹</span></header>
+                <div class="od-detail-row"><span>Payment status</span><strong class="@(paid ? "od-good" : "od-neutral")">@Model.PaymentStatus</strong></div>
+                <div class="od-detail-row"><span>Payment reference</span><strong class="od-reference">@(string.IsNullOrWhiteSpace(Model.RazorpayOrderId) ? "Not available" : Model.RazorpayOrderId)</strong></div>
+                <div class="od-detail-row od-detail-total"><span>Total paid / due</span><strong>₹@Model.TotalAmount.ToString("N2")</strong></div>
+                <p class="od-note">Payment details are displayed as recorded for this order.</p>
+            </section>
+
+            <section class="od-panel od-delivery-panel">
+                <header class="od-panel-heading"><div><span class="od-section-kicker">TO YOUR DOOR</span><h2>Delivery details</h2></div><span class="od-panel-symbol" aria-hidden="true">⌖</span></header>
+                <span class="od-address-label">SHIPPING ADDRESS</span>
+                <p class="od-address">@Model.ShippingAddress</p>
+                <div class="od-shipment-state"><span class="od-shipment-dot"></span><div><strong>@status</strong><small>@(string.IsNullOrWhiteSpace(Model.ShippingWaybill) ? "Tracking will be available after dispatch." : $"Waybill number: {Model.ShippingWaybill}")</small></div></div>
+                <a class="od-primary-action" asp-controller="Orders" asp-action="Track" asp-route-id="@Model.Id">Track this delivery <span aria-hidden="true">→</span></a>
+            </section>
+        </aside>
+    </div>
+
+    <footer class="od-page-footer">
+        <a class="od-back-link" asp-controller="Account" asp-action="Profile" asp-route-tab="orders">← Back to my orders</a>
+        <a class="od-help-link" asp-controller="Home" asp-action="Returns">Need help with your order?</a>
+    </footer>
+</main>
