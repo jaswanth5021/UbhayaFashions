@@ -111,4 +111,54 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
+
+    // Desktop navigation sticks only after its original position is passed.
+    // Hide it while scrolling down and reveal it again when scrolling up.
+    const headerNavBar = document.querySelector(".header .header-nav-bar");
+    const desktopNavQuery = window.matchMedia("(min-width: 901px)");
+    if (headerNavBar && desktopNavQuery.matches) {
+        let navStartY = headerNavBar.getBoundingClientRect().top + window.scrollY;
+        let previousScrollY = window.scrollY;
+        let scrollTicking = false;
+
+        const updateScrollNavigation = function () {
+            const currentY = window.scrollY;
+            if (!desktopNavQuery.matches) {
+                headerNavBar.classList.remove("is-scroll-fixed", "is-scroll-hidden");
+                previousScrollY = currentY;
+                scrollTicking = false;
+                return;
+            }
+
+            if (currentY <= navStartY) {
+                headerNavBar.classList.remove("is-scroll-fixed", "is-scroll-hidden");
+            } else {
+                headerNavBar.classList.add("is-scroll-fixed");
+                if (currentY > previousScrollY + 2) {
+                    headerNavBar.classList.add("is-scroll-hidden");
+                } else if (currentY < previousScrollY - 2) {
+                    headerNavBar.classList.remove("is-scroll-hidden");
+                }
+            }
+
+            previousScrollY = currentY;
+            scrollTicking = false;
+        };
+
+        window.addEventListener("scroll", function () {
+            if (!scrollTicking) {
+                scrollTicking = true;
+                window.requestAnimationFrame(updateScrollNavigation);
+            }
+        }, { passive: true });
+
+        window.addEventListener("resize", function () {
+            if (!desktopNavQuery.matches) {
+                headerNavBar.classList.remove("is-scroll-fixed", "is-scroll-hidden");
+            } else if (!headerNavBar.classList.contains("is-scroll-fixed")) {
+                navStartY = headerNavBar.getBoundingClientRect().top + window.scrollY;
+            }
+        }, { passive: true });
+    }
+
 });
