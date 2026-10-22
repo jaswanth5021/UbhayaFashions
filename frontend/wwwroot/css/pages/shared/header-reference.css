@@ -1039,3 +1039,65 @@ svg:not([width]) {
         height: 23px !important;
     }
 }
+
+
+/* Definitive mobile header fix: reserve separate space for the brand and account.
+   Keep the signed-in name in the account dropdown on narrow screens. */
+@media (max-width: 600px) {
+    .header {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .header > .brand {
+        position: absolute !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        max-width: calc(100% - 190px) !important;
+        min-width: 0 !important;
+        z-index: 1 !important;
+    }
+
+    .header > .brand .brand-wordmark {
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .header > .brand .brand-wordmark strong,
+    .header > .brand .brand-wordmark small {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .header .header-actions .account-menu {
+        flex: 0 0 40px !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+    }
+
+    .header .header-actions .account-menu .account-menu-toggle {
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .header .header-actions .account-menu .account-menu-name,
+    .header .header-actions .account-menu .account-menu-toggle-chevron {
+        display: none !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .header > .brand {
+        max-width: calc(100% - 176px) !important;
+    }
+}
