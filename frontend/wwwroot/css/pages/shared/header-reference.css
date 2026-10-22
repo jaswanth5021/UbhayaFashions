@@ -595,15 +595,15 @@ svg:not([width]) {
     }
 
     .header > .brand {
-        grid-column: 1 !important;
+        grid-column: 2 !important;
         grid-row: 1 !important;
-        position: static !important;
+        position: absolute !important;
         display: flex !important;
         align-items: center !important;
         gap: 8px !important;
         justify-content: center !important;
         width: max-content !important;
-        max-width: calc(100% - 130px) !important;
+        max-width: calc(100% - 150px) !important;
         min-width: 0 !important;
         height: 48px !important;
         margin: 0 !important;
