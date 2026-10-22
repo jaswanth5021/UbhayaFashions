@@ -1269,3 +1269,73 @@ svg:not([width]) {
     .header > .brand .brand-wordmark strong { font-size: 14px !important; }
     .header .header-actions { gap: 2px !important; }
 }
+
+
+/* Mobile header refinement: remove cart/wishlist from the top row.
+   Keep these destinations in the bottom navigation and style the signed-in
+   account control as a subtle, polished avatar instead of a large outlined circle. */
+@media (max-width: 900px) {
+    .header .header-actions > .wishlist-header-icon,
+    .header .header-actions > .cart-icon {
+        display: none !important;
+    }
+
+    .header .header-actions > .account-menu {
+        display: inline-flex !important;
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        margin: 0 0 0 2px !important;
+    }
+
+    .header .header-actions > .account-menu .account-menu-toggle {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        width: 34px !important;
+        min-width: 34px !important;
+        max-width: 34px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 0 !important;
+        border: 1px solid #ead4dd !important;
+        border-radius: 50% !important;
+        background: linear-gradient(145deg, #fff8fb, #f7e7ee) !important;
+        color: #78183f !important;
+        box-shadow: 0 2px 6px rgb(83 23 49 / 8%) !important;
+        gap: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .header .header-actions > .account-menu .account-menu-avatar {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 20px !important;
+        height: 20px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .header .header-actions > .account-menu .account-menu-avatar svg {
+        display: block !important;
+        width: 20px !important;
+        height: 20px !important;
+        stroke: currentColor !important;
+        stroke-width: 1.8 !important;
+    }
+
+    .header .header-actions > .account-menu .account-menu-name,
+    .header .header-actions > .account-menu .account-menu-toggle-chevron {
+        display: none !important;
+    }
+
+    .header .header-actions {
+        gap: 5px !important;
+    }
+}
