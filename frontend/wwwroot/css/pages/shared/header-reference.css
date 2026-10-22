@@ -227,7 +227,7 @@ svg:not([width]) {
 
     .header > .header-actions {
         position: absolute !important;
-        top: 50% !important;
+        top: 39px !important;
         right: 8px !important;
         transform: translateY(-50%) !important;
         grid-column: 3 !important;
@@ -612,7 +612,7 @@ svg:not([width]) {
         margin: 0 !important;
         padding: 0 !important;
         transform: translate(-50%, -50%) !important;
-        left: 50% !important;
+        left: calc(50% - 16px) !important;
         top: 50% !important;
     }
 
@@ -848,7 +848,7 @@ svg:not([width]) {
     }
 
     .header > .brand {
-        left: 50% !important;
+        left: calc(50% - 16px) !important;
         top: 50% !important;
         transform: translate(-50%, -50%) !important;
         justify-content: center !important;
