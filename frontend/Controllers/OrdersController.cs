@@ -13,6 +13,39 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
     public IActionResult Index() => RedirectToAction("Profile", "Account", new { tab = "orders" });
 
     [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        if (id <= 0) return NotFound();
+
+        try
+        {
+            // Read from the authenticated customer's order list so an order ID
+            // cannot be used to view another customer's order.
+            var json = await api.GetMyOrdersAsync();
+            var orders = JsonSerializer.Deserialize<List<MyOrderViewModel>>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+
+            var order = orders.FirstOrDefault(item => item.Id == id);
+            if (order is null) return NotFound();
+
+            return View(order);
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Unable to load details for order {OrderId}", id);
+            TempData["Error"] = "We couldn't load your order details. Please try again.";
+            return RedirectToAction("Profile", "Account", new { tab = "orders" });
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Unable to parse order details for order {OrderId}", id);
+            TempData["Error"] = "Your order details are temporarily unavailable.";
+            return RedirectToAction("Profile", "Account", new { tab = "orders" });
+        }
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Track(int id)
     {
         if (id <= 0) return NotFound();
