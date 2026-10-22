@@ -75,3 +75,7 @@
 .od-courier-wordmark{font-size:15px;font-weight:900;letter-spacing:.055em;white-space:nowrap}
 .od-courier-brand:hover{opacity:.82}
 @media(max-width:560px){.od-delivery-heading h2{font-size:22px}.od-courier-wordmark{font-size:12px}.od-courier-mark{width:25px;height:25px}}
+
+/* Use the actual Delhivery logo asset instead of a text-only imitation. */
+.od-courier-logo{display:block;width:clamp(120px, 15vw, 170px);max-width:100%;height:auto;max-height:34px;object-fit:contain;object-position:right center}
+@media(max-width:560px){.od-courier-logo{width:118px;max-height:28px}}
