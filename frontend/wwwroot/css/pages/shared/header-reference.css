@@ -227,10 +227,11 @@ svg:not([width]) {
     }
 
     .header > .header-actions {
-        position: absolute !important;
-        top: 34px !important;
-        right: 8px !important;
-        transform: translateY(-50%) !important;
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        left: auto !important;
+        transform: none !important;
         grid-column: 3 !important;
         grid-row: 1 !important;
         display: flex !important;
@@ -238,6 +239,7 @@ svg:not([width]) {
         justify-content: flex-end !important;
         gap: clamp(14px, 1.6vw, 24px) !important;
         width: max-content !important;
+        justify-self: end !important;
         height: 68px !important;
         margin: 0 !important;
         padding: 0 !important;
