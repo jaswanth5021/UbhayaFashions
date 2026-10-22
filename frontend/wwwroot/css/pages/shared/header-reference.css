@@ -80,8 +80,8 @@ svg:not([width]) {
 @media (min-width: 901px) {
     .header {
         display: grid !important;
-        grid-template-columns: minmax(220px, 300px) minmax(280px, 1fr) max-content !important;
-        grid-template-rows: 78px 48px !important;
+        grid-template-columns: minmax(200px, 260px) minmax(240px, 1fr) max-content !important;
+        grid-template-rows: 68px 44px !important;
         align-items: center !important;
         column-gap: clamp(16px, 2vw, 28px) !important;
         row-gap: 0 !important;
@@ -167,10 +167,10 @@ svg:not([width]) {
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) 52px !important;
         width: 100% !important;
-        max-width: 720px !important;
-        height: 48px !important;
-        min-height: 48px !important;
-        max-height: 48px !important;
+        max-width: 620px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
@@ -227,7 +227,7 @@ svg:not([width]) {
 
     .header > .header-actions {
         position: absolute !important;
-        top: 39px !important;
+        top: 34px !important;
         right: 8px !important;
         transform: translateY(-50%) !important;
         grid-column: 3 !important;
@@ -237,7 +237,7 @@ svg:not([width]) {
         justify-content: flex-end !important;
         gap: clamp(14px, 1.6vw, 24px) !important;
         width: max-content !important;
-        height: 78px !important;
+        height: 68px !important;
         margin: 0 !important;
         padding: 0 !important;
         z-index: 20 !important;
@@ -612,7 +612,7 @@ svg:not([width]) {
         margin: 0 !important;
         padding: 0 !important;
         transform: translate(-50%, -50%) !important;
-        left: calc(50% - 16px) !important;
+        left: calc(50% - 28px) !important;
         top: 50% !important;
     }
 
