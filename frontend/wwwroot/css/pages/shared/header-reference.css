@@ -945,3 +945,38 @@ svg:not([width]) {
         pointer-events: none !important;
     }
 }
+
+
+/* Mobile-only: replace the always-visible header search field with a search icon.
+   The existing headerSearchPanel opens as a popup when the icon is tapped. */
+@media (max-width: 900px) {
+    .header > form.desktop-header-search {
+        display: none !important;
+    }
+
+    .header .header-actions > .header-search-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 38px !important;
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 50% !important;
+        background: transparent !important;
+        color: #2f2429 !important;
+        box-shadow: none !important;
+        cursor: pointer !important;
+    }
+
+    .header .header-actions > .header-search-button svg {
+        display: block !important;
+        width: 23px !important;
+        height: 23px !important;
+    }
+}
