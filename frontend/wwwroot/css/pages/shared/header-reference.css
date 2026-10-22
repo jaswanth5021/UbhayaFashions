@@ -852,7 +852,7 @@ svg:not([width]) {
     }
 
     .header > .brand {
-        left: calc(50% - 16px) !important;
+        left: calc(50% - 24px) !important;
         top: 50% !important;
         transform: translate(-50%, -50%) !important;
         justify-content: center !important;
@@ -866,7 +866,12 @@ svg:not([width]) {
     }
 
     .header > .brand .brand-wordmark small {
-        display: none !important;
+        display: block !important;
+        font-size: 6px !important;
+        letter-spacing: 0.24em !important;
+        line-height: 1.2 !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
     }
 
     .header > .brand .brand-wordmark strong {
