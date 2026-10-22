@@ -97,7 +97,7 @@ svg:not([width]) {
     }
 
     .header > .brand {
-        grid-column: 2 !important;
+        grid-column: 1 !important;
         grid-row: 1 !important;
         position: static !important;
         display: flex !important;
@@ -402,6 +402,8 @@ svg:not([width]) {
     }
 
     .header .header-nav-bar > .menu-button {
+        position: relative !important;
+        z-index: 51 !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -776,6 +778,8 @@ svg:not([width]) {
     }
 
     .header > .header-nav-bar {
+        position: relative !important;
+        z-index: 50 !important;
         grid-column: 1 !important;
         grid-row: 1 !important;
         display: flex !important;
