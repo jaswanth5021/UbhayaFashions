@@ -1101,3 +1101,171 @@ svg:not([width]) {
         max-width: calc(100% - 176px) !important;
     }
 }
+
+
+/* Final mobile header layout: one compact row, search visible, actions on the right.
+   Override older mobile rules that moved the logo below the icon row. */
+@media (max-width: 900px) {
+    .header {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0 !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 68px !important;
+        min-height: 68px !important;
+        padding: 0 14px !important;
+        overflow: visible !important;
+    }
+
+    .header > .brand {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        width: max-content !important;
+        max-width: 42% !important;
+        height: 56px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 2 !important;
+    }
+
+    .header > .brand .brand-mark {
+        display: block !important;
+        flex: 0 0 42px !important;
+        width: 42px !important;
+        height: 42px !important;
+        overflow: hidden !important;
+    }
+
+    .header > .brand .brand-mark img {
+        width: 42px !important;
+        height: 42px !important;
+        max-width: none !important;
+        max-height: none !important;
+        object-fit: contain !important;
+    }
+
+    .header > .brand .brand-wordmark {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .header > .brand .brand-wordmark strong {
+        font-size: 16px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    .header > .brand .brand-wordmark small {
+        font-size: 7px !important;
+        line-height: 1 !important;
+        letter-spacing: .28em !important;
+        white-space: nowrap !important;
+    }
+
+    .header > form.desktop-header-search {
+        display: none !important;
+    }
+
+    .header > .header-actions {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
+        width: auto !important;
+        height: 100% !important;
+        margin-left: auto !important;
+        padding: 0 !important;
+        z-index: 4 !important;
+    }
+
+    .header .header-actions > .header-search-button {
+        display: inline-flex !important;
+        flex: 0 0 36px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        color: #30252b !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    .header .header-actions > .header-search-button svg {
+        display: block !important;
+        width: 23px !important;
+        height: 23px !important;
+    }
+
+    .header .header-actions > .account-menu {
+        display: inline-flex !important;
+        flex: 0 0 38px !important;
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+    }
+
+    .header .header-actions > .account-menu .account-menu-toggle {
+        display: inline-flex !important;
+        justify-content: center !important;
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        gap: 0 !important;
+    }
+
+    .header .header-actions > .account-menu .account-menu-name,
+    .header .header-actions > .account-menu .account-menu-toggle-chevron {
+        display: none !important;
+    }
+
+    .header .header-actions > .customer-notification-menu {
+        display: none !important;
+    }
+
+    .header .header-actions > .wishlist-header-icon,
+    .header .header-actions > .cart-icon {
+        display: inline-flex !important;
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        height: 40px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+/* On very narrow phones, keep the centered logo compact and preserve all actions. */
+@media (max-width: 380px) {
+    .header { padding-inline: 10px !important; }
+    .header > .brand { max-width: 38% !important; gap: 4px !important; }
+    .header > .brand .brand-mark { flex-basis: 36px !important; width: 36px !important; height: 36px !important; }
+    .header > .brand .brand-mark img { width: 36px !important; height: 36px !important; }
+    .header > .brand .brand-wordmark strong { font-size: 14px !important; }
+    .header .header-actions { gap: 2px !important; }
+}
