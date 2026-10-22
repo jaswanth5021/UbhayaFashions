@@ -768,3 +768,49 @@ body:has(.track-page) {
     .track-scan-note { margin: 0 14px 14px; padding: 12px 14px; }
     .track-delivery-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 16px; }
 }
+
+
+/* Mobile: keep the order ID field compact and prevent global input styles
+   from making it unusually tall on the tracking page. */
+@media (max-width: 600px) {
+    .track-page .track-lookup-row {
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    .track-page .track-lookup-input {
+        box-sizing: border-box !important;
+        flex: 0 0 48px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+        padding: 0 12px !important;
+        overflow: hidden !important;
+    }
+
+    .track-page .track-lookup-input input,
+    .track-page .track-lookup-input input[type="text"],
+    .track-page .track-lookup-input input[type="number"] {
+        box-sizing: border-box !important;
+        display: block !important;
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 4px !important;
+        border: 0 !important;
+        line-height: normal !important;
+        font-size: 16px !important;
+    }
+
+    .track-page .track-lookup-input svg {
+        flex: 0 0 20px !important;
+        width: 20px !important;
+        height: 20px !important;
+    }
+}
