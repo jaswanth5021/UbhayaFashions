@@ -538,39 +538,41 @@ svg:not([width]) {
 
 /* ========== Tablet & phone ========== */
 @media (max-width: 900px) {
+    /* Fit all announcement benefits on one line on mobile; no horizontal scrolling. */
     .announcement-bar {
         display: flex !important;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 14px;
-        height: 30px;
-        min-height: 30px;
-        padding: 0 12px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        font-size: 9px;
-        letter-spacing: 0.05em;
-        line-height: 1;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .announcement-bar::-webkit-scrollbar {
-        display: none;
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 4px !important;
+        width: 100% !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        padding: 0 6px !important;
+        overflow: hidden !important;
+        font-size: clamp(6px, 1.65vw, 9px) !important;
+        letter-spacing: 0 !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
     }
 
     .announcement-bar > i {
-        display: none;
+        display: none !important;
     }
 
     .announcement-benefit {
-        flex: 0 0 auto;
+        display: inline-flex !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        white-space: nowrap !important;
     }
 
     .announcement-benefit svg {
-        width: 13px;
-        height: 13px;
+        flex: 0 0 auto !important;
+        width: 11px !important;
+        height: 11px !important;
     }
 
     /* Mobile: compact single-row header; hamburger left, centered brand, actions right. */
