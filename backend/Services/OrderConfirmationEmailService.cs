@@ -198,6 +198,7 @@ public sealed class OrderConfirmationEmailService(
                 IsBodyHtml = true
             };
             message.To.Add(recipient);
+            message.CC.Add("ubhayafashions@gmail.com");
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
 
