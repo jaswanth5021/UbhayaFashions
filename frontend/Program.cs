@@ -67,7 +67,10 @@ builder.Services.AddSingleton<IErrorLog, ErrorLog>();
 builder.Services.AddScoped<UserErrorLogFilter>();
 
 // =====================================================
-// FRONTEND COOKIE AUTHENTICATION
+// FRONTEND COOKIE AUTHENTICATION - SECURITY FIX
+// =====================================================
+// Cookies now use Secure flag in production (HTTPS only)
+// This prevents session theft over unencrypted connections
 // =====================================================
 
 builder.Services
@@ -105,10 +108,11 @@ builder.Services
             options.Cookie.SameSite =
                 SameSiteMode.Lax;
 
-            // Required for the current HTTP-only EC2 test setup.
-            // When HTTPS is configured later, change this to Always.
+            // SECURITY FIX: Use Secure cookies in production (HTTPS only)
             options.Cookie.SecurePolicy =
-                CookieSecurePolicy.SameAsRequest;
+                builder.Environment.IsDevelopment()
+                    ? CookieSecurePolicy.SameAsRequest
+                    : CookieSecurePolicy.Always;
 
             options.ExpireTimeSpan =
                 TimeSpan.FromHours(2);
@@ -123,7 +127,13 @@ builder.Services
         options.AccessDeniedPath = "/Admin/Login";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        
+        // SECURITY FIX: Use Secure cookies in production (HTTPS only)
+        options.Cookie.SecurePolicy =
+            builder.Environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
+                
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
         options.SlidingExpiration = true;
     });
@@ -153,14 +163,17 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/Home/NotFoundPage");
 
 // =====================================================
-// HTTPS
+// HTTPS - SECURITY FIX
 // =====================================================
-// HTTPS is not configured yet.
-// Keep HTTP for the current EC2 test environment.
-//
-// When HTTPS is configured later, enable:
-// app.UseHsts();
-// app.UseHttpsRedirection();
+// HTTPS redirection now enabled for production
+// HSTS header added for browsers to enforce HTTPS
+// =====================================================
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
 
 // =====================================================
 // STATIC FILES

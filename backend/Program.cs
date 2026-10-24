@@ -170,17 +170,29 @@ builder.Services.AddAuthorization();
 
 
 // =====================================================
-// CORS
+// CORS - SECURITY FIX
+// =====================================================
+// Changed from AllowAnyOrigin() to specific frontend URL
+// This prevents unauthorized sites from calling the API
 // =====================================================
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
+        var frontendUrl = builder.Configuration["FrontendUrl"];
+        
+        if (string.IsNullOrWhiteSpace(frontendUrl))
+        {
+            // Development fallback
+            frontendUrl = "http://localhost:5000";
+        }
+
         policy
-            .AllowAnyOrigin()
+            .WithOrigins(frontendUrl)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -202,7 +214,13 @@ if (app.Environment.IsDevelopment())
 // MIDDLEWARE
 // =====================================================
 
-// app.UseHttpsRedirection();
+// HTTPS redirection enabled for production
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
 Directory.CreateDirectory(uploadsPath);

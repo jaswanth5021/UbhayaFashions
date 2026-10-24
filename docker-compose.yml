@@ -3,7 +3,9 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "ChangeThisStrongPassword123!"
+      # SECURITY FIX: Use environment variable instead of hardcoded password
+      # Create a .env file with: DB_PASSWORD=<your-strong-password>
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD}"
     ports:
       - "1433:1433"
     volumes:
@@ -13,12 +15,17 @@ services:
     build: ./backend
     environment:
       ASPNETCORE_URLS: http://+:5000
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=LadiesDressStore;User Id=sa;Password=ChangeThisStrongPassword123!;TrustServerCertificate=True;Encrypt=False"
-      Jwt__Key: "ChangeThisToALongRandomProductionSecretAtLeast32Chars"
+      # SECURITY FIX: Use environment variables for all secrets
+      # Create a .env file with these values (never commit .env!)
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=LadiesDressStore;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;Encrypt=False"
+      Jwt__Key: "${JWT_SECRET_KEY}"
       Jwt__Issuer: "LadiesDressStore"
       Jwt__Audience: "LadiesDressStoreWeb"
       FrontendUrl: "${FRONTEND_URL:-https://ubhaya1.duckdns.org}"
       UploadsPath: /data/uploads
+      # Add your Razorpay and SMTP secrets to .env as well
+      Razorpay__KeyId: "${RAZORPAY_KEY_ID}"
+      Razorpay__KeySecret: "${RAZORPAY_KEY_SECRET}"
     ports:
       - "5000:5000"
     volumes:
