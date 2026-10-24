@@ -12,6 +12,12 @@
 **/secrets.json
 **/secrets.*.json
 
+# SECURITY: Environment variables with secrets
+.env
+.env.local
+.env.production
+.env.*.local
+
 # Local databases and logs
 *.db
 *.sqlite
