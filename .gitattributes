@@ -1,0 +1,26 @@
+# ==============================================================================
+# UBHAYA FASHIONS - LINGUIST CONFIGURATION
+# ==============================================================================
+# This file tells GitHub how to classify languages correctly
+# Without this, the repo appears as a CSS project instead of C#
+# ==============================================================================
+
+# Mark C# and Razor as primary languages
+*.cs linguist-language=CSharp
+*.cshtml linguist-language=CSharp
+*.csproj linguist-language=CSharp
+*.sln linguist-language=CSharp
+
+# Exclude vendor and generated files from language statistics
+wwwroot/lib/** linguist-vendored
+node_modules/** linguist-vendored
+**/bin/** linguist-generated
+**/obj/** linguist-generated
+**/Migrations/** linguist-generated
+
+# Minified files should not count toward language stats
+*.min.css linguist-generated
+*.min.js linguist-generated
+
+# Documentation files
+*.md linguist-documentation
