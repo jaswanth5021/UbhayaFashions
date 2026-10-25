@@ -131,34 +131,6 @@
     </div>
 </section>
 
-
-@if (!showSignup)
-{
-    <section class="login-community" aria-label="Discover Ubhaya Fashions">
-        <article class="login-community-card login-community-review">
-            <span class="login-community-icon" aria-hidden="true">♡</span>
-            <p class="login-community-kicker">YOUR VOICE MATTERS</p>
-            <h2>Every style has a story.</h2>
-            <p>We’re making room for real customer stories. Shop with us and share your experience to help our community choose with confidence.</p>
-            <a asp-controller="Home" asp-action="About">Meet Ubhaya <span aria-hidden="true">→</span></a>
-        </article>
-        <article class="login-community-card login-community-journal">
-            <span class="login-community-icon" aria-hidden="true">✦</span>
-            <p class="login-community-kicker">THE STYLE JOURNAL</p>
-            <h2>Little ways to wear it beautifully.</h2>
-            <p>Explore our guide to building a wardrobe that feels comfortable, graceful, and unmistakably yours.</p>
-            <a asp-controller="Home" asp-action="StyleGuide">Read the style guide <span aria-hidden="true">→</span></a>
-        </article>
-        <article class="login-community-card login-community-feature">
-            <span class="login-community-icon" aria-hidden="true">↗</span>
-            <p class="login-community-kicker">A FRESH UPDATE</p>
-            <h2>Discover your next favourite.</h2>
-            <p>Explore the latest arrivals and find a look for everyday moments, celebrations, and everything in between.</p>
-            <a asp-controller="Products" asp-action="Index">Explore new styles <span aria-hidden="true">→</span></a>
-        </article>
-    </section>
-}
-
 @if (TempData["SignupSuccess"] is string signupSuccess)
 {
     <div class="login-account-toast" role="status" data-signup-success data-app-notification="success">
