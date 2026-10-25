@@ -13,6 +13,8 @@ public class HomeController(ApiService api, ILogger<HomeController> logger) : Co
 
     public IActionResult About() => View();
 
+    public IActionResult StyleGuide() => View();
+
     public IActionResult NotFoundPage()
     {
         Response.StatusCode = StatusCodes.Status404NotFound;
