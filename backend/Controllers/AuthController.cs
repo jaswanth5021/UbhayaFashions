@@ -451,9 +451,9 @@ public class AuthController(
                     <tr><td style="padding:30px 28px;">
                       <p style="margin:0 0 12px;font-size:16px;">Hello,</p>
                       <p style="margin:0;font-size:15px;line-height:1.75;color:#665557;">We received a request to reset the password for your Ubhaya Fashions account. Use the secure button below to choose a new password.</p>
-                      <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto;">
-                        <tr><td align="center" bgcolor="#68142e" style="border-radius:7px;">
-                          <a href="{safeResetUrl}" style="display:inline-block;padding:15px 28px;color:#fff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.7px;">RESET MY PASSWORD</a>
+                      <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto;border-collapse:separate;">
+                        <tr><td align="center" style="padding:0;">
+                          <a href="{safeResetUrl}" target="_blank" style="display:block;background-color:#68142e;border:1px solid #68142e;border-radius:7px;padding:16px 32px;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.7px;line-height:1.4;text-align:center;">RESET MY PASSWORD</a>
                         </td></tr>
                       </table>
                       <div style="padding:16px;border:1px solid #efdfdf;border-radius:10px;background:#fffaf8;">
