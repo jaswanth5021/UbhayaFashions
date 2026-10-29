@@ -33,8 +33,8 @@
     align-items: flex-end;
     overflow: hidden;
     background:
-        radial-gradient(ellipse at 20% 20%, rgba(241, 207, 165, .22), transparent 34%),
-        radial-gradient(ellipse at 82% 78%, rgba(255, 245, 223, .13), transparent 31%),
+        linear-gradient(0deg, rgba(52, 17, 19, .78) 0%, rgba(52, 17, 19, .18) 46%, rgba(52, 17, 19, .04) 100%),
+        url('/images/login-fashion-hero.jpg') center 38% / cover no-repeat,
         linear-gradient(145deg, #401021 0%, #711a37 48%, #9d5360 100%);
     color: #fffaf6;
 }
@@ -689,4 +689,66 @@
     .login-new-signup-form > .login-new-submit {
         grid-column: auto;
     }
+}
+
+/* Fashion hero image and the three store promises shown at the bottom of the visual panel. */
+.login-showcase-visual::after {
+    background: linear-gradient(0deg, rgba(52, 17, 19, .42), transparent 52%);
+    opacity: 1;
+}
+.login-showcase-benefits {
+    position: absolute;
+    z-index: 2;
+    right: 22px;
+    bottom: 22px;
+    left: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    border-top: 1px solid rgba(255, 250, 246, .34);
+    padding-top: 16px;
+    color: #fffaf6;
+}
+.login-showcase-benefit {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 9px;
+    font-size: 9px;
+    font-weight: 750;
+    line-height: 1.4;
+    letter-spacing: .04em;
+}
+.login-showcase-benefit + .login-showcase-benefit {
+    border-left: 1px solid rgba(255, 250, 246, .4);
+}
+.login-showcase-benefit svg {
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}
+.login-showcase-quote { padding-bottom: 112px; }
+@media (max-width: 760px) {
+    .login-showcase-benefits {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        padding-top: 10px;
+    }
+    .login-showcase-benefit {
+        flex-direction: column;
+        gap: 4px;
+        padding: 0 3px;
+        text-align: center;
+        font-size: 8px;
+    }
+    .login-showcase-benefit svg { width: 24px; height: 24px; flex-basis: 24px; }
+    .login-showcase-quote { padding-bottom: 124px; }
 }
