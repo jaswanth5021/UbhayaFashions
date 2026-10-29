@@ -630,6 +630,27 @@
     .footer-bottom { min-height: 84px; padding: 18px 0 30px; }
 }
 
+/* The shared header SVG reset is loaded later; keep the footer benefit icons legible. */
+.footer-benefits .footer-benefit > svg {
+    width: 42px;
+    height: 42px;
+    max-width: 42px;
+    max-height: 42px;
+    flex: 0 0 42px;
+    padding: 6px;
+    stroke-width: 2;
+}
+
+@media (max-width: 600px) {
+    .footer-benefits .footer-benefit > svg {
+        width: 36px;
+        height: 36px;
+        max-width: 36px;
+        max-height: 36px;
+        flex-basis: 36px;
+    }
+}
+
 
 /* Mobile Shop active state should match Home: no filled square behind the icon. */
 @media (max-width: 600px) {
