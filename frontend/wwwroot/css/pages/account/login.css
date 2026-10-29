@@ -752,3 +752,45 @@
     .login-showcase-benefit svg { width: 24px; height: 24px; flex-basis: 24px; }
     .login-showcase-quote { padding-bottom: 124px; }
 }
+
+
+/* Final layout correction: keep the hero copy, signature, and benefit strip from overlapping. */
+.login-showcase-visual {
+    isolation: isolate;
+}
+.login-showcase-quote {
+    z-index: 2;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 158px;
+}
+.login-showcase-signature {
+    max-width: 100%;
+}
+.login-showcase-index {
+    display: none;
+}
+.login-showcase-benefits {
+    z-index: 3;
+    bottom: 18px;
+    padding-top: 12px;
+    background: linear-gradient(180deg, transparent, rgba(52, 17, 19, .18));
+}
+.login-showcase-visual::after {
+    z-index: 0;
+    background: linear-gradient(0deg, rgba(52, 17, 19, .5) 0%, rgba(52, 17, 19, .06) 65%, transparent 100%);
+    opacity: 1;
+}
+@media (max-width: 1000px) {
+    .login-showcase-quote {
+        padding-bottom: 142px;
+    }
+}
+@media (max-width: 600px) {
+    .login-showcase-quote {
+        padding-bottom: 138px;
+    }
+    .login-showcase-benefits {
+        bottom: 12px;
+    }
+}
