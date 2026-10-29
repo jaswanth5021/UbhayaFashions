@@ -26,11 +26,11 @@
     grid-row: 1;
 }
 
-/* Keep the same fashion-photo hero on both Login and Sign Up states. */
+/* Use a distinct fashion-photo hero for the Sign Up state. */
 .login-showcase.is-signup .login-showcase-visual {
     background-image:
         linear-gradient(0deg, rgba(52, 17, 19, .78) 0%, rgba(52, 17, 19, .18) 46%, rgba(52, 17, 19, .04) 100%),
-        url('/images/login-fashion-hero.jpg'),
+        url('/images/signup-fashion-hero.jpg'),
         linear-gradient(145deg, #401021 0%, #711a37 48%, #9d5360 100%);
     background-position: center, center 38%, center;
     background-size: cover, cover, cover;
@@ -803,5 +803,20 @@
     }
     .login-showcase-benefits {
         bottom: 12px;
+    }
+}
+
+
+/* Responsive crop for the separate sign-up fashion photograph. */
+@media (max-width: 1000px) {
+    .login-showcase.is-signup .login-showcase-visual {
+        min-height: 300px;
+        background-position: center, center 34%, center;
+    }
+}
+@media (max-width: 600px) {
+    .login-showcase.is-signup .login-showcase-visual {
+        min-height: 320px;
+        background-position: center, center 30%, center;
     }
 }
