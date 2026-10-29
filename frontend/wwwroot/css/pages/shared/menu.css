@@ -1317,3 +1317,40 @@ body.menu-open { overflow: hidden; }
     display: none !important;
     content: none !important;
 }
+
+/* Match the side-menu links to the colored Categories accordion card. */
+.menu-list > li:not(.menu-category-group) {
+    margin: 6px 0;
+    border: 0;
+}
+
+.menu-list > li:not(.menu-category-group) > .menu-item {
+    min-height: 62px;
+    border: 1px solid #eedfdc;
+    border-radius: 14px;
+    background: linear-gradient(110deg, #fff7f5, #fffdfb);
+    box-shadow: 0 4px 12px rgb(84 38 47 / 4%);
+}
+
+.menu-list > li:nth-child(1) > .menu-item { border-color: #efd9de; background: linear-gradient(110deg, #fff2f4, #fffaf8); }
+.menu-list > li:nth-child(2) > .menu-item { border-color: #f0dfc8; background: linear-gradient(110deg, #fff7eb, #fffdf7); }
+.menu-list > li:nth-child(4) > .menu-item { border-color: #dce8dd; background: linear-gradient(110deg, #f1f8f1, #fbfdf9); }
+.menu-list > li:nth-child(5) > .menu-item { border-color: #e4dcef; background: linear-gradient(110deg, #f7f2fb, #fdfbff); }
+.menu-list > li:nth-child(6) > .menu-item { border-color: #eadbd4; background: linear-gradient(110deg, #fbf4ef, #fffdf9); }
+
+.menu-list > li:not(.menu-category-group) > .menu-item:hover {
+    border-color: #d9b7b4;
+    background: linear-gradient(110deg, #f9e9eb, #fff7f2);
+    box-shadow: 0 7px 16px rgb(84 38 47 / 9%);
+}
+
+.menu-list > li:not(.menu-category-group) > .menu-item .menu-item-icon {
+    border: 1px solid rgb(255 255 255 / 85%);
+    box-shadow: 0 2px 7px rgb(79 35 47 / 7%);
+}
+
+.menu-list > li:nth-child(1) .menu-item-icon { background: #f8e5e9; color: #8a2948; }
+.menu-list > li:nth-child(2) .menu-item-icon { background: #f7ead7; color: #9a672d; }
+.menu-list > li:nth-child(4) .menu-item-icon { background: #e5efe5; color: #527a60; }
+.menu-list > li:nth-child(5) .menu-item-icon { background: #eee6f4; color: #75558c; }
+.menu-list > li:nth-child(6) .menu-item-icon { background: #f1e6df; color: #815a49; }

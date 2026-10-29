@@ -1,4 +1,4 @@
-@using System.Text.Json
+﻿@using System.Text.Json
 @using Microsoft.Extensions.Caching.Memory
 @inject LadiesDressStore.Web.Services.ApiService Api
 @inject IMemoryCache ProductCache
@@ -17,15 +17,15 @@
     });
     var metaDescription = ViewData["MetaDescription"]?.ToString() ?? (ViewContext.RouteData.Values["controller"]?.ToString() switch
     {
-        "Home" => "Discover thoughtfully curated women’s fashion from Ubhaya Fashions. Shop dresses, ethnic wear, and new arrivals.",
-        "Products" => "Explore the Ubhaya Fashions collection of women’s dresses and ethnic wear. Find new arrivals, best sellers, and more.",
+        "Home" => "Discover thoughtfully curated womenâ€™s fashion from Ubhaya Fashions. Shop dresses, ethnic wear, and new arrivals.",
+        "Products" => "Explore the Ubhaya Fashions collection of womenâ€™s dresses and ethnic wear. Find new arrivals, best sellers, and more.",
         "Contact" => "Contact Ubhaya Fashions about your order, products, or any other questions.",
         "Shipping" => "Read about shipping and delivery for Ubhaya Fashions orders across India.",
         "Cart" => "Review the items in your Ubhaya Fashions shopping cart.",
         "Orders" => "Complete your Ubhaya Fashions order securely.",
         "Account" => "Manage your Ubhaya Fashions account and orders.",
         "Wishlist" => "View your saved Ubhaya Fashions products.",
-        _ => "Shop women’s fashion at Ubhaya Fashions."
+        _ => "Shop womenâ€™s fashion at Ubhaya Fashions."
     });
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
@@ -175,7 +175,7 @@
 
     <!-- Hamburger Menu CSS -->
     <link rel="stylesheet"
-          href="~/css/pages/shared/menu.css?v=drawer-2026-10-07"
+          href="~/css/pages/shared/menu.css?v=colored-menu-cards-20261029-1"
           asp-append-version="true" />
 
     <!-- Footer CSS -->
@@ -207,7 +207,7 @@
     <link rel="stylesheet" href="~/css/pages/shared/api-loader.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/customer-notifications.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/pages/account/login.css?v=account-benefits-20261029-5" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/account/login.css?v=login-shared-notice-20261029-3" asp-append-version="true" />
     @if (currentController == "Account" && currentAction == "ResetPassword")
     {
         <link rel="stylesheet" href="~/css/pages/account/password-reset.css" asp-append-version="true" />
@@ -342,7 +342,7 @@
                     <section class="customer-notification-panel" id="customerNotificationPanel" aria-label="Recent notifications" hidden>
                         <header><div><strong>Notifications</strong><span>New arrivals and store updates</span></div></header>
                         <div class="customer-notification-items" id="customerNotificationItems" aria-live="polite">
-                            <p class="customer-notification-loading">Loading updates…</p>
+                            <p class="customer-notification-loading">Loading updatesâ€¦</p>
                         </div>
                         <a class="customer-notification-view-all" asp-controller="Notifications" asp-action="Index">View all notifications</a>
                     </section>
@@ -530,7 +530,7 @@
     <aside class="cart-drawer @(openCartDrawer ? "is-open" : string.Empty)" id="cartDrawer" aria-labelledby="cartDrawerTitle" aria-hidden="@(!openCartDrawer)">
         <div class="cart-drawer-header">
             <h2 id="cartDrawerTitle">Your cart</h2>
-            <button type="button" class="cart-drawer-close" id="cartDrawerClose" aria-label="Close cart">×</button>
+            <button type="button" class="cart-drawer-close" id="cartDrawerClose" aria-label="Close cart">Ã—</button>
         </div>
         <div class="cart-drawer-columns"><span>Product</span><span>Total</span></div>
         @if (TempData["CartMessage"] is string drawerCartMessage)
@@ -585,7 +585,7 @@
                             <input type="hidden" name="productId" value="@item.ProductId" />
                             <input type="hidden" name="size" value="@item.Size" />
                             <input type="hidden" name="color" value="@item.Color" />
-                            <button type="submit" aria-label="Remove @item.Name from cart">×</button>
+                            <button type="submit" aria-label="Remove @item.Name from cart">Ã—</button>
                         </form>
                     </article>
                 }
@@ -593,9 +593,9 @@
         </div>
         <section class="cart-drawer-address-step" id="cartDrawerAddressStep" hidden aria-label="Choose delivery address">
             <div class="checkout-drawer-title-row">
-                <button type="button" class="cart-drawer-back" id="cartDrawerBackToItems">← Back</button>
+                <button type="button" class="cart-drawer-back" id="cartDrawerBackToItems">â† Back</button>
                 <span>Delivery</span>
-                <button type="button" class="cart-drawer-close checkout-inline-close" id="cartDrawerAddressClose" aria-label="Close">×</button>
+                <button type="button" class="cart-drawer-close checkout-inline-close" id="cartDrawerAddressClose" aria-label="Close">Ã—</button>
             </div>
 
             <form asp-controller="Orders" asp-action="Checkout" method="post" class="cart-drawer-address-form" id="drawerCheckoutForm">
@@ -621,7 +621,7 @@
                                     <span>@savedAddress.FullAddress</span>
                                     <small>@savedAddress.Mobile</small>
                                 </span>
-                                <button type="button" class="drawer-address-delete" data-address-id="@savedAddress.Id" aria-label="Delete address">×</button>
+                                <button type="button" class="drawer-address-delete" data-address-id="@savedAddress.Id" aria-label="Delete address">Ã—</button>
                             </label>
                         }
                     }
@@ -631,7 +631,7 @@
                     }
                 </div>
 
-                <button type="button" class="drawer-add-address" id="drawerAddNewAddress">＋ Add new address</button>
+                <button type="button" class="drawer-add-address" id="drawerAddNewAddress">ï¼‹ Add new address</button>
 
                 <div class="drawer-new-address" id="drawerNewAddress" hidden>
                     <div class="drawer-new-address-head">
@@ -640,7 +640,7 @@
                     </div>
 
                     <button type="button" class="use-location-button" id="drawerUseLocation">
-                        <span aria-hidden="true">⌖</span> Use my current location
+                        <span aria-hidden="true">âŒ–</span> Use my current location
                     </button>
                     <div id="drawerAddressAutocomplete" data-google-maps-key="@Configuration["Google:MapsApiKey"]"></div>
                     <p class="drawer-address-hint">Search your address or use your current location.</p>
@@ -782,3 +782,4 @@
 </body>
 
 </html>
+

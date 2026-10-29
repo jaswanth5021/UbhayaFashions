@@ -59,7 +59,7 @@
 
                         <label asp-for="Login.Identifier">Email or mobile number</label>
                         <input asp-for="Login.Identifier" autocomplete="section-customer username" placeholder="Enter your email or mobile" />
-                        <span asp-validation-for="Login.Identifier" class="login-new-field-error"></span>
+                        <span asp-validation-for="Login.Identifier" class="login-new-field-error" data-app-notification="error"></span>
 
                         <div class="login-new-password-heading">
                             <label asp-for="Login.Password">Password</label>
@@ -71,7 +71,7 @@
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
                             </button>
                         </div>
-                        <span asp-validation-for="Login.Password" class="login-new-field-error"></span>
+                        <span asp-validation-for="Login.Password" class="login-new-field-error" data-app-notification="error"></span>
 
                         <button type="submit" class="login-new-submit">SIGN IN <span aria-hidden="true">→</span></button>
                     </form>
@@ -95,25 +95,25 @@
                         <div class="login-signup-field">
                             <label asp-for="Signup.Name">Full name</label>
                             <input asp-for="Signup.Name" autocomplete="name" placeholder="Enter your full name" required />
-                            <span asp-validation-for="Signup.Name" class="login-new-field-error"></span>
+                            <span asp-validation-for="Signup.Name" class="login-new-field-error" data-app-notification="error"></span>
                         </div>
 
                         <div class="login-signup-field">
                             <label asp-for="Signup.Email">Email address</label>
                             <input asp-for="Signup.Email" type="email" autocomplete="email" placeholder="you@example.com" required />
-                            <span asp-validation-for="Signup.Email" class="login-new-field-error"></span>
+                            <span asp-validation-for="Signup.Email" class="login-new-field-error" data-app-notification="error"></span>
                         </div>
 
                         <div class="login-signup-field">
                             <label asp-for="Signup.Mobile">Mobile number</label>
                             <input asp-for="Signup.Mobile" type="tel" autocomplete="tel" placeholder="Enter your mobile number" required />
-                            <span asp-validation-for="Signup.Mobile" class="login-new-field-error"></span>
+                            <span asp-validation-for="Signup.Mobile" class="login-new-field-error" data-app-notification="error"></span>
                         </div>
 
                         <div class="login-signup-field">
                             <label asp-for="Signup.DateOfBirth">Date of birth</label>
                             <input asp-for="Signup.DateOfBirth" type="date" max="@DateTime.Today.AddYears(-18).ToString("yyyy-MM-dd")" autocomplete="bday" required />
-                            <span asp-validation-for="Signup.DateOfBirth" class="login-new-field-error"></span>
+                            <span asp-validation-for="Signup.DateOfBirth" class="login-new-field-error" data-app-notification="error"></span>
                         </div>
 
                         <div class="login-signup-field">
@@ -124,13 +124,13 @@
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
                                 </button>
                             </div>
-                            <span asp-validation-for="Signup.Password" class="login-new-field-error"></span>
+                            <span asp-validation-for="Signup.Password" class="login-new-field-error" data-app-notification="error"></span>
                         </div>
 
                         <div class="login-signup-field">
                             <label asp-for="Signup.ConfirmPassword">Confirm password</label>
                             <input asp-for="Signup.ConfirmPassword" autocomplete="new-password" placeholder="Enter your password again" required />
-                            <span asp-validation-for="Signup.ConfirmPassword" class="login-new-field-error"></span>
+                            <span asp-validation-for="Signup.ConfirmPassword" class="login-new-field-error" data-app-notification="error"></span>
                         </div>
 
                         <button type="submit" class="login-new-submit">CREATE ACCOUNT <span aria-hidden="true">→</span></button>
@@ -163,6 +163,7 @@
         (() => {
             const modes = document.querySelector('[data-login-modes]');
             if (!modes) return;
+
             const accountLayout = document.querySelector('[data-account-layout]');
             const loginPanel = modes.querySelector('[data-login-panel]');
             const signupPanel = modes.querySelector('[data-signup-panel]');
@@ -199,10 +200,14 @@
             const signupForm = modes.querySelector('[data-signup-form]');
             const feedback = modes.querySelector('[data-signup-feedback]');
             const setSignupFeedback = (message, state) => {
+                if (state === 'error' && message && window.AppNotifications) {
+                    window.AppNotifications.show(message, 'error');
+                    message = '';
+                }
                 feedback.textContent = message;
                 feedback.classList.toggle('is-visible', Boolean(message));
                 feedback.classList.toggle('is-pending', state === 'pending');
-                feedback.classList.toggle('is-error', state === 'error');
+                feedback.classList.toggle('is-error', state === 'error' && Boolean(message));
             };
 
             const showSignupToast = message => {
@@ -258,7 +263,6 @@
                 if (invalid) {
                     event.preventDefault();
                     setSignupFeedback(invalid.validationMessage || 'Please check the highlighted fields and try again.', 'error');
-                    invalid.reportValidity();
                     invalid.focus();
                     return;
                 }

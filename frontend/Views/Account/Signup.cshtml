@@ -12,7 +12,7 @@
         <p>Join us for a more personal shopping experience. You can verify your email later from your profile.</p>
     </div>
 
-    <div asp-validation-summary="ModelOnly" class="error signup-validation-summary"></div>
+    <div asp-validation-summary="ModelOnly" class="error signup-validation-summary" data-app-notification="error" role="alert"></div>
 
     <form asp-action="Signup" method="post" class="signup-form">
         @Html.AntiForgeryToken()
@@ -20,37 +20,37 @@
         <div class="signup-field">
             <label asp-for="Name"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Full name</label>
             <input asp-for="Name" autocomplete="name" placeholder="Your name" />
-            <span asp-validation-for="Name"></span>
+            <span asp-validation-for="Name" data-app-notification="error"></span>
         </div>
 
         <div class="signup-field">
             <label asp-for="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>Email address</label>
             <input asp-for="Email" autocomplete="email" placeholder="you@example.com" />
-            <span asp-validation-for="Email"></span>
+            <span asp-validation-for="Email" data-app-notification="error"></span>
         </div>
 
         <div class="signup-field">
             <label asp-for="Mobile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M10 17h4"/></svg>Mobile number</label>
             <input asp-for="Mobile" type="tel" autocomplete="tel" placeholder="+91 98765 43210" />
-            <span asp-validation-for="Mobile"></span>
+            <span asp-validation-for="Mobile" data-app-notification="error"></span>
         </div>
 
         <div class="signup-field">
             <label asp-for="DateOfBirth"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 17h2"/></svg>Date of birth</label>
             <input asp-for="DateOfBirth" type="date" max="@DateTime.Today.AddYears(-18).ToString("yyyy-MM-dd")" autocomplete="bday" />
-            <span asp-validation-for="DateOfBirth"></span>
+            <span asp-validation-for="DateOfBirth" data-app-notification="error"></span>
         </div>
 
         <div class="signup-field">
             <label asp-for="Password"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3M12 14v3"/></svg>Password</label>
             <input asp-for="Password" autocomplete="new-password" />
-            <span asp-validation-for="Password"></span>
+            <span asp-validation-for="Password" data-app-notification="error"></span>
         </div>
 
         <div class="signup-field">
             <label asp-for="ConfirmPassword"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"/><path d="m9 12 2 2 4-4"/></svg>Confirm password</label>
             <input asp-for="ConfirmPassword" autocomplete="new-password" />
-            <span asp-validation-for="ConfirmPassword"></span>
+            <span asp-validation-for="ConfirmPassword" data-app-notification="error"></span>
         </div>
 
         <button class="button full signup-submit" type="submit">Create account</button>

@@ -625,6 +625,29 @@
     }
 }
 
+.login-new-field-error:not(:empty) {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 7px 0 12px;
+    padding: 9px 11px;
+    border: 1px solid #e8aeb8;
+    border-left: 3px solid #b4233e;
+    border-radius: 6px;
+    background: #fff0f2;
+    color: #8f1830;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.45;
+}
+
+.login-new-form input.input-validation-error,
+.login-new-password-wrap input.input-validation-error {
+    border-color: #b4233e;
+    box-shadow: 0 0 0 2px rgb(180 35 62 / 12%);
+}
+
+
 @media (max-width: 420px) {
     .login-showcase-visual {
         min-height: 310px;
