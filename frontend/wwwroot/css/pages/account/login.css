@@ -45,7 +45,7 @@
     overflow: hidden;
     background:
         linear-gradient(0deg, rgba(52, 17, 19, .78) 0%, rgba(52, 17, 19, .18) 46%, rgba(52, 17, 19, .04) 100%),
-        url('/images/login-fashion-hero.jpg') center 38% / cover no-repeat,
+        url('/images/login-fashion-hero-clean-final.jpg') center 38% / cover no-repeat,
         linear-gradient(145deg, #401021 0%, #711a37 48%, #9d5360 100%);
     color: #fffaf6;
 }
