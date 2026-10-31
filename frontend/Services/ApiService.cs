@@ -823,6 +823,17 @@ public class ApiService(
             : (false, await response.Content.ReadAsStringAsync());
     }
 
+    public async Task<(bool Success, string Message)> DeleteMyAccountAsync(string currentPassword, string confirmation)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/me/delete");
+        AddToken(request);
+        request.Content = JsonContent.Create(new { currentPassword, confirmation });
+        using var response = await Client.SendAsync(request);
+        return response.IsSuccessStatusCode
+            ? (true, "")
+            : (false, await response.Content.ReadAsStringAsync());
+    }
+
     public async Task<(bool Success, string Message)> ChangePasswordAsync(ChangePasswordViewModel model)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/change-password");
