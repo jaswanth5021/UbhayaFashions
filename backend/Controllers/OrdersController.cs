@@ -49,7 +49,7 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
                 Price = variant.Price,
                 Quantity = item.Quantity,
                 Size = variant.Size,
-                Color = item.Color
+                Color = variant.Color
             });
             variant.Stock -= item.Quantity;
             inventoryTransactions.Add(new InventoryTransaction
@@ -118,18 +118,50 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
         }
 
         // Validate every stock variant before changing any inventory.
+        // Match using the saved size/color rather than the variant row ID because
+        // admin product edits may recreate variant rows while old orders still exist.
+        var productIds = order.Items.Select(item => item.ProductId).Distinct().ToList();
+        var currentVariants = await db.ProductVariants
+            .Where(variant => productIds.Contains(variant.ProductId))
+            .ToListAsync(cancellationToken);
+
+        static string NormalizeVariantValue(string? value) =>
+            (value ?? string.Empty).Trim();
+
         var stockRestorations = new List<(ProductVariant Variant, OrderItem Item)>();
         foreach (var item in order.Items)
         {
-            var variant = await db.ProductVariants.FirstOrDefaultAsync(x =>
-                x.ProductId == item.ProductId &&
-                x.Size == item.Size &&
-                (string.IsNullOrWhiteSpace(item.Color)
-                    ? string.IsNullOrWhiteSpace(x.Color)
-                    : x.Color == item.Color), cancellationToken);
+            var sizeMatches = currentVariants
+                .Where(variant => variant.ProductId == item.ProductId &&
+                    string.Equals(NormalizeVariantValue(variant.Size),
+                        NormalizeVariantValue(item.Size), StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var savedColor = NormalizeVariantValue(item.Color);
+            var exactMatches = sizeMatches
+                .Where(variant => string.Equals(NormalizeVariantValue(variant.Color),
+                    savedColor, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            ProductVariant? variant = exactMatches.Count == 1 ? exactMatches[0] : null;
+
+            // Older orders may not have saved a color. If only one current variant
+            // exists for that product/size, it is safe to restore to that variant.
+            // Never guess when multiple colors share the same size.
+            if (variant is null && sizeMatches.Count == 1)
+                variant = sizeMatches[0];
 
             if (variant is null)
-                return Conflict($"Unable to restore inventory for {item.ProductName} ({item.Size}). Please contact support.");
+            {
+                logger.LogWarning(
+                    "Inventory restoration could not resolve a unique variant. OrderId={OrderId}, ProductId={ProductId}, ProductName={ProductName}, Size={Size}, SavedColor={Color}, MatchingVariants={MatchingVariants}",
+                    order.Id, item.ProductId, item.ProductName, item.Size, item.Color, sizeMatches.Count);
+
+                var reason = sizeMatches.Count == 0
+                    ? "the product no longer has this size"
+                    : "the saved color does not uniquely match a current variant";
+                return Conflict($"Unable to restore inventory for {item.ProductName} ({item.Size}) because {reason}. Please contact support.");
+            }
 
             stockRestorations.Add((variant, item));
         }
