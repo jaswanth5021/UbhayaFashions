@@ -81,3 +81,10 @@
 @media(max-width:560px){.od-courier-logo{width:118px;max-height:28px}}
 
 .od-item-product-link{display:block;flex:0 0 auto;border-radius:14px;text-decoration:none}.od-item-product-link:focus-visible,.od-item-name-link:focus-visible{outline:3px solid #b84c78;outline-offset:3px}.od-item-name-link{color:inherit;text-decoration:none}.od-item-name-link:hover{color:#8b2054;text-decoration:underline;text-underline-offset:3px}
+
+
+/* Customer order cancellation action, shown only while the shipment is not created. */
+.od-cancel-order-form{margin-top:12px}
+.od-cancel-order-button{display:inline-flex;min-height:42px;align-items:center;justify-content:center;padding:0 18px;border:1px solid #d9aeb8;border-radius:8px;background:#fff7f8;color:#92233f;font:inherit;font-size:12px;font-weight:750;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}
+.od-cancel-order-button:hover{border-color:#92233f;background:#92233f;color:#fff}
+.od-cancel-order-note{margin:9px 0 0;color:#79666c;font-size:11px;line-height:1.5}
