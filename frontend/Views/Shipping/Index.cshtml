@@ -2,28 +2,94 @@
     ViewData["Title"] = "Shipping Policy";
     ViewData["MetaDescription"] = "Read about shipping charges, order processing, delivery timelines and tracking for Ubhaya Fashions orders across India.";
 }
-<main class="store-policy">
-    <header class="store-policy-hero">
-        <span>UBHAYA FASHIONS · CUSTOMER CARE</span>
-        <h1>Shipping <em>Policy</em></h1>
-        <p>Clear information about shipping charges, order dispatch, delivery timelines and tracking for your Ubhaya Fashions order.</p>
+<main class="shipping-policy-page">
+    <header class="shipping-policy-hero">
+        <p class="shipping-policy-eyebrow">UBHAYA FASHIONS · CUSTOMER CARE</p>
+        <h1>Shipping Policy</h1>
+        <p class="shipping-policy-intro">Everything you need to know about delivery, shipping charges and order dispatch.</p>
     </header>
-    <nav class="store-policy-nav" aria-label="Customer policies">
+
+    <nav class="store-policy-nav shipping-policy-nav" aria-label="Customer policies">
         <a asp-controller="Home" asp-action="Privacy">Privacy</a>
         <a asp-controller="Home" asp-action="Terms">Terms</a>
         <a asp-controller="Home" asp-action="Returns">Returns &amp; Refunds</a>
         <a asp-controller="Home" asp-action="Cancellation">Cancellation</a>
         <a class="active" asp-controller="Shipping" asp-action="Index" aria-current="page">Shipping</a>
     </nav>
-    <div class="store-policy-content">
-        <section><h2>Shipping Charges</h2><p>We offer <strong>free shipping on orders above ₹999</strong>.</p><p>Shipping charges may apply to orders below ₹999. The applicable charge, if any, will be displayed during checkout before you place your order.</p></section>
-        <section><h2>Order Processing</h2><p>Orders are generally processed and dispatched within <strong>24–48 hours</strong> after successful order confirmation and payment.</p><p>Orders placed on Sundays or public holidays may be processed on the next working day.</p></section>
-        <section><h2>Delivery Time</h2><p>After dispatch, delivery generally takes approximately <strong>3–7 business days</strong>, depending on the delivery location.</p><p>Delivery timelines may vary for remote locations, festivals, severe weather, courier operations or other circumstances beyond our control.</p></section>
-        <section><h2>Order Tracking</h2><p>Once your order has been dispatched, tracking information will be shared when available.</p><p>Signed-in customers can also check available shipment updates from Account → Orders.</p></section>
-        <section><h2>Delivery Address</h2><p>Please check that your delivery address, PIN code and contact number are complete and accurate before placing your order.</p><p>We may not be able to change the delivery address after the order has been handed over to the courier.</p></section>
-        <section><h2>Delayed Deliveries</h2><p>Occasionally, deliveries may take longer than estimated due to courier delays, weather conditions, public holidays, festivals or other unexpected circumstances.</p><p>If your order appears significantly delayed, please contact us with your order number.</p></section>
-        <section><h2>Incorrect or Incomplete Address</h2><p>Customers are responsible for providing a complete and accurate delivery address.</p><p>If a parcel is returned because of an incorrect or incomplete address, any re-delivery arrangement and applicable charges will be discussed with you.</p></section>
-        <section><h2>Need Help?</h2><p>If you have questions about shipping, delivery or tracking, our customer-care team is happy to help.</p><p><a asp-controller="Contact" asp-action="Index">Contact Ubhaya Fashions</a> or email <a href="mailto:ubhayafashions@gmail.com">ubhayafashions@gmail.com</a>.</p></section>
-    </div>
-    <p class="store-policy-date">Last updated: 31 October 2026</p>
+
+    <section class="shipping-policy-content" aria-label="Shipping information">
+        <article class="shipping-policy-card">
+            <div class="shipping-policy-icon shipping-icon-gold" aria-hidden="true">🚚</div>
+            <div class="shipping-policy-copy">
+                <h2>Shipping Charges</h2>
+                <p>We offer <strong>free shipping on orders above ₹999</strong>.</p>
+                <p>Shipping charges may apply to orders below ₹999. The applicable shipping charge will be displayed during checkout before you place your order.</p>
+            </div>
+        </article>
+
+        <article class="shipping-policy-card">
+            <div class="shipping-policy-icon shipping-icon-rose" aria-hidden="true">📦</div>
+            <div class="shipping-policy-copy">
+                <h2>Order Processing</h2>
+                <p>Orders are generally processed and dispatched within <strong>24–48 hours</strong> after successful order confirmation and payment.</p>
+                <p>Orders placed on Sundays or public holidays may be processed on the next working day.</p>
+            </div>
+        </article>
+
+        <article class="shipping-policy-card">
+            <div class="shipping-policy-icon shipping-icon-gold" aria-hidden="true">🛵</div>
+            <div class="shipping-policy-copy">
+                <h2>Delivery Time</h2>
+                <p>After dispatch, delivery generally takes approximately <strong>3–7 business days</strong>, depending on the delivery location.</p>
+                <p>Delivery timelines may vary for remote locations, during festivals, severe weather conditions, or other circumstances beyond our control.</p>
+            </div>
+        </article>
+
+        <article class="shipping-policy-card">
+            <div class="shipping-policy-icon shipping-icon-rose" aria-hidden="true">🔎</div>
+            <div class="shipping-policy-copy">
+                <h2>Order Tracking</h2>
+                <p>Once your order has been dispatched, tracking information will be shared when available.</p>
+                <p>Signed-in customers can also check available shipment updates from <strong>Account → Orders</strong>.</p>
+            </div>
+        </article>
+
+        <article class="shipping-policy-card">
+            <div class="shipping-policy-icon shipping-icon-gold" aria-hidden="true">📍</div>
+            <div class="shipping-policy-copy">
+                <h2>Delivery Address</h2>
+                <p>Please check that your delivery address, PIN code and contact number are complete and accurate before placing your order.</p>
+                <p>We may not be able to change the delivery address after the order has been handed over to the courier.</p>
+            </div>
+        </article>
+
+        <article class="shipping-policy-card">
+            <div class="shipping-policy-icon shipping-icon-rose" aria-hidden="true">⏳</div>
+            <div class="shipping-policy-copy">
+                <h2>Delayed Deliveries</h2>
+                <p>Occasionally, deliveries may take longer than estimated due to courier delays, weather conditions, public holidays, festivals or other unexpected circumstances.</p>
+                <p>If your order appears significantly delayed, please contact us with your order number.</p>
+            </div>
+        </article>
+
+        <article class="shipping-policy-card">
+            <div class="shipping-policy-icon shipping-icon-gold" aria-hidden="true">⚠️</div>
+            <div class="shipping-policy-copy">
+                <h2>Incorrect or Incomplete Address</h2>
+                <p>Customers are responsible for providing a complete and accurate delivery address.</p>
+                <p>If a parcel is returned because of an incorrect or incomplete address, any re-delivery arrangement and applicable charges will be discussed with you.</p>
+            </div>
+        </article>
+
+        <article class="shipping-policy-card shipping-policy-contact">
+            <div class="shipping-policy-icon shipping-icon-rose" aria-hidden="true">💬</div>
+            <div class="shipping-policy-copy">
+                <h2>Need Help?</h2>
+                <p>If you have questions about shipping, delivery or tracking, our customer-care team is happy to help.</p>
+                <p><a asp-controller="Contact" asp-action="Index">Contact Ubhaya Fashions</a> or email <a href="mailto:ubhayafashions@gmail.com">ubhayafashions@gmail.com</a>.</p>
+            </div>
+        </article>
+    </section>
+
+    <p class="shipping-policy-date">Last updated: 31 October 2026</p>
 </main>
