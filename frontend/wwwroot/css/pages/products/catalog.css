@@ -2480,3 +2480,24 @@
         grid-row: 1 !important;
     }
 }
+
+
+/* Ensure the inline catalog colour token is painted as the swatch fill. */
+.catalog-page .catalog-sidebar .filter-color-option > .filter-color-swatch {
+    background-color: var(--filter-color, #c8b7b0) !important;
+    background-image: none !important;
+    background-repeat: no-repeat !important;
+}
+@media (max-width: 600px) {
+    .catalog-page .catalog-sidebar .filter-color-option > .filter-color-swatch {
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        min-height: 16px !important;
+        max-width: 16px !important;
+        max-height: 16px !important;
+        display: block !important;
+        border-radius: 50% !important;
+        flex: none !important;
+    }
+}
