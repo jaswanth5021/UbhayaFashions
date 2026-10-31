@@ -181,6 +181,21 @@
                             var canReviewOrder = string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase) ||
                                 string.Equals(order.Status, "Delivered", StringComparison.OrdinalIgnoreCase) ||
                                 string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase);
+                            var shipmentStatusForCancel = order.ShippingStatus?.Trim() ?? "";
+                            var shipmentNotCreated = string.IsNullOrWhiteSpace(order.ShippingWaybill) &&
+                                (string.IsNullOrWhiteSpace(shipmentStatusForCancel) ||
+                                 shipmentStatusForCancel.Equals("NotCreated", StringComparison.OrdinalIgnoreCase) ||
+                                 shipmentStatusForCancel.Equals("Creation Failed", StringComparison.OrdinalIgnoreCase) ||
+                                 shipmentStatusForCancel.Equals("Failed", StringComparison.OrdinalIgnoreCase));
+                            var orderStatusForCancel = order.Status?.Trim() ?? "";
+                            var fulfilmentAlreadyProgressed = orderStatusForCancel.Contains("cancel", StringComparison.OrdinalIgnoreCase) ||
+                                orderStatusForCancel.Contains("deliver", StringComparison.OrdinalIgnoreCase) ||
+                                orderStatusForCancel.Contains("complete", StringComparison.OrdinalIgnoreCase) ||
+                                orderStatusForCancel.Contains("ship", StringComparison.OrdinalIgnoreCase) ||
+                                orderStatusForCancel.Contains("dispatch", StringComparison.OrdinalIgnoreCase) ||
+                                orderStatusForCancel.Contains("pickup", StringComparison.OrdinalIgnoreCase) ||
+                                orderStatusForCancel.Contains("transit", StringComparison.OrdinalIgnoreCase);
+                            var canCancelOrder = shipmentNotCreated && !fulfilmentAlreadyProgressed;
                             <article class="profile-order-card order-card"
                                      data-profile-order-card
                                      data-order-status="@((order.Status ?? "").ToLowerInvariant())"
@@ -192,6 +207,15 @@
                                     <div class="order-card-heading-right">
                                         <strong class="order-card-total">₹@order.TotalAmount.ToString("N0")</strong>
                                         <a class="order-open-details-link" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">Order summary <span aria-hidden="true">↗</span></a>
+                                        @if (canCancelOrder)
+                                        {
+                                            <form asp-controller="Orders" asp-action="Cancel" method="post" class="profile-cancel-order-form"
+                                                  onsubmit="return confirm('Are you sure you want to cancel order #@order.Id? This action cannot be undone.');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                <button type="submit" class="profile-cancel-order-button">Cancel order</button>
+                                            </form>
+                                        }
                                         <button type="button" class="order-view-toggle" data-profile-order-toggle aria-expanded="false">View items <span aria-hidden="true">⌄</span></button>
                                     </div>
                                 </header>
