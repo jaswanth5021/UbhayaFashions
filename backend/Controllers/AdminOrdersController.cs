@@ -94,6 +94,8 @@ public class AdminOrdersController(ApplicationDbContext db) : ControllerBase
     {
         var order = await db.Orders.FindAsync(id);
         if (order is null) return NotFound();
+        if (string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            return Conflict("A cancelled order cannot be moved back to an active status.");
 
         order.Status = request.Status;
         if (!string.IsNullOrWhiteSpace(request.PaymentStatus))
