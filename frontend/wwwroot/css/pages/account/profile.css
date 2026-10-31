@@ -550,3 +550,22 @@
     .profile-delete-account-form { grid-template-columns: 1fr; }
     .profile-delete-account-button { grid-column: auto; width: 100%; }
 }
+
+
+/* Keep the Delete Account destination visible in the profile navigation on phones. */
+.profile-tabs { flex-wrap: wrap; overflow-x: visible; }
+.profile-tabs a[href*="tab=delete"] {
+    border: 1px solid #e6c3ca;
+    background: #fff8f9;
+    color: #9b263e;
+}
+.profile-tabs a[href*="tab=delete"]:hover,
+.profile-tabs a[href*="tab=delete"].is-active {
+    border-color: #a4263e;
+    background: #a4263e;
+    color: #fff;
+}
+@media (max-width: 600px) {
+    .profile-tabs { flex-wrap: wrap; overflow: visible; }
+    .profile-tabs a { flex: 0 0 auto; }
+}
