@@ -569,3 +569,27 @@
     .profile-tabs { flex-wrap: wrap; overflow: visible; }
     .profile-tabs a { flex: 0 0 auto; }
 }
+
+.profile-delete-account-shortcut {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 26px;
+    padding: 15px 17px;
+    border: 1px solid #ead6da;
+    border-radius: 9px;
+    background: #fffafb;
+    color: #74666a;
+    font-size: 13px;
+}
+.profile-delete-account-shortcut a {
+    color: #9b263e;
+    font-weight: 750;
+    text-decoration: none;
+}
+.profile-delete-account-shortcut a:hover { text-decoration: underline; }
+@media (max-width: 600px) {
+    .profile-delete-account-shortcut { align-items: flex-start; flex-direction: column; }
+}
