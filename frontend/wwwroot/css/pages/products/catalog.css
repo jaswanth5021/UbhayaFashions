@@ -2188,3 +2188,180 @@
     .catalog-sidebar .filter-color-option .filter-color-name { font-size: 15px; }
     .catalog-sidebar .filter-color-more { margin-top: 18px; }
 }
+
+
+/* Mobile filter drawer refinement: tighter rhythm and consistent section styling. */
+@media (max-width: 600px) {
+    .catalog-page .catalog-sidebar {
+        border-radius: 14px 0 0 14px;
+        background: #fff !important;
+    }
+
+    .catalog-page .catalog-sidebar-form {
+        padding: 0 22px 28px;
+    }
+
+    .catalog-page .filter-section {
+        padding: 15px 0;
+        border-bottom: 1px solid #eee7e5;
+    }
+
+    .catalog-page .filter-section > h3,
+    .catalog-page .filter-color-accordion > summary {
+        min-height: 25px;
+        margin: 0;
+        color: #34272c;
+        font-size: 13px;
+        font-weight: 750;
+        letter-spacing: .8px;
+    }
+
+    .catalog-page .filter-section > h3 {
+        position: relative;
+        padding-left: 12px;
+    }
+
+    .catalog-page .filter-section > h3::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        bottom: 3px;
+        left: 0;
+        width: 3px;
+        border-radius: 2px;
+        background: linear-gradient(180deg, #b64a63, #d7a64b);
+    }
+
+    /* Keep size chips compact and evenly aligned. */
+    .catalog-page .filter-size-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 10px;
+    }
+
+    .catalog-page .filter-size-option span {
+        display: inline-flex;
+        min-width: 42px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        border: 1px solid #eadbd8;
+        border-radius: 7px;
+        background: #fff;
+        color: #4d3a3e;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .catalog-page .filter-size-option.is-selected span {
+        border-color: #68142e;
+        background: #68142e;
+        color: #fff;
+    }
+
+    /* Colour list: clean left aligned checkboxes with comfortable, consistent rows. */
+    .catalog-page .filter-color-section {
+        padding: 15px 0 14px;
+    }
+
+    .catalog-page .filter-color-accordion > summary {
+        min-height: 25px;
+        font-size: 13px;
+    }
+
+    .catalog-page .filter-color-list {
+        gap: 7px;
+        padding-top: 11px;
+    }
+
+    .catalog-page .filter-color-option {
+        min-height: 30px;
+        gap: 12px;
+    }
+
+    .catalog-page .filter-color-option input[type="checkbox"] {
+        width: 19px !important;
+        height: 19px !important;
+        min-width: 19px;
+        flex-basis: 19px;
+        border-radius: 4px;
+    }
+
+    .catalog-page .filter-color-option .filter-color-name {
+        color: #30282c;
+        font-size: 14px;
+        line-height: 1.35;
+    }
+
+    .catalog-page .filter-color-option.is-selected .filter-color-name {
+        color: #68142e;
+        font-weight: 650;
+    }
+
+    .catalog-page .filter-color-more {
+        margin-top: 9px;
+        padding-top: 0;
+        border-top: 0;
+    }
+
+    .catalog-page .filter-color-more > summary {
+        min-height: 26px;
+        padding: 2px 0;
+        color: #1764e8;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .catalog-page .filter-color-more-list {
+        gap: 7px;
+        padding-top: 9px;
+    }
+
+    /* Price labels and slider stay close together, matching the other sections. */
+    .catalog-page .filter-price-values {
+        margin: 9px 0 8px;
+        color: #68142e;
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    .catalog-page .filter-range-wrap {
+        height: 28px;
+        margin: 0 5px 10px;
+        border: 1px solid #eadbd8;
+        border-radius: 9px;
+        background: #fffaf9;
+    }
+
+    .catalog-page .filter-range-wrap input[type="range"] {
+        height: 28px;
+    }
+
+    .catalog-page .filter-range-wrap input[type="range"]::-webkit-slider-runnable-track {
+        height: 3px;
+        background: #e4d3d5;
+    }
+
+    .catalog-page .filter-range-wrap input[type="range"]::-moz-range-track {
+        height: 3px;
+        background: #e4d3d5;
+    }
+
+    .catalog-page .filter-price-inputs input {
+        height: 36px;
+        border: 1px solid #e7d9d6;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 12px;
+    }
+
+    .catalog-page .catalog-apply-filters {
+        min-height: 46px;
+        border-radius: 7px;
+        font-size: 11px;
+        letter-spacing: .8px;
+    }
+}
