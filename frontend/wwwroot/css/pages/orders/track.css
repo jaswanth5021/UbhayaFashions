@@ -889,3 +889,9 @@ body:has(.track-page) {
 }
 
 .track-product-link{display:block;flex:0 0 auto;border-radius:14px;text-decoration:none}.track-product-link:focus-visible,.track-product-name-link:focus-visible{outline:3px solid #b84c78;outline-offset:3px}.track-product-name-link{color:#8b2054;font-weight:650;text-decoration:none}.track-product-name-link:hover{text-decoration:underline;text-underline-offset:3px}
+
+
+/* Customer cancellation action appears only before a shipment is created. */
+.track-cancel-order-form{margin-top:9px}
+.track-cancel-order-button{display:inline-flex;min-height:38px;align-items:center;justify-content:center;padding:0 15px;border:1px solid #dfb9c2;border-radius:7px;background:#fff7f8;color:#92233f;font:inherit;font-size:11px;font-weight:750;cursor:pointer}
+.track-cancel-order-button:hover{border-color:#92233f;background:#92233f;color:#fff}
