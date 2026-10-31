@@ -2037,3 +2037,154 @@
 .filter-color-more[open] > summary::after { content: "−"; }
 .filter-color-more > summary span { margin-left: auto; color: #8b858d; font-size: 12px; font-weight: 500; }
 .filter-color-more-list { padding-top: 12px; }
+
+
+/* Colour filter — compact checkbox list matching the requested reference. */
+.catalog-sidebar .filter-color-section {
+    padding: 18px 0 20px;
+    border-bottom: 1px solid #eee8e6;
+}
+.catalog-sidebar .filter-color-accordion > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 24px;
+    color: #292126;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    cursor: pointer;
+    list-style: none;
+}
+.catalog-sidebar .filter-color-accordion > summary::-webkit-details-marker,
+.catalog-sidebar .filter-color-more > summary::-webkit-details-marker {
+    display: none;
+}
+.catalog-sidebar .filter-color-accordion > summary::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    margin-right: 3px;
+    border-top: 2px solid #8a8589;
+    border-left: 2px solid #8a8589;
+    transform: rotate(45deg);
+    transition: transform .18s ease;
+}
+.catalog-sidebar .filter-color-accordion:not([open]) > summary::after {
+    transform: rotate(225deg);
+}
+.catalog-sidebar .filter-color-accordion > summary span {
+    position: relative;
+    padding-left: 12px;
+}
+.catalog-sidebar .filter-color-accordion > summary span::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: #a83b59;
+}
+.catalog-sidebar .filter-color-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+    padding-top: 18px;
+}
+.catalog-sidebar .filter-color-option {
+    display: flex;
+    width: 100%;
+    min-height: 25px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    cursor: pointer;
+}
+.catalog-sidebar .filter-color-option::before,
+.catalog-sidebar .filter-color-option::after,
+.catalog-sidebar .filter-color-option > span::before,
+.catalog-sidebar .filter-color-option > span::after {
+    content: none !important;
+    display: none !important;
+}
+.catalog-sidebar .filter-color-option input[type="checkbox"] {
+    position: static !important;
+    display: inline-block !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px;
+    flex: 0 0 18px;
+    margin: 0 !important;
+    padding: 0;
+    appearance: auto;
+    opacity: 1 !important;
+    visibility: visible !important;
+    accent-color: #68142e;
+    cursor: pointer;
+}
+.catalog-sidebar .filter-color-option .filter-color-name {
+    display: inline-block !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #252126;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: normal;
+}
+.catalog-sidebar .filter-color-option.is-selected .filter-color-name {
+    color: #68142e;
+    font-weight: 650;
+}
+.catalog-sidebar .filter-color-more {
+    margin-top: 18px;
+}
+.catalog-sidebar .filter-color-more > summary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #1764e8;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    list-style: none;
+}
+.catalog-sidebar .filter-color-more > summary::after {
+    content: none !important;
+    display: none !important;
+}
+.catalog-sidebar .filter-color-more-list {
+    gap: 13px;
+    padding-top: 15px;
+}
+@media (max-width: 600px) {
+    .catalog-sidebar .filter-color-section { padding: 17px 0 19px; }
+    .catalog-sidebar .filter-color-accordion > summary { font-size: 14px; }
+    .catalog-sidebar .filter-color-list { gap: 13px; padding-top: 17px; }
+    .catalog-sidebar .filter-color-option { min-height: 25px; gap: 12px; }
+    .catalog-sidebar .filter-color-option input[type="checkbox"] {
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px;
+        flex-basis: 18px;
+    }
+    .catalog-sidebar .filter-color-option .filter-color-name { font-size: 15px; }
+    .catalog-sidebar .filter-color-more { margin-top: 18px; }
+}
