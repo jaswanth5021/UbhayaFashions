@@ -18,3 +18,12 @@
 {
     <div hidden data-app-notification="success">@signupSuccess</div>
 }
+
+@if (TempData["DelhiverySuccess"] is string delhiverySuccess)
+{
+    <div hidden data-app-notification="success">@delhiverySuccess</div>
+}
+@if (TempData["DelhiveryError"] is string delhiveryError)
+{
+    <div hidden data-app-notification="error">@delhiveryError</div>
+}
