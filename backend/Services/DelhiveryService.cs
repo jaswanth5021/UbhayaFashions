@@ -171,13 +171,6 @@ public sealed class DelhiveryService(IHttpClientFactory httpClientFactory, IConf
             !string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Prepaid shipment creation is allowed only after payment is verified.");
 
-        // Delhivery recommends checking serviceability before manifestation.
-        var serviceability = await CheckPincodeServiceabilityAsync(shipment.PostalCode, cancellationToken);
-        var serviceableForPayment = paymentMode == "COD" ? serviceability.Cod : serviceability.Prepaid;
-        if (!serviceableForPayment)
-            throw new InvalidOperationException(
-                $"Delhivery does not currently support {paymentMode} delivery to PIN code {shipment.PostalCode}. Check the PIN code or contact Delhivery.");
-
         var payload = new
         {
             shipments = new[]
