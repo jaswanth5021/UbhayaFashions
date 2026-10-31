@@ -261,6 +261,37 @@
                     <button class="profile-save-button" type="submit">Update password</button>
                 </form>
                 <p class="profile-reset-note">Forgot your current password? <a asp-action="ForgotPassword">Reset it by email</a>.</p>
+
+                <section class="profile-delete-account" aria-labelledby="deleteAccountHeading">
+                    <div class="profile-delete-account-heading">
+                        <span aria-hidden="true">!</span>
+                        <div>
+                            <h3 id="deleteAccountHeading">Delete My Account</h3>
+                            <p>Permanently close your account and remove your saved profile information.</p>
+                        </div>
+                    </div>
+                    <ul>
+                        <li>Your profile details, saved addresses, wishlist and recently viewed items will be removed.</li>
+                        <li>Your reviews and review votes will be deleted.</li>
+                        <li>Order, payment and shipment records may be retained where required for legal, tax and fulfilment purposes. Personal profile details will be anonymised in those records.</li>
+                    </ul>
+                    <form asp-action="DeleteMyAccount" method="post" class="profile-delete-account-form"
+                          onsubmit="return confirm('Are you sure you want to permanently delete your Ubhaya Fashions account? This cannot be undone.');">
+                        @Html.AntiForgeryToken()
+                        <div class="profile-field">
+                            <label for="DeleteAccountPassword">Current password</label>
+                            <input id="DeleteAccountPassword" name="currentPassword" type="password"
+                                   autocomplete="current-password" required />
+                        </div>
+                        <div class="profile-field">
+                            <label for="DeleteAccountConfirmation">Type DELETE to confirm</label>
+                            <input id="DeleteAccountConfirmation" name="confirmation" type="text"
+                                   autocomplete="off" required pattern="DELETE" />
+                        </div>
+                        <button type="submit" class="profile-delete-account-button">Delete My Account</button>
+                    </form>
+                    <p class="profile-delete-account-note">For Google or Facebook sign-in accounts without a password, use Forgot Password to set one before continuing.</p>
+                </section>
             </section>
         }
         else
