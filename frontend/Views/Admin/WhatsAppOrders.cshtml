@@ -1,0 +1,32 @@
+@model List<AdminOrderViewModel>
+@{
+    ViewData["Title"] = "WhatsApp Orders";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var search = Context.Request.Query["search"].ToString();
+    var orders = Model;
+    if (!string.IsNullOrWhiteSpace(search)) {
+        orders = orders.Where(o => o.Id.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) || (o.Customer?.Name?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) || (o.Customer?.Mobile?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+    }
+}
+<div class="page-head"><div><h1>WhatsApp confirmations</h1><p>Prepare order confirmation messages and open them directly in WhatsApp.</p></div><span class="wa-count">@orders.Count orders</span></div>
+<form class="admin-product-filters" method="get"><label>Search<input type="search" name="search" value="@search" placeholder="Order number, customer or mobile" /></label><button class="primary" type="submit">Search</button><a class="admin-filter-clear" asp-action="WhatsAppOrders">Clear</a></form>
+<div class="wa-order-grid">
+@foreach (var o in orders.OrderByDescending(x => x.CreatedDate)) {
+    var phone = new string((o.Customer?.Mobile ?? "").Where(char.IsDigit).ToArray());
+    if (phone.Length == 10) phone = "91" + phone;
+    else if (phone.Length == 11 && phone.StartsWith("0")) phone = "91" + phone[1..];
+    var customer = string.IsNullOrWhiteSpace(o.Customer?.Name) ? "Customer" : o.Customer!.Name;
+    var message = $"Hello {customer}, thank you for shopping with UBHAYA FASHIONS! Your order #{o.Id} has been placed successfully. Order total: ₹{o.TotalAmount:N2}. We will keep you updated on your order status.";
+    var url = $"https://wa.me/{phone}?text={Uri.EscapeDataString(message)}";
+    <article class="wa-order-card">
+        <div class="wa-card-top"><div><strong>Order #@o.Id</strong><small>@o.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small></div><span class="wa-status">@o.Status</span></div>
+        <h3>@customer</h3><p class="wa-phone">@(!string.IsNullOrWhiteSpace(o.Customer?.Mobile) ? o.Customer.Mobile : "Mobile number not available")</p>
+        <div class="wa-details"><span>@string.Join(", ", o.Items.Select(i => $"{i.ProductName} ×{i.Quantity}"))</span><strong>₹@o.TotalAmount.ToString("N0")</strong></div>
+        @if (phone.Length >= 12) { <a class="wa-send" href="@url" target="_blank" rel="noopener noreferrer">Open WhatsApp message ↗</a> } else { <span class="wa-disabled">Add a valid customer mobile number</span> }
+    </article>
+}
+@if (orders.Count == 0) { <div class="inventory-empty">No orders found.</div> }
+</div>
+<style>
+.wa-count{background:#edf8f0;color:#176b38;border-radius:20px;padding:7px 13px;font-size:13px;font-weight:700}.wa-order-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:20px}.wa-order-card{background:#fff;border:1px solid #eee5e2;border-radius:14px;padding:18px;box-shadow:0 4px 18px rgba(40,20,20,.04)}.wa-card-top{display:flex;justify-content:space-between;align-items:start}.wa-card-top strong{color:#6c1531}.wa-card-top small{display:block;color:#8b8181;margin-top:5px}.wa-status{font-size:11px;padding:5px 9px;border-radius:20px;background:#f5f0ed;color:#6b4b4b}.wa-order-card h3{font-size:16px;margin:18px 0 3px}.wa-phone{font-size:13px;color:#817777;margin:0}.wa-details{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #f0e9e7;margin-top:15px;padding-top:13px;font-size:13px}.wa-details span{color:#625959}.wa-details strong{white-space:nowrap}.wa-send{display:flex;justify-content:center;margin-top:16px;padding:11px;border-radius:8px;background:#e8f7ed;color:#176b38;font-weight:700;text-decoration:none;font-size:13px}.wa-send:hover{background:#d5f0df}.wa-disabled{display:block;margin-top:16px;padding:10px;background:#f7f3f1;border-radius:8px;color:#8a7770;font-size:12px;text-align:center}@media(max-width:600px){.wa-order-grid{grid-template-columns:1fr}}
+</style>
