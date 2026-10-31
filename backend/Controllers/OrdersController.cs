@@ -71,6 +71,101 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
         return Ok(order);
     }
 
+    [HttpPost("{id:int}/cancel")]
+    public async Task<IActionResult> Cancel(int id, CancellationToken cancellationToken)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
+            return Unauthorized();
+
+        await using var transaction = await db.Database.BeginTransactionAsync(
+            System.Data.IsolationLevel.Serializable, cancellationToken);
+
+        var order = await db.Orders
+            .Include(x => x.Items)
+            .Include(x => x.DelhiveryShipment)
+            .FirstOrDefaultAsync(x => x.Id == id && x.CustomerId == customerId, cancellationToken);
+
+        if (order is null) return NotFound("Order not found.");
+
+        if (string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            return Conflict("This order has already been cancelled.");
+
+        var orderStatus = order.Status ?? string.Empty;
+        if (orderStatus.Contains("deliver", StringComparison.OrdinalIgnoreCase) ||
+            orderStatus.Contains("complete", StringComparison.OrdinalIgnoreCase) ||
+            orderStatus.Contains("transit", StringComparison.OrdinalIgnoreCase) ||
+            orderStatus.Contains("pickup", StringComparison.OrdinalIgnoreCase) ||
+            orderStatus.Contains("dispatch", StringComparison.OrdinalIgnoreCase) ||
+            orderStatus.Contains("ship", StringComparison.OrdinalIgnoreCase))
+            return Conflict("This order can no longer be cancelled because fulfilment has progressed.");
+
+        var shipment = order.DelhiveryShipment;
+        if (shipment is not null)
+        {
+            var shipmentStatus = shipment.ShipmentStatus?.Trim() ?? string.Empty;
+            var canCancelBeforeShipment = string.IsNullOrWhiteSpace(shipment.Waybill) &&
+                (string.IsNullOrWhiteSpace(shipmentStatus) ||
+                 shipmentStatus.Equals("NotCreated", StringComparison.OrdinalIgnoreCase) ||
+                 shipmentStatus.Equals("Creation Failed", StringComparison.OrdinalIgnoreCase) ||
+                 shipmentStatus.Equals("Failed", StringComparison.OrdinalIgnoreCase));
+
+            if (!canCancelBeforeShipment)
+                return Conflict("This order can only be cancelled before the Delhivery shipment is created. Current shipment status: " + shipmentStatus);
+
+            shipment.ShipmentStatus = "Cancelled";
+            shipment.UpdatedAtUtc = DateTime.UtcNow;
+        }
+
+        // Validate every stock variant before changing any inventory.
+        var stockRestorations = new List<(ProductVariant Variant, OrderItem Item)>();
+        foreach (var item in order.Items)
+        {
+            var variant = await db.ProductVariants.FirstOrDefaultAsync(x =>
+                x.ProductId == item.ProductId &&
+                x.Size == item.Size &&
+                (string.IsNullOrWhiteSpace(item.Color)
+                    ? string.IsNullOrWhiteSpace(x.Color)
+                    : x.Color == item.Color), cancellationToken);
+
+            if (variant is null)
+                return Conflict($"Unable to restore inventory for {item.ProductName} ({item.Size}). Please contact support.");
+
+            stockRestorations.Add((variant, item));
+        }
+
+        foreach (var (variant, item) in stockRestorations)
+        {
+            variant.Stock += item.Quantity;
+            db.InventoryTransactions.Add(new InventoryTransaction
+            {
+                ProductId = item.ProductId,
+                Size = item.Size,
+                Type = "Cancellation",
+                Quantity = item.Quantity,
+                StockAfter = variant.Stock,
+                Note = $"Customer cancelled order #{order.Id} before shipment creation"
+            });
+        }
+
+        order.Status = "Cancelled";
+        if (string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase))
+            order.PaymentStatus = "Refund Pending";
+
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return Ok(new
+        {
+            success = true,
+            message = string.Equals(order.PaymentStatus, "Refund Pending", StringComparison.OrdinalIgnoreCase)
+                ? "Your order has been cancelled. Your payment is marked for refund processing."
+                : "Your order has been cancelled successfully.",
+            orderId = order.Id,
+            order.Status,
+            order.PaymentStatus
+        });
+    }
+
     [HttpGet("my")]
     public async Task<IActionResult> MyOrders()
     {
