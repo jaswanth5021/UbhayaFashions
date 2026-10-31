@@ -411,14 +411,14 @@ public class AccountController(ApiService api) : Controller
         if (!string.Equals(confirmation?.Trim(), "DELETE", StringComparison.Ordinal))
         {
             TempData["ProfileError"] = "Type DELETE exactly to confirm account deletion.";
-            return RedirectToAction(nameof(Profile), new { tab = "security" });
+            return RedirectToAction(nameof(Profile), new { tab = "delete" });
         }
 
         var result = await api.DeleteMyAccountAsync(currentPassword, confirmation);
         if (!result.Success)
         {
             TempData["ProfileError"] = result.Message.Trim('"');
-            return RedirectToAction(nameof(Profile), new { tab = "security" });
+            return RedirectToAction(nameof(Profile), new { tab = "delete" });
         }
 
         Response.Cookies.Delete("access_token");
