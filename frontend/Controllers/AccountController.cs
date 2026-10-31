@@ -401,6 +401,32 @@ public class AccountController(ApiService api) : Controller
         return RedirectToAction(nameof(Profile), new { tab = "security" });
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteMyAccount(string currentPassword, string confirmation)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+            return RedirectToAction(nameof(Login));
+
+        if (!string.Equals(confirmation?.Trim(), "DELETE", StringComparison.Ordinal))
+        {
+            TempData["ProfileError"] = "Type DELETE exactly to confirm account deletion.";
+            return RedirectToAction(nameof(Profile), new { tab = "security" });
+        }
+
+        var result = await api.DeleteMyAccountAsync(currentPassword, confirmation);
+        if (!result.Success)
+        {
+            TempData["ProfileError"] = result.Message.Trim('"');
+            return RedirectToAction(nameof(Profile), new { tab = "security" });
+        }
+
+        Response.Cookies.Delete("access_token");
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        TempData["SignupSuccess"] = "Your account has been deleted. Existing order and payment records are retained where required.";
+        return RedirectToAction(nameof(Login));
+    }
+
     [HttpGet]
     public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
 
