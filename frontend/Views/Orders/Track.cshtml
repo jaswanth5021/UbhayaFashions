@@ -111,7 +111,7 @@
 
         <div class="track-order-summary">
             <div class="track-order-product">
-                <div class="track-order-thumb">
+                <a class="track-product-link" href="@Url.Action("Details", "Products", new { id = Model.FirstItemProductId })" aria-label="View @Model.FirstItemName product"><div class="track-order-thumb">
                     @if (imageUrl is not null)
                     {
                         <img src="@imageUrl" alt="@Model.FirstItemName" loading="lazy" />
@@ -120,7 +120,7 @@
                     {
                         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg>
                     }
-                </div>
+                </div></a>
                 <div class="track-order-info">
                     <div class="track-order-title">
                         <span>Order #@Model.OrderId</span>
@@ -129,6 +129,7 @@
                             @badgeText
                         </span>
                     </div>
+                    <p><a class="track-product-name-link" href="@Url.Action("Details", "Products", new { id = Model.FirstItemProductId })">@Model.FirstItemName</a></p>
                     <p>Placed on @orderDate.ToString("dd MMM yyyy")</p>
                     <p>@itemLabel &bull; ₹@Model.TotalAmount.ToString("N0")</p>
                     <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId" class="track-order-link">
