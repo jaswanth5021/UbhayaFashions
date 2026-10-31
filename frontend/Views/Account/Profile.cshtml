@@ -205,13 +205,13 @@
                                             <div class="profile-order-item">
                                                 @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
                                                 {
-                                                    <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.ProductName" loading="lazy" />
+                                                    <a class="profile-order-product-link" href="@Url.Action("Details", "Products", new { id = item.ProductId })"><img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.ProductName" loading="lazy" /></a>
                                                 }
                                                 else
                                                 {
-                                                    <span class="profile-order-image-placeholder" aria-hidden="true">U</span>
+                                                    <a class="profile-order-product-link" href="@Url.Action("Details", "Products", new { id = item.ProductId })"><span class="profile-order-image-placeholder" aria-hidden="true">U</span></a>
                                                 }
-                                                <span class="profile-order-item-info"><strong>@item.ProductName</strong><small>Size: @item.Size · Qty: @item.Quantity</small></span>
+                                                <span class="profile-order-item-info"><strong><a class="profile-order-product-name" href="@Url.Action("Details", "Products", new { id = item.ProductId })">@item.ProductName</a></strong><small>Size: @item.Size · Qty: @item.Quantity</small></span>
                                                 <div class="order-item-actions">
                                                     <strong class="profile-order-item-price">₹@((item.Price * item.Quantity).ToString("N0"))</strong>
                                                     @if (canReviewOrder)
