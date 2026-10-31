@@ -56,12 +56,8 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             query = query.Where(x => x.Variants.Any(variant => variant.Size == normalizedSize && variant.Stock > 0));
         }
 
-        if (!string.IsNullOrWhiteSpace(color))
-        {
-            var colorToken = "," + ProductColorCatalog.Canonical(color).Replace(" ", "") + ",";
-            query = query.Where(x =>
-                ("," + (x.Colors ?? "").Replace(" ", "") + ",").Contains(colorToken));
-        }
+        var selectedColors = ProductColorCatalog.Split(color)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         if (minPrice.HasValue)
         {
@@ -108,6 +104,13 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         };
 
         var products = await query.ToListAsync();
+        if (selectedColors.Count > 0)
+        {
+            products = products
+                .Where(product => ProductColorCatalog.Split(product.Colors)
+                    .Any(productColor => selectedColors.Contains(productColor)))
+                .ToList();
+        }
         return Ok(await AttachReviewSummariesAsync(products));
     }
 
@@ -128,6 +131,24 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToList();
         return Ok(colors);
+    }
+
+    [HttpGet("color-counts")]
+    public async Task<IActionResult> GetColorCounts()
+    {
+        var products = await db.Products.AsNoTracking()
+            .Select(product => new { product.Id, product.Colors })
+            .ToListAsync();
+
+        var counts = products
+            .SelectMany(product => ProductColorCatalog.Split(product.Colors)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Select(colorName => new { Color = colorName, product.Id }))
+            .GroupBy(item => item.Color, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.Select(item => item.Id).Distinct().Count(),
+                StringComparer.OrdinalIgnoreCase);
+
+        return Ok(counts);
     }
 
     [HttpGet("price-bounds")]
