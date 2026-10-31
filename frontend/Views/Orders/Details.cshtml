@@ -68,7 +68,7 @@
                     {
                         var imageUrl = string.IsNullOrWhiteSpace(item.ImageUrl) ? null : ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"]);
                         <article class="od-item">
-                            <div class="od-item-image">
+                            <a class="od-item-product-link" href="@Url.Action("Details", "Products", new { id = item.ProductId })" aria-label="View @item.ProductName product"><div class="od-item-image">
                                 @if (imageUrl is not null)
                                 {
                                     <img src="@imageUrl" alt="@item.ProductName" loading="lazy" />
@@ -77,9 +77,9 @@
                                 {
                                     <span aria-hidden="true">U</span>
                                 }
-                            </div>
+                            </div></a>
                             <div class="od-item-copy">
-                                <h3>@item.ProductName</h3>
+                                <h3><a class="od-item-name-link" href="@Url.Action("Details", "Products", new { id = item.ProductId })">@item.ProductName</a></h3>
                                 <p>Size: @(!string.IsNullOrWhiteSpace(item.Size) ? item.Size : "Standard")</p>
                                 @if (!string.IsNullOrWhiteSpace(item.Color)) { <p>Colour: @item.Color</p> }
                                 <p>Quantity: @item.Quantity</p>
