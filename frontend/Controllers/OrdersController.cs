@@ -45,6 +45,44 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         }
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Cancel(int id)
+    {
+        if (id <= 0) return NotFound();
+
+        try
+        {
+            var result = await api.CancelMyOrderAsync(id);
+            if (!result.Success)
+            {
+                var message = result.Message;
+                try
+                {
+                    using var document = JsonDocument.Parse(result.Message);
+                    if (document.RootElement.TryGetProperty("message", out var apiMessage))
+                        message = apiMessage.GetString() ?? message;
+                }
+                catch (JsonException) { }
+
+                TempData["ProfileError"] = string.IsNullOrWhiteSpace(message)
+                    ? "We couldn't cancel this order. Please try again."
+                    : message.Trim('"');
+            }
+            else
+            {
+                TempData["ProfileSuccess"] = "Your order has been cancelled. If payment was captured, the refund is pending processing.";
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Unable to cancel order {OrderId}", id);
+            TempData["ProfileError"] = "We couldn't reach the order service. Please try again.";
+        }
+
+        return RedirectToAction("Profile", "Account", new { tab = "orders" });
+    }
+
     [HttpGet]
     public async Task<IActionResult> Track(int id)
     {
