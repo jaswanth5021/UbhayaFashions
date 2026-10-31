@@ -15,6 +15,10 @@
     var customColors = ViewBag.CustomColors as List<string> ?? [];
     var selectedColors = ProductColorCatalog.Split(selectedColor).ToHashSet(StringComparer.OrdinalIgnoreCase);
     var colorCounts = ViewBag.ColorCounts as Dictionary<string, int> ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+    var colorEntries = ProductColorCatalog.All
+        .Select(item => (Name: item.Name, Hex: item.Hex))
+        .Concat(customColors.Select(name => (Name: name, Hex: "#c8b7b0")))
+        .ToList();
     var priceCeiling = ViewBag.PriceCeiling as int? ?? 10000;
     var wishlistedProductIds = ViewBag.WishlistedProductIds as HashSet<int> ?? new HashSet<int>();
     var productCount = (int)ViewBag.ProductCount;
@@ -177,39 +181,41 @@
                 </section>
 
                 <section class="filter-section">
-                    <div class="filter-color-heading">
-                        <h3>Color</h3>
-                        <label class="filter-color-search" aria-label="Search colours">
-                            <input type="search" placeholder="Search" autocomplete="off" data-color-search />
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
-                        </label>
-                    </div>
+                    <h3>Color</h3>
                     <p class="filter-color-help">Choose one or more colours.</p>
                     <input type="hidden" name="color" value="@selectedColor" data-color-filter-value />
                     <div class="filter-color-list" data-color-list>
-                        @foreach (var item in ProductColorCatalog.All)
+                        @foreach (var item in colorEntries.Take(6))
                         {
                             var isSelected = selectedColors.Contains(item.Name);
                             var count = colorCounts.GetValueOrDefault(item.Name);
-                            <label class="filter-color-option @(isSelected ? "is-selected" : "")" title="@item.Name" data-color-name="@item.Name">
+                            <label class="filter-color-option @(isSelected ? "is-selected" : "")" title="@item.Name">
                                 <input type="checkbox" value="@item.Name" checked="@(isSelected ? "checked" : null)" data-color-option />
                                 <span class="filter-color-swatch" style="--filter-color:@item.Hex"></span>
                                 <span class="filter-color-name">@item.Name</span>
                                 <small class="filter-color-count">(@count.ToString("N0", System.Globalization.CultureInfo.InvariantCulture))</small>
                             </label>
                         }
-                        @foreach (var colorName in customColors)
-                        {
-                            var isSelected = selectedColors.Contains(colorName);
-                            var count = colorCounts.GetValueOrDefault(colorName);
-                            <label class="filter-color-option @(isSelected ? "is-selected" : "")" title="@colorName" data-color-name="@colorName">
-                                <input type="checkbox" value="@colorName" checked="@(isSelected ? "checked" : null)" data-color-option />
-                                <span class="filter-color-swatch" style="--filter-color:#c8b7b0"></span>
-                                <span class="filter-color-name">@colorName</span>
-                                <small class="filter-color-count">(@count.ToString("N0", System.Globalization.CultureInfo.InvariantCulture))</small>
-                            </label>
-                        }
                     </div>
+                    @if (colorEntries.Count > 6)
+                    {
+                        <details class="filter-color-more">
+                            <summary>More colours <span>(@(colorEntries.Count - 6))</span></summary>
+                            <div class="filter-color-list filter-color-more-list">
+                                @foreach (var item in colorEntries.Skip(6))
+                                {
+                                    var isSelected = selectedColors.Contains(item.Name);
+                                    var count = colorCounts.GetValueOrDefault(item.Name);
+                                    <label class="filter-color-option @(isSelected ? "is-selected" : "")" title="@item.Name">
+                                        <input type="checkbox" value="@item.Name" checked="@(isSelected ? "checked" : null)" data-color-option />
+                                        <span class="filter-color-swatch" style="--filter-color:@item.Hex"></span>
+                                        <span class="filter-color-name">@item.Name</span>
+                                        <small class="filter-color-count">(@count.ToString("N0", System.Globalization.CultureInfo.InvariantCulture))</small>
+                                    </label>
+                                }
+                            </div>
+                        </details>
+                    }
                 </section>
 
                 <section class="filter-section">
@@ -576,15 +582,6 @@
         if (event.target.matches('input[type="radio"], input[type="range"], input[type="number"]')) {
             filterForm.requestSubmit();
         }
-    });
-
-    const colorSearch = document.querySelector('[data-color-search]');
-    const colorOptions = [...document.querySelectorAll('[data-color-name]')];
-    colorSearch?.addEventListener('input', () => {
-        const term = colorSearch.value.trim().toLocaleLowerCase();
-        colorOptions.forEach(option => {
-            option.hidden = !option.dataset.colorName.toLocaleLowerCase().includes(term);
-        });
     });
 
     const minRange = document.getElementById('minPriceRange');
