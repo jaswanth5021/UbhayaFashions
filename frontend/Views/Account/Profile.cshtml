@@ -320,6 +320,10 @@
                     </div>
                     <button class="profile-save-button" type="submit">Save changes</button>
                 </form>
+                <div class="profile-delete-account-shortcut">
+                    <span>Need to close your account?</span>
+                    <a asp-action="Profile" asp-route-tab="delete">Delete My Account <span aria-hidden="true">→</span></a>
+                </div>
                     <div class="profile-email-verification">
                         @if (Model.EmailVerified)
                         {
