@@ -415,6 +415,74 @@ public class AuthController(
         return Ok(new { success = true });
     }
 
+    [Authorize]
+    [HttpPost("me/delete")]
+    public async Task<IActionResult> DeleteMyAccount(DeleteMyAccountRequest request)
+    {
+        if (!TryGetCustomerId(out var customerId)) return Unauthorized();
+        if (!string.Equals(request.Confirmation?.Trim(), "DELETE", StringComparison.Ordinal))
+            return BadRequest("Type DELETE exactly to confirm account deletion.");
+
+        var customer = await db.Customers.FirstOrDefaultAsync(x => x.Id == customerId);
+        if (customer is null) return NotFound("Customer account was not found.");
+
+        if (string.IsNullOrWhiteSpace(customer.PasswordHash) ||
+            string.IsNullOrWhiteSpace(request.CurrentPassword) ||
+            !BCrypt.Net.BCrypt.Verify(request.CurrentPassword, customer.PasswordHash))
+            return BadRequest("Your current password is incorrect. If you use Google or Facebook sign-in, set a password using Forgot Password first.");
+
+        await using var transaction = await db.Database.BeginTransactionAsync();
+
+        var customerReviewIds = await db.ProductReviews
+            .Where(review => review.CustomerId == customerId)
+            .Select(review => review.Id)
+            .ToListAsync();
+
+        await db.ProductReviewVotes
+            .Where(vote => vote.CustomerId == customerId || customerReviewIds.Contains(vote.ProductReviewId))
+            .ExecuteDeleteAsync();
+        await db.ProductReviews
+            .Where(review => review.CustomerId == customerId)
+            .ExecuteDeleteAsync();
+        await db.CustomerNotificationStates
+            .Where(state => state.CustomerId == customerId)
+            .ExecuteDeleteAsync();
+        await db.WishlistItems
+            .Where(item => item.CustomerId == customerId)
+            .ExecuteDeleteAsync();
+        await db.RecentlyViewedProducts
+            .Where(item => item.CustomerId == customerId)
+            .ExecuteDeleteAsync();
+        await db.ExternalLogins
+            .Where(login => login.CustomerId == customerId)
+            .ExecuteDeleteAsync();
+        await db.CustomerAddresses
+            .Where(address => address.CustomerId == customerId)
+            .ExecuteDeleteAsync();
+
+        // Keep order, payment and shipment records for accounting and fulfilment history,
+        // but remove personal profile data and credentials from the customer record.
+        customer.Name = "Deleted Customer";
+        customer.Email = $"deleted-{customer.Id}-{Guid.NewGuid():N}@deleted.ubhaya.invalid";
+        customer.Mobile = null;
+        customer.Age = null;
+        customer.DateOfBirth = null;
+        customer.Gender = null;
+        customer.ProfileImage = null;
+        customer.PasswordHash = null;
+        customer.PasswordResetTokenHash = null;
+        customer.PasswordResetExpiresUtc = null;
+        customer.EmailVerified = false;
+        customer.EmailVerificationCodeHash = null;
+        customer.EmailVerificationCodeExpiresUtc = null;
+        customer.EmailVerificationLastSentUtc = null;
+        customer.EmailVerificationFailedAttempts = 0;
+
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return Ok(new { success = true, message = "Your account has been deleted. Existing order and payment records are retained where required." });
+    }
+
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
     {
@@ -873,3 +941,5 @@ public class AuthController(
 
 
 
+
+public sealed record DeleteMyAccountRequest(string? CurrentPassword, string? Confirmation);
