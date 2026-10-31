@@ -9,8 +9,6 @@
     }
 }
 <div class="page-head"><div><h1>Delhivery shipments</h1><p>Create shipments and review AWB details separately from order management.</p></div><span class="dl-count">@orders.Count orders</span></div>
-@if (TempData["DelhiverySuccess"] is string success) { <div class="admin-alert success">@success</div> }
-@if (TempData["DelhiveryError"] is string error) { <div class="admin-alert error">@error</div> }
 <form class="admin-product-filters" method="get"><label>Search<input type="search" name="search" value="@search" placeholder="Order number, customer or mobile" /></label><button class="primary" type="submit">Search</button><a class="admin-filter-clear" asp-action="DelhiveryOrders">Clear</a></form>
 <div class="dl-list">
 @foreach (var o in orders.OrderByDescending(x => x.CreatedDate)) {
