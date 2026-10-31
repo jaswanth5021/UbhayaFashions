@@ -6,6 +6,21 @@
     var status = string.IsNullOrWhiteSpace(Model.ShippingStatus) || Model.ShippingStatus == "NotCreated"
         ? "Not yet shipped" : Model.ShippingStatus;
     var itemCount = Model.Items?.Sum(item => item.Quantity) ?? 0;
+    var shipmentStatusForCancel = Model.ShippingStatus?.Trim() ?? "";
+    var shipmentNotCreated = string.IsNullOrWhiteSpace(Model.ShippingWaybill) &&
+        (string.IsNullOrWhiteSpace(shipmentStatusForCancel) ||
+         shipmentStatusForCancel.Equals("NotCreated", StringComparison.OrdinalIgnoreCase) ||
+         shipmentStatusForCancel.Equals("Creation Failed", StringComparison.OrdinalIgnoreCase) ||
+         shipmentStatusForCancel.Equals("Failed", StringComparison.OrdinalIgnoreCase));
+    var orderStatusForCancel = Model.Status?.Trim() ?? "";
+    var fulfilmentAlreadyProgressed = orderStatusForCancel.Contains("cancel", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("deliver", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("complete", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("ship", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("dispatch", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("pickup", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("transit", StringComparison.OrdinalIgnoreCase);
+    var canCancelOrder = shipmentNotCreated && !fulfilmentAlreadyProgressed;
 }
 
 <link rel="stylesheet" href="~/css/pages/orders/details.css" asp-append-version="true" />
@@ -119,6 +134,20 @@
                 <p class="od-address">@Model.ShippingAddress</p>
                 <div class="od-shipment-state"><span class="od-shipment-dot"></span><div><strong>@status</strong><small>@(string.IsNullOrWhiteSpace(Model.ShippingWaybill) ? "Tracking will be available after dispatch." : $"Waybill number: {Model.ShippingWaybill}")</small></div></div>
                 <a class="od-primary-action" asp-controller="Orders" asp-action="Track" asp-route-id="@Model.Id">Track this delivery <span aria-hidden="true">→</span></a>
+                @if (canCancelOrder)
+                {
+                    <form asp-controller="Orders" asp-action="Cancel" method="post" class="od-cancel-order-form"
+                          onsubmit="return confirm('Are you sure you want to cancel order #@Model.Id? This action cannot be undone.');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="od-cancel-order-button">Cancel order</button>
+                    </form>
+                    <p class="od-cancel-order-note">Cancellation is available until your Delhivery shipment is created.</p>
+                }
+                else if (string.Equals(Model.PaymentStatus, "Refund Pending", StringComparison.OrdinalIgnoreCase))
+                {
+                    <p class="od-cancel-order-note">Your order is cancelled. Refund processing is pending.</p>
+                }
             </section>
         </aside>
     </div>
