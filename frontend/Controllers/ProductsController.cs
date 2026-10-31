@@ -73,6 +73,15 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
 
         try
         {
+            ViewBag.ColorCounts = await api.GetProductColorCountsAsync();
+        }
+        catch (HttpRequestException)
+        {
+            ViewBag.ColorCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        try
+        {
             var savedColors = await api.GetProductColorsAsync();
             var customColors = savedColors
                 .Where(name => !ProductColorCatalog.All.Any(item => item.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
