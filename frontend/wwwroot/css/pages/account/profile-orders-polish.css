@@ -320,3 +320,10 @@
 }
 
 .profile-order-product-link{display:block;flex:0 0 auto}.profile-order-product-name{color:inherit;text-decoration:none}.profile-order-product-name:hover{color:#8b2054;text-decoration:underline;text-underline-offset:3px}.profile-order-product-link:focus-visible,.profile-order-product-name:focus-visible{outline:3px solid #b84c78;outline-offset:3px}
+
+
+/* Conditional cancellation button on each eligible order card. */
+.profile-cancel-order-form{display:inline-flex;margin:0;align-items:center}
+.profile-cancel-order-button{min-height:32px;padding:0 12px;border:1px solid #e3bfc7;border-radius:6px;background:#fff8f8;color:#92233f;font:inherit;font-size:10px;font-weight:750;white-space:nowrap;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}
+.profile-cancel-order-button:hover{border-color:#92233f;background:#92233f;color:#fff}
+@media(max-width:600px){.profile-cancel-order-form{width:100%}.profile-cancel-order-button{width:100%;min-height:36px}}
