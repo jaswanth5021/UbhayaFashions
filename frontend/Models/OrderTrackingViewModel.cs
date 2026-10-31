@@ -15,6 +15,7 @@ public sealed class OrderTrackingViewModel
     public decimal TotalAmount { get; set; }
     public int ItemCount { get; set; }
     public string? FirstItemName { get; set; }
+    public int FirstItemProductId { get; set; }
     public string? FirstItemImageUrl { get; set; }
     public string? RecipientName { get; set; }
     public string? RecipientPhone { get; set; }
