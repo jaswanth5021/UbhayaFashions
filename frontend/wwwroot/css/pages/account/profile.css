@@ -593,3 +593,32 @@
 @media (max-width: 600px) {
     .profile-delete-account-shortcut { align-items: flex-start; flex-direction: column; }
 }
+
+
+/* Keep Delete account tab visually consistent with the other profile tabs. */
+.profile-tabs a[href*="tab=delete"] {
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: #74666a !important;
+    padding: 11px 15px !important;
+    border-radius: 9px !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    box-shadow: none !important;
+}
+.profile-tabs a[href*="tab=delete"]:hover {
+    border-color: transparent !important;
+    background: #faf6f7 !important;
+    color: #571326 !important;
+}
+.profile-tabs a[href*="tab=delete"].is-active {
+    border-color: transparent !important;
+    background: #571326 !important;
+    color: #fff !important;
+}
+@media (max-width: 600px) {
+    .profile-tabs a[href*="tab=delete"] {
+        padding: 10px 11px !important;
+        font-size: 12px !important;
+    }
+}
