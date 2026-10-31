@@ -194,8 +194,8 @@
                                 var isSelected = selectedColors.Contains(item.Name);
                                 <label class="filter-color-option @(isSelected ? "is-selected" : "")" title="@item.Name">
                                     <input type="checkbox" value="@item.Name" checked="@(isSelected ? "checked" : null)" data-color-option />
-                                    <span class="filter-color-swatch" style="background-color: @item.Hex !important" aria-hidden="true"></span>
-                                    <span class="filter-color-swatch" style="background-color: @item.Hex !important" aria-hidden="true"></span>
+                                    <span class="filter-color-swatch" style="--filter-color: @item.Hex" aria-hidden="true"></span>
+                                    <span class="filter-color-swatch" style="--filter-color: @item.Hex" aria-hidden="true"></span>
                                             <span class="filter-color-name">@item.Name</span>
                                 </label>
                             }
