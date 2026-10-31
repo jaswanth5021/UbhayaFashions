@@ -206,16 +206,17 @@
                                     <div><span>ORDER #@order.Id</span><time datetime="@order.CreatedDate.ToString("O")">@order.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</time></div>
                                     <div class="order-card-heading-right">
                                         <strong class="order-card-total">₹@order.TotalAmount.ToString("N0")</strong>
-                                        <a class="order-open-details-link" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">Order summary <span aria-hidden="true">↗</span></a>
-                                        @if (canCancelOrder)
-                                        {
-                                            <form asp-controller="Orders" asp-action="Cancel" method="post" class="profile-cancel-order-form"
-                                                  onsubmit="return confirm('Are you sure you want to cancel order #@order.Id? This action cannot be undone.');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@order.Id" />
-                                                <button type="submit" class="profile-cancel-order-button">Cancel order</button>
-                                            </form>
-                                        }
+                                        <div class="order-card-primary-actions">
+                                            <a class="order-open-details-link" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">Order summary <span aria-hidden="true">↗</span></a>
+                                            @if (canCancelOrder)
+                                            {
+                                                <form asp-controller="Orders" asp-action="Cancel" method="post" class="profile-cancel-order-form" data-cancel-order-form data-order-id="@order.Id">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@order.Id" />
+                                                    <button type="submit" class="profile-cancel-order-button"><span aria-hidden="true">×</span> Cancel order</button>
+                                                </form>
+                                            }
+                                        </div>
                                         <button type="button" class="order-view-toggle" data-profile-order-toggle aria-expanded="false">View items <span aria-hidden="true">⌄</span></button>
                                     </div>
                                 </header>
@@ -382,10 +383,66 @@
 
 @if (activeTab == "orders")
 {
+    <dialog class="ubhaya-cancel-dialog" id="cancelOrderDialog" aria-labelledby="cancelOrderTitle" aria-describedby="cancelOrderDescription">
+        <div class="ubhaya-cancel-dialog__content">
+            <div class="ubhaya-cancel-dialog__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5m0 3h.01M10.3 3.9 2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="ubhaya-cancel-dialog__eyebrow">UBHAYA FASHIONS</span>
+            <h2 id="cancelOrderTitle">Cancel this order?</h2>
+            <p id="cancelOrderDescription">Are you sure you want to cancel order <strong data-cancel-order-number></strong>? This action cannot be undone.</p>
+            <div class="ubhaya-cancel-dialog__note">If your payment was captured, the refund status will be shared with you by email.</div>
+            <div class="ubhaya-cancel-dialog__actions">
+                <button type="button" class="ubhaya-cancel-dialog__keep" data-cancel-dialog-close>Keep my order</button>
+                <button type="button" class="ubhaya-cancel-dialog__confirm" data-cancel-dialog-confirm>Yes, cancel order</button>
+            </div>
+        </div>
+    </dialog>
     <script>
         (() => {
             const list = document.getElementById('profileOrdersList');
             if (!list) return;
+
+            const cancelDialog = document.getElementById('cancelOrderDialog');
+            const cancelOrderNumber = cancelDialog?.querySelector('[data-cancel-order-number]');
+            const cancelDialogConfirm = cancelDialog?.querySelector('[data-cancel-dialog-confirm]');
+            let pendingCancellationForm = null;
+
+            list.addEventListener('submit', event => {
+                const form = event.target.closest('[data-cancel-order-form]');
+                if (!form || !cancelDialog) return;
+                event.preventDefault();
+                pendingCancellationForm = form;
+                if (cancelOrderNumber) cancelOrderNumber.textContent = '#' + (form.dataset.orderId || '');
+                cancelDialog.showModal();
+                cancelDialog.querySelector('[data-cancel-dialog-close]')?.focus();
+            });
+
+            cancelDialog?.querySelector('[data-cancel-dialog-close]')?.addEventListener('click', () => {
+                cancelDialog.close();
+                pendingCancellationForm = null;
+            });
+
+            cancelDialogConfirm?.addEventListener('click', () => {
+                if (!pendingCancellationForm) return;
+                cancelDialogConfirm.disabled = true;
+                cancelDialogConfirm.textContent = 'Cancelling…';
+                pendingCancellationForm.submit();
+            });
+
+            cancelDialog?.addEventListener('click', event => {
+                if (event.target === cancelDialog) {
+                    cancelDialog.close();
+                    pendingCancellationForm = null;
+                }
+            });
+
+            cancelDialog?.addEventListener('close', () => {
+                if (cancelDialogConfirm) {
+                    cancelDialogConfirm.disabled = false;
+                    cancelDialogConfirm.textContent = 'Yes, cancel order';
+                }
+            });
 
             const cards = [...list.querySelectorAll('[data-profile-order-card]')];
             const filterButtons = [...document.querySelectorAll('[data-order-filter]')];
