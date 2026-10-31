@@ -14,7 +14,7 @@
             <div class="profile-avatar">@firstLetter</div>
             <div class="profile-heading">
                 <span class="profile-eyebrow">ACCOUNT</span>
-                <h1>@(activeTab == "addresses" ? "Your Addresses" : activeTab == "orders" ? "My Orders" : "My Profile")</h1>
+                <h1>@(activeTab == "addresses" ? "Your Addresses" : activeTab == "orders" ? "My Orders" : activeTab == "delete" ? "Delete Account" : "My Profile")</h1>
                 <p>@(activeTab == "addresses" ? "Manage the addresses you use for delivery." : activeTab == "orders" ? "Track your purchases and review your order history." : "Manage your personal information, delivery addresses, and password.")</p>
             </div>
         </header>
@@ -28,6 +28,7 @@
             <a class="@(activeTab == "addresses" ? "is-active" : "")" asp-action="Profile" asp-route-tab="addresses">My addresses</a>
             <a class="@(activeTab == "orders" ? "is-active" : "")" asp-action="Profile" asp-route-tab="orders">My orders</a>
             <a class="@(activeTab == "security" ? "is-active" : "")" asp-action="Profile" asp-route-tab="security">Password &amp; security</a>
+            <a class="@(activeTab == "delete" ? "is-active" : "")" asp-action="Profile" asp-route-tab="delete">Delete account</a>
         </nav>
 
         @if (activeTab == "addresses")
@@ -262,6 +263,13 @@
                 </form>
                 <p class="profile-reset-note">Forgot your current password? <a asp-action="ForgotPassword">Reset it by email</a>.</p>
 
+
+            </section>
+        }
+        else if (activeTab == "delete")
+        {
+            <section class="profile-tab-panel">
+                <div class="profile-panel-heading"><h2>Delete My Account</h2><p>Review what will happen before permanently closing your account.</p></div>
                 <section class="profile-delete-account" aria-labelledby="deleteAccountHeading">
                     <div class="profile-delete-account-heading">
                         <span aria-hidden="true">!</span>
