@@ -885,6 +885,17 @@ public class ApiService(
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }
 
+    public async Task<(bool Success, string Message)> CancelMyOrderAsync(int orderId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/orders/{orderId}/cancel");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+            return (false, body);
+        return (true, body);
+    }
+
     public async Task<string>
         GetMyOrdersAsync()
     {
