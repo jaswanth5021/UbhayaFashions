@@ -243,7 +243,7 @@ public class AccountController(ApiService api) : Controller
             return View(new ProfileViewModel());
         }
 
-        var activeTab = tab is "details" or "addresses" or "security" or "orders"
+        var activeTab = tab is "details" or "addresses" or "security" or "orders" or "delete"
             ? tab
             : "details";
         ViewBag.ActiveTab = activeTab;
