@@ -53,6 +53,16 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         {
             var tracking = await api.GetOrderTrackingAsync(id);
             if (tracking is null) return NotFound();
+            var orderJson = await api.GetMyOrdersAsync();
+            var customerOrders = JsonSerializer.Deserialize<List<MyOrderViewModel>>(orderJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+            var firstItem = customerOrders.FirstOrDefault(order => order.Id == id)?.Items.FirstOrDefault();
+            if (firstItem is not null)
+            {
+                tracking.FirstItemProductId = firstItem.ProductId;
+                tracking.FirstItemName ??= firstItem.ProductName;
+                tracking.FirstItemImageUrl ??= firstItem.ImageUrl;
+            }
             return View("Track", tracking);
         }
         catch (HttpRequestException ex)
