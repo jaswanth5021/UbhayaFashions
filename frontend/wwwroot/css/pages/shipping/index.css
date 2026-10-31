@@ -1,349 +1,122 @@
-/* =========================================================
-   UBHAYA FASHIONS
-   SHIPPING POLICY PAGE
-   ========================================================= */
-
-
-/* =========================================================
-   PAGE
-   ========================================================= */
-
+/* Ubhaya Fashions — Shipping policy cards */
 .shipping-policy-page {
-    width: min(1100px, calc(100% - 40px));
-
+    width: min(1240px, calc(100% - 56px));
     margin: 0 auto;
-
-    padding: 70px 0 90px;
-
+    padding: 42px 0 72px;
     color: #302522;
 }
-
-
-/* =========================================================
-   HERO
-   ========================================================= */
-
 .shipping-policy-hero {
     max-width: 760px;
-
-    margin: 0 auto 55px;
-
+    margin: 0 auto 28px;
     text-align: center;
 }
-
-
 .shipping-policy-eyebrow {
-    margin: 0 0 12px;
-
-    color: #68142e;
-
+    margin: 0 0 10px;
+    color: #8a3150;
     font-size: 11px;
-
-    font-weight: 700;
-
-    letter-spacing: 3px;
-
-    text-transform: uppercase;
+    font-weight: 750;
+    letter-spacing: 2.5px;
 }
-
-
 .shipping-policy-hero h1 {
-    margin: 0 0 18px;
-
+    margin: 0 0 12px;
     color: #302522;
-
-    font:
-        400 clamp(38px, 6vw, 58px)
-        Georgia,
-        "Times New Roman",
-        serif;
-
-    line-height: 1.1;
+    font: 400 clamp(36px, 5vw, 52px)/1.12 Georgia, "Times New Roman", serif;
 }
-
-
 .shipping-policy-intro {
     max-width: 650px;
-
     margin: 0 auto;
-
-    color: #685b57;
-
+    color: #766963;
     font-size: 15px;
-
-    line-height: 1.8;
+    line-height: 1.7;
 }
-
-
-/* =========================================================
-   CONTENT
-   ========================================================= */
-
+.shipping-policy-nav {
+    justify-content: center;
+    margin: 0 0 22px;
+}
 .shipping-policy-content {
     display: grid;
-
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
 }
-
-
-/* =========================================================
-   POLICY CARD
-   ========================================================= */
-
 .shipping-policy-card {
     display: grid;
-
-    grid-template-columns: 64px 1fr;
-
+    grid-template-columns: 74px minmax(0, 1fr);
+    align-items: start;
     gap: 20px;
-
-    padding: 28px;
-
-    border: 1px solid #e7deda;
-
-    background: #fff;
-
-    transition:
-        border-color .2s ease,
-        box-shadow .2s ease,
-        transform .2s ease;
+    min-width: 0;
+    padding: 30px 32px;
+    border: 1px solid #eadbd6;
+    border-radius: 14px;
+    background: linear-gradient(110deg, #fff 0%, #fffdfc 100%);
+    box-shadow: 0 7px 22px rgb(75 35 35 / 4%);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
-
-
 .shipping-policy-card:hover {
-    border-color: #d8c3bd;
-
-    box-shadow:
-        0 8px 25px
-        rgb(48 37 34 / 6%);
-
+    border-color: #dfc4bd;
+    box-shadow: 0 10px 26px rgb(75 35 35 / 7%);
     transform: translateY(-1px);
 }
-
-
-/* =========================================================
-   ICON
-   ========================================================= */
-
 .shipping-policy-icon {
-    width: 54px;
-
-    height: 54px;
-
+    width: 60px;
+    height: 60px;
     display: grid;
-
     place-items: center;
-
     border-radius: 50%;
-
-    background: #f8eae7;
-
-    font-size: 24px;
+    font-size: 27px;
+    line-height: 1;
 }
-
-
-/* =========================================================
-   CARD TITLE
-   ========================================================= */
-
+.shipping-icon-gold { background: #fbf0d8; }
+.shipping-icon-rose { background: #f6e6e9; }
+.shipping-policy-copy { min-width: 0; }
 .shipping-policy-card h2 {
-    margin: 0 0 10px;
-
+    margin: 0 0 12px;
     color: #302522;
-
-    font:
-        400 25px
-        Georgia,
-        "Times New Roman",
-        serif;
-
-    line-height: 1.25;
+    font: 400 27px/1.2 Georgia, "Times New Roman", serif;
 }
-
-
-/* =========================================================
-   CARD CONTENT
-   ========================================================= */
-
 .shipping-policy-card p {
     margin: 7px 0;
-
-    color: #685b57;
-
-    font-size: 14px;
-
+    color: #6e625e;
+    font-size: 15px;
     line-height: 1.75;
 }
-
-
-.shipping-policy-card strong {
-    color: #68142e;
-}
-
-
-/* =========================================================
-   CONTACT CARD
-   ========================================================= */
-
-.shipping-policy-contact {
-    background: #f8eae7;
-}
-
-
-.shipping-policy-contact
-.shipping-policy-icon {
-    background: #fff;
-}
-
-
-/* =========================================================
-   CONTACT BUTTON
-   ========================================================= */
-
-.shipping-policy-button {
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    min-height: 44px;
-
-    margin-top: 10px;
-
-    padding: 0 22px;
-
-    background: #68142e;
-
-    color: #fff;
-
-    font-size: 12px;
-
+.shipping-policy-card strong { color: #751b3b; font-weight: 750; }
+.shipping-policy-contact { background: #fff9f8; }
+.shipping-policy-contact .shipping-policy-copy a {
+    color: #7a1b40;
     font-weight: 700;
-
-    letter-spacing: 1px;
-
-    text-decoration: none;
-
-    transition:
-        background .2s ease,
-        transform .2s ease;
+    text-underline-offset: 3px;
 }
-
-
-.shipping-policy-button:hover {
-    background: #4f0f23;
-
-    color: #fff;
-
-    transform: translateY(-1px);
+.shipping-policy-date {
+    margin: 24px 4px 0;
+    color: #92827d;
+    font-size: 12px;
+    text-align: right;
 }
-
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-.shipping-policy-footer {
-    margin-top: 45px;
-
-    padding-top: 22px;
-
-    border-top: 1px solid #e7deda;
-
-    text-align: center;
-}
-
-
-.shipping-policy-footer p {
-    margin: 0;
-
-    color: #8a7a75;
-
-    font-size: 11px;
-
-    letter-spacing: .5px;
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 600px) {
-
+@media (max-width: 650px) {
     .shipping-policy-page {
-        width: calc(100% - 30px);
-
-        padding: 45px 0 60px;
+        width: calc(100% - 28px);
+        padding: 30px 0 54px;
     }
-
-
-    .shipping-policy-hero {
-        margin-bottom: 35px;
-    }
-
-
-    .shipping-policy-hero h1 {
-        font-size: 38px;
-    }
-
-
-    .shipping-policy-intro {
-        font-size: 14px;
-    }
-
-
+    .shipping-policy-hero { margin-bottom: 22px; }
+    .shipping-policy-hero h1 { font-size: 36px; }
+    .shipping-policy-intro { font-size: 14px; }
+    .shipping-policy-nav { justify-content: flex-start; }
     .shipping-policy-card {
-        grid-template-columns: 1fr;
-
+        grid-template-columns: 50px minmax(0, 1fr);
         gap: 14px;
-
-        padding: 22px;
+        padding: 21px 17px;
+        border-radius: 12px;
     }
-
-
     .shipping-policy-icon {
         width: 48px;
-
         height: 48px;
-
-        font-size: 21px;
-    }
-
-
-    .shipping-policy-card h2 {
         font-size: 22px;
     }
-
-
-    .shipping-policy-card p {
-        font-size: 13px;
-    }
-
+    .shipping-policy-card h2 { margin-bottom: 9px; font-size: 22px; }
+    .shipping-policy-card p { font-size: 13px; line-height: 1.65; }
 }
-
-
-/* =========================================================
-   SMALL MOBILE
-   ========================================================= */
-
-@media (max-width: 400px) {
-
-    .shipping-policy-page {
-        width: calc(100% - 24px);
-
-        padding-top: 35px;
-    }
-
-
-    .shipping-policy-hero h1 {
-        font-size: 34px;
-    }
-
-
-    .shipping-policy-card {
-        padding: 18px;
-    }
-
+@media (max-width: 370px) {
+    .shipping-policy-card { grid-template-columns: 42px minmax(0, 1fr); gap: 11px; padding: 17px 13px; }
+    .shipping-policy-icon { width: 40px; height: 40px; font-size: 19px; }
+    .shipping-policy-card h2 { font-size: 20px; }
 }
