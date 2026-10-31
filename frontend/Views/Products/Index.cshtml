@@ -564,9 +564,27 @@
     const filterForm = document.querySelector(".catalog-sidebar-form");
     const priceCeiling = Number(filterForm?.dataset.priceCeiling) || 10000;
     filterForm?.addEventListener("change", (event) => {
+        if (event.target.matches('input[data-color-option]')) {
+            const selected = [...filterForm.querySelectorAll('input[data-color-option]:checked')]
+                .map(input => input.value);
+            const colorValue = filterForm.querySelector('[data-color-filter-value]');
+            if (colorValue) colorValue.value = selected.join(',');
+            event.target.closest('.filter-color-option')?.classList.toggle('is-selected', event.target.checked);
+            filterForm.requestSubmit();
+            return;
+        }
         if (event.target.matches('input[type="radio"], input[type="range"], input[type="number"]')) {
             filterForm.requestSubmit();
         }
+    });
+
+    const colorSearch = document.querySelector('[data-color-search]');
+    const colorOptions = [...document.querySelectorAll('[data-color-name]')];
+    colorSearch?.addEventListener('input', () => {
+        const term = colorSearch.value.trim().toLocaleLowerCase();
+        colorOptions.forEach(option => {
+            option.hidden = !option.dataset.colorName.toLocaleLowerCase().includes(term);
+        });
     });
 
     const minRange = document.getElementById('minPriceRange');
