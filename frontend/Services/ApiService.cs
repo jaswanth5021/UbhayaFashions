@@ -88,6 +88,9 @@ public class ApiService(
     public async Task<List<string>> GetProductColorsAsync()
         => await Client.GetFromJsonAsync<List<string>>("api/products/colors") ?? [];
 
+    public async Task<Dictionary<string, int>> GetProductColorCountsAsync()
+        => await Client.GetFromJsonAsync<Dictionary<string, int>>("api/products/color-counts") ?? new(StringComparer.OrdinalIgnoreCase);
+
     public async Task<int> GetPriceCeilingAsync()
     {
         var bounds = await Client.GetFromJsonAsync<PriceBoundsResponse>("api/products/price-bounds");
