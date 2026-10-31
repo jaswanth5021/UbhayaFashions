@@ -9,6 +9,21 @@
     var inTransit = normalized.Contains("transit") || outForDelivery || delivered;
     var pickedUp = inTransit || normalized.Contains("picked") || normalized.Contains("pickup");
     var shipmentCreated = !string.IsNullOrWhiteSpace(Model.Waybill);
+    var shipmentStatusForCancel = Model.ShippingStatus?.Trim() ?? "";
+    var shipmentNotCreated = string.IsNullOrWhiteSpace(Model.Waybill) &&
+        (string.IsNullOrWhiteSpace(shipmentStatusForCancel) ||
+         shipmentStatusForCancel.Equals("NotCreated", StringComparison.OrdinalIgnoreCase) ||
+         shipmentStatusForCancel.Equals("Creation Failed", StringComparison.OrdinalIgnoreCase) ||
+         shipmentStatusForCancel.Equals("Failed", StringComparison.OrdinalIgnoreCase));
+    var orderStatusForCancel = Model.OrderStatus?.Trim() ?? "";
+    var fulfilmentAlreadyProgressed = orderStatusForCancel.Contains("cancel", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("deliver", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("complete", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("ship", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("dispatch", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("pickup", StringComparison.OrdinalIgnoreCase) ||
+        orderStatusForCancel.Contains("transit", StringComparison.OrdinalIgnoreCase);
+    var canCancelOrder = shipmentNotCreated && !fulfilmentAlreadyProgressed;
     var cancelled = normalized.Contains("cancel") || Model.OrderStatus.Contains("cancel", StringComparison.OrdinalIgnoreCase);
     var currentStep = cancelled ? -1 : delivered ? 5 : outForDelivery ? 4 : inTransit ? 3 : pickedUp ? 2 : shipmentCreated ? 1 : 0;
 
@@ -136,6 +151,15 @@
                         View Order Details
                         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                     </a>
+                    @if (canCancelOrder)
+                    {
+                        <form asp-controller="Orders" asp-action="Cancel" method="post" class="track-cancel-order-form"
+                              onsubmit="return confirm('Are you sure you want to cancel order #@Model.OrderId? This action cannot be undone.');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.OrderId" />
+                            <button type="submit" class="track-cancel-order-button">Cancel order</button>
+                        </form>
+                    }
                 </div>
             </div>
 
