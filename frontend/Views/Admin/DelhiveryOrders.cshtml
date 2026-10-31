@@ -1,0 +1,45 @@
+@model List<AdminOrderViewModel>
+@{
+    ViewData["Title"] = "Delhivery Shipments";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var search = Context.Request.Query["search"].ToString();
+    var orders = Model;
+    if (!string.IsNullOrWhiteSpace(search)) {
+        orders = orders.Where(o => o.Id.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) || (o.Customer?.Name?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) || (o.Customer?.Mobile?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+    }
+}
+<div class="page-head"><div><h1>Delhivery shipments</h1><p>Create shipments and review AWB details separately from order management.</p></div><span class="dl-count">@orders.Count orders</span></div>
+@if (TempData["DelhiverySuccess"] is string success) { <div class="admin-alert success">@success</div> }
+@if (TempData["DelhiveryError"] is string error) { <div class="admin-alert error">@error</div> }
+<form class="admin-product-filters" method="get"><label>Search<input type="search" name="search" value="@search" placeholder="Order number, customer or mobile" /></label><button class="primary" type="submit">Search</button><a class="admin-filter-clear" asp-action="DelhiveryOrders">Clear</a></form>
+<div class="dl-list">
+@foreach (var o in orders.OrderByDescending(x => x.CreatedDate)) {
+    <article class="dl-card">
+        <div class="dl-card-head"><div><strong>Order #@o.Id</strong><small>@o.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small></div><span class="dl-order-status">@o.Status</span></div>
+        <div class="dl-card-info"><div><small>CUSTOMER</small><strong>@o.Customer?.Name</strong><span>@o.Customer?.Mobile</span></div><div><small>ORDER VALUE</small><strong>₹@o.TotalAmount.ToString("N0")</strong><span>@o.PaymentStatus</span></div><div><small>SHIPMENT</small><strong>@(string.IsNullOrWhiteSpace(o.ShippingWaybill) ? "Not created" : o.ShippingStatus)</strong><span>@(string.IsNullOrWhiteSpace(o.ShippingWaybill) ? "AWB pending" : $"AWB: {o.ShippingWaybill}")</span></div></div>
+        @if (!string.IsNullOrWhiteSpace(o.ShippingWaybill)) {
+            <div class="dl-created">Shipment already created for this order.</div>
+        } else {
+            <details class="dl-create"><summary>Create Delhivery shipment</summary>
+                <form asp-action="CreateDelhiveryShipment" method="post" class="dl-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="OrderId" value="@o.Id" />
+                    <label>Recipient name<input name="RecipientName" value="@o.Customer?.Name" required maxlength="150" /></label>
+                    <label>Phone<input name="RecipientPhone" value="@o.Customer?.Mobile" required maxlength="20" /></label>
+                    <label class="wide">Full delivery address<input name="Address" value="@o.ShippingAddress" required maxlength="500" /></label>
+                    <label>City<input name="City" required maxlength="100" /></label>
+                    <label>State<input name="State" required maxlength="100" /></label>
+                    <label>PIN code<input name="PostalCode" inputmode="numeric" pattern="[0-9]{6}" required maxlength="6" /></label>
+                    <label>Weight (grams)<input name="WeightGrams" type="number" min="1" max="100000" value="1000" required /></label>
+                    <input type="hidden" name="Country" value="India" />
+                    <button class="dl-submit" type="submit">Create shipment</button>
+                </form>
+            </details>
+        }
+    </article>
+}
+@if (orders.Count == 0) { <div class="inventory-empty">No orders found.</div> }
+</div>
+<style>
+.dl-count{background:#f3edf0;color:#6c1531;border-radius:20px;padding:7px 13px;font-size:13px;font-weight:700}.dl-list{display:grid;gap:14px;margin-top:20px}.dl-card{background:#fff;border:1px solid #eee5e2;border-radius:14px;padding:18px;box-shadow:0 4px 18px rgba(40,20,20,.04)}.dl-card-head{display:flex;justify-content:space-between;align-items:start}.dl-card-head strong{color:#6c1531}.dl-card-head small{display:block;color:#8b8181;margin-top:5px}.dl-order-status{background:#f5f0ed;border-radius:20px;padding:5px 10px;font-size:11px}.dl-card-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0;padding:15px 0;border-top:1px solid #f0e9e7;border-bottom:1px solid #f0e9e7}.dl-card-info div{display:grid;gap:4px}.dl-card-info small{font-size:10px;letter-spacing:.08em;color:#968987}.dl-card-info strong{font-size:14px}.dl-card-info span{font-size:12px;color:#817777}.dl-create summary{cursor:pointer;color:#6c1531;font-weight:700}.dl-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.dl-form label{display:grid;gap:5px;font-size:12px;color:#655858}.dl-form input{width:100%;min-width:0;padding:10px;border:1px solid #e5d9d5;border-radius:7px}.dl-form .wide{grid-column:1/-1}.dl-submit{grid-column:1/-1;justify-self:start;background:#6c1531;color:white;border:0;border-radius:8px;padding:11px 18px;font-weight:700;cursor:pointer}.dl-created{font-size:13px;color:#176b38;background:#edf8f0;padding:10px;border-radius:8px}@media(max-width:650px){.dl-card-info{grid-template-columns:1fr 1fr}.dl-form{grid-template-columns:1fr}.dl-form .wide,.dl-submit{grid-column:auto}}
+</style>
