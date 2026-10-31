@@ -887,3 +887,5 @@ body:has(.track-page) {
         height: 48px !important;
     }
 }
+
+.track-product-link{display:block;flex:0 0 auto;border-radius:14px;text-decoration:none}.track-product-link:focus-visible,.track-product-name-link:focus-visible{outline:3px solid #b84c78;outline-offset:3px}.track-product-name-link{color:#8b2054;font-weight:650;text-decoration:none}.track-product-name-link:hover{text-decoration:underline;text-underline-offset:3px}
