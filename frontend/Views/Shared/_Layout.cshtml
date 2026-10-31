@@ -531,7 +531,7 @@
     <aside class="cart-drawer @(openCartDrawer ? "is-open" : string.Empty)" id="cartDrawer" aria-labelledby="cartDrawerTitle" aria-hidden="@(!openCartDrawer)">
         <div class="cart-drawer-header">
             <h2 id="cartDrawerTitle">Your cart</h2>
-            <button type="button" class="cart-drawer-close" id="cartDrawerClose" aria-label="Close cart">Ã—</button>
+            <button type="button" class="cart-drawer-close" id="cartDrawerClose" aria-label="Close cart">&times;</button>
         </div>
         <div class="cart-drawer-columns"><span>Product</span><span>Total</span></div>
         @if (TempData["CartMessage"] is string drawerCartMessage)
@@ -586,7 +586,7 @@
                             <input type="hidden" name="productId" value="@item.ProductId" />
                             <input type="hidden" name="size" value="@item.Size" />
                             <input type="hidden" name="color" value="@item.Color" />
-                            <button type="submit" aria-label="Remove @item.Name from cart">Ã—</button>
+                            <button type="submit" aria-label="Remove @item.Name from cart">&times;</button>
                         </form>
                     </article>
                 }
@@ -596,7 +596,7 @@
             <div class="checkout-drawer-title-row">
                 <button type="button" class="cart-drawer-back" id="cartDrawerBackToItems">â† Back</button>
                 <span>Delivery</span>
-                <button type="button" class="cart-drawer-close checkout-inline-close" id="cartDrawerAddressClose" aria-label="Close">Ã—</button>
+                <button type="button" class="cart-drawer-close checkout-inline-close" id="cartDrawerAddressClose" aria-label="Close">&times;</button>
             </div>
 
             <form asp-controller="Orders" asp-action="Checkout" method="post" class="cart-drawer-address-form" id="drawerCheckoutForm">
@@ -622,7 +622,7 @@
                                     <span>@savedAddress.FullAddress</span>
                                     <small>@savedAddress.Mobile</small>
                                 </span>
-                                <button type="button" class="drawer-address-delete" data-address-id="@savedAddress.Id" aria-label="Delete address">Ã—</button>
+                                <button type="button" class="drawer-address-delete" data-address-id="@savedAddress.Id" aria-label="Delete address">&times;</button>
                             </label>
                         }
                     }
