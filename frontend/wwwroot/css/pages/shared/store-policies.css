@@ -1,1 +1,80 @@
 .store-policy{max-width:1120px;margin:42px auto 76px;padding:0 22px;color:#29232a}.store-policy-hero{padding:clamp(30px,6vw,62px);border-radius:24px;background:linear-gradient(125deg,#4b102e,#811b50 60%,#b84c78);color:#fff;box-shadow:0 18px 44px #54152f22}.store-policy-hero>span{font-size:11px;letter-spacing:.18em;font-weight:800;color:#f7c9dc}.store-policy-hero h1{margin:14px 0;font:500 clamp(34px,5vw,54px)/1.1 Georgia,serif;letter-spacing:-.03em}.store-policy-hero h1 em{color:#f7c9dc}.store-policy-hero>p{max-width:650px;margin:0;color:#f9eaf1;font-size:15px;line-height:1.8}.store-policy-nav{display:flex;flex-wrap:wrap;gap:7px;margin:22px 0;padding:8px;border:1px solid #f0e3e9;border-radius:16px;background:#fff;box-shadow:0 8px 24px #4213270a}.store-policy-nav a{padding:11px 16px;border-radius:10px;color:#6c5360;text-decoration:none;font-size:13px;font-weight:700}.store-policy-nav a:hover,.store-policy-nav a.active{background:#7f194b;color:#fff}.store-policy-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.store-policy-content section{padding:24px;border:1px solid #f0e5e9;border-radius:18px;background:#fff;box-shadow:0 8px 24px #42132708}.store-policy-content h2{margin:0 0 11px;color:#68143d;font:600 21px Georgia,serif}.store-policy-content p{margin:0 0 12px;color:#625963;font-size:14px;line-height:1.8}.store-policy-content p:last-child{margin-bottom:0}.store-policy-content a{color:#8b2054;font-weight:650;text-underline-offset:3px}.store-policy-notice{grid-column:1/-1;padding:22px 24px;border:1px solid #edc7d7;border-radius:16px;background:#fff5f8;color:#67203f}.store-policy-notice strong{font-size:18px}.store-policy-date{margin:16px 4px;color:#857783;font-size:12px}@media(max-width:680px){.store-policy{margin:20px auto 48px;padding:0 14px}.store-policy-hero{padding:28px 22px;border-radius:18px}.store-policy-hero>p{font-size:14px}.store-policy-nav{gap:4px;padding:6px}.store-policy-nav a{padding:10px 11px;font-size:12px}.store-policy-content{grid-template-columns:1fr;gap:12px}.store-policy-content section{padding:20px}.store-policy-notice{grid-column:auto;padding:18px}}
+
+/* Shared policy pages — shipping-style horizontal information cards */
+.store-policy-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+}
+.store-policy-content .store-policy-card {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+    min-width: 0;
+    padding: 30px 32px;
+    border: 1px solid #eadbd6;
+    border-radius: 14px;
+    background: linear-gradient(110deg, #fff 0%, #fffdfc 100%);
+    box-shadow: 0 7px 22px rgb(75 35 35 / 4%);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.store-policy-content .store-policy-card:hover {
+    border-color: #dfc4bd;
+    box-shadow: 0 10px 26px rgb(75 35 35 / 7%);
+    transform: translateY(-1px);
+}
+.store-policy-content .store-policy-icon {
+    width: 60px;
+    height: 60px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #fbf0d8;
+    font-size: 27px;
+    line-height: 1;
+}
+.store-policy-content .store-policy-card:nth-child(even) .store-policy-icon {
+    background: #f6e6e9;
+}
+.store-policy-content .store-policy-copy { min-width: 0; }
+.store-policy-content .store-policy-copy h2 {
+    margin: 0 0 12px;
+    color: #302522;
+    font: 400 27px/1.2 Georgia, "Times New Roman", serif;
+}
+.store-policy-content .store-policy-copy p {
+    margin: 7px 0;
+    color: #6e625e;
+    font-size: 15px;
+    line-height: 1.75;
+}
+.store-policy-content .store-policy-copy p:last-child { margin-bottom: 0; }
+.store-policy-content .store-policy-copy strong,
+.store-policy-content .store-policy-notice strong { color: #751b3b; font-weight: 750; }
+.store-policy-content .store-policy-notice {
+    grid-column: auto;
+    color: #6e625e;
+    background: #fff9f8;
+}
+@media (max-width: 650px) {
+    .store-policy-content { gap: 14px; }
+    .store-policy-content .store-policy-card {
+        grid-template-columns: 50px minmax(0, 1fr);
+        gap: 14px;
+        padding: 21px 17px;
+        border-radius: 12px;
+    }
+    .store-policy-content .store-policy-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+    }
+    .store-policy-content .store-policy-copy h2 { margin-bottom: 9px; font-size: 22px; }
+    .store-policy-content .store-policy-copy p { font-size: 13px; line-height: 1.65; }
+}
+@media (max-width: 370px) {
+    .store-policy-content .store-policy-card { grid-template-columns: 42px minmax(0, 1fr); gap: 11px; padding: 17px 13px; }
+    .store-policy-content .store-policy-icon { width: 40px; height: 40px; font-size: 19px; }
+    .store-policy-content .store-policy-copy h2 { font-size: 20px; }
+}
