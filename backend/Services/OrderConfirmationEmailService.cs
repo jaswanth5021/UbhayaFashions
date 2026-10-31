@@ -10,6 +10,7 @@ namespace backend.Services;
 public interface IOrderConfirmationEmailService
 {
     Task SendOrderConfirmationAsync(Order order, Customer customer);
+    Task SendOrderCancellationAsync(Order order, Customer customer);
 }
 
 public sealed class OrderConfirmationEmailService(
@@ -17,6 +18,133 @@ public sealed class OrderConfirmationEmailService(
     IConfiguration configuration,
     ILogger<OrderConfirmationEmailService> logger) : IOrderConfirmationEmailService
 {
+    public async Task SendOrderCancellationAsync(Order order, Customer customer)
+    {
+        var recipient = customer.Email?.Trim();
+        if (string.IsNullOrWhiteSpace(recipient))
+        {
+            logger.LogInformation("Order cancellation email skipped for order {OrderId}: customer has no email address.", order.Id);
+            return;
+        }
+
+        var smtp = configuration.GetSection("Smtp");
+        var host = smtp["Host"];
+        var from = smtp["From"];
+        if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
+        {
+            logger.LogWarning("Order {OrderId} was cancelled, but cancellation email was skipped because SMTP is not configured.", order.Id);
+            return;
+        }
+
+        var greetingName = string.IsNullOrWhiteSpace(customer.Name) ? "there" : customer.Name.Trim();
+        var encodedName = WebUtility.HtmlEncode(greetingName);
+        var encodedAddress = WebUtility.HtmlEncode(order.ShippingAddress);
+        var currency = CultureInfo.GetCultureInfo("en-IN");
+        var itemRows = string.Join("", order.Items.Select(item => $"""
+            <tr>
+              <td style="padding:12px 10px;border-bottom:1px solid #eee5e1;color:#39272b;">{WebUtility.HtmlEncode(item.ProductName)}<br><small style="color:#80645f;">Size: {WebUtility.HtmlEncode(item.Size ?? "—")}</small></td>
+              <td style="padding:12px 10px;border-bottom:1px solid #eee5e1;text-align:center;color:#39272b;">{item.Quantity}</td>
+              <td style="padding:12px 10px;border-bottom:1px solid #eee5e1;text-align:right;color:#39272b;">{(item.Price * item.Quantity).ToString("C", currency)}</td>
+            </tr>
+            """));
+        var refundMessage = string.Equals(order.PaymentStatus, "Refund Pending", StringComparison.OrdinalIgnoreCase)
+            ? "Your payment was already captured. The refund is pending processing and will be returned to the original payment method, subject to payment provider processing times."
+            : "If your payment was not captured, no refund is required. If you have any payment-related questions, please contact our support team.";
+        var encodedRefundMessage = WebUtility.HtmlEncode(refundMessage);
+        var plainText = $"""
+            Hi {greetingName},
+
+            Your order #{order.Id} has been cancelled successfully as requested.
+
+            ORDER SUMMARY
+            {string.Join(Environment.NewLine, order.Items.Select(item => $"- {item.ProductName} | Size: {item.Size} | Qty: {item.Quantity} | {(item.Price * item.Quantity).ToString("C", currency)}"))}
+
+            Order total: {order.TotalAmount.ToString("C", currency)}
+            Delivery address: {order.ShippingAddress}
+
+            {refundMessage}
+
+            If you need help, email ubhayafashions@gmail.com and mention order #{order.Id}.
+
+            Thank you,
+            Ubhaya Fashions
+            """;
+        var html = $"""
+            <!doctype html>
+            <html lang="en">
+            <body style="margin:0;padding:0;background:#f8f3f0;font-family:Arial,Helvetica,sans-serif;color:#302522;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8f3f0;padding:32px 12px;">
+                <tr><td align="center">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;border:1px solid #efdfdf;border-radius:12px;background:#fffdfb;overflow:hidden;">
+                    <tr><td style="padding:26px 30px;background:linear-gradient(110deg,#68142e,#963451);text-align:center;color:#fff;">
+                      <div style="font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#f0d8a7;">Ubhaya Fashions</div>
+                      <h1 style="margin:12px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;">Order cancelled</h1>
+                    </td></tr>
+                    <tr><td style="padding:30px;">
+                      <p style="margin:0 0 12px;font-size:16px;">Hi {encodedName},</p>
+                      <p style="margin:0;font-size:15px;line-height:1.7;">Your order <strong style="color:#68142e;">#{order.Id}</strong> has been cancelled successfully as requested.</p>
+                      <div style="margin:22px 0;padding:16px;border:1px solid #efdfdf;border-radius:8px;background:#fffaf8;">
+                        <div style="margin-bottom:10px;color:#9a6b64;font-size:11px;font-weight:700;letter-spacing:1.5px;">CANCELLED ORDER SUMMARY</div>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:13px;">
+                          <thead><tr><th align="left" style="padding:8px 10px;border-bottom:1px solid #e7d8d3;color:#80645f;font-size:11px;">Item</th><th style="padding:8px 4px;border-bottom:1px solid #e7d8d3;color:#80645f;font-size:11px;">Qty</th><th align="right" style="padding:8px 10px;border-bottom:1px solid #e7d8d3;color:#80645f;font-size:11px;">Amount</th></tr></thead>
+                          <tbody>{itemRows}</tbody>
+                        </table>
+                        <p style="margin:16px 0 0;text-align:right;font-size:15px;">Order total <strong style="color:#68142e;">{order.TotalAmount.ToString("C", currency)}</strong></p>
+                      </div>
+                      <div style="margin:18px 0;padding:16px;border:1px solid #ead8c8;border-radius:8px;background:#f8f0e8;">
+                        <div style="margin-bottom:7px;color:#694c42;font-size:12px;font-weight:700;letter-spacing:1px;">PAYMENT / REFUND INFORMATION</div>
+                        <p style="margin:0;font-size:13px;line-height:1.7;color:#665557;">{encodedRefundMessage}</p>
+                      </div>
+                      <div style="margin-top:18px;">
+                        <div style="margin-bottom:6px;color:#9a6b64;font-size:11px;font-weight:700;letter-spacing:1.2px;">DELIVERY ADDRESS ON THE ORDER</div>
+                        <div style="font-size:13px;line-height:1.6;color:#665557;">{encodedAddress}</div>
+                      </div>
+                      <p style="margin:24px 0 0;font-size:13px;line-height:1.7;color:#665557;">If you have questions, reply to this email or contact <a href="mailto:ubhayafashions@gmail.com" style="color:#813c40;font-weight:700;">ubhayafashions@gmail.com</a> and mention order #{order.Id}.</p>
+                      <p style="margin:18px 0 0;font-size:13px;color:#665557;">Thank you,<br><strong>Ubhaya Fashions</strong></p>
+                    </td></tr>
+                    <tr><td style="padding:16px 24px;border-top:1px solid #eee5e1;text-align:center;color:#9a918a;font-size:12px;">Tradition meets today · Ubhaya Fashions</td></tr>
+                  </table>
+                </td></tr>
+              </table>
+            </body>
+            </html>
+            """;
+
+        try
+        {
+            using var message = new MailMessage
+            {
+                From = new MailAddress(from, "Ubhaya Fashions"),
+                Subject = $"Order #{order.Id} cancelled - Ubhaya Fashions",
+                Body = html,
+                IsBodyHtml = true
+            };
+            message.To.Add(recipient);
+            message.CC.Add("ubhayafashions@gmail.com");
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
+
+            var port = int.TryParse(smtp["Port"], out var configuredPort) ? configuredPort : 587;
+            using var client = new SmtpClient(host, port)
+            {
+                EnableSsl = bool.TryParse(smtp["EnableSsl"], out var enableSsl) ? enableSsl : true,
+                DeliveryMethod = SmtpDeliveryMethod.Network
+            };
+
+            var username = smtp["Username"];
+            if (!string.IsNullOrWhiteSpace(username))
+                client.Credentials = new NetworkCredential(username, smtp["Password"]);
+
+            await client.SendMailAsync(message);
+            logger.LogInformation("Order cancellation email sent for order {OrderId} to customer {CustomerId}.", order.Id, customer.Id);
+        }
+        catch (Exception exception)
+        {
+            // Email failure must never reverse an order cancellation already committed to the database.
+            logger.LogError(exception, "Order {OrderId} was cancelled, but its cancellation email could not be sent.", order.Id);
+        }
+    }
+
     public async Task SendOrderConfirmationAsync(Order order, Customer customer)
     {
         var recipient = customer.Email?.Trim();
