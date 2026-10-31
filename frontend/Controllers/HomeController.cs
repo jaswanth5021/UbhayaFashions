@@ -11,6 +11,8 @@ public class HomeController(ApiService api, ILogger<HomeController> logger) : Co
 
     public IActionResult Returns() => View();
 
+    public IActionResult Cancellation() => View();
+
     public IActionResult About() => View();
 
 
