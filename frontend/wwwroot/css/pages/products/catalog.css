@@ -2442,3 +2442,41 @@
         padding-top: 8px;
     }
 }
+
+
+/* Final swatch rendering fix: fixed-size circular dots; never collapse in the grid. */
+@media (max-width: 600px) {
+    .catalog-page .catalog-sidebar .filter-color-option {
+        grid-template-columns: 19px 18px minmax(0, 1fr) !important;
+        column-gap: 10px !important;
+    }
+
+    .catalog-page .catalog-sidebar .filter-color-option > .filter-color-swatch {
+        display: inline-block !important;
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        max-width: 16px !important;
+        min-height: 16px !important;
+        max-height: 16px !important;
+        flex: 0 0 16px !important;
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        align-self: center !important;
+        justify-self: center !important;
+        box-sizing: border-box !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 1px solid rgba(45, 37, 40, .2) !important;
+        border-radius: 50% !important;
+        box-shadow: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .catalog-page .catalog-sidebar .filter-color-option > .filter-color-name {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+    }
+}
