@@ -327,3 +327,149 @@
 .profile-cancel-order-button{min-height:32px;padding:0 12px;border:1px solid #e3bfc7;border-radius:6px;background:#fff8f8;color:#92233f;font:inherit;font-size:10px;font-weight:750;white-space:nowrap;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}
 .profile-cancel-order-button:hover{border-color:#92233f;background:#92233f;color:#fff}
 @media(max-width:600px){.profile-cancel-order-form{width:100%}.profile-cancel-order-button{width:100%;min-height:36px}}
+
+
+/* Branded cancellation actions and accessible confirmation dialog. */
+.profile-orders-panel .order-card-primary-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+.profile-orders-panel .profile-cancel-order-form {
+    display: inline-flex;
+    margin: 0;
+    align-items: center;
+}
+.profile-orders-panel .profile-cancel-order-button {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 12px;
+    border: 1px solid #ead5d9;
+    border-radius: 7px;
+    background: #fff;
+    color: #8b3047;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.profile-orders-panel .profile-cancel-order-button > span {
+    font-size: 15px;
+    line-height: 1;
+}
+.profile-orders-panel .profile-cancel-order-button:hover {
+    border-color: #a94b60;
+    background: #fff6f6;
+    color: #762039;
+    box-shadow: 0 2px 8px rgb(118 32 57 / 8%);
+}
+.profile-orders-panel .profile-cancel-order-button:focus-visible,
+.ubhaya-cancel-dialog button:focus-visible {
+    outline: 3px solid rgb(156 54 86 / 28%);
+    outline-offset: 3px;
+}
+
+.ubhaya-cancel-dialog {
+    width: min(440px, calc(100vw - 32px));
+    max-width: none;
+    padding: 0;
+    overflow: visible;
+    border: 1px solid #f0dfe2;
+    border-radius: 17px;
+    background: #fffdfc;
+    color: #3d2029;
+    box-shadow: 0 24px 70px rgb(35 12 20 / 22%);
+}
+.ubhaya-cancel-dialog::backdrop {
+    background: rgb(35 19 25 / 48%);
+    backdrop-filter: blur(3px);
+}
+.ubhaya-cancel-dialog__content {
+    padding: 30px 30px 26px;
+    text-align: center;
+}
+.ubhaya-cancel-dialog__icon {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 15px;
+    place-items: center;
+    border: 1px solid #f1d9dc;
+    border-radius: 50%;
+    background: #fff4f3;
+    color: #a34b52;
+}
+.ubhaya-cancel-dialog__icon svg { width: 26px; height: 26px; }
+.ubhaya-cancel-dialog__eyebrow {
+    color: #a17b62;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .2em;
+}
+.ubhaya-cancel-dialog h2 {
+    margin: 8px 0 9px;
+    color: #68142e;
+    font: 700 25px/1.2 Georgia, "Times New Roman", serif;
+}
+.ubhaya-cancel-dialog p {
+    margin: 0 auto;
+    max-width: 340px;
+    color: #705d62;
+    font-size: 13px;
+    line-height: 1.7;
+}
+.ubhaya-cancel-dialog p strong { color: #4b2430; }
+.ubhaya-cancel-dialog__note {
+    margin-top: 17px;
+    padding: 11px 13px;
+    border: 1px solid #f0e5df;
+    border-radius: 8px;
+    background: #fffaf5;
+    color: #806c5e;
+    font-size: 11px;
+    line-height: 1.55;
+    text-align: left;
+}
+.ubhaya-cancel-dialog__actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 22px;
+}
+.ubhaya-cancel-dialog__actions button {
+    min-height: 42px;
+    padding: 0 17px;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.ubhaya-cancel-dialog__keep {
+    border: 1px solid #e7d8d8;
+    background: #fff;
+    color: #654a50;
+}
+.ubhaya-cancel-dialog__keep:hover { background: #faf5f4; border-color: #d7c0c2; }
+.ubhaya-cancel-dialog__confirm {
+    border: 1px solid #8b3047;
+    background: #8b3047;
+    color: #fff;
+}
+.ubhaya-cancel-dialog__confirm:hover:not(:disabled) { background: #68142e; border-color: #68142e; }
+.ubhaya-cancel-dialog__confirm:disabled { cursor: wait; opacity: .72; }
+
+@media (max-width: 600px) {
+    .profile-orders-panel .order-card-primary-actions { width: 100%; justify-content: flex-end; gap: 7px; }
+    .profile-orders-panel .profile-cancel-order-form { width: auto; }
+    .profile-orders-panel .profile-cancel-order-button { width: auto; min-height: 33px; padding: 0 9px; }
+    .ubhaya-cancel-dialog__content { padding: 25px 20px 21px; }
+    .ubhaya-cancel-dialog__actions { flex-direction: column-reverse; }
+    .ubhaya-cancel-dialog__actions button { width: 100%; }
+}
