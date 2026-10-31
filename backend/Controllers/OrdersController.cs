@@ -82,6 +82,7 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
 
         var order = await db.Orders
             .Include(x => x.Items)
+            .Include(x => x.Customer)
             .Include(x => x.DelhiveryShipment)
             .FirstOrDefaultAsync(x => x.Id == id && x.CustomerId == customerId, cancellationToken);
 
@@ -153,6 +154,9 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
 
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
+
+        // Notify the customer only after the cancellation and inventory restoration are committed.
+        await orderEmail.SendOrderCancellationAsync(order, order.Customer);
 
         return Ok(new
         {
