@@ -47,6 +47,26 @@
 
     items.forEach((item, index) => {
         item.addEventListener("click", () => selectItem(index, false));
+        // Hovering lifts the garment and previews its details.
+        item.addEventListener("pointerenter", event => {
+            if (event.pointerType === "mouse" || event.pointerType === "pen") {
+                selectItem(index, false);
+            }
+        });
+    });
+
+    // A gentle cursor-follow interaction makes the garments travel along the rail.
+    // Keep the pointer away from the extreme edges to avoid abrupt jumps.
+    let hoverFrame = 0;
+    track.addEventListener("pointermove", event => {
+        if (event.pointerType !== "mouse" || pointerDown || track.scrollWidth <= track.clientWidth) return;
+        if (hoverFrame) cancelAnimationFrame(hoverFrame);
+        const bounds = track.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+        const target = progress * (track.scrollWidth - track.clientWidth);
+        hoverFrame = requestAnimationFrame(() => {
+            track.scrollLeft += (target - track.scrollLeft) * 0.16;
+        });
     });
 
     // Drag the rail with a mouse; native touch scrolling remains enabled on mobile.
