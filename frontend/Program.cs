@@ -123,7 +123,9 @@ builder.Services
         options.AccessDeniedPath = "/Admin/Login";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
         options.SlidingExpiration = true;
     });
@@ -155,12 +157,26 @@ app.UseStatusCodePagesWithReExecute("/Home/NotFoundPage");
 // =====================================================
 // HTTPS
 // =====================================================
-// HTTPS is not configured yet.
-// Keep HTTP for the current EC2 test environment.
-//
-// When HTTPS is configured later, enable:
-// app.UseHsts();
-// app.UseHttpsRedirection();
+// IIS terminates TLS in production. Forward the original scheme before redirects.
+app.UseForwardedHeaders(new Microsoft.AspNetCore.Builder.ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+        | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+});
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
+app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
+    context.Response.Headers.TryAdd("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    context.Response.Headers.TryAdd("Content-Security-Policy",
+        "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://api.razorpay.com https://checkout.razorpay.com; upgrade-insecure-requests");
+    await next();
+});
 
 // =====================================================
 // STATIC FILES
