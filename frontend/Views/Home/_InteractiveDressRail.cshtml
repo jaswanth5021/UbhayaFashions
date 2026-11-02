@@ -1,0 +1,78 @@
+@model List<LadiesDressStore.Web.Models.ProductViewModel>
+@{
+    var railProducts = (Model ?? []).Take(15).ToList();
+}
+@if (railProducts.Count > 0)
+{
+    <section class="interactive-dress-rail" aria-labelledby="interactiveDressRailTitle" data-dress-rail-section>
+        <div class="dress-rail-heading">
+            <div>
+                <p class="dress-rail-eyebrow">THE UBHAYA EDIT</p>
+                <h2 id="interactiveDressRailTitle">A closer look at our dresses</h2>
+                <p class="dress-rail-subtitle">Explore a handpicked selection from our latest collection.</p>
+            </div>
+            <div class="dress-rail-controls">
+                <span class="dress-rail-count">@railProducts.Count curated styles</span>
+                <button type="button" data-dress-rail-prev aria-label="Scroll to previous dresses">‹</button>
+                <button type="button" data-dress-rail-next aria-label="Scroll to next dresses">›</button>
+            </div>
+        </div>
+
+        <div class="dress-rail-track" data-dress-rail-track tabindex="0" aria-label="Up to 15 dresses. Swipe or use arrow keys to browse.">
+            @foreach (var product in railProducts)
+            {
+                var imageUrl = !string.IsNullOrWhiteSpace(product.ImageUrl)
+                    ? product.ImageUrl
+                    : product.Images?.OrderBy(image => image.SortOrder).Select(image => image.ImageUrl).FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
+                <a class="dress-rail-item" asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">
+                    <span class="dress-rail-hanger" aria-hidden="true"></span>
+                    <span class="dress-rail-image-wrap">
+                        @if (!string.IsNullOrWhiteSpace(imageUrl))
+                        {
+                            <img src="@ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"])"
+                                 alt="@product.Name"
+                                 loading="lazy" />
+                        }
+                        else
+                        {
+                            <span class="dress-rail-image-placeholder">UBHAYA</span>
+                        }
+                    </span>
+                    <span class="dress-rail-product-name">@product.Name</span>
+                    <span class="dress-rail-product-price">₹@product.Price.ToString("N0")</span>
+                    <span class="dress-rail-view">VIEW STYLE <span aria-hidden="true">→</span></span>
+                </a>
+            }
+        </div>
+        <p class="dress-rail-hint">Swipe or drag to explore the collection</p>
+    </section>
+
+    <style>
+        .interactive-dress-rail{padding:64px max(5vw,20px);background:#f8f6f2;overflow:hidden}
+        .dress-rail-heading{max-width:1400px;margin:0 auto 28px;display:flex;align-items:end;justify-content:space-between;gap:24px}
+        .dress-rail-eyebrow{margin:0 0 9px;color:#8b735d;font-size:10px;letter-spacing:.2em;font-weight:700}
+        .dress-rail-heading h2{margin:0;color:#28231f;font-family:Georgia,serif;font-size:clamp(27px,3vw,40px);font-weight:400}
+        .dress-rail-subtitle{margin:9px 0 0;color:#746b64;font-size:13px}
+        .dress-rail-controls{display:flex;align-items:center;gap:9px;flex-shrink:0}
+        .dress-rail-count{margin-right:8px;color:#766b60;font-size:11px;letter-spacing:.06em}
+        .dress-rail-controls button{width:38px;height:38px;border:1px solid #cfc5b9;border-radius:50%;background:transparent;color:#352d26;font-size:24px;line-height:1;cursor:pointer}
+        .dress-rail-controls button:hover{background:#352d26;color:#fff;border-color:#352d26}
+        .dress-rail-track{max-width:1400px;margin:auto;display:flex;gap:22px;overflow-x:auto;overflow-y:hidden;padding:14px 4px 22px;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#b8a998 transparent;cursor:grab}
+        .dress-rail-track.is-dragging{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}
+        .dress-rail-item{position:relative;display:flex;flex:0 0 clamp(170px,18vw,225px);flex-direction:column;align-items:center;color:inherit;text-decoration:none;scroll-snap-align:start}
+        .dress-rail-hanger{position:relative;width:30px;height:19px;margin-bottom:4px;border-top:1.5px solid #8f806f}
+        .dress-rail-hanger:before{content:"";position:absolute;width:9px;height:9px;left:10px;top:-9px;border:1.5px solid #8f806f;border-bottom:0;border-radius:9px 9px 0 0}
+        .dress-rail-hanger:after{content:"";position:absolute;left:0;right:0;top:0;border-top:1.5px solid #8f806f}
+        .dress-rail-image-wrap{width:100%;height:285px;display:flex;align-items:center;justify-content:center;background:#eee9e2;overflow:hidden}
+        .dress-rail-image-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+        .dress-rail-item:hover .dress-rail-image-wrap img{transform:scale(1.045)}
+        .dress-rail-image-placeholder{color:#9b8b79;font-family:Georgia,serif;letter-spacing:.18em}
+        .dress-rail-product-name{max-width:100%;margin-top:13px;color:#302923;font-size:13px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .dress-rail-product-price{margin-top:5px;color:#665b50;font-size:13px}
+        .dress-rail-view{margin-top:10px;color:#8a6d4e;font-size:9px;font-weight:700;letter-spacing:.14em}
+        .dress-rail-view span{font-size:14px;margin-left:4px}
+        .dress-rail-hint{max-width:1400px;margin:2px auto 0;color:#8b8177;font-size:10px;letter-spacing:.08em;text-align:right}
+        @media(max-width:640px){.interactive-dress-rail{padding:42px 16px}.dress-rail-heading{align-items:flex-start;flex-direction:column;margin-bottom:18px}.dress-rail-controls{width:100%;justify-content:flex-end}.dress-rail-count{margin-right:auto}.dress-rail-item{flex-basis:64vw}.dress-rail-image-wrap{height:260px}.dress-rail-hint{text-align:center}}
+        @media(prefers-reduced-motion:reduce){.dress-rail-track,.dress-rail-image-wrap img{scroll-behavior:auto;transition:none}}
+    </style>
+}
