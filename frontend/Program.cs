@@ -105,10 +105,10 @@ builder.Services
             options.Cookie.SameSite =
                 SameSiteMode.Lax;
 
-            // Required for the current HTTP-only EC2 test setup.
-            // When HTTPS is configured later, change this to Always.
-            options.Cookie.SecurePolicy =
-                CookieSecurePolicy.SameAsRequest;
+            // Local HTTP is permitted only in Development.
+            options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
 
             options.ExpireTimeSpan =
                 TimeSpan.FromHours(2);
