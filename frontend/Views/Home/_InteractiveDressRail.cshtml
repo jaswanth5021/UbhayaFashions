@@ -25,9 +25,9 @@
                 {
                     var product = railProducts[i];
                     var imageUrl = ProductImage(product);
-                    <button type="button" class="dress-rail-item @(i == 0 ? "is-selected" : "")"
+                    <button type="button" class="dress-rail-item"
                             data-dress-rail-item data-index="@i"
-                            aria-pressed="@(i == 0 ? "true" : "false")"
+                            aria-pressed="false"
                             aria-label="View @product.Name">
                         <span class="dress-rail-hook" aria-hidden="true"></span>
                         <span class="dress-rail-thumb">
@@ -42,20 +42,14 @@
             </div>
         </div>
 
-        <div class="dress-rail-feature" aria-live="polite">
-            <div class="dress-rail-feature-image">
-                @if (!string.IsNullOrWhiteSpace(ProductImage(firstProduct!)))
-                {
-                    <img data-dress-rail-feature-image src="@ProductImage(firstProduct!)" alt="@firstProduct!.Name" />
-                }
-                else { <span class="dress-rail-feature-empty">UBHAYA</span> }
-            </div>
+        <div class="dress-rail-feature" data-dress-rail-feature aria-live="polite" hidden>
+            <div class="dress-rail-feature-image"><img data-dress-rail-feature-image src="" alt="" /></div>
             <div class="dress-rail-feature-copy">
-                <p class="dress-rail-feature-kicker">CURATED FOR YOU</p>
-                <h3 data-dress-rail-feature-name>@firstProduct!.Name</h3>
+                <p class="dress-rail-feature-kicker">THE UBHAYA EDIT · SELECTED STYLE</p>
+                <h3 data-dress-rail-feature-name></h3>
                 <p class="dress-rail-feature-description">A handpicked style from the latest Ubhaya collection.</p>
-                <p class="dress-rail-feature-price" data-dress-rail-feature-price>₹@firstProduct.Price.ToString("N0")</p>
-                <a data-dress-rail-feature-link asp-controller="Products" asp-action="Details" asp-route-id="@firstProduct.Id" class="dress-rail-shop-link">SHOP THIS STYLE <span aria-hidden="true">→</span></a>
+                <p class="dress-rail-feature-price" data-dress-rail-feature-price></p>
+                <a data-dress-rail-feature-link href="#" class="dress-rail-shop-link">DISCOVER THIS STYLE <span aria-hidden="true">→</span></a>
             </div>
         </div>
         <p class="dress-rail-hint">Drag the rail or tap a piece to take a closer look</p>
@@ -72,36 +66,37 @@
     </section>
 
     <style>
-        .interactive-dress-rail{padding:50px max(5vw,20px) 34px;background:linear-gradient(180deg,#fbfaf8 0%,#f4f0ea 100%);color:#211f1c;overflow:hidden}
-        .dress-rail-intro{text-align:center;max-width:900px;margin:0 auto 30px}
-        .dress-rail-eyebrow{margin:0 0 9px;font-size:9px;letter-spacing:.24em;color:#8a7867}
-        .dress-rail-intro h2{margin:0;font-family:Georgia,serif;font-size:clamp(21px,2.3vw,31px);font-weight:500;letter-spacing:.01em}
-        .dress-rail-rack{max-width:1320px;margin:0 auto;position:relative;padding:0 8px 8px}
-        .dress-rail-bar{height:5px;position:absolute;top:18px;left:0;right:0;border-radius:10px;background:linear-gradient(180deg,#fdfdfd 0%,#b9b5af 32%,#77716b 55%,#d7d3ce 100%);box-shadow:0 2px 4px #342c241f,0 7px 12px #342c2410}
-        .dress-rail-track{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;gap:clamp(10px,2vw,27px);overflow-x:auto;overflow-y:visible;padding:0 18px 18px;scrollbar-width:none;scroll-behavior:smooth;cursor:grab;touch-action:pan-x}
+        .interactive-dress-rail{position:relative;padding:58px max(5vw,24px) 42px;background:radial-gradient(ellipse at 50% 0%,#fff 0%,#f8f5f0 62%,#f0ebe3 100%);color:#28231f;overflow:hidden}
+        .dress-rail-intro{text-align:center;max-width:900px;margin:0 auto 34px}
+        .dress-rail-eyebrow{margin:0 0 10px;font-size:9px;letter-spacing:.25em;color:#927a62}
+        .dress-rail-intro h2{margin:0;font-family:Georgia,serif;font-size:clamp(23px,2.5vw,34px);font-weight:400}
+        .dress-rail-rack{max-width:1320px;margin:0 auto;position:relative;padding:0 8px 6px}
+        .dress-rail-bar{height:5px;position:absolute;top:17px;left:0;right:0;border-radius:8px;background:linear-gradient(180deg,#fff 0%,#c9c1b7 35%,#81786f 60%,#e5dfd7 100%);box-shadow:0 2px 4px #342c2420,0 8px 16px #342c2410}
+        .dress-rail-track{position:relative;display:flex;align-items:flex-start;justify-content:center;gap:clamp(12px,2.4vw,34px);overflow-x:auto;overflow-y:visible;padding:0 22px 20px;scrollbar-width:none;scroll-behavior:smooth;cursor:grab;touch-action:pan-x}
         .dress-rail-track::-webkit-scrollbar{display:none}
         .dress-rail-track.is-dragging{cursor:grabbing;scroll-behavior:auto}
-        .dress-rail-item{position:relative;isolation:isolate;flex:0 0 clamp(78px,9vw,118px);height:178px;margin-top:0;border:0;background:transparent;padding:0 4px;cursor:pointer;opacity:.78;transform:translateY(0) scale(.96);transform-origin:50% 0;transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .25s,filter .25s;filter:saturate(.9)}
-        .dress-rail-item:hover,.dress-rail-item:focus-visible,.dress-rail-item.is-selected{opacity:1;transform:translateY(-18px) scale(1.09);z-index:5;filter:saturate(1.08);outline:none}
-        .dress-rail-hook{position:relative;display:block;width:2px;height:17px;margin:0 auto;background:linear-gradient(90deg,#8a8176,#eee9e1,#82796f);box-shadow:0 0 1px #51483e}
+        .dress-rail-item{position:relative;isolation:isolate;flex:0 0 clamp(78px,8.5vw,112px);height:174px;margin:0;border:0;background:transparent;padding:0 4px;cursor:pointer;opacity:.82;transform:translateY(0);transform-origin:50% 0;transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .25s,filter .25s;filter:saturate(.92)}
+        .dress-rail-item:hover,.dress-rail-item:focus-visible,.dress-rail-item.is-selected{opacity:1;transform:translateY(-25px) scale(1.09);z-index:5;filter:saturate(1.08);outline:none}
+        .dress-rail-hook{position:relative;display:block;width:2px;height:19px;margin:0 auto;background:linear-gradient(90deg,#8a8176,#f5f0e8,#82796f);box-shadow:0 0 1px #51483e}
         .dress-rail-hook:before{content:"";position:absolute;width:10px;height:11px;left:-4px;top:-8px;border:1.5px solid #8e857a;border-bottom:0;border-radius:9px 9px 0 0;transform:rotate(8deg)}
-        .dress-rail-thumb{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:148px;margin-top:0;overflow:hidden;background:#fff;border:1px solid #e5ded4;border-radius:2px 2px 5px 5px;box-shadow:0 5px 12px #30261b18}
-        .dress-rail-thumb:before{content:"";position:absolute;z-index:1;top:0;left:0;right:0;height:18px;background:linear-gradient(180deg,#ffffff55,transparent);pointer-events:none}
-        .dress-rail-thumb img{width:100%;height:100%;object-fit:cover;object-position:center 28%;mix-blend-mode:normal;transition:transform .35s ease}
-        .dress-rail-item:hover .dress-rail-thumb img,.dress-rail-item.is-selected .dress-rail-thumb img{transform:scale(1.06)}
-        .dress-rail-empty,.dress-rail-feature-empty{font:11px Georgia,serif;letter-spacing:.15em;color:#9a8e82}
-        .dress-rail-feature{max-width:850px;min-height:230px;margin:12px auto 0;display:grid;grid-template-columns:minmax(190px,.9fr) 1fr;align-items:center;gap:clamp(24px,5vw,70px);padding:10px 24px 0}
-        .dress-rail-feature-image{height:230px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;border:1px solid #ebe5dc;box-shadow:0 12px 30px #30261b12}
-        .dress-rail-feature-image img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;transition:opacity .18s,transform .35s}
-        .dress-rail-feature-copy{max-width:360px}
-        .dress-rail-feature-kicker{margin:0 0 8px;color:#8b7865;font-size:9px;letter-spacing:.2em}
-        .dress-rail-feature-copy h3{margin:0 0 8px;font:500 clamp(20px,2.2vw,27px) Georgia,serif}
-        .dress-rail-feature-description{margin:0 0 12px;color:#77716b;font-size:12px;line-height:1.6}
-        .dress-rail-feature-price{margin:0 0 18px;font-size:14px}
-        .dress-rail-shop-link{display:inline-flex;align-items:center;gap:12px;padding:10px 19px;background:#171614;color:#fff;text-decoration:none;border-radius:30px;font-size:9px;letter-spacing:.12em}
-        .dress-rail-shop-link:hover{background:#80664e}
-        .dress-rail-hint{margin:15px auto 0;text-align:center;color:#8b8177;font-size:10px;letter-spacing:.06em}
-        @@media(max-width:640px){.interactive-dress-rail{padding:38px 12px 28px}.dress-rail-intro{padding:0 8px;margin-bottom:24px}.dress-rail-track{justify-content:flex-start;gap:9px;padding-left:14px}.dress-rail-item{flex-basis:76px;height:153px}.dress-rail-thumb{height:126px}.dress-rail-feature{grid-template-columns:1fr;gap:12px;padding:4px 14px 0;text-align:center}.dress-rail-feature-image{height:220px}.dress-rail-feature-copy{margin:auto}.dress-rail-feature-price{margin-bottom:14px}.dress-rail-hint{margin-top:12px}}
-        @@media(prefers-reduced-motion:reduce){.dress-rail-track,.dress-rail-item,.dress-rail-thumb img,.dress-rail-feature-image img{scroll-behavior:auto;transition:none}}
+        .dress-rail-thumb{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:145px;overflow:hidden;background:linear-gradient(145deg,#fff,#f4f0e9);border:1px solid #e5ded4;border-radius:3px 3px 7px 7px;box-shadow:0 7px 16px #30261b18,inset 0 0 0 3px #ffffff80}
+        .dress-rail-thumb img{width:100%;height:100%;object-fit:cover;object-position:center 25%;transition:transform .45s ease,filter .3s}
+        .dress-rail-item:hover .dress-rail-thumb img{transform:scale(1.1);filter:contrast(1.03)}
+        .dress-rail-empty{font:11px Georgia,serif;letter-spacing:.15em;color:#9a8e82}
+        .dress-rail-feature[hidden]{display:none!important}
+        .dress-rail-feature{max-width:900px;min-height:260px;margin:12px auto 0;display:grid;grid-template-columns:minmax(210px,.92fr) 1fr;align-items:center;gap:clamp(28px,5vw,76px);padding:18px 36px;background:#ffffffb8;border:1px solid #e9e1d7;box-shadow:0 18px 48px #35291c0d;animation:railFeatureIn .38s ease both}
+        @@keyframes railFeatureIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .dress-rail-feature-image{height:235px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(145deg,#fff,#f8f5f0);border:1px solid #eee8df}
+        .dress-rail-feature-image img{width:100%;height:100%;object-fit:contain;transition:opacity .2s,transform .4s}
+        .dress-rail-feature-copy{max-width:390px}
+        .dress-rail-feature-kicker{margin:0 0 10px;color:#927a62;font-size:9px;letter-spacing:.2em}
+        .dress-rail-feature-copy h3{margin:0 0 10px;font:400 clamp(23px,2.4vw,31px) Georgia,serif}
+        .dress-rail-feature-description{margin:0 0 15px;color:#81776e;font-size:12px;line-height:1.7}
+        .dress-rail-feature-price{margin:0 0 20px;font-size:15px}
+        .dress-rail-shop-link{display:inline-flex;align-items:center;gap:16px;padding:12px 22px;background:#28231f;color:#fff;text-decoration:none;border-radius:2px;font-size:9px;letter-spacing:.13em}
+        .dress-rail-shop-link:hover{background:#8b6c4e}
+        .dress-rail-hint{margin:14px auto 0;text-align:center;color:#91867b;font-size:10px;letter-spacing:.08em}
+        @@media(max-width:640px){.interactive-dress-rail{padding:40px 12px 30px}.dress-rail-intro{padding:0 8px;margin-bottom:26px}.dress-rail-intro h2{font-size:23px}.dress-rail-track{justify-content:flex-start;gap:10px;padding-left:14px}.dress-rail-item{flex-basis:76px;height:150px}.dress-rail-thumb{height:124px}.dress-rail-feature{grid-template-columns:1fr;gap:15px;padding:16px;text-align:center}.dress-rail-feature-image{height:220px}.dress-rail-feature-copy{margin:auto}}
+        @@media(prefers-reduced-motion:reduce){.dress-rail-track,.dress-rail-item,.dress-rail-thumb img,.dress-rail-feature-image img{scroll-behavior:auto;transition:none;animation:none}}
     </style>
 }
