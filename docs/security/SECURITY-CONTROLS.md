@@ -36,17 +36,17 @@ Do not run TDE enablement scripts until the SQL Server edition/version, certific
 
 ## 3. Data residency and processors
 
-**Status: AWS region and transfer map not yet evidenced.**
+**Status: EC2 region identified; complete data-flow and backup locations not yet evidenced.**
 
-The production EC2 region must be recorded from the AWS console and confirmed against the SQL Server host, backups, logs, object/file storage, and disaster-recovery copies. Do not assume a region based on the business's location.
+The production Windows EC2 instance is reported by the deployment owner as running in **Asia Pacific (Singapore), ap-southeast-1**. This identifies the EC2 region only; it does not prove that SQL Server, backups, logs, uploads/media, or third-party processors are in the same region. Verify each separately in its relevant AWS service console and provider documentation.
 
 Maintain a processor register for AWS, Razorpay, Delhivery, transactional email, and optional Google/Facebook sign-in. For each, record data categories, purpose, hosting/processing locations, retention, subprocessors, contractual terms, and cross-border transfers. Update the privacy notice when providers or regions change.
 
 Required deployment record:
-- AWS account/environment owner: deployment owner to complete.
-- EC2 region: **TBD — verify in AWS Console**.
+- AWS EC2 region: **Asia Pacific (Singapore), ap-southeast-1** (reported by deployment owner).
 - SQL Server region and backup region: **TBD — verify**.
 - Uploads/media location and backup location: **TBD — verify**.
+- CloudWatch/log storage region and retention: **TBD — verify**.
 - Third-party processor locations and transfer terms: **TBD — verify with providers**.
 
 ## 4. Access controls
