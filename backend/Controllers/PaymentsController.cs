@@ -16,7 +16,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/payments")]
 [Authorize]
-public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail) : ControllerBase
+public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail, IWebHostEnvironment environment) : ControllerBase
 {
     [HttpPost("create-order")]
     public async Task<IActionResult> CreateOrder(CreatePaymentOrderRequest request)
@@ -150,7 +150,10 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
     [HttpPost("test-success")]
     public async Task<IActionResult> TestSuccess(CreatePaymentOrderRequest request)
     {
-        if (!configuration.GetValue<bool>("PaymentTesting:Enabled"))
+        // Never expose simulated payment success outside local development,
+        // even if PaymentTesting:Enabled is accidentally set in production.
+        if (!environment.IsDevelopment() ||
+            !configuration.GetValue<bool>("PaymentTesting:Enabled"))
             return NotFound();
 
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
