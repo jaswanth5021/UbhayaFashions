@@ -11,26 +11,41 @@
     previous?.addEventListener("click", () => track.scrollBy({ left: -scrollAmount(), behavior: "smooth" }));
     next?.addEventListener("click", () => track.scrollBy({ left: scrollAmount(), behavior: "smooth" }));
 
-    let isDragging = false;
+    let pointerDown = false;
+    let dragged = false;
     let startX = 0;
     let startScroll = 0;
+
     track.addEventListener("pointerdown", event => {
-        if (event.pointerType === "touch" || event.target.closest("a")) return;
-        isDragging = true;
+        if (event.pointerType === "touch" || event.button !== 0) return;
+        pointerDown = true;
+        dragged = false;
         startX = event.clientX;
         startScroll = track.scrollLeft;
-        track.classList.add("is-dragging");
-        track.setPointerCapture(event.pointerId);
     });
+
     track.addEventListener("pointermove", event => {
-        if (!isDragging) return;
-        track.scrollLeft = startScroll - (event.clientX - startX);
+        if (!pointerDown) return;
+        const distance = event.clientX - startX;
+        if (Math.abs(distance) > 5) {
+            dragged = true;
+            track.classList.add("is-dragging");
+            track.scrollLeft = startScroll - distance;
+        }
     });
+
     const stopDragging = () => {
-        isDragging = false;
+        pointerDown = false;
         track.classList.remove("is-dragging");
     };
     track.addEventListener("pointerup", stopDragging);
     track.addEventListener("pointercancel", stopDragging);
-    track.addEventListener("lostpointercapture", stopDragging);
+    track.addEventListener("mouseleave", stopDragging);
+
+    track.addEventListener("click", event => {
+        if (!dragged) return;
+        event.preventDefault();
+        event.stopPropagation();
+        dragged = false;
+    }, true);
 })();
