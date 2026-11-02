@@ -1,78 +1,106 @@
 @model List<LadiesDressStore.Web.Models.ProductViewModel>
 @{
     var railProducts = (Model ?? []).Take(15).ToList();
+    var firstProduct = railProducts.FirstOrDefault();
+    string ProductImage(LadiesDressStore.Web.Models.ProductViewModel product)
+    {
+        var image = !string.IsNullOrWhiteSpace(product.ImageUrl)
+            ? product.ImageUrl
+            : product.Images?.OrderBy(item => item.SortOrder).Select(item => item.ImageUrl).FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
+        return string.IsNullOrWhiteSpace(image) ? "" : ImageUrlHelper.Resolve(image, Configuration["ApiBaseUrl"]);
+    }
 }
 @if (railProducts.Count > 0)
 {
-    <section class="interactive-dress-rail" aria-labelledby="interactiveDressRailTitle" data-dress-rail-section>
-        <div class="dress-rail-heading">
-            <div>
-                <p class="dress-rail-eyebrow">THE UBHAYA EDIT</p>
-                <h2 id="interactiveDressRailTitle">A closer look at our dresses</h2>
-                <p class="dress-rail-subtitle">Explore a handpicked selection from our latest collection.</p>
-            </div>
-            <div class="dress-rail-controls">
-                <span class="dress-rail-count">@railProducts.Count curated styles</span>
-                <button type="button" data-dress-rail-prev aria-label="Scroll to previous dresses">‹</button>
-                <button type="button" data-dress-rail-next aria-label="Scroll to next dresses">›</button>
+    <section class="interactive-dress-rail" data-dress-rail-section aria-labelledby="dressRailTitle">
+        <header class="dress-rail-intro">
+            <p class="dress-rail-eyebrow">THE UBHAYA EDIT · NEW SEASON, NEW FEEL</p>
+            <h2 id="dressRailTitle">A clothing rail you can handle, right on the page.</h2>
+        </header>
+
+        <div class="dress-rail-rack" aria-label="Choose a style from the clothing rail">
+            <div class="dress-rail-bar" aria-hidden="true"></div>
+            <div class="dress-rail-track" data-dress-rail-track tabindex="0">
+                @for (var i = 0; i < railProducts.Count; i++)
+                {
+                    var product = railProducts[i];
+                    var imageUrl = ProductImage(product);
+                    <button type="button" class="dress-rail-item @(i == 0 ? "is-selected" : "")"
+                            data-dress-rail-item data-index="@i"
+                            aria-pressed="@(i == 0 ? "true" : "false")"
+                            aria-label="View @product.Name">
+                        <span class="dress-rail-hook" aria-hidden="true"></span>
+                        <span class="dress-rail-thumb">
+                            @if (!string.IsNullOrWhiteSpace(imageUrl))
+                            {
+                                <img src="@imageUrl" alt="" loading="lazy" />
+                            }
+                            else { <span class="dress-rail-empty">UBHAYA</span> }
+                        </span>
+                    </button>
+                }
             </div>
         </div>
 
-        <div class="dress-rail-track" data-dress-rail-track tabindex="0" aria-label="Up to 15 dresses. Swipe or use arrow keys to browse.">
-            @foreach (var product in railProducts)
-            {
-                var imageUrl = !string.IsNullOrWhiteSpace(product.ImageUrl)
-                    ? product.ImageUrl
-                    : product.Images?.OrderBy(image => image.SortOrder).Select(image => image.ImageUrl).FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
-                <a class="dress-rail-item" asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">
-                    <span class="dress-rail-hanger" aria-hidden="true"></span>
-                    <span class="dress-rail-image-wrap">
-                        @if (!string.IsNullOrWhiteSpace(imageUrl))
-                        {
-                            <img src="@ImageUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"])"
-                                 alt="@product.Name"
-                                 loading="lazy" />
-                        }
-                        else
-                        {
-                            <span class="dress-rail-image-placeholder">UBHAYA</span>
-                        }
-                    </span>
-                    <span class="dress-rail-product-name">@product.Name</span>
-                    <span class="dress-rail-product-price">₹@product.Price.ToString("N0")</span>
-                    <span class="dress-rail-view">VIEW STYLE <span aria-hidden="true">→</span></span>
-                </a>
-            }
+        <div class="dress-rail-feature" aria-live="polite">
+            <div class="dress-rail-feature-image">
+                @if (!string.IsNullOrWhiteSpace(ProductImage(firstProduct!)))
+                {
+                    <img data-dress-rail-feature-image src="@ProductImage(firstProduct!)" alt="@firstProduct!.Name" />
+                }
+                else { <span class="dress-rail-feature-empty">UBHAYA</span> }
+            </div>
+            <div class="dress-rail-feature-copy">
+                <p class="dress-rail-feature-kicker">CURATED FOR YOU</p>
+                <h3 data-dress-rail-feature-name>@firstProduct!.Name</h3>
+                <p class="dress-rail-feature-description">A handpicked style from the latest Ubhaya collection.</p>
+                <p class="dress-rail-feature-price" data-dress-rail-feature-price>₹@firstProduct.Price.ToString("N0")</p>
+                <a data-dress-rail-feature-link asp-controller="Products" asp-action="Details" asp-route-id="@firstProduct.Id" class="dress-rail-shop-link">SHOP THIS STYLE <span aria-hidden="true">→</span></a>
+            </div>
         </div>
-        <p class="dress-rail-hint">Swipe or drag to explore the collection</p>
+        <p class="dress-rail-hint">Drag the rail or tap a piece to take a closer look</p>
+
+        <script type="application/json" data-dress-rail-data>
+            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(railProducts.Select((product, index) => new {
+                index,
+                name = product.Name,
+                price = "₹" + product.Price.ToString("N0"),
+                image = ProductImage(product),
+                url = Url.Action("Details", "Products", new { id = product.Id })
+            })))
+        </script>
     </section>
 
     <style>
-        .interactive-dress-rail{padding:64px max(5vw,20px);background:#f8f6f2;overflow:hidden}
-        .dress-rail-heading{max-width:1400px;margin:0 auto 28px;display:flex;align-items:end;justify-content:space-between;gap:24px}
-        .dress-rail-eyebrow{margin:0 0 9px;color:#8b735d;font-size:10px;letter-spacing:.2em;font-weight:700}
-        .dress-rail-heading h2{margin:0;color:#28231f;font-family:Georgia,serif;font-size:clamp(27px,3vw,40px);font-weight:400}
-        .dress-rail-subtitle{margin:9px 0 0;color:#746b64;font-size:13px}
-        .dress-rail-controls{display:flex;align-items:center;gap:9px;flex-shrink:0}
-        .dress-rail-count{margin-right:8px;color:#766b60;font-size:11px;letter-spacing:.06em}
-        .dress-rail-controls button{width:38px;height:38px;border:1px solid #cfc5b9;border-radius:50%;background:transparent;color:#352d26;font-size:24px;line-height:1;cursor:pointer}
-        .dress-rail-controls button:hover{background:#352d26;color:#fff;border-color:#352d26}
-        .dress-rail-track{max-width:1400px;margin:auto;display:flex;gap:22px;overflow-x:auto;overflow-y:hidden;padding:14px 4px 22px;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#b8a998 transparent;cursor:grab}
-        .dress-rail-track.is-dragging{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}
-        .dress-rail-item{position:relative;display:flex;flex:0 0 clamp(170px,18vw,225px);flex-direction:column;align-items:center;color:inherit;text-decoration:none;scroll-snap-align:start}
-        .dress-rail-hanger{position:relative;width:30px;height:19px;margin-bottom:4px;border-top:1.5px solid #8f806f}
-        .dress-rail-hanger:before{content:"";position:absolute;width:9px;height:9px;left:10px;top:-9px;border:1.5px solid #8f806f;border-bottom:0;border-radius:9px 9px 0 0}
-        .dress-rail-hanger:after{content:"";position:absolute;left:0;right:0;top:0;border-top:1.5px solid #8f806f}
-        .dress-rail-image-wrap{width:100%;height:285px;display:flex;align-items:center;justify-content:center;background:#eee9e2;overflow:hidden}
-        .dress-rail-image-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
-        .dress-rail-item:hover .dress-rail-image-wrap img{transform:scale(1.045)}
-        .dress-rail-image-placeholder{color:#9b8b79;font-family:Georgia,serif;letter-spacing:.18em}
-        .dress-rail-product-name{max-width:100%;margin-top:13px;color:#302923;font-size:13px;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .dress-rail-product-price{margin-top:5px;color:#665b50;font-size:13px}
-        .dress-rail-view{margin-top:10px;color:#8a6d4e;font-size:9px;font-weight:700;letter-spacing:.14em}
-        .dress-rail-view span{font-size:14px;margin-left:4px}
-        .dress-rail-hint{max-width:1400px;margin:2px auto 0;color:#8b8177;font-size:10px;letter-spacing:.08em;text-align:right}
-        @@media(max-width:640px){.interactive-dress-rail{padding:42px 16px}.dress-rail-heading{align-items:flex-start;flex-direction:column;margin-bottom:18px}.dress-rail-controls{width:100%;justify-content:flex-end}.dress-rail-count{margin-right:auto}.dress-rail-item{flex-basis:64vw}.dress-rail-image-wrap{height:260px}.dress-rail-hint{text-align:center}}
-        @@media(prefers-reduced-motion:reduce){.dress-rail-track,.dress-rail-image-wrap img{scroll-behavior:auto;transition:none}}
+        .interactive-dress-rail{padding:52px max(5vw,20px) 34px;background:#fff;color:#211f1c;overflow:hidden}
+        .dress-rail-intro{text-align:center;max-width:900px;margin:0 auto 18px}
+        .dress-rail-eyebrow{margin:0 0 8px;font-size:9px;letter-spacing:.24em;color:#8a7867}
+        .dress-rail-intro h2{margin:0;font-family:Georgia,serif;font-size:clamp(20px,2.2vw,30px);font-weight:500;letter-spacing:.01em}
+        .dress-rail-rack{max-width:1250px;margin:0 auto;position:relative;padding-top:13px}
+        .dress-rail-bar{height:2px;background:linear-gradient(90deg,transparent,#77716b 5%,#77716b 95%,transparent);position:absolute;top:16px;left:0;right:0}
+        .dress-rail-track{position:relative;display:flex;align-items:flex-start;justify-content:center;gap:clamp(4px,1.5vw,22px);overflow-x:auto;overflow-y:hidden;padding:0 8px 8px;scrollbar-width:none;scroll-behavior:smooth;cursor:grab}
+        .dress-rail-track::-webkit-scrollbar{display:none}
+        .dress-rail-track.is-dragging{cursor:grabbing;scroll-behavior:auto}
+        .dress-rail-item{position:relative;flex:0 0 clamp(58px,8vw,104px);height:132px;border:0;background:transparent;padding:0 3px;cursor:pointer;opacity:.62;transition:opacity .25s,transform .25s}
+        .dress-rail-item:hover,.dress-rail-item.is-selected{opacity:1}
+        .dress-rail-item.is-selected{transform:translateY(2px) scale(1.08);z-index:2}
+        .dress-rail-hook{display:block;position:relative;width:2px;height:13px;background:#9b948b;margin:0 auto 0}
+        .dress-rail-hook:before{content:"";position:absolute;width:10px;height:7px;border:1px solid #9b948b;border-bottom:0;border-radius:9px 9px 0 0;left:-4px;top:-5px}
+        .dress-rail-thumb{height:112px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+        .dress-rail-thumb img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 4px 4px #00000012)}
+        .dress-rail-empty,.dress-rail-feature-empty{font:11px Georgia,serif;letter-spacing:.15em;color:#9a8e82}
+        .dress-rail-feature{max-width:780px;min-height:210px;margin:6px auto 0;display:grid;grid-template-columns:minmax(180px, .9fr) 1fr;align-items:center;gap:clamp(24px,5vw,70px);padding:10px 24px 0}
+        .dress-rail-feature-image{height:210px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+        .dress-rail-feature-image img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;transition:opacity .18s,transform .35s}
+        .dress-rail-feature-copy{max-width:360px}
+        .dress-rail-feature-kicker{margin:0 0 8px;color:#8b7865;font-size:9px;letter-spacing:.2em}
+        .dress-rail-feature-copy h3{margin:0 0 8px;font:500 clamp(20px,2.2vw,27px) Georgia,serif}
+        .dress-rail-feature-description{margin:0 0 12px;color:#77716b;font-size:12px;line-height:1.6}
+        .dress-rail-feature-price{margin:0 0 18px;font-size:14px}
+        .dress-rail-shop-link{display:inline-flex;align-items:center;gap:12px;padding:10px 19px;background:#171614;color:#fff;text-decoration:none;border-radius:30px;font-size:9px;letter-spacing:.12em}
+        .dress-rail-shop-link:hover{background:#80664e}
+        .dress-rail-hint{margin:16px auto 0;text-align:center;color:#8b8177;font-size:10px;letter-spacing:.06em}
+        @@media(max-width:640px){.interactive-dress-rail{padding:38px 12px 28px}.dress-rail-intro{padding:0 8px}.dress-rail-track{justify-content:flex-start;gap:5px}.dress-rail-item{flex-basis:72px;height:116px}.dress-rail-thumb{height:97px}.dress-rail-feature{grid-template-columns:1fr;gap:8px;padding:4px 14px 0;text-align:center}.dress-rail-feature-image{height:220px}.dress-rail-feature-copy{margin:auto}.dress-rail-feature-price{margin-bottom:14px}.dress-rail-hint{margin-top:12px}}
+        @@media(prefers-reduced-motion:reduce){.dress-rail-track,.dress-rail-item,.dress-rail-feature-image img{scroll-behavior:auto;transition:none}}
     </style>
 }
