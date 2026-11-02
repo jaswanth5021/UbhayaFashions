@@ -4,6 +4,7 @@ using backend.Models;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,6 +19,7 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/admin/auth")]
+[EnableRateLimiting("auth")]
 public class AdminAuthController(
     ApplicationDbContext db,
     IConfiguration config,
