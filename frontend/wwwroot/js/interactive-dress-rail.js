@@ -20,17 +20,20 @@
     let dragged = false;
     let startX = 0;
     let startScroll = 0;
-    let hoverFrame = 0;
-    let featureTimer;
+    let suppressClick = false;
+    let previewTimer = 0;
+    let edgeFrame = 0;
+    let pointerX = null;
 
-    function preview(index) {
+    function showPreview(index) {
         const product = products[index];
         if (!product) return;
         activeIndex = index;
+
         items.forEach((item, i) => {
-            const active = i === index;
-            item.classList.toggle("is-selected", active);
-            item.setAttribute("aria-pressed", active ? "true" : "false");
+            const selected = i === index;
+            item.classList.toggle("is-selected", selected);
+            item.setAttribute("aria-pressed", selected ? "true" : "false");
         });
 
         feature.hidden = false;
@@ -42,19 +45,19 @@
         if (featurePrice) featurePrice.textContent = product.price || "";
         if (featureLink) featureLink.href = product.url || "#";
 
-        if (featureImage) {
+        if (featureImage && product.image) {
+            window.clearTimeout(previewTimer);
             featureImage.style.opacity = "0";
-            window.clearTimeout(featureTimer);
-            featureTimer = window.setTimeout(() => {
-                featureImage.src = product.image || "";
+            previewTimer = window.setTimeout(() => {
+                featureImage.src = product.image;
                 featureImage.alt = product.name || "";
                 featureImage.onload = () => { featureImage.style.opacity = "1"; };
-                if (!product.image || featureImage.complete) featureImage.style.opacity = "1";
-            }, 90);
+                if (featureImage.complete) featureImage.style.opacity = "1";
+            }, 80);
         }
     }
 
-    function clearPreview() {
+    function hidePreview() {
         activeIndex = -1;
         items.forEach(item => {
             item.classList.remove("is-selected");
@@ -65,32 +68,55 @@
 
     items.forEach((item, index) => {
         item.addEventListener("pointerenter", event => {
-            if (event.pointerType === "mouse" || event.pointerType === "pen") preview(index);
+            if (event.pointerType === "mouse" || event.pointerType === "pen") showPreview(index);
         });
-        item.addEventListener("focus", () => preview(index));
-        item.addEventListener("click", () => preview(index));
+        item.addEventListener("focus", () => showPreview(index));
+        item.addEventListener("click", () => {
+            if (suppressClick) return;
+            showPreview(index);
+        });
     });
 
+    // Keep the selected look visible while the pointer moves from the garment to its details.
     section.addEventListener("pointerleave", event => {
-        if (event.pointerType === "mouse" || event.pointerType === "pen") clearPreview();
+        if (event.pointerType === "mouse" || event.pointerType === "pen") hidePreview();
     });
     section.addEventListener("focusout", event => {
-        if (!section.contains(event.relatedTarget)) clearPreview();
+        if (!section.contains(event.relatedTarget)) hidePreview();
     });
 
-    // Move the rail gently as the pointer approaches either edge.
-    track.addEventListener("pointermove", event => {
-        if (event.pointerType !== "mouse" || pointerDown || track.scrollWidth <= track.clientWidth) return;
+    // Cursor position gently guides the rail left or right, like sliding hangers along a rack.
+    function edgeScroll() {
+        if (pointerX === null || pointerDown || track.scrollWidth <= track.clientWidth) {
+            edgeFrame = 0;
+            return;
+        }
         const bounds = track.getBoundingClientRect();
-        const ratio = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
-        const target = ratio * (track.scrollWidth - track.clientWidth);
-        if (hoverFrame) cancelAnimationFrame(hoverFrame);
-        hoverFrame = requestAnimationFrame(() => {
-            track.scrollLeft += (target - track.scrollLeft) * 0.12;
-        });
+        const localX = Math.max(0, Math.min(bounds.width, pointerX - bounds.left));
+        const normalized = (localX / bounds.width - 0.5) * 2;
+        const threshold = 0.18;
+        let velocity = 0;
+        if (normalized < -threshold) {
+            velocity = -Math.pow((-normalized - threshold) / (1 - threshold), 2) * 13;
+        } else if (normalized > threshold) {
+            velocity = Math.pow((normalized - threshold) / (1 - threshold), 2) * 13;
+        }
+        if (Math.abs(velocity) > 0.15) track.scrollLeft += velocity;
+        edgeFrame = requestAnimationFrame(edgeScroll);
+    }
+
+    track.addEventListener("pointermove", event => {
+        if (event.pointerType !== "mouse" || pointerDown) return;
+        pointerX = event.clientX;
+        if (!edgeFrame) edgeFrame = requestAnimationFrame(edgeScroll);
+    });
+    track.addEventListener("pointerleave", () => {
+        pointerX = null;
+        if (edgeFrame) cancelAnimationFrame(edgeFrame);
+        edgeFrame = 0;
     });
 
-    // Mouse drag and native touch swipe.
+    // Desktop drag; touch devices retain their native horizontal swipe behaviour.
     track.addEventListener("pointerdown", event => {
         if (event.pointerType === "touch" || event.button !== 0) return;
         pointerDown = true;
@@ -108,17 +134,21 @@
         }
     });
     const stopDrag = () => {
+        if (!pointerDown) return;
         pointerDown = false;
         track.classList.remove("is-dragging");
+        if (dragged) {
+            suppressClick = true;
+            window.setTimeout(() => { suppressClick = false; }, 0);
+        }
     };
     track.addEventListener("pointerup", stopDrag);
     track.addEventListener("pointercancel", stopDrag);
     track.addEventListener("mouseleave", stopDrag);
     track.addEventListener("click", event => {
-        if (!dragged) return;
+        if (!suppressClick) return;
         event.preventDefault();
         event.stopPropagation();
-        dragged = false;
     }, true);
 
     track.addEventListener("keydown", event => {
