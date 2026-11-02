@@ -1,0 +1,88 @@
+@{
+    ViewData["Title"] = "Security";
+    ViewData["MetaDescription"] = "Learn how Ubhaya Fashions protects customer information, handles security reports, and communicates its security practices.";
+}
+<link rel="stylesheet" href="~/css/pages/shared/security.css" asp-append-version="true" />
+
+<div class="security-page">
+    <section class="security-hero">
+        <div class="security-hero-copy">
+            <span class="security-eyebrow">YOUR TRUST MATTERS</span>
+            <h1>Security at <em>Ubhaya Fashions</em></h1>
+            <p>We take the protection of your account and order information seriously. This page explains the safeguards in place, what we are still verifying, and how to contact us about a security concern.</p>
+            <div class="security-hero-meta"><span class="security-live-dot"></span> Security practices and transparency</div>
+        </div>
+        <div class="security-hero-mark" aria-hidden="true">
+            <svg viewBox="0 0 120 140" fill="none"><path d="M60 7 105 25v36c0 32-18 54-45 69C33 115 15 93 15 61V25L60 7Z" stroke="currentColor" stroke-width="5"/><path d="m39 68 14 14 29-32" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+    </section>
+
+    <div class="security-intro">
+        <div><span class="security-kicker">OUR APPROACH</span><h2>Clear information. Honest commitments.</h2></div>
+        <p>We do not claim certifications, audits, or security tests that we cannot substantiate. Where a control is still being checked or arranged, we say so openly.</p>
+    </div>
+
+    <div class="security-grid">
+        <section class="security-card" id="certifications">
+            <div class="security-card-top"><span class="security-icon">✦</span><span class="security-status status-pending">No certifications claimed</span></div>
+            <h2>Certifications &amp; compliance</h2>
+            <p>Ubhaya Fashions does not currently publish SOC 2, ISO 27001, HIPAA, or PCI DSS certification claims. We will only display a certification or audit logo when we hold valid evidence that covers the relevant business and systems.</p>
+            <p>GDPR is a privacy regulation, not a certification. Applicable privacy and e-commerce obligations depend on the customers, data, and services involved. Payment processing is handled through our payment provider; this does not mean the store itself is PCI DSS certified.</p>
+            <div class="security-detail"><strong>Coverage:</strong> No independent certification is currently represented on this page.</div>
+        </section>
+
+        <section class="security-card" id="encryption">
+            <div class="security-card-top"><span class="security-icon">⌁</span><span class="security-status status-partial">Partially verified</span></div>
+            <h2>Data encryption</h2>
+            <p>Connections to the website are served over HTTPS. The application is configured to redirect HTTP traffic to HTTPS and use HTTP Strict Transport Security in non-development environments. Authentication cookies are configured as HttpOnly and Secure in production.</p>
+            <p>Account passwords are stored as password hashes rather than readable passwords. We are still verifying encryption at rest for the SQL Server database, server storage, and backups. We do not describe those systems as encrypted at rest until that verification is complete.</p>
+            <div class="security-detail"><strong>In transit:</strong> HTTPS/TLS. <strong>At rest:</strong> database and backup encryption verification pending.</div>
+        </section>
+
+        <section class="security-card" id="residency">
+            <div class="security-card-top"><span class="security-icon">◎</span><span class="security-status status-partial">Location review pending</span></div>
+            <h2>Data residency</h2>
+            <p>The current production web server is reported to run on AWS EC2 in Asia Pacific (Singapore), region <strong>ap-southeast-1</strong>. This is the known location of that EC2 instance, not a guarantee that every category of customer data is stored only there.</p>
+            <p>We are verifying the locations of the SQL Server database, backups, uploaded product/customer files, logs, and the services that help us process payments, ship orders, and send emails. These providers may process information in other locations under their own terms.</p>
+            <div class="security-detail"><strong>Regional options:</strong> An India-region migration is being considered; it is not represented as completed.</div>
+        </section>
+
+        <section class="security-card" id="access">
+            <div class="security-card-top"><span class="security-icon">◈</span><span class="security-status status-partial">Review in progress</span></div>
+            <h2>Access controls</h2>
+            <p>Customer sign-in and administrator sign-in use separate authentication paths. Authentication endpoints have request throttling, and production authentication cookies are configured with HttpOnly, Secure, and SameSite protections.</p>
+            <p>Access to customer information should be limited to people who need it to operate the store and support an order. We are completing a review of administrator accounts, server and AWS permissions, database privileges, and access logging. We will update this page when that review is evidenced.</p>
+            <div class="security-detail"><strong>Commitment:</strong> No shared administrator credentials; access should be individually assigned and limited to business need.</div>
+        </section>
+
+        <section class="security-card" id="disclosure">
+            <div class="security-card-top"><span class="security-icon">⚑</span><span class="security-status status-partial">Reporting route available</span></div>
+            <h2>Vulnerability disclosure</h2>
+            <p>If you believe you have found a security weakness, please contact us through our <a asp-controller="Contact" asp-action="Index">Contact page</a> and clearly mark the message “Security vulnerability report”. Include the affected page or endpoint, steps to reproduce, and relevant screenshots or request details. Do not include real customer data, passwords, or payment information.</p>
+            <p>Please do not access, change, download, or disclose another person's information, disrupt the service, or run tests that could affect customers. We will review good-faith reports and may contact you for clarification. This is a responsible disclosure channel; we do not currently operate a public bug bounty programme.</p>
+            <div class="security-detail"><strong>Response:</strong> Reports are reviewed through the store's support channel. A dedicated monitored security mailbox and formal response targets are still to be established.</div>
+        </section>
+
+        <section class="security-card" id="incidents">
+            <div class="security-card-top"><span class="security-icon">◷</span><span class="security-status status-pending">History being established</span></div>
+            <h2>Security incident history</h2>
+            <p>We are establishing a documented incident register by reviewing available application, hosting, database, and provider records. We do not currently publish a verified incident timeline on this page.</p>
+            <p>This should not be interpreted as a statement that no incidents have ever occurred. If a security incident is confirmed and is appropriate to disclose, we will publish a dated summary describing the affected service, customer impact where known, and remediation, while protecting personal information and investigation details.</p>
+            <div class="security-detail"><strong>Public record:</strong> No verified, disclosed incident entries are currently published.</div>
+        </section>
+
+        <section class="security-card security-card-wide" id="testing">
+            <div class="security-card-top"><span class="security-icon">⌕</span><span class="security-status status-pending">Not yet evidenced</span></div>
+            <h2>Penetration testing &amp; independent reviews</h2>
+            <p>We have not yet published evidence of a completed independent third-party penetration test for the production website and API. Automated code and dependency checks are being introduced in the development workflow, but these are not a substitute for an independent penetration test.</p>
+            <p>When an external assessment is completed, we will publish the assessment date, scope at a high level, and remediation status. A report or executive summary may be requested through our <a asp-controller="Contact" asp-action="Index">Contact page</a>, subject to confidentiality and the need to avoid exposing exploitable technical details.</p>
+            <div class="security-detail"><strong>Planned scope:</strong> Public storefront, customer authentication, admin portal, APIs, and checkout/payment integration boundaries.</div>
+        </section>
+    </div>
+
+    <section class="security-contact">
+        <div><span class="security-kicker">NEED TO REACH US?</span><h2>Have a security concern?</h2><p>Contact our team privately and label your message as a security report. Please avoid sharing sensitive customer information in your message.</p></div>
+        <a asp-controller="Contact" asp-action="Index" class="security-contact-link">Contact our team <span aria-hidden="true">→</span></a>
+    </section>
+    <p class="security-updated">Last reviewed: November 2026. This page describes the controls and verification status known at the time of review and may be updated as our systems and providers change.</p>
+</div>
