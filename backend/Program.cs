@@ -3,6 +3,8 @@ using backend.Middleware;
 using backend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
@@ -167,20 +169,37 @@ builder.Services
 // =====================================================
 
 builder.Services.AddAuthorization();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("auth", limiter =>
+    {
+        limiter.PermitLimit = 10;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+        limiter.AutoReplenishment = true;
+    });
+});
 
 
 // =====================================================
 // CORS
 // =====================================================
 
+var allowedOrigins = builder.Configuration.GetSection("Security:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+var configuredFrontendUrl = builder.Configuration["FrontendUrl"];
+if (Uri.TryCreate(configuredFrontendUrl, UriKind.Absolute, out var frontendUri)
+    && !allowedOrigins.Contains(frontendUri.GetLeftPart(UriPartial.Authority), StringComparer.OrdinalIgnoreCase))
+{
+    allowedOrigins = allowedOrigins.Append(frontendUri.GetLeftPart(UriPartial.Authority)).ToArray();
+}
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        if (allowedOrigins.Length > 0)
+            policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
+        // Same-origin server-to-server deployments do not require CORS.
     });
 });
 
@@ -202,7 +221,8 @@ if (app.Environment.IsDevelopment())
 // MIDDLEWARE
 // =====================================================
 
-// app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment()) app.UseHsts();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
 Directory.CreateDirectory(uploadsPath);
@@ -212,9 +232,9 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
-app.UseCors("AllowFrontend");
-
 app.UseRouting();
+app.UseCors("AllowFrontend");
+app.UseRateLimiter();
 
 
 // =====================================================
