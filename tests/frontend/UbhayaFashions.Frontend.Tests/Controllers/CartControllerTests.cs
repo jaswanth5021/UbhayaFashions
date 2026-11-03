@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using LadiesDressStore.Web.Controllers;
 using LadiesDressStore.Web.Models;
 using Microsoft.AspNetCore.Http;
@@ -44,6 +45,6 @@ public sealed class CartControllerTests
         public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
         public void Remove(string key) { }
         public void Set(string key, byte[] value) { }
-        public bool TryGetValue(string key, out byte[]? value) { value = null; return false; }
+        public bool TryGetValue(string key, [NotNullWhen(true)] out byte[]? value) { value = null; return false; }
     }
 }
