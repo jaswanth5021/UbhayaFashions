@@ -269,10 +269,10 @@ public sealed class DelhiveryService(
         var httpClient = CreateClient();
         var requestUri = new Uri(httpClient.BaseAddress!, "api/cmu/create.json");
         var productsDescription = string.Join(", ", order.Items.Select(x => x.ProductName).Distinct());
-        var forbiddenCharacters = new[] { '%', '#', ';', '\\\\', '&' };
+        var forbiddenCharacters = new[] { '%', '#', ';', '\\', '&' };
         var addressSpecialCharacters = forbiddenCharacters
             .Where(character => shipment.Address.Contains(character))
-            .Select(character => character == '\\\\' ? "backslash" : character.ToString())
+            .Select(character => character == '\\' ? "backslash" : character.ToString())
             .ToArray();
 
         logger.LogInformation(
