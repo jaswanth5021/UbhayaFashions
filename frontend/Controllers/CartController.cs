@@ -51,12 +51,18 @@ public class CartController : Controller
         var normalizedSize = size?.Trim();
         var normalizedColor = string.IsNullOrWhiteSpace(color) ? null : color.Trim();
         var hasColorVariants = product.Variants.Any(item => !string.IsNullOrWhiteSpace(item.Color));
+        var sizeVariants = product.Variants
+            .Where(item => string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        // Prefer the selected color's specific stock; fall back to a shared
+        // variant whose color is empty when no exact-color variant exists.
         var variant = hasColorVariants
-            ? product.Variants.FirstOrDefault(item =>
-                string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase) &&
+            ? sizeVariants.FirstOrDefault(item =>
+                !string.IsNullOrWhiteSpace(normalizedColor) &&
                 string.Equals(item.Color, normalizedColor, StringComparison.OrdinalIgnoreCase))
-            : product.Variants.FirstOrDefault(item =>
-                string.Equals(item.Size, normalizedSize, StringComparison.OrdinalIgnoreCase));
+                ?? sizeVariants.FirstOrDefault(item => string.IsNullOrWhiteSpace(item.Color))
+            : sizeVariants.FirstOrDefault();
         if (variant is null)
         {
             if (isAjax) return BadRequest(new { success = false, message = "Please select an available size." });
