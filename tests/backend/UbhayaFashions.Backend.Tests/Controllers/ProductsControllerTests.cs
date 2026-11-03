@@ -59,7 +59,7 @@ public sealed class ProductsControllerTests
         {
             Assert.That(value.Name, Is.EqualTo("Jaipuri Kurti"));
             Assert.That(value.Variants, Has.Count.EqualTo(1));
-            Assert.That(value.Variants[0].Price, Is.EqualTo(1299m));
+            Assert.That(value.Variants.First().Price, Is.EqualTo(1299m));
         });
     }
 
