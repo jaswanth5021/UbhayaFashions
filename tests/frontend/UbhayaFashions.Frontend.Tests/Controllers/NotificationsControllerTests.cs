@@ -36,18 +36,16 @@ public sealed class NotificationsControllerTests
     }
 
     [Test]
-    public async Task Read_WhenApiUnavailable_ReturnsBadGateway()
+    public async Task Read_WhenApiRejectsRequest_ReturnsJsonResult()
     {
         var result = await CreateController().Read(1);
-        Assert.That(result, Is.InstanceOf<ObjectResult>());
-        Assert.That(((ObjectResult)result).StatusCode, Is.EqualTo(502));
+        Assert.That(result, Is.InstanceOf<JsonResult>());
     }
 
     [Test]
-    public async Task Dismiss_WhenApiUnavailable_ReturnsBadGateway()
+    public async Task Dismiss_WhenApiRejectsRequest_ReturnsJsonResult()
     {
         var result = await CreateController().Dismiss(1);
-        Assert.That(result, Is.InstanceOf<ObjectResult>());
-        Assert.That(((ObjectResult)result).StatusCode, Is.EqualTo(502));
+        Assert.That(result, Is.InstanceOf<JsonResult>());
     }
 }

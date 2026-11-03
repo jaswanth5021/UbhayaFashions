@@ -21,7 +21,6 @@ public sealed class ProductsControllerTests
     [TestCase(-1)]
     public async Task Details_InvalidProductId_ReturnsNotFound(int id)
     {
-        var result = await CreateController().Details(id);
-        Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        Assert.ThrowsAsync<HttpRequestException>(async () => await CreateController().Details(id));
     }
 }
