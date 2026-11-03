@@ -30,7 +30,8 @@ public interface IDelhiveryService
 public sealed class DelhiveryService(
     IHttpClientFactory httpClientFactory,
     IConfiguration configuration,
-    ILogger<DelhiveryService> logger) : IDelhiveryService
+    ILogger<DelhiveryService> logger,
+    IErrorLog errorLog) : IDelhiveryService
 {
     private HttpClient CreateClient()
     {
@@ -275,6 +276,13 @@ public sealed class DelhiveryService(
             .Select(character => character == '\\' ? "backslash" : character.ToString())
             .ToArray();
 
+        errorLog.Write(
+            "Delhivery Integration",
+            "Delhivery Support Request Summary",
+            $"OrderId={order.Id}; OrderReference=UBHAYA-{order.Id}; Method=POST; RequestUri={requestUri}; ContentType=application/x-www-form-urlencoded; FormFields=format,data; FormatValue=json; ClientName={clientName}; PickupLocationName={pickup}; DestinationNamePresent={!string.IsNullOrWhiteSpace(shipment.RecipientName)}; DestinationPhonePresent={!string.IsNullOrWhiteSpace(shipment.RecipientPhone)}; DestinationPin={shipment.PostalCode}; City={shipment.City}; State={shipment.State}; Country={shipment.Country}; PaymentMode={paymentMode}; PaymentStatus={order.PaymentStatus}; TotalAmount={order.TotalAmount}; CodAmount={(paymentMode == "COD" ? order.TotalAmount : 0)}; ProductsDescription={productsDescription}; Quantity={Math.Max(1, order.Items.Sum(x => x.Quantity))}; WeightGrams={shipment.WeightGrams}; DimensionsCm=25x20x5; ShippingMode=Surface; SellerName={configuration["Delhivery:SellerName"] ?? "UBHAYA FASHIONS"}; SellerPin={configuration["Delhivery:SellerPin"] ?? ""}; SellerAddressPresent={!string.IsNullOrWhiteSpace(configuration["Delhivery:SellerAddress"])}; SellerPhonePresent={!string.IsNullOrWhiteSpace(configuration["Delhivery:SellerPhone"])}; WaybillFieldIsBlank=true; AddressSpecialCharacters={string.Join(",", addressSpecialCharacters)}; JsonPayloadLength={json.Length}",
+            requestUri.ToString(),
+            "delhivery-diagnostics");
+
         logger.LogInformation(
             "Delhivery Support Request Summary. OrderId={OrderId}, OrderReference={OrderReference}, Method=POST, RequestUri={RequestUri}, ContentType=application/x-www-form-urlencoded, FormFields=format,data, FormatValue=json, ClientName={ClientName}, PickupLocationName={PickupLocationName}, DestinationNamePresent={DestinationNamePresent}, DestinationPhonePresent={DestinationPhonePresent}, DestinationPin={DestinationPin}, City={City}, State={State}, Country={Country}, PaymentMode={PaymentMode}, PaymentStatus={PaymentStatus}, TotalAmount={TotalAmount}, CodAmount={CodAmount}, ProductsDescription={ProductsDescription}, Quantity={Quantity}, WeightGrams={WeightGrams}, DimensionsCm=25x20x5, ShippingMode=Surface, SellerName={SellerName}, SellerPin={SellerPin}, SellerAddressPresent={SellerAddressPresent}, SellerPhonePresent={SellerPhonePresent}, WaybillFieldIsBlank={WaybillFieldIsBlank}, AddressContainsDelhiveryFaqSpecialCharacters={AddressContainsDelhiveryFaqSpecialCharacters}, AddressSpecialCharacters={AddressSpecialCharacters}, JsonPayloadLength={JsonPayloadLength}",
             order.Id,
@@ -347,6 +355,23 @@ public sealed class DelhiveryService(
                 responseContentType,
                 responseRequestId,
                 body);
+        }
+
+        errorLog.Write(
+            "Delhivery Integration",
+            "Delhivery provider response",
+            $"OrderId={order.Id}; HttpStatus={(int)response.StatusCode}; ReasonPhrase={response.ReasonPhrase}; ContentType={responseContentType}; ProviderRequestId={responseRequestId}; ResponseBody={body}",
+            requestUri.ToString(),
+            "delhivery-diagnostics");
+
+        if (configuration.GetValue<bool>("Delhivery:EnableSupportPayloadLogging"))
+        {
+            errorLog.Write(
+                "Delhivery Integration",
+                "Delhivery full support payload (contains personal information)",
+                $"OrderId={order.Id}; FormFormat=json; FormData={json}",
+                requestUri.ToString(),
+                "delhivery-sensitive-diagnostics");
         }
 
         EnsureSuccess(response, body, "Shipment creation");
