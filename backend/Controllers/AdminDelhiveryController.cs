@@ -8,6 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
+public sealed record CreateDelhiveryPickupRequest(
+    string PickupDate,
+    string PickupTime,
+    int ExpectedPackageCount);
+
 [ApiController]
 [Route("api/admin/orders")]
 [Authorize(Roles = "Admin")]
@@ -89,6 +94,33 @@ public sealed class AdminDelhiveryController(
         catch (Exception ex)
         {
             logger.LogError(ex, "Delhivery waybill fetch failed for count {Count}", count);
+            return StatusCode(502, new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("/api/admin/delhivery/pickup-request")]
+    public async Task<IActionResult> CreatePickupRequest(
+        [FromBody] CreateDelhiveryPickupRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await delhivery.CreatePickupRequestAsync(
+                request.PickupDate, request.PickupTime, request.ExpectedPackageCount, cancellationToken);
+            return Ok(new
+            {
+                success = true,
+                pickupLocation = configuration["Delhivery:PickupLocationName"],
+                response
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Delhivery pickup request creation failed");
             return StatusCode(502, new { error = ex.Message });
         }
     }
