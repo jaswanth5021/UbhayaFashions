@@ -13,14 +13,14 @@
     var initialColor = productColors.FirstOrDefault() ?? "";
     // Variants without a color are shared across every product color.
     // Prefer an exact-color variant over a shared fallback when both exist for the same size.
-    var variants = (hasColorVariants
-        ? allVariants.Where(variant =>
+    var variants = allVariants
+        .Where(variant =>
+            !hasColorVariants ||
             string.IsNullOrWhiteSpace(variant.Color) ||
             string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(variant =>
-                string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
-        : allVariants)
         .OrderBy(variant => variant.Size)
+        .ThenByDescending(variant =>
+            string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
         .ToList();
 
     var standardSizes = new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" };
