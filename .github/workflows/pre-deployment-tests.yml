@@ -1,0 +1,29 @@
+name: Pre-deployment tests
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches:
+      - feature/comprehensive-pre-deployment-tests
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Run all tests and frontend build
+        shell: pwsh
+        run: .\tests\run-all-tests.ps1 -Configuration Release
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubhaya-test-results
+          path: tests/TestResults/
+          if-no-files-found: warn
