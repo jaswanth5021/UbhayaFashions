@@ -3,6 +3,8 @@ using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using Moq;
 
 namespace UbhayaFashions.Frontend.Tests.Helpers;
@@ -21,6 +23,7 @@ internal static class ControllerTestHost
     {
         context ??= CreateHttpContext();
         controller.ControllerContext = new ControllerContext { HttpContext = context };
+        controller.Url = new UrlHelper(new ActionContext(context, new RouteData(), new ActionDescriptor()));
         controller.TempData = new TempDataDictionary(context, Mock.Of<ITempDataProvider>());
     }
 
