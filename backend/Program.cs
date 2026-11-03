@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Configuration;
 using backend.Middleware;
 using backend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -44,6 +45,9 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.Configure<RazorpaySettings>(
+    builder.Configuration.GetSection("Razorpay"));
 
 // Razorpay REST client. The secret is supplied only by backend configuration.
 builder.Services.AddHttpClient("Razorpay", client =>
