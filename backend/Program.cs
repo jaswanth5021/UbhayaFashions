@@ -56,15 +56,26 @@ builder.Services.AddHttpClient("Razorpay", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-// Delhivery B2C client. Defaults to staging; use production only after activation.
+// Delhivery B2C client. Environment is explicit; production is never inferred
+// from the presence of a token. BaseUrl can override the environment default.
 builder.Services.AddHttpClient("Delhivery", client =>
 {
-    var baseUrl = builder.Configuration["Delhivery:BaseUrl"];
-    if (string.IsNullOrWhiteSpace(baseUrl))
-        baseUrl = "https://staging-express.delhivery.com/";
-    if (!baseUrl.EndsWith("/", StringComparison.Ordinal))
-        baseUrl += "/";
-    client.BaseAddress = new Uri(baseUrl);
+    var environment = builder.Configuration["Delhivery:Environment"] ?? "Staging";
+    var configuredBaseUrl = builder.Configuration["Delhivery:BaseUrl"];
+    var baseUrl = !string.IsNullOrWhiteSpace(configuredBaseUrl)
+        ? configuredBaseUrl
+        : environment.Equals("Production", StringComparison.OrdinalIgnoreCase)
+            ? "https://track.delhivery.com/"
+            : environment.Equals("Staging", StringComparison.OrdinalIgnoreCase)
+                ? "https://staging-express.delhivery.com/"
+                : throw new InvalidOperationException(
+                    "Delhivery:Environment must be either Staging or Production.");
+
+    if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var delhiveryBaseUri) ||
+        (delhiveryBaseUri.Scheme != Uri.UriSchemeHttps))
+        throw new InvalidOperationException("Delhivery:BaseUrl must be an absolute HTTPS URL.");
+
+    client.BaseAddress = new Uri(baseUrl.EndsWith("/", StringComparison.Ordinal) ? baseUrl : baseUrl + "/");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddScoped<IDelhiveryService, DelhiveryService>();
