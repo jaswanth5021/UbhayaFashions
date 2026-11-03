@@ -264,17 +264,66 @@ public sealed class DelhiveryService(
             new KeyValuePair<string, string>("data", json)
         });
 
-        using var response = await CreateClient().PostAsync("api/cmu/create.json", content, cancellationToken);
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        // Capture Delhivery's response before parsing so failed HTTP and package-level
-        // responses are both available in the application logs. Never log request headers or tokens.
+        // Log only non-sensitive request diagnostics. Do not log the API token,
+        // recipient name, full address, or phone number.
+        var httpClient = CreateClient();
+        var requestUri = new Uri(httpClient.BaseAddress!, "api/cmu/create.json");
         logger.LogInformation(
-            "Delhivery Create Shipment response. OrderId={OrderId}, HttpStatus={HttpStatus}, IsSuccessStatusCode={IsSuccessStatusCode}, ResponseBody={ResponseBody}",
+            "Delhivery Create Shipment request. OrderId={OrderId}, OrderReference={OrderReference}, RequestUri={RequestUri}, ClientName={ClientName}, PickupLocation={PickupLocation}, DestinationPin={DestinationPin}, City={City}, State={State}, Country={Country}, PaymentMode={PaymentMode}, PaymentStatus={PaymentStatus}, TotalAmount={TotalAmount}, Quantity={Quantity}, WeightGrams={WeightGrams}, ShippingMode={ShippingMode}, SellerPin={SellerPin}, PayloadLength={PayloadLength}",
             order.Id,
-            (int)response.StatusCode,
-            response.IsSuccessStatusCode,
-            body);
+            $"UBHAYA-{order.Id}",
+            requestUri,
+            clientName,
+            pickup,
+            shipment.PostalCode,
+            shipment.City,
+            shipment.State,
+            shipment.Country,
+            paymentMode,
+            order.PaymentStatus,
+            order.TotalAmount,
+            Math.Max(1, order.Items.Sum(x => x.Quantity)),
+            shipment.WeightGrams,
+            "Surface",
+            configuration["Delhivery:SellerPin"] ?? "",
+            json.Length);
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/cmu/create.json")
+        {
+            Content = content
+        };
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        var responseContentType = response.Content.Headers.ContentType?.ToString() ?? "NotProvided";
+        var responseRequestId = response.Headers.TryGetValues("X-Request-Id", out var requestIds)
+            ? string.Join(",", requestIds)
+            : response.Headers.TryGetValues("X-Trace-Id", out var traceIds)
+                ? string.Join(",", traceIds)
+                : "NotProvided";
+
+        // Log the complete provider response. It is essential for diagnosing HTTP
+        // errors and HTTP 200 responses that contain package-level failures.
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogError(
+                "Delhivery Create Shipment HTTP failure. OrderId={OrderId}, HttpStatus={HttpStatus}, ReasonPhrase={ReasonPhrase}, ContentType={ContentType}, ProviderRequestId={ProviderRequestId}, ResponseBody={ResponseBody}",
+                order.Id,
+                (int)response.StatusCode,
+                response.ReasonPhrase,
+                responseContentType,
+                responseRequestId,
+                body);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Delhivery Create Shipment provider response. OrderId={OrderId}, HttpStatus={HttpStatus}, ContentType={ContentType}, ProviderRequestId={ProviderRequestId}, ResponseBody={ResponseBody}",
+                order.Id,
+                (int)response.StatusCode,
+                responseContentType,
+                responseRequestId,
+                body);
+        }
 
         EnsureSuccess(response, body, "Shipment creation");
 
