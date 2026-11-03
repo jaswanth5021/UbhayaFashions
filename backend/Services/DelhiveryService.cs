@@ -266,6 +266,16 @@ public sealed class DelhiveryService(
 
         using var response = await CreateClient().PostAsync("api/cmu/create.json", content, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        // Capture Delhivery's response before parsing so failed HTTP and package-level
+        // responses are both available in the application logs. Never log request headers or tokens.
+        logger.LogInformation(
+            "Delhivery Create Shipment response. OrderId={OrderId}, HttpStatus={HttpStatus}, IsSuccessStatusCode={IsSuccessStatusCode}, ResponseBody={ResponseBody}",
+            order.Id,
+            (int)response.StatusCode,
+            response.IsSuccessStatusCode,
+            body);
+
         EnsureSuccess(response, body, "Shipment creation");
 
         using var document = JsonDocument.Parse(body);
@@ -330,25 +340,46 @@ public sealed class DelhiveryService(
     private static string ExtractShipmentError(JsonElement root)
     {
         var messages = new List<string>();
-        var remark = FindString(root, "rmk");
-        if (!string.IsNullOrWhiteSpace(remark)) messages.Add(remark);
 
-        if (root.TryGetProperty("packages", out var packages) && packages.ValueKind == JsonValueKind.Array)
+        // Delhivery may return an error/message at the root, or remarks per package.
+        foreach (var field in new[] { "error", "message", "rmk" })
+        {
+            var value = FindString(root, field);
+            if (!string.IsNullOrWhiteSpace(value))
+                messages.Add(value);
+        }
+
+        if (root.TryGetProperty("packages", out var packages) &&
+            packages.ValueKind == JsonValueKind.Array)
         {
             foreach (var package in packages.EnumerateArray())
             {
-                if (package.TryGetProperty("remarks", out var remarks) && remarks.ValueKind == JsonValueKind.Array)
+                foreach (var field in new[] { "remarks", "error", "message" })
                 {
-                    foreach (var item in remarks.EnumerateArray())
-                        if (item.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(item.GetString()))
-                            messages.Add(item.GetString()!);
+                    if (!package.TryGetProperty(field, out var value))
+                        continue;
+
+                    if (value.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var item in value.EnumerateArray())
+                        {
+                            if (item.ValueKind == JsonValueKind.String &&
+                                !string.IsNullOrWhiteSpace(item.GetString()))
+                                messages.Add(item.GetString()!);
+                        }
+                    }
+                    else if (value.ValueKind == JsonValueKind.String &&
+                             !string.IsNullOrWhiteSpace(value.GetString()))
+                    {
+                        messages.Add(value.GetString()!);
+                    }
                 }
             }
         }
 
         return messages.Count > 0
-            ? string.Join(" ", messages.Distinct(StringComparer.OrdinalIgnoreCase))
-            : "Delhivery did not create the shipment or return a waybill.";
+            ? string.Join(" | ", messages.Distinct(StringComparer.OrdinalIgnoreCase))
+            : root.GetRawText();
     }
 
     private static string SafeBody(byte[] bytes)
