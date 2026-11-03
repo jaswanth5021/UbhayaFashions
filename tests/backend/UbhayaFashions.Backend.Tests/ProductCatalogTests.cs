@@ -31,11 +31,16 @@ public class ProductColorCatalogTests
         Assert.That(ProductColorCatalog.Matches(stored, selected), Is.EqualTo(expected));
     }
 
-    [TestCase(new decimal[] { 3299, 6499 }, 10000)]
-    [TestCase(new decimal[] { 18450, 25000 }, 25000)]
-    [TestCase(new decimal[] { 10001 }, 10100)]
-    [TestCase(new decimal[] { 0, -10 }, 10000)]
-    [TestCase(new decimal[] { }, 10000)]
+    public static IEnumerable<TestCaseData> PriceCeilingCases()
+    {
+        yield return new TestCaseData(new[] { 3299m, 6499m }, 10000);
+        yield return new TestCaseData(new[] { 18450m, 25000m }, 25000);
+        yield return new TestCaseData(new[] { 10001m }, 10100);
+        yield return new TestCaseData(new[] { 0m, -10m }, 10000);
+        yield return new TestCaseData(Array.Empty<decimal>(), 10000);
+    }
+
+    [TestCaseSource(nameof(PriceCeilingCases))]
     public void PriceCeiling_HandlesNormalAndBoundaryPrices(decimal[] prices, int expected)
     {
         Assert.That(ProductColorCatalog.PriceCeiling(prices), Is.EqualTo(expected));
@@ -77,14 +82,13 @@ public class ProductsControllerTests
     }
 
     [Test]
-    public async Task Get_ExistingProduct_ReturnsProduct()
+    public async Task Get_ExistingProduct_ReturnsProductWithVariants()
     {
-        var category = new Category { Name = "Kurtis" };
         var product = new Product
         {
             Name = "Jaipuri Kurti",
             Description = "Test product",
-            CategoryNavigation = category,
+            CategoryNavigation = new Category { Name = "Kurtis" },
             Colors = "Pink,Blue",
             ImageUrl = "/uploads/test.jpg",
             Variants =
@@ -99,8 +103,13 @@ public class ProductsControllerTests
         var result = await controller.Get(product.Id);
 
         Assert.That(result, Is.InstanceOf<OkObjectResult>());
-        var response = (OkObjectResult)result;
-        Assert.That(response.Value, Is.SameAs(product));
-        Assert.That(product.Variants, Has.Count.EqualTo(1));
+        var responseProduct = ((OkObjectResult)result).Value as Product;
+        Assert.That(responseProduct, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(responseProduct!.Name, Is.EqualTo("Jaipuri Kurti"));
+            Assert.That(responseProduct.Variants, Has.Count.EqualTo(1));
+            Assert.That(responseProduct.Variants.First().Price, Is.EqualTo(1299m));
+        });
     }
 }

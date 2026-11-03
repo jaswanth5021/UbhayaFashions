@@ -16,6 +16,7 @@ $projects = @(
 )
 
 $runResults = @()
+$frontendBuildExit = 1
 Push-Location $root
 try {
     foreach ($project in $projects) {
@@ -40,7 +41,7 @@ finally {
 }
 
 $total = 0; $passed = 0; $failed = 0; $skipped = 0
-$trxFiles = Get-ChildItem -Path $results -Filter "*.trx" -Recurse -ErrorAction SilentlyContinue
+$trxFiles = @(Get-ChildItem -Path $results -Filter "*.trx" -Recurse -ErrorAction SilentlyContinue)
 foreach ($trx in $trxFiles) {
     try {
         [xml]$doc = Get-Content -LiteralPath $trx.FullName
@@ -58,8 +59,13 @@ foreach ($trx in $trxFiles) {
 }
 
 $projectFailures = @($runResults | Where-Object { $_.ExitCode -ne 0 }).Count
-$overallPass = ($projectFailures -eq 0 -and $frontendBuildExit -eq 0 -and $trxFiles.Count -eq $projects.Count -and $failed -eq 0)
+$overallPass = ($projectFailures -eq 0 -and $frontendBuildExit -eq 0 -and $trxFiles.Count -eq $projects.Count -and $failed -eq 0 -and $skipped -eq 0)
 $status = if ($overallPass) { "PASS" } else { "FAIL" }
+
+$projectSummary = ($runResults | ForEach-Object {
+    $state = if ($_.ExitCode -eq 0) { "PASS" } else { "FAIL" }
+    "$($_.Name): $state"
+}) -join [Environment]::NewLine
 
 $summary = @"
 UBHAYA FASHIONS - PRE-DEPLOYMENT TEST REPORT
@@ -74,15 +80,16 @@ TRX reports : $($trxFiles.Count) / $($projects.Count)
 Frontend build exit code: $frontendBuildExit
 
 Project execution:
-$($runResults | ForEach-Object { "$($_.Name): $(if ($_.ExitCode -eq 0) {'PASS'} else {'FAIL'})" } | Out-String)
+$projectSummary
+
 FINAL RESULT: $status
 "@
 
 $summaryPath = Join-Path $results "summary.txt"
 $summary | Set-Content -Path $summaryPath -Encoding UTF8
-$html = "<html><head><title>Ubhaya Fashions Test Report</title></head><body><h1>Ubhaya Fashions - Pre-deployment Test Report</h1><pre>$([System.Net.WebUtility]::HtmlEncode($summary))</pre><h2>Coverage files</h2><ul>" +
-    ((Get-ChildItem -Path $results -Filter "coverage.cobertura.xml" -Recurse | ForEach-Object { "<li>$($_.FullName)</li>" }) -join "") +
-    "</ul></body></html>"
+$coverageFiles = @(Get-ChildItem -Path $results -Filter "coverage.cobertura.xml" -Recurse)
+$coverageList = ($coverageFiles | ForEach-Object { "<li>$([System.Net.WebUtility]::HtmlEncode($_.FullName))</li>" }) -join ""
+$html = "<html><head><title>Ubhaya Fashions Test Report</title></head><body><h1>Ubhaya Fashions - Pre-deployment Test Report</h1><pre>$([System.Net.WebUtility]::HtmlEncode($summary))</pre><h2>Cobertura coverage files</h2><ul>$coverageList</ul></body></html>"
 $html | Set-Content -Path (Join-Path $results "summary.html") -Encoding UTF8
 
 Write-Host $summary
