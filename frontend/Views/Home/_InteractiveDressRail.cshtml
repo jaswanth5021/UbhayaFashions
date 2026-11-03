@@ -1,6 +1,6 @@
 @model List<LadiesDressStore.Web.Models.ProductViewModel>
 @{
-    var railProducts = (Model ?? []).Take(15).ToList();
+    var railProducts = new List<LadiesDressStore.Web.Models.ProductViewModel>(); // (Model ?? []).Take(15).ToList();
     var firstProduct = railProducts.FirstOrDefault();
     string ProductImage(LadiesDressStore.Web.Models.ProductViewModel product)
     {
