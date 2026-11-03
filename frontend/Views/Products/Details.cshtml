@@ -11,8 +11,14 @@
     var allVariants = Model.Variants.OrderBy(variant => variant.Size).ToList();
     var hasColorVariants = allVariants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
     var initialColor = productColors.FirstOrDefault() ?? "";
+    // Variants without a color are shared across every product color.
+    // Prefer an exact-color variant over a shared fallback when both exist for the same size.
     var variants = (hasColorVariants
-        ? allVariants.Where(variant => string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
+        ? allVariants.Where(variant =>
+            string.IsNullOrWhiteSpace(variant.Color) ||
+            string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(variant =>
+                string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
         : allVariants)
         .OrderBy(variant => variant.Size)
         .ToList();
@@ -1748,8 +1754,20 @@
                 try { allVariants = JSON.parse(variantData?.dataset.variants || "[]"); } catch { allVariants = []; }
                 const hasColorVariants = allVariants.some(item => (item.color || item.Color || "").trim());
                 const sizeButtons = Array.from(document.querySelectorAll(".product-size-option"));
+                // Empty-color variants are shared fallbacks for every selected color.
+                // If an exact-color variant exists for a size, it takes precedence over the shared one.
                 const matchingVariants = hasColorVariants
-                    ? allVariants.filter(item => (item.color || item.Color || "").toLowerCase() === selectedColor.toLowerCase())
+                    ? allVariants
+                        .filter(item => {
+                            const variantColor = (item.color ?? item.Color ?? "").trim();
+                            return !variantColor || variantColor.toLowerCase() === selectedColor.toLowerCase();
+                        })
+                        .sort((a, b) => {
+                            const aColor = (a.color ?? a.Color ?? "").trim().toLowerCase();
+                            const bColor = (b.color ?? b.Color ?? "").trim().toLowerCase();
+                            const selected = selectedColor.toLowerCase();
+                            return Number(bColor === selected) - Number(aColor === selected);
+                        })
                     : allVariants;
                 sizeButtons.forEach(sizeButton => {
                     const variant = matchingVariants.find(item =>
