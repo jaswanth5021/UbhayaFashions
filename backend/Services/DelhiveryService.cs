@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net.Http.Headers;
-using System.Text.Json;\nusing System.Net.Http.Json;
+using System.Text.Json;
+using System.Net.Http.Json;
 using backend.Models;
 
 namespace backend.Services;
@@ -26,15 +27,24 @@ public interface IDelhiveryService
     Task<string?> RefreshTrackingAsync(string waybill, CancellationToken cancellationToken);
 }
 
-public sealed class DelhiveryService(IHttpClientFactory httpClientFactory, IConfiguration configuration) : IDelhiveryService
+public sealed class DelhiveryService(
+    IHttpClientFactory httpClientFactory,
+    IConfiguration configuration,
+    ILogger<DelhiveryService> logger) : IDelhiveryService
 {
     private HttpClient CreateClient()
     {
-        var token = configuration["Delhivery:ApiToken"];
+        var configuredToken = configuration["Delhivery:ApiToken"];
+        var token = configuredToken?.Trim();
         if (string.IsNullOrWhiteSpace(token))
-            throw new InvalidOperationException("Delhivery:ApiToken is not configured.");
+            throw new InvalidOperationException("Delhivery:ApiToken is not configured. Check appsettings.Development.json, User Secrets, and environment variables.");
 
         var client = httpClientFactory.CreateClient("Delhivery");
+        logger.LogInformation(
+            "Delhivery client configured. TokenPresent={TokenPresent}, TokenLength={TokenLength}, BaseAddress={BaseAddress}",
+            true,
+            token.Length,
+            client.BaseAddress?.GetLeftPart(UriPartial.Authority) ?? "NotConfigured");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
