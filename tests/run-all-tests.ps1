@@ -9,6 +9,8 @@ $results = Join-Path $PSScriptRoot "TestResults"
 New-Item -ItemType Directory -Force -Path $results | Out-Null
 
 Get-ChildItem -Path $results -Force | Remove-Item -Recurse -Force
+if (-not (Test-Path (Join-Path $PSScriptRoot "CONTROLLER-COVERAGE.md"))) { & (Join-Path $PSScriptRoot "Generate-ControllerCoverage.ps1") }
+
 $projects = @(
     @{ Name = "Backend NUnit"; Path = "tests/backend/UbhayaFashions.Backend.Tests/UbhayaFashions.Backend.Tests.csproj" },
     @{ Name = "Frontend NUnit"; Path = "tests/frontend/UbhayaFashions.Frontend.Tests/UbhayaFashions.Frontend.Tests.csproj" },
@@ -17,19 +19,27 @@ $projects = @(
 
 $runResults = @()
 $frontendBuildExit = 1
+$backendBuildExit = 1
 Push-Location $root
 try {
     foreach ($project in $projects) {
         Write-Host ""
         Write-Host "========== $($project.Name) ==========" -ForegroundColor Cyan
         $trxName = ($project.Name -replace '[^A-Za-z0-9]+', '-') + ".trx"
-        dotnet test $project.Path --configuration $Configuration --logger "trx;LogFileName=$trxName" --collect:"XPlat Code Coverage" --results-directory $results
+        $testArgs = @("test", $project.Path, "--configuration", $Configuration, "--logger", "trx;LogFileName=$trxName", "--results-directory", $results)
+        if ($project.Name -ne "Legacy regression") { $testArgs += @("--collect:XPlat Code Coverage") }
+        & dotnet @testArgs
         $exitCode = $LASTEXITCODE
         $runResults += [pscustomobject]@{ Name = $project.Name; ExitCode = $exitCode }
         if ($exitCode -ne 0) {
             Write-Host "$($project.Name) FAILED." -ForegroundColor Red
         }
     }
+
+    Write-Host ""
+    Write-Host "========== Backend application build ==========" -ForegroundColor Cyan
+    dotnet build "backend/backend.csproj" --configuration $Configuration --no-restore
+    $backendBuildExit = $LASTEXITCODE
 
     Write-Host ""
     Write-Host "========== Frontend application build ==========" -ForegroundColor Cyan
@@ -59,7 +69,9 @@ foreach ($trx in $trxFiles) {
 }
 
 $projectFailures = @($runResults | Where-Object { $_.ExitCode -ne 0 }).Count
-$overallPass = ($projectFailures -eq 0 -and $frontendBuildExit -eq 0 -and $trxFiles.Count -eq $projects.Count -and $failed -eq 0 -and $skipped -eq 0)
+$coveragePath = Join-Path $PSScriptRoot "CONTROLLER-COVERAGE.md"
+$coverageIncomplete = Select-String -Path $coveragePath -Pattern "\| (IN PROGRESS|NOT STARTED|BLOCKED) \|" -Quiet
+$overallPass = ($projectFailures -eq 0 -and $backendBuildExit -eq 0 -and $frontendBuildExit -eq 0 -and $trxFiles.Count -eq $projects.Count -and $failed -eq 0 -and $skipped -eq 0 -and -not $coverageIncomplete)
 $status = if ($overallPass) { "PASS" } else { "FAIL" }
 
 $projectSummary = ($runResults | ForEach-Object {
@@ -77,7 +89,9 @@ Passed      : $passed
 Failed      : $failed
 Skipped     : $skipped
 TRX reports : $($trxFiles.Count) / $($projects.Count)
+Backend build exit code: $backendBuildExit
 Frontend build exit code: $frontendBuildExit
+Controller coverage incomplete: $coverageIncomplete
 
 Project execution:
 $projectSummary
