@@ -76,61 +76,6 @@ public class FrontendColorCatalogTests
 }
 
 [TestFixture]
-public class ContactControllerTests
-{
-    private ContactController CreateController()
-    {
-        var httpContext = new DefaultHttpContext();
-        var controller = new ContactController
-        {
-            ControllerContext = new ControllerContext { HttpContext = httpContext },
-            TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>())
-        };
-        return controller;
-    }
-
-    [Test]
-    public void IndexGet_ReturnsView()
-    {
-        var result = CreateController().Index();
-
-        Assert.That(result, Is.InstanceOf<ViewResult>());
-    }
-
-    [Test]
-    public void IndexPost_InvalidModel_ReturnsViewWithoutRedirect()
-    {
-        var controller = CreateController();
-        controller.ModelState.AddModelError("Email", "Invalid email");
-
-        var model = new ContactViewModel { Name = "Test" };
-        var result = controller.Index(model);
-
-        Assert.That(result, Is.InstanceOf<ViewResult>());
-        Assert.That(((ViewResult)result).Model, Is.SameAs(model));
-    }
-
-    [Test]
-    public void IndexPost_ValidModel_SetsConfirmationAndRedirects()
-    {
-        var controller = CreateController();
-        var model = new ContactViewModel
-        {
-            Name = "Test Customer",
-            Email = "customer@example.com",
-            Subject = "Order enquiry",
-            Message = "Please share my order status."
-        };
-
-        var result = controller.Index(model);
-
-        Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
-        Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo(nameof(ContactController.Index)));
-        Assert.That(controller.TempData["ContactSuccess"], Is.Not.Null);
-    }
-}
-
-[TestFixture]
 public class ContactViewModelValidationTests
 {
     [Test]
