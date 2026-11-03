@@ -264,17 +264,26 @@ public sealed class DelhiveryService(
             new KeyValuePair<string, string>("data", json)
         });
 
-        // Log only non-sensitive request diagnostics. Do not log the API token,
-        // recipient name, full address, or phone number.
+        // Always log non-sensitive diagnostics. Full payload logging is opt-in because
+        // the payload contains customer and seller personal information.
         var httpClient = CreateClient();
         var requestUri = new Uri(httpClient.BaseAddress!, "api/cmu/create.json");
+        var productsDescription = string.Join(", ", order.Items.Select(x => x.ProductName).Distinct());
+        var forbiddenCharacters = new[] { '%', '#', ';', '\\\\', '&' };
+        var addressSpecialCharacters = forbiddenCharacters
+            .Where(character => shipment.Address.Contains(character))
+            .Select(character => character == '\\\\' ? "backslash" : character.ToString())
+            .ToArray();
+
         logger.LogInformation(
-            "Delhivery Create Shipment request. OrderId={OrderId}, OrderReference={OrderReference}, RequestUri={RequestUri}, ClientName={ClientName}, PickupLocation={PickupLocation}, DestinationPin={DestinationPin}, City={City}, State={State}, Country={Country}, PaymentMode={PaymentMode}, PaymentStatus={PaymentStatus}, TotalAmount={TotalAmount}, Quantity={Quantity}, WeightGrams={WeightGrams}, ShippingMode={ShippingMode}, SellerPin={SellerPin}, PayloadLength={PayloadLength}",
+            "Delhivery Support Request Summary. OrderId={OrderId}, OrderReference={OrderReference}, Method=POST, RequestUri={RequestUri}, ContentType=application/x-www-form-urlencoded, FormFields=format,data, FormatValue=json, ClientName={ClientName}, PickupLocationName={PickupLocationName}, DestinationNamePresent={DestinationNamePresent}, DestinationPhonePresent={DestinationPhonePresent}, DestinationPin={DestinationPin}, City={City}, State={State}, Country={Country}, PaymentMode={PaymentMode}, PaymentStatus={PaymentStatus}, TotalAmount={TotalAmount}, CodAmount={CodAmount}, ProductsDescription={ProductsDescription}, Quantity={Quantity}, WeightGrams={WeightGrams}, DimensionsCm=25x20x5, ShippingMode=Surface, SellerName={SellerName}, SellerPin={SellerPin}, SellerAddressPresent={SellerAddressPresent}, SellerPhonePresent={SellerPhonePresent}, WaybillFieldIsBlank={WaybillFieldIsBlank}, AddressContainsDelhiveryFaqSpecialCharacters={AddressContainsDelhiveryFaqSpecialCharacters}, AddressSpecialCharacters={AddressSpecialCharacters}, JsonPayloadLength={JsonPayloadLength}",
             order.Id,
             $"UBHAYA-{order.Id}",
             requestUri,
             clientName,
             pickup,
+            !string.IsNullOrWhiteSpace(shipment.RecipientName),
+            !string.IsNullOrWhiteSpace(shipment.RecipientPhone),
             shipment.PostalCode,
             shipment.City,
             shipment.State,
@@ -282,11 +291,26 @@ public sealed class DelhiveryService(
             paymentMode,
             order.PaymentStatus,
             order.TotalAmount,
+            paymentMode == "COD" ? order.TotalAmount : 0,
+            productsDescription,
             Math.Max(1, order.Items.Sum(x => x.Quantity)),
             shipment.WeightGrams,
-            "Surface",
+            configuration["Delhivery:SellerName"] ?? "UBHAYA FASHIONS",
             configuration["Delhivery:SellerPin"] ?? "",
+            !string.IsNullOrWhiteSpace(configuration["Delhivery:SellerAddress"]),
+            !string.IsNullOrWhiteSpace(configuration["Delhivery:SellerPhone"]),
+            true,
+            addressSpecialCharacters.Length > 0,
+            string.Join(",", addressSpecialCharacters),
             json.Length);
+
+        if (configuration.GetValue<bool>("Delhivery:EnableSupportPayloadLogging"))
+        {
+            logger.LogWarning(
+                "Delhivery FULL SUPPORT PAYLOAD ENABLED. This log contains customer and seller personal information. OrderId={OrderId}, FormFormat=json, FormData={FormData}",
+                order.Id,
+                json);
+        }
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "api/cmu/create.json")
         {
