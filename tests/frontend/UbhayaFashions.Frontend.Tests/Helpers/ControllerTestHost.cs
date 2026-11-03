@@ -23,7 +23,7 @@ internal static class ControllerTestHost
         context ??= CreateHttpContext();
         controller.ControllerContext = new ControllerContext { HttpContext = context };
         var urlHelper = new Mock<IUrlHelper>();
-        urlHelper.Setup(x => x.Action(It.IsAny<UrlActionContext>())).Returns("/test-generated-url");
+        urlHelper.Setup(x => x.Action(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<object?>())).Returns("/test-generated-url");
         urlHelper.Setup(x => x.IsLocalUrl(It.IsAny<string>()))
             .Returns((string? url) => !string.IsNullOrWhiteSpace(url) && url.StartsWith("/", StringComparison.Ordinal) && !url.StartsWith("//", StringComparison.Ordinal));
         controller.Url = urlHelper.Object;
