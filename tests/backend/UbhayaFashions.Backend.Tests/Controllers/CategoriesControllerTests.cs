@@ -61,6 +61,6 @@ public sealed class CategoriesControllerTests
         var values = ((OkObjectResult)result).Value as List<Category>;
         Assert.That(values, Has.Count.EqualTo(4));
         Assert.That(values!.Select(x => x.Name), Is.EqualTo(new[] { "A", "B", "C", "D" }));
-        Assert.That(values.Any(x => x.Name == "Hidden"), Is.False);
+        Assert.That(values!.Any(x => x.Name == "Hidden"), Is.False);
     }
 }

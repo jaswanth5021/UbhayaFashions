@@ -2,10 +2,7 @@ using System.Net;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Routing;
 using Moq;
 
 namespace UbhayaFashions.Frontend.Tests.Helpers;
@@ -24,7 +21,11 @@ internal static class ControllerTestHost
     {
         context ??= CreateHttpContext();
         controller.ControllerContext = new ControllerContext { HttpContext = context };
-        controller.Url = new UrlHelper(new ActionContext(context, new RouteData(), new ActionDescriptor()));
+        var urlHelper = new Mock<IUrlHelper>();
+        urlHelper.Setup(x => x.Action(It.IsAny<UrlActionContext>())).Returns("/test-generated-url");
+        urlHelper.Setup(x => x.IsLocalUrl(It.IsAny<string>()))
+            .Returns((string? url) => !string.IsNullOrWhiteSpace(url) && url.StartsWith("/", StringComparison.Ordinal) && !url.StartsWith("//", StringComparison.Ordinal));
+        controller.Url = urlHelper.Object;
         controller.TempData = new TempDataDictionary(context, Mock.Of<ITempDataProvider>());
     }
 
