@@ -84,6 +84,10 @@
                     <p class="login-new-eyebrow">JOIN UBHAYA</p>
                     <h2 id="signupHeading" tabindex="-1">Create account</h2>
                     <p class="login-new-intro">A beautiful start to a more personal shopping experience.</p>
+                    @if (TempData["SignupNotice"] is string signupNotice)
+                    {
+                        <div class="login-new-message is-error" role="alert" data-app-notification="error">@signupNotice</div>
+                    }
                     <div class="login-new-message is-error login-signup-client-feedback" data-signup-feedback role="alert" aria-live="assertive"></div>
                     @if (showSignup)
                     {
