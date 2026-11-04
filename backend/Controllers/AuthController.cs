@@ -497,7 +497,7 @@ public class AuthController(
 
         var email = request.Email?.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(email)) return Ok(new { success = true });
-        var customer = await db.Customers.FirstOrDefaultAsync(x => x.Email == email);
+        var customer = await db.Customers.FirstOrDefaultAsync(x => x.Email != null && x.Email.Trim().ToLower() == email);
         if (customer is null) return Ok(new { success = true, accountExists = false });
 
         var cooldownKey = "password-reset:" + email;
