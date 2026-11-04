@@ -69,6 +69,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Payment>().Property(x => x.Amount).HasPrecision(18, 2);
         modelBuilder.Entity<Payment>().HasIndex(x => x.RazorpayOrderId).IsUnique();
         modelBuilder.Entity<Payment>().HasIndex(x => x.RazorpayPaymentId).IsUnique().HasFilter("[RazorpayPaymentId] IS NOT NULL");
+        modelBuilder.Entity<RazorpayWebhookEvent>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.EventId).IsUnique();
+            entity.Property(x => x.EventId).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.EventType).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.RazorpayPaymentId).HasMaxLength(100);
+            entity.Property(x => x.RazorpayOrderId).HasMaxLength(100);
+            entity.Property(x => x.ProcessingStatus).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.ErrorMessage).HasMaxLength(2000);
+        });
         modelBuilder.Entity<OrderItem>().Property(x => x.Price).HasPrecision(18, 2);
         modelBuilder.Entity<Customer>().HasMany(x => x.ExternalLogins).WithOne(x => x.Customer).HasForeignKey(x => x.CustomerId);
         modelBuilder.Entity<Customer>().HasMany(x => x.Orders).WithOne(x => x.Customer).HasForeignKey(x => x.CustomerId);
