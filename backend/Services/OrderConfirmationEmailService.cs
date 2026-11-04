@@ -29,7 +29,7 @@ public sealed class OrderConfirmationEmailService(
 
         var smtp = configuration.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["From"];
+        var from = smtp["Senders:Orders"] ?? smtp["From"];
         var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         var supportEmail = smtp["Senders:Support"] ?? smtp["From"];
         var internalCopy = smtp["InternalCopy"];
@@ -161,7 +161,7 @@ public sealed class OrderConfirmationEmailService(
 
         var smtp = configuration.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["From"];
+        var from = smtp["Senders:Orders"] ?? smtp["From"];
         var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         var supportEmail = smtp["Senders:Support"] ?? smtp["From"];
         var internalCopy = smtp["InternalCopy"];
