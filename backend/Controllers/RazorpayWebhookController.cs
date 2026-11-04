@@ -153,10 +153,10 @@ public sealed class RazorpayWebhookController(
                     var unavailableItem = order.Items.FirstOrDefault(item =>
                     {
                         var product = products.SingleOrDefault(x => x.Id == item.ProductId);
+                        var hasColorVariants = product?.Variants.Any(x => !string.IsNullOrWhiteSpace(x.Color)) == true;
                         var variant = product?.Variants.FirstOrDefault(x =>
                             x.Size == item.Size &&
-                            (string.IsNullOrWhiteSpace(item.Color) ||
-                             string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase)));
+                            (!hasColorVariants || string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase)));
                         return variant is null || variant.Stock < item.Quantity;
                     });
 
@@ -172,10 +172,10 @@ public sealed class RazorpayWebhookController(
                         foreach (var item in order.Items)
                         {
                             var product = products.Single(x => x.Id == item.ProductId);
+                            var hasColorVariants = product.Variants.Any(x => !string.IsNullOrWhiteSpace(x.Color));
                             var variant = product.Variants.First(x =>
                                 x.Size == item.Size &&
-                                (string.IsNullOrWhiteSpace(item.Color) ||
-                                 string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase)));
+                                (!hasColorVariants || string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase)));
                             variant.Stock -= item.Quantity;
                             db.InventoryTransactions.Add(new InventoryTransaction
                             {
