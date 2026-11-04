@@ -50,9 +50,11 @@ public sealed class OrderConfirmationEmailService(
               <td style="padding:12px 10px;border-bottom:1px solid #eee5e1;text-align:right;color:#39272b;">{(item.Price * item.Quantity).ToString("C", currency)}</td>
             </tr>
             """));
-        var refundMessage = string.Equals(order.PaymentStatus, "Refund Pending", StringComparison.OrdinalIgnoreCase)
-            ? "Your payment was already captured. The refund is pending processing and will be returned to the original payment method, subject to payment provider processing times."
-            : "If your payment was not captured, no refund is required. If you have any payment-related questions, please contact our support team.";
+        var refundMessage = string.Equals(order.PaymentStatus, "Refund Initiated", StringComparison.OrdinalIgnoreCase)
+            ? "Your full refund has been initiated to your original payment method through Razorpay. Normal refunds generally take 5–7 working days to reach your account, depending on your bank or card issuer."
+            : string.Equals(order.PaymentStatus, "Refund Pending", StringComparison.OrdinalIgnoreCase)
+                ? "Your order has been cancelled, but the refund could not yet be confirmed with the payment provider. Our team will review it and initiate the refund. Please contact support if you need an update."
+                : "If your payment was not captured, no refund is required. If you have any payment-related questions, please contact our support team."; 
         var encodedRefundMessage = WebUtility.HtmlEncode(refundMessage);
         var plainText = $"""
             Hi {greetingName},
@@ -118,7 +120,7 @@ public sealed class OrderConfirmationEmailService(
             using var message = new MailMessage
             {
                 From = new MailAddress(from, displayName),
-                Subject = $"Order #{order.Id} cancelled - Ubhaya Fashions",
+                Subject = string.Equals(order.PaymentStatus, "Refund Initiated", StringComparison.OrdinalIgnoreCase) ? $"Order #{order.Id} cancelled - refund initiated" : $"Order #{order.Id} cancelled - Ubhaya Fashions",
                 Body = html,
                 IsBodyHtml = true
             };
