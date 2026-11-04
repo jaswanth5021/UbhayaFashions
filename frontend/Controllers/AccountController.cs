@@ -191,15 +191,7 @@ public class AccountController(ApiService api) : Controller
         var result = await api.VerifySignupEmailAsync(model.Email, model.Code);
         if (!result.Success)
         {
-            if (result.RetryAfterSeconds > 0)
-            {
-                ViewBag.ResetRetryAfterSeconds = result.RetryAfterSeconds;
-                ModelState.AddModelError("", $"Please wait {TimeSpan.FromSeconds(result.RetryAfterSeconds).ToString(@"m\:ss")} before requesting another reset email.");
-            }
-            else
-            {
-                ModelState.AddModelError("", result.Message);
-            }
+            ModelState.AddModelError("", result.Message.Trim('"'));
             return View(model);
         }
         TempData["SignupSuccess"] = "Email verified and account created. Please log in.";
@@ -447,7 +439,14 @@ public class AccountController(ApiService api) : Controller
         var result = await api.RequestPasswordResetAsync(model.Email);
         if (!result.Success)
         {
-            ModelState.AddModelError("", result.Message.Trim('"'));
+            if (result.RetryAfterSeconds > 0)
+            {
+                ViewBag.ResetRetryAfterSeconds = result.RetryAfterSeconds;
+            }
+            else
+            {
+                ModelState.AddModelError("", result.Message);
+            }
             return View(model);
         }
 
