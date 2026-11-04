@@ -13,6 +13,8 @@ public class Order
     public string ShippingAddress { get; set; } = "";
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public string? RazorpayOrderId { get; set; }
+    // Structured address snapshot required if Razorpay notifies us after the customer leaves checkout.
+    public string? DeliveryAddressJson { get; set; }
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }
