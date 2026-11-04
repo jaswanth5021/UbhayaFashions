@@ -2,8 +2,23 @@
     ViewData["Title"] = "Order Successful";
     ViewData["MetaDescription"] = "Your Ubhaya Fashions order was placed successfully.";
     var orderId = (int?)ViewBag.OrderId;
+    var waybill = ViewBag.Waybill as string;
+    var shippingStatus = ViewBag.ShippingStatus as string;
+    var delhiTrackingUrl = ViewBag.DelhiTrackingUrl as string;
 }
 <style>
+    .order-awb-panel{margin:24px 0;padding:22px;border:1px solid #e5c7c3;border-radius:18px;background:linear-gradient(145deg,#fff7f5,#fff);text-align:left}
+    .order-awb-heading{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .order-awb-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#f5e5e3;font-size:23px}
+    .order-awb-heading span:not(.order-awb-icon){color:#9a6b64;font-size:10px;font-weight:700;letter-spacing:1.4px}
+    .order-awb-heading h2{margin:4px 0 0;color:#492d30;font-size:1.2rem}
+    .order-awb-number{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:15px;border:1px dashed #c99b96;border-radius:12px;background:#fff}
+    .order-awb-number span{width:100%;color:#80645f;font-size:12px}
+    .order-awb-number strong{color:#68142e;font-size:clamp(1.25rem,3vw,1.7rem);letter-spacing:1px;overflow-wrap:anywhere}
+    .order-awb-number button{margin-left:auto}
+    .order-awb-status{margin:14px 0 0;color:#665557;font-size:13px}
+    .order-awb-track{display:inline-flex;margin-top:16px}
+    .order-awb-pending>p{color:#665557;font-size:14px;line-height:1.7}
     .order-evidence-reminder{margin:30px 0 24px;padding:clamp(20px,3vw,34px);border:1px solid #d8b5b1;border-radius:20px;background:linear-gradient(145deg,#fffaf8 0%,#fff 75%);text-align:left;box-shadow:0 8px 24px rgba(91,39,42,.05)}
     .order-evidence-heading{display:flex;align-items:center;gap:13px;margin-bottom:10px}
     .order-evidence-heading-icon{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:15px;background:#f5e5e3;color:#813c40}
@@ -40,6 +55,40 @@
                 <small>Keep this number handy when you contact us.</small>
             </div>
         }
+        @if (!string.IsNullOrWhiteSpace(waybill))
+        {
+            <section class="order-awb-panel" aria-label="Shipment tracking details">
+                <div class="order-awb-heading">
+                    <span class="order-awb-icon" aria-hidden="true">📦</span>
+                    <div><span>YOUR SHIPMENT IS CREATED</span><h2>Delhivery tracking details</h2></div>
+                </div>
+                <div class="order-awb-number">
+                    <span>AWB / Tracking number</span>
+                    <strong>@waybill</strong>
+                    <button type="button" class="order-ref-copy" data-order-ref="@waybill">Copy AWB</button>
+                </div>
+                <p class="order-awb-status">Shipment status: <strong>@(string.IsNullOrWhiteSpace(shippingStatus) ? "Shipment Created" : shippingStatus)</strong></p>
+                @if (!string.IsNullOrWhiteSpace(delhiTrackingUrl))
+                {
+                    <a class="button order-result-primary order-awb-track" href="@delhiTrackingUrl" target="_blank" rel="noopener noreferrer">Track with Delhivery <span aria-hidden="true">↗</span></a>
+                }
+            </section>
+        }
+        else
+        {
+            <section class="order-awb-panel order-awb-pending" aria-label="Shipment tracking update">
+                <div class="order-awb-heading">
+                    <span class="order-awb-icon" aria-hidden="true">📦</span>
+                    <div><span>SHIPMENT UPDATE</span><h2>Your AWB will appear here</h2></div>
+                </div>
+                <p>Your payment and order are confirmed. The courier shipment has not returned an AWB yet. Please check this page or My Orders again after shipment creation.</p>
+                @if (!string.IsNullOrWhiteSpace(shippingStatus))
+                {
+                    <p class="order-awb-status">Current shipment status: <strong>@shippingStatus</strong></p>
+                }
+            </section>
+        }
+
         <div class="order-result-status">
             <div class="order-result-payment-status">
                 <span class="order-result-status-icon" aria-hidden="true">&#10003;</span>
