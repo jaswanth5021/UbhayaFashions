@@ -21,6 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RecentlyViewedProduct> RecentlyViewedProducts => Set<RecentlyViewedProduct>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<RazorpayWebhookEvent> RazorpayWebhookEvents => Set<RazorpayWebhookEvent>();
     public DbSet<CustomerAddress> CustomerAddresses => Set<CustomerAddress>();
     public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
     public DbSet<ProductReviewImage> ProductReviewImages => Set<ProductReviewImage>();
