@@ -90,6 +90,7 @@ public class AdminAuthController(
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
         var from = smtp["Senders:Support"] ?? smtp["From"];
+        var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
         {
             logger.LogError("Admin password reset email is not configured.");
@@ -116,12 +117,14 @@ public class AdminAuthController(
         var resetUrl = $"{frontendUrl}/Admin/ResetPassword?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
         try
         {
-            using var mail = new MailMessage(from, email)
+            using var mail = new MailMessage
             {
+                From = new MailAddress(from, displayName),
                 Subject = "Reset your Ubhaya Fashions admin password",
                 Body = $"Use this one-time link to reset your admin password. It expires in one hour:\n\n{resetUrl}\n\nIf you did not request this, you can ignore this email.",
                 IsBodyHtml = false
             };
+            mail.To.Add(email);
             var port = int.TryParse(smtp["Port"], out var configuredPort) ? configuredPort : 587;
             using var client = new SmtpClient(host, port)
             {
