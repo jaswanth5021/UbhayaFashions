@@ -16,7 +16,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/payments")]
 [Authorize]
-public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail) : ControllerBase
+public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, ILogger<PaymentsController> logger) : ControllerBase
 {
     [HttpPost("create-order")]
     public async Task<IActionResult> CreateOrder(CreatePaymentOrderRequest request)
@@ -246,6 +246,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             .Include(x => x.Items)
             .Include(x => x.Payments)
             .Include(x => x.Customer)
+            .Include(x => x.DelhiveryShipment)
             .FirstOrDefaultAsync(x => x.Id == request.OrderId && x.CustomerId == customerId);
 
         if (order is null)
@@ -348,9 +349,18 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
 
+            // Payment is already committed. Courier failures must not reverse a successful payment.
+            await CreatePaidOrderShipmentAsync(order, request.DeliveryAddress, delhivery, db, configuration, logger);
             await orderEmail.SendOrderConfirmationAsync(order, order.Customer);
 
-            return Ok(new { success = true, orderId = order.Id, status = "Paid" });
+            return Ok(new
+            {
+                success = true,
+                orderId = order.Id,
+                status = "Paid",
+                waybill = order.DelhiveryShipment?.Waybill,
+                shipmentStatus = order.DelhiveryShipment?.ShipmentStatus ?? "Creation Failed"
+            });
         }
         catch
         {
