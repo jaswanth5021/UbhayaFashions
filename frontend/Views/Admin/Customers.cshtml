@@ -1,9 +1,54 @@
 @model List<AdminCustomerSummary>
-@{ ViewData["Title"] = "Customers"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
-<div class="page-head"><div><h1>Customers</h1><p>Customer details and order totals.</p></div></div>
-<form class="admin-product-filters" asp-action="Customers" method="get"><label>Search<input type="search" name="search" value="@ViewBag.Search" placeholder="Name, email or phone" /></label><button class="primary" type="submit">Search</button><a class="admin-filter-clear" asp-action="Customers">Clear</a></form>
-<div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Date of birth</th><th>Orders placed</th><th>Last order</th></tr></thead><tbody>
-@foreach (var customer in Model) { <tr><td>@customer.Name</td><td>@(string.IsNullOrWhiteSpace(customer.Mobile) ? "—" : customer.Mobile)</td><td>@(string.IsNullOrWhiteSpace(customer.Email) ? "—" : customer.Email)</td><td>@(customer.DateOfBirth?.ToString("dd MMM yyyy") ?? "Not available")</td><td>@customer.OrderCount</td><td>@(customer.LastOrderDate?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")</td></tr> }
-@if (Model.Count == 0) { <tr><td colspan="6" class="inventory-empty">No customers were found.</td></tr> }
-</tbody></table></div>
-<p class="customer-data-note">Customers with no orders show an order count of 0 and no last order date. Date of birth appears when present in their profile.</p>
+@{
+    ViewData["Title"] = "Customers";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var search = ViewBag.Search as string;
+}
+<div class="customers-page">
+    <header class="customers-heading">
+        <div><span class="customers-eyebrow">CUSTOMER RELATIONSHIPS</span><h1>Customers</h1><p>Understand your shoppers, review their activity and find customer information quickly.</p></div>
+        <span class="customers-count-pill">@ViewBag.FilteredCustomerCount customers</span>
+    </header>
+
+    <section class="customers-stats" aria-label="Customer summary">
+        <article class="customer-stat"><span class="customer-stat-icon c-blue">♙</span><div><small>Total customers</small><strong>@ViewBag.TotalCustomers</strong><em>Registered profiles</em></div></article>
+        <article class="customer-stat"><span class="customer-stat-icon c-green">✓</span><div><small>Placed an order</small><strong>@ViewBag.CustomersWithOrders</strong><em>Customers with purchases</em></div></article>
+        <article class="customer-stat"><span class="customer-stat-icon c-violet">↻</span><div><small>Repeat customers</small><strong>@ViewBag.RepeatCustomers</strong><em>More than one order</em></div></article>
+        <article class="customer-stat"><span class="customer-stat-icon c-amber">◷</span><div><small>No orders yet</small><strong>@ViewBag.CustomersWithoutOrders</strong><em>Registered, not purchased</em></div></article>
+    </section>
+
+    <section class="customers-directory">
+        <div class="customers-directory-head"><div><h2>Customer directory</h2><p>Search by customer name, email address or mobile number.</p></div><span>@ViewBag.FilteredCustomerCount result(s)</span></div>
+        <form class="customers-search" asp-action="Customers" method="get">
+            <label for="customer-search">Search customers</label>
+            <div class="customers-search-row"><div class="customers-search-input"><span>⌕</span><input id="customer-search" type="search" name="search" value="@search" placeholder="Enter name, email or phone number"/></div><button class="primary" type="submit">Search</button>@if(!string.IsNullOrWhiteSpace(search)){<a asp-action="Customers" class="customers-clear">Clear</a>}</div>
+        </form>
+        <div class="customers-table-wrap"><table class="customers-table">
+            <thead><tr><th>Customer</th><th>Contact</th><th>Date of birth</th><th>Orders</th><th>Last order</th><th>Activity</th></tr></thead>
+            <tbody>
+            @foreach(var customer in Model){
+                var initial = string.IsNullOrWhiteSpace(customer.Name) ? "C" : customer.Name.Trim().Substring(0,1).ToUpperInvariant();
+                <tr>
+                    <td><div class="customer-identity"><span class="customer-avatar">@initial</span><div><strong>@(string.IsNullOrWhiteSpace(customer.Name) ? "Customer" : customer.Name)</strong><small>Customer #@customer.Id</small></div></div></td>
+                    <td><div class="customer-contact"><strong>@(string.IsNullOrWhiteSpace(customer.Mobile) ? "Phone not provided" : customer.Mobile)</strong><small>@(string.IsNullOrWhiteSpace(customer.Email) ? "Email not provided" : customer.Email)</small></div></td>
+                    <td>@(customer.DateOfBirth?.ToString("dd MMM yyyy") ?? "—")</td>
+                    <td><span class="customer-order-count">@customer.OrderCount</span></td>
+                    <td>@(customer.LastOrderDate?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")</td>
+                    <td>@if(customer.OrderCount>1){<span class="customer-activity repeat">Repeat customer</span>}else if(customer.OrderCount==1){<span class="customer-activity active">Purchased</span>}else{<span class="customer-activity new">No orders</span>}</td>
+                </tr>
+            }
+            @if(Model.Count==0){<tr><td colspan="6" class="customers-empty"><span>⌕</span><strong>No customers found</strong><small>Try another name, email or phone number, or clear the search.</small></td></tr>}
+            </tbody>
+        </table></div>
+        <footer class="customers-table-footer"><span>Showing @Model.Count customer(s)@if(!string.IsNullOrWhiteSpace(search)){<text> matching your search</text>}</span><span>Customer profile data is shown when available.</span></footer>
+    </section>
+    <p class="customers-note">Customers with no orders have an order count of 0. Date of birth is displayed only when provided in their profile.</p>
+</div>
+<style>
+.customers-page{color:#302a30}.customers-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:19px}.customers-eyebrow{display:block;color:#8d5369;font-size:9px;font-weight:800;letter-spacing:1.3px;margin-bottom:7px}.customers-heading h1{font-size:27px;font-weight:780;letter-spacing:-.6px;margin:0}.customers-heading p{margin:6px 0 0;color:#88808a;font-size:12px}.customers-count-pill{padding:8px 12px;border:1px solid #eee6eb;border-radius:9px;background:#fff;color:#711a3a;font-size:11px;font-weight:750}
+.customers-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:18px 0}.customer-stat{display:flex;align-items:center;gap:12px;min-width:0;padding:16px;border:1px solid #eee8ed;border-radius:13px;background:#fff;box-shadow:0 3px 12px rgba(38,22,31,.035)}.customer-stat-icon{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;font-size:20px;font-weight:750}.c-blue{background:#edf3ff;color:#356bd5}.c-green{background:#eaf8ef;color:#29945a}.c-violet{background:#f2edff;color:#7851c9}.c-amber{background:#fff6e5;color:#c58a18}.customer-stat small,.customer-stat em{display:block;color:#89818b;font-size:10px;font-style:normal}.customer-stat strong{display:block;margin:4px 0;font-size:24px;line-height:1.1;color:#2d272e}
+.customers-directory{overflow:hidden;border:1px solid #eee8ed;border-radius:13px;background:#fff;box-shadow:0 3px 12px rgba(38,22,31,.035)}.customers-directory-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 18px 12px}.customers-directory-head h2{font-size:16px;margin:0}.customers-directory-head p{font-size:11px;color:#8d858e;margin:4px 0 0}.customers-directory-head>span{font-size:10px;color:#786f79;font-weight:700}.customers-search{padding:0 18px 15px}.customers-search>label{display:block;margin-bottom:6px;color:#615963;font-size:10px;font-weight:700}.customers-search-row{display:flex;align-items:center;gap:9px}.customers-search-input{display:flex;align-items:center;gap:8px;flex:1;min-width:0;height:39px;padding:0 11px;border:1px solid #e8e1e6;border-radius:8px;background:#fff}.customers-search-input span{font-size:20px;color:#8b7884}.customers-search-input input{width:100%;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:12px;color:#383139}.customers-search-row button{height:39px}.customers-clear{font-size:11px;color:#741b3c;font-weight:700;text-decoration:none;padding:8px}
+.customers-table-wrap{overflow-x:auto;border-top:1px solid #f0ecef}.customers-table{width:100%;min-width:790px;border-collapse:collapse}.customers-table th{padding:12px 15px;background:#fbfafb;color:#766e78;text-align:left;font-size:9px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;white-space:nowrap}.customers-table td{padding:13px 15px;border-top:1px solid #f1edf0;font-size:11px;vertical-align:middle}.customers-table tbody tr:hover{background:#fdfbfc}.customer-identity{display:flex;align-items:center;gap:10px}.customer-avatar{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:#f6eaf0;color:#751c3e;font-size:12px;font-weight:800}.customer-identity strong,.customer-identity small,.customer-contact strong,.customer-contact small{display:block}.customer-identity strong,.customer-contact strong{font-size:11px;color:#3b333b}.customer-identity small,.customer-contact small{margin-top:4px;color:#928a94;font-size:10px}.customer-order-count{display:inline-grid;place-items:center;min-width:27px;height:25px;padding:0 7px;border-radius:8px;background:#f6f0f3;color:#741b3c;font-weight:800}.customer-activity{display:inline-flex;padding:5px 8px;border-radius:20px;font-size:9px;font-weight:750;white-space:nowrap}.customer-activity.repeat{background:#f1edff;color:#7252b7}.customer-activity.active{background:#eaf7ef;color:#27824c}.customer-activity.new{background:#f3f1f3;color:#777078}.customers-empty{text-align:center!important;padding:45px 15px!important}.customers-empty span,.customers-empty strong,.customers-empty small{display:block}.customers-empty span{font-size:25px;color:#a28c99}.customers-empty strong{margin:8px 0 4px;font-size:13px}.customers-empty small{color:#928a94;font-size:11px}.customers-table-footer{display:flex;justify-content:space-between;gap:12px;padding:12px 17px;color:#8b838c;font-size:10px}.customers-note{margin:12px 2px;color:#918993;font-size:10px}
+@@media(max-width:900px){.customers-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@@media(max-width:600px){.customers-heading{align-items:flex-start;flex-direction:column}.customers-heading h1{font-size:23px}.customers-stats{gap:9px}.customer-stat{padding:12px;gap:9px}.customer-stat-icon{flex-basis:34px;height:34px;font-size:17px}.customer-stat strong{font-size:21px}.customers-directory-head{align-items:flex-start}.customers-search{padding:0 12px 13px}.customers-search-row{flex-wrap:wrap}.customers-search-input{flex-basis:100%}.customers-search-row button{flex:1}.customers-table-footer{flex-direction:column}}
+</style>
