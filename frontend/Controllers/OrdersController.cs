@@ -209,9 +209,29 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
     }
 
     [HttpGet]
-    public IActionResult Success(int id)
+    public async Task<IActionResult> Success(int id)
     {
+        if (id <= 0) return RedirectToAction(nameof(Index));
+
         ViewBag.OrderId = id;
+        try
+        {
+            // The tracking endpoint scopes the lookup to the signed-in customer.
+            var tracking = await api.GetOrderTrackingAsync(id);
+            if (tracking is null) return NotFound();
+
+            ViewBag.Waybill = tracking.Waybill;
+            ViewBag.ShippingStatus = tracking.ShippingStatus;
+            ViewBag.DelhiTrackingUrl = string.IsNullOrWhiteSpace(tracking.Waybill)
+                ? null
+                : $"https://www.delhivery.com/track/package/{Uri.EscapeDataString(tracking.Waybill)}";
+        }
+        catch (Exception ex) when (ex is HttpRequestException or JsonException)
+        {
+            logger.LogWarning(ex, "Could not load shipment details for success page, order {OrderId}.", id);
+            ViewBag.ShippingStatus = "Tracking details are being updated";
+        }
+
         return View();
     }
 
