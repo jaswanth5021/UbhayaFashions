@@ -204,11 +204,11 @@ public sealed class DelhiveryService(
     public async Task<(string Waybill, string? LabelUrl)> CreateShipmentAsync(
         Order order, DelhiveryShipment shipment, CancellationToken cancellationToken)
     {
-        var pickup = configuration["Delhivery:PickupLocationName"];
+        var pickup = configuration["Delhivery:PickupLocationName"]?.Trim();
         if (string.IsNullOrWhiteSpace(pickup))
             throw new InvalidOperationException("Delhivery:PickupLocationName is not configured.");
 
-        var clientName = configuration["Delhivery:ClientName"];
+        var clientName = configuration["Delhivery:ClientName"]?.Trim();
         if (string.IsNullOrWhiteSpace(clientName))
             throw new InvalidOperationException("Delhivery:ClientName is not configured. Set it to the exact client name shown in your Delhivery B2C account.");
 
@@ -378,9 +378,21 @@ public sealed class DelhiveryService(
 
         using var document = JsonDocument.Parse(body);
         var root = document.RootElement;
+        var shipmentError = ExtractShipmentError(root);
+        if (!string.IsNullOrWhiteSpace(shipmentError) &&
+            shipmentError.Contains("shipment list contains no data", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "Delhivery rejected the shipment list with 'shipment list contains no data'. " +
+                $"The request includes shipments[0].client='{clientName}'. " +
+                "Verify that Delhivery:ClientName exactly matches the client name registered in Delhivery One, " +
+                "including spelling, capitalization and internal spaces. The client field is already included " +
+                "inside the shipments array; do not change the payload structure unless Delhivery confirms otherwise.");
+        }
+
         if (root.TryGetProperty("success", out var success) &&
             success.ValueKind == JsonValueKind.False)
-            throw new InvalidOperationException(ExtractShipmentError(root));
+            throw new InvalidOperationException(shipmentError);
 
         var packageStatus = FindString(root, "status");
         if (string.Equals(packageStatus, "Fail", StringComparison.OrdinalIgnoreCase))
