@@ -849,12 +849,23 @@ public class ApiService(
             : (false, await response.Content.ReadAsStringAsync());
     }
 
-    public async Task<(bool Success, string Message)> RequestPasswordResetAsync(string email)
+    public async Task<(bool Success, string Message, bool AccountExists)> RequestPasswordResetAsync(string email)
     {
         using var response = await Client.PostAsJsonAsync("api/auth/forgot-password", new { email });
-        return response.IsSuccessStatusCode
-            ? (true, "")
-            : (false, await response.Content.ReadAsStringAsync());
+        if (!response.IsSuccessStatusCode)
+            return (false, await response.Content.ReadAsStringAsync(), false);
+
+        try
+        {
+            using var json = await System.Text.Json.JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var exists = json.RootElement.TryGetProperty("accountExists", out var accountExists)
+                && accountExists.ValueKind == System.Text.Json.JsonValueKind.True;
+            return (true, "", exists);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return (false, "The password reset service returned an unexpected response.", false);
+        }
     }
 
     public async Task<(bool Success, string Message)> ResetPasswordAsync(ResetPasswordViewModel model)
