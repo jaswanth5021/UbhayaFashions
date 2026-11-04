@@ -31,6 +31,35 @@
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
     var isHomePage = currentController == "Home" && currentAction == "Index";
     var isContactPage = currentController == "Contact";
+    // Publish canonical URLs only for public, indexable storefront pages.
+    // Query-string variants (search, sort, filters, pagination) canonicalize to the base listing.
+    string? canonicalUrl = null;
+    if (currentController == "Home" && currentAction is "Index" or "About" or "Privacy" or "Terms" or "Returns" or "Cancellation")
+    {
+        canonicalUrl = Url.Action(currentAction, "Home", values: null, protocol: "https", host: "ubhayafashions.in");
+    }
+    else if (currentController == "Products" && currentAction == "Index")
+    {
+        canonicalUrl = Url.Action("Index", "Products", values: null, protocol: "https", host: "ubhayafashions.in");
+    }
+    else if (currentController == "Products" && currentAction == "Categories")
+    {
+        canonicalUrl = Url.Action("Categories", "Products", values: null, protocol: "https", host: "ubhayafashions.in");
+    }
+    else if (currentController == "Products" && currentAction == "Details"
+        && int.TryParse(ViewContext.RouteData.Values["id"]?.ToString(), out var canonicalProductId)
+        && canonicalProductId > 0)
+    {
+        canonicalUrl = Url.Action("Details", "Products", new { id = canonicalProductId }, protocol: "https", host: "ubhayafashions.in");
+    }
+    else if (currentController == "Contact" && currentAction == "Index")
+    {
+        canonicalUrl = Url.Action("Index", "Contact", values: null, protocol: "https", host: "ubhayafashions.in");
+    }
+    else if (currentController == "Shipping" && currentAction == "Index")
+    {
+        canonicalUrl = Url.Action("Index", "Shipping", values: null, protocol: "https", host: "ubhayafashions.in");
+    }
     var navQuery = Context.Request.Query;
     var isAboutNavActive = currentController == "Home" && currentAction == "About";
     var isNewArrivalsNavActive = currentController == "Products" && navQuery.ContainsKey("newArrivals");
@@ -152,6 +181,10 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="@metaDescription" />
+    @if (!string.IsNullOrWhiteSpace(canonicalUrl))
+    {
+        <link rel="canonical" href="@canonicalUrl" />
+    }
 
     <link rel="icon" type="image/png" href="~/images/favicon.png" asp-append-version="true" />
 
