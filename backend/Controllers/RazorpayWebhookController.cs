@@ -213,7 +213,7 @@ public sealed class RazorpayWebhookController(
             else
             {
                 var order = payment?.Order;
-                if (order is not null && order.PaymentStatus != "Paid" && payment.Status != "Captured")
+                if (payment is not null && order is not null && order.PaymentStatus != "Paid" && payment.Status != "Captured")
                 {
                     payment.Status = "Failed";
                     order.PaymentStatus = "Failed";
