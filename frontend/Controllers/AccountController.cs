@@ -19,6 +19,7 @@ public class AccountController(ApiService api) : Controller
     {
         ViewBag.Error = error;
         ViewBag.ReturnUrl = returnUrl;
+        ViewBag.ShowSignup = TempData["OpenSignup"] is bool openSignup && openSignup;
         return View(new LoginExperienceViewModel());
     }
 
@@ -445,7 +446,8 @@ public class AccountController(ApiService api) : Controller
         if (!result.AccountExists)
         {
             TempData["SignupNotice"] = "We couldn't find an account with that email address. Create an account to continue.";
-            return RedirectToAction(nameof(Signup));
+            TempData["OpenSignup"] = true;
+            return RedirectToAction(nameof(Login));
         }
 
         ViewBag.PasswordResetSent = true;
