@@ -496,7 +496,7 @@ public class AuthController(
     {
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["Senders:Support"] ?? smtp["From"];
+        var from = smtp["From"];
         var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
             return StatusCode(503, "Password reset email is not configured. Set the Smtp configuration for the backend.");
@@ -799,7 +799,7 @@ public class AuthController(
 
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["Senders:Support"] ?? smtp["From"];
+        var from = smtp["From"];
         var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
         {
@@ -900,7 +900,7 @@ public class AuthController(
        
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["Senders:Support"] ?? smtp["From"];
+        var from = smtp["From"];
         var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
             throw new InvalidOperationException("Email verification is not configured. Set the backend Smtp configuration.");
