@@ -309,6 +309,16 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         await using var transaction = await db.Database.BeginTransactionAsync();
         try
         {
+            // Serialize payment finalization for this payment row. If the webhook
+            // committed first, this lock/read observes Captured and prevents a second stock deduction.
+            var currentPayment = await db.Payments
+                .FromSqlInterpolated($"SELECT * FROM dbo.Payments WITH (UPDLOCK, ROWLOCK) WHERE Id = {payment.Id}")
+                .AsNoTracking()
+                .SingleAsync();
+
+            if (currentPayment.Status == "Captured")
+                return Ok(new { success = true, orderId = order.Id, status = "Paid" });
+
             // Re-check stock inside the transaction immediately before committing it.
             var productIds = order.Items.Select(x => x.ProductId).Distinct().ToList();
             var products = await db.Products
