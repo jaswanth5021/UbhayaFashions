@@ -49,7 +49,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             ShippingAddress = request.ShippingAddress,
             Status = "Pending",
             PaymentStatus = "Pending",
-            PaymentMethod = "Prepaid"
+            PaymentMethod = "Prepaid",
+            DeliveryAddressJson = request.DeliveryAddress is null ? null : JsonSerializer.Serialize(request.DeliveryAddress)
         };
 
         foreach (var item in request.Items)
@@ -376,7 +377,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             throw;
         }
     }
-    private static async Task CreatePaidOrderShipmentAsync(
+    internal static async Task CreatePaidOrderShipmentAsync(
         Order order,
         PaymentDeliveryAddress? address,
         IDelhiveryService delhivery,
