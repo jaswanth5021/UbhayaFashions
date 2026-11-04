@@ -208,10 +208,6 @@ public sealed class DelhiveryService(
         if (string.IsNullOrWhiteSpace(pickup))
             throw new InvalidOperationException("Delhivery:PickupLocationName is not configured.");
 
-        var clientName = configuration["Delhivery:ClientName"]?.Trim();
-        if (string.IsNullOrWhiteSpace(clientName))
-            throw new InvalidOperationException("Delhivery:ClientName is not configured. Set it to the exact client name shown in your Delhivery B2C account.");
-
         ValidatePincode(shipment.PostalCode, nameof(shipment.PostalCode));
         if (shipment.RecipientPhone.Count(char.IsDigit) < 10)
             throw new InvalidOperationException("A valid recipient phone number is required.");
@@ -244,7 +240,6 @@ public sealed class DelhiveryService(
             {
                 new
                 {
-                    client = clientName,
                     name = shipment.RecipientName,
                     add = shipment.Address,
                     pin = shipment.PostalCode,
@@ -294,16 +289,16 @@ public sealed class DelhiveryService(
         errorLog.Write(
             "Delhivery Integration",
             "Delhivery Support Request Summary",
-            $"OrderId={order.Id}; OrderReference=UBHAYA-{order.Id}; Method=POST; RequestUri={requestUri}; ContentType=application/x-www-form-urlencoded; FormFields=format,data; FormatValue=json; ClientName={clientName}; PickupLocationName={pickup}; DestinationNamePresent={!string.IsNullOrWhiteSpace(shipment.RecipientName)}; DestinationPhonePresent={!string.IsNullOrWhiteSpace(shipment.RecipientPhone)}; DestinationPin={shipment.PostalCode}; City={shipment.City}; State={shipment.State}; Country={shipment.Country}; PaymentMode={paymentMode}; PaymentStatus={order.PaymentStatus}; TotalAmount={order.TotalAmount}; CodAmount={(paymentMode == "COD" ? order.TotalAmount : 0)}; ProductsDescription={productsDescription}; Quantity={Math.Max(1, order.Items.Sum(x => x.Quantity))}; WeightGrams={shipment.WeightGrams}; DimensionsCm=25x20x5; ShippingMode=Surface; SellerName={configuration["Delhivery:SellerName"] ?? "UBHAYA FASHIONS"}; SellerPin={configuration["Delhivery:SellerPin"] ?? ""}; SellerAddressPresent={!string.IsNullOrWhiteSpace(configuration["Delhivery:SellerAddress"])}; SellerPhonePresent={!string.IsNullOrWhiteSpace(configuration["Delhivery:SellerPhone"])}; WaybillFieldIsBlank=true; AddressSpecialCharacters={string.Join(",", addressSpecialCharacters)}; JsonPayloadLength={json.Length}",
+            $"OrderId={order.Id}; OrderReference=UBHAYA-{order.Id}; Method=POST; RequestUri={requestUri}; ContentType=application/x-www-form-urlencoded; FormFields=format,data; FormatValue=json; ClientFieldIncluded=false; PickupLocationName={pickup}; DestinationNamePresent={!string.IsNullOrWhiteSpace(shipment.RecipientName)}; DestinationPhonePresent={!string.IsNullOrWhiteSpace(shipment.RecipientPhone)}; DestinationPin={shipment.PostalCode}; City={shipment.City}; State={shipment.State}; Country={shipment.Country}; PaymentMode={paymentMode}; PaymentStatus={order.PaymentStatus}; TotalAmount={order.TotalAmount}; CodAmount={(paymentMode == "COD" ? order.TotalAmount : 0)}; ProductsDescription={productsDescription}; Quantity={Math.Max(1, order.Items.Sum(x => x.Quantity))}; WeightGrams={shipment.WeightGrams}; DimensionsCm=25x20x5; ShippingMode=Surface; SellerName={configuration["Delhivery:SellerName"] ?? "UBHAYA FASHIONS"}; SellerPin={configuration["Delhivery:SellerPin"] ?? ""}; SellerAddressPresent={!string.IsNullOrWhiteSpace(configuration["Delhivery:SellerAddress"])}; SellerPhonePresent={!string.IsNullOrWhiteSpace(configuration["Delhivery:SellerPhone"])}; WaybillFieldIsBlank=true; AddressSpecialCharacters={string.Join(",", addressSpecialCharacters)}; JsonPayloadLength={json.Length}",
             requestUri.ToString(),
             "delhivery-diagnostics");
 
         logger.LogInformation(
-            "Delhivery Support Request Summary. OrderId={OrderId}, OrderReference={OrderReference}, Method=POST, RequestUri={RequestUri}, ContentType=application/x-www-form-urlencoded, FormFields=format,data, FormatValue=json, ClientName={ClientName}, PickupLocationName={PickupLocationName}, DestinationNamePresent={DestinationNamePresent}, DestinationPhonePresent={DestinationPhonePresent}, DestinationPin={DestinationPin}, City={City}, State={State}, Country={Country}, PaymentMode={PaymentMode}, PaymentStatus={PaymentStatus}, TotalAmount={TotalAmount}, CodAmount={CodAmount}, ProductsDescription={ProductsDescription}, Quantity={Quantity}, WeightGrams={WeightGrams}, DimensionsCm=25x20x5, ShippingMode=Surface, SellerName={SellerName}, SellerPin={SellerPin}, SellerAddressPresent={SellerAddressPresent}, SellerPhonePresent={SellerPhonePresent}, WaybillFieldIsBlank={WaybillFieldIsBlank}, AddressContainsDelhiveryFaqSpecialCharacters={AddressContainsDelhiveryFaqSpecialCharacters}, AddressSpecialCharacters={AddressSpecialCharacters}, JsonPayloadLength={JsonPayloadLength}",
+            "Delhivery Support Request Summary. OrderId={OrderId}, OrderReference={OrderReference}, Method=POST, RequestUri={RequestUri}, ContentType=application/x-www-form-urlencoded, FormFields=format,data, FormatValue=json, ClientFieldIncluded={ClientFieldIncluded}, PickupLocationName={PickupLocationName}, DestinationNamePresent={DestinationNamePresent}, DestinationPhonePresent={DestinationPhonePresent}, DestinationPin={DestinationPin}, City={City}, State={State}, Country={Country}, PaymentMode={PaymentMode}, PaymentStatus={PaymentStatus}, TotalAmount={TotalAmount}, CodAmount={CodAmount}, ProductsDescription={ProductsDescription}, Quantity={Quantity}, WeightGrams={WeightGrams}, DimensionsCm=25x20x5, ShippingMode=Surface, SellerName={SellerName}, SellerPin={SellerPin}, SellerAddressPresent={SellerAddressPresent}, SellerPhonePresent={SellerPhonePresent}, WaybillFieldIsBlank={WaybillFieldIsBlank}, AddressContainsDelhiveryFaqSpecialCharacters={AddressContainsDelhiveryFaqSpecialCharacters}, AddressSpecialCharacters={AddressSpecialCharacters}, JsonPayloadLength={JsonPayloadLength}",
             order.Id,
             $"UBHAYA-{order.Id}",
             requestUri,
-            clientName,
+            false,
             pickup,
             !string.IsNullOrWhiteSpace(shipment.RecipientName),
             !string.IsNullOrWhiteSpace(shipment.RecipientPhone),
@@ -398,11 +393,8 @@ public sealed class DelhiveryService(
             shipmentError.Contains("shipment list contains no data", StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
-                "Delhivery rejected the shipment list with 'shipment list contains no data'. " +
-                $"The request includes shipments[0].client='{clientName}'. " +
-                "Verify that Delhivery:ClientName exactly matches the client name registered in Delhivery One, " +
-                "including spelling, capitalization and internal spaces. The client field is already included " +
-                "inside the shipments array; do not change the payload structure unless Delhivery confirms otherwise.");
+                "Delhivery rejected the shipment list with 'shipment list contains no data' even though the optional client field was omitted from shipments[0]. " +
+                "Confirm the account's registered client name with your Delhivery Business POC and verify that the API token belongs to the selected environment.");
         }
 
         if (root.TryGetProperty("success", out var success) &&
