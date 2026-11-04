@@ -131,8 +131,17 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
         }
         foreach (var (variant, item) in restorations)
         {
-            variant.Stock += item.Quantity;
-            db.InventoryTransactions.Add(new InventoryTransaction { ProductId = item.ProductId, Size = item.Size, Type = "Cancellation", Quantity = item.Quantity, StockAfter = variant.Stock, Note = $"Admin cancelled order #{order.Id}. Inspect damaged items before making them available for sale." });
+            // This admin workflow is specifically for damaged items discovered during packing.
+            // The ordered quantity was already deducted at checkout; do not add it back to sellable stock.
+            db.InventoryTransactions.Add(new InventoryTransaction
+            {
+                ProductId = item.ProductId,
+                Size = item.Size,
+                Type = "Damaged",
+                Quantity = 0,
+                StockAfter = variant.Stock,
+                Note = $"Order #{order.Id} cancelled by admin: {item.Quantity} unit(s) marked damaged and excluded from sellable inventory."
+            });
         }
         order.Status = "Cancelled";
         if (string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase)) order.PaymentStatus = "Refund Pending";
@@ -140,7 +149,7 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await orderEmail.SendOrderCancellationAsync(order, order.Customer);
-        return Ok(new { success = true, orderId = order.Id, order.Status, order.PaymentStatus, message = "Order cancelled. Stock quantity restored; inspect damaged items before resale. Process any Refund Pending payment separately in Razorpay." });
+        return Ok(new { success = true, orderId = order.Id, order.Status, order.PaymentStatus, message = "Order cancelled. Damaged units remain excluded from sellable stock and are recorded in inventory transactions. Process any Refund Pending payment separately in Razorpay." });
     }
     [HttpPut("{id:int}/status")]
     public async Task<IActionResult> Status(int id, AdminOrderStatusRequest request)
