@@ -102,6 +102,18 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
         var orderStatus = order.Status ?? string.Empty;
         if (new[] { "deliver", "complete", "transit", "pickup", "dispatch", "ship" }.Any(term => orderStatus.Contains(term, StringComparison.OrdinalIgnoreCase)))
             return Conflict("This order cannot be cancelled automatically because fulfilment has progressed.");
+        var productIds = order.Items.Select(item => item.ProductId).Distinct().ToList();
+        var variants = await db.ProductVariants.Where(v => productIds.Contains(v.ProductId)).ToListAsync(cancellationToken);
+        static string Normalize(string? value) => (value ?? string.Empty).Trim();
+        var restorations = new List<(ProductVariant Variant, OrderItem Item)>();
+        foreach (var item in order.Items)
+        {
+            var matches = variants.Where(v => v.ProductId == item.ProductId && string.Equals(Normalize(v.Size), Normalize(item.Size), StringComparison.OrdinalIgnoreCase)).ToList();
+            var exact = matches.Where(v => string.Equals(Normalize(v.Color), Normalize(item.Color), StringComparison.OrdinalIgnoreCase)).ToList();
+            var variant = exact.Count == 1 ? exact[0] : matches.Count == 1 ? matches[0] : null;
+            if (variant is null) return Conflict($"Unable to identify inventory variant for {item.ProductName} ({item.Size}, {item.Color}). No stock was changed.");
+            restorations.Add((variant, item));
+        }
         var shipment = order.DelhiveryShipment;
         if (shipment is not null)
         {
@@ -116,18 +128,6 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
             }
             else if (!string.IsNullOrWhiteSpace(shipmentStatus) && !new[] { "NotCreated", "Creation Failed", "Failed" }.Contains(shipmentStatus, StringComparer.OrdinalIgnoreCase))
                 return Conflict($"Shipment status '{shipmentStatus}' cannot be cancelled automatically.");
-        }
-        var productIds = order.Items.Select(item => item.ProductId).Distinct().ToList();
-        var variants = await db.ProductVariants.Where(v => productIds.Contains(v.ProductId)).ToListAsync(cancellationToken);
-        static string Normalize(string? value) => (value ?? string.Empty).Trim();
-        var restorations = new List<(ProductVariant Variant, OrderItem Item)>();
-        foreach (var item in order.Items)
-        {
-            var matches = variants.Where(v => v.ProductId == item.ProductId && string.Equals(Normalize(v.Size), Normalize(item.Size), StringComparison.OrdinalIgnoreCase)).ToList();
-            var exact = matches.Where(v => string.Equals(Normalize(v.Color), Normalize(item.Color), StringComparison.OrdinalIgnoreCase)).ToList();
-            var variant = exact.Count == 1 ? exact[0] : matches.Count == 1 ? matches[0] : null;
-            if (variant is null) return Conflict($"Unable to identify inventory variant for {item.ProductName} ({item.Size}, {item.Color}). No stock was changed.");
-            restorations.Add((variant, item));
         }
         foreach (var (variant, item) in restorations)
         {
