@@ -173,11 +173,21 @@ public sealed class OrderConfirmationEmailService(
         var greetingName = string.IsNullOrWhiteSpace(customer.Name) ? "there" : customer.Name.Trim();
         var itemLines = order.Items.Select(item =>
             $"- {item.ProductName} | Size: {item.Size ?? "â€”"} | Qty: {item.Quantity} | {(item.Price * item.Quantity).ToString("C", currency)}");
+        var waybill = order.DelhiveryShipment?.Waybill;
+        var trackingUrl = string.IsNullOrWhiteSpace(waybill)
+            ? null
+            : $"https://www.delhivery.com/track/package/{Uri.EscapeDataString(waybill)}";
+        var trackingText = !string.IsNullOrWhiteSpace(waybill)
+            ? $"DELHIVERY AWB: {waybill}{Environment.NewLine}Track your shipment: {trackingUrl}"
+            : "Your shipment tracking number will be shared once the courier shipment is created.";
+        var trackingHtml = !string.IsNullOrWhiteSpace(waybill)
+            ? $"<div style=\"margin:18px 0;padding:16px;border:1px solid #e5c7c3;border-radius:10px;background:#fff7f5;\"><div style=\"color:#9a6b64;font-size:11px;font-weight:700;letter-spacing:1.2px;\">DELHIVERY TRACKING</div><div style=\"margin:8px 0;color:#68142e;font-size:18px;font-weight:700;\">AWB: {WebUtility.HtmlEncode(waybill)}</div><a href=\"{WebUtility.HtmlEncode(trackingUrl)}\" style=\"color:#813c40;font-weight:700;\">Track your order</a></div>"
+            : "<div style=\"margin:18px 0;padding:14px;border:1px solid #ead8c8;border-radius:8px;background:#f8f0e8;color:#665557;font-size:13px;\">Your shipment tracking number will be shared once the courier shipment is created.</div>";
         var plainText = $"""
             Hi {greetingName},
 
             Your order #{order.Id} has been placed successfully. Weâ€™re getting it ready.
-            Weâ€™ll share your tracking details as soon as your order is ready to ship.
+            {trackingText}
 
             ORDER SUMMARY
             {string.Join(Environment.NewLine, itemLines)}
@@ -251,7 +261,8 @@ public sealed class OrderConfirmationEmailService(
                     <tr><td style="padding:30px;">
                       <p style="margin:0 0 12px;font-size:16px;">Hi {encodedName},</p>
                       <p style="margin:0;font-size:15px;line-height:1.7;">Your order <strong style="color:#68142e;">#{order.Id}</strong> has been placed successfully. Weâ€™re getting it ready.</p>
-                      <p style="margin:12px 0 24px;font-size:14px;line-height:1.7;color:#665557;">Weâ€™ll share your tracking details as soon as your order is ready to ship.</p>
+                      <p style="margin:12px 0 16px;font-size:14px;line-height:1.7;color:#665557;">Your order is confirmed. Here are your shipment details.</p>
+                      {trackingHtml}
                       <div style="padding:16px;border:1px solid #efdfdf;border-radius:8px;background:#fffaf8;">
                         <div style="margin-bottom:10px;color:#9a6b64;font-size:11px;font-weight:700;letter-spacing:1.5px;">ORDER SUMMARY</div>
                         <div style="margin-bottom:14px;color:#68142e;font-size:16px;font-weight:700;">Order #{order.Id}</div>
