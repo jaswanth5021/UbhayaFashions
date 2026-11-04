@@ -74,7 +74,7 @@
                                 @if (canCancel) {
                                     var canCancelShipment = true;
                                     <section class="orders-dialog-cancel"><div><h3>Cancel order</h3><p>@(canCancelShipment ? "This requests Delhivery cancellation for the AWB and automatically initiates a full Razorpay refund for captured prepaid payments." : $"Shipment status is '{o.ShippingStatus}'. Delhivery may reject cancellation if the parcel is no longer eligible for cancellation.")</p></div>
-                                        @if (canCancelShipment) { <form asp-action="CancelOrder" method="post" onsubmit="return confirm('Cancel order #@o.Id and request Delhivery cancellation if an AWB exists? Any prepaid refund must be processed separately in Razorpay.')">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@o.Id"/><input type="hidden" name="page" value="@currentPage"/><input type="hidden" name="pageSize" value="@pageSize"/><input type="hidden" name="search" value="@search"/><input type="hidden" name="filterStatus" value="@selectedStatus"/><input type="hidden" name="filterPaymentStatus" value="@selectedPaymentStatus"/><button class="orders-cancel-button" type="submit">Cancel order</button></form> }
+                                        @if (canCancelShipment) { <form asp-action="CancelOrder" method="post" class="orders-cancel-form" data-order-id="@o.Id" data-has-awb="@(!string.IsNullOrWhiteSpace(o.ShippingWaybill) ? "true" : "false")">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@o.Id"/><input type="hidden" name="page" value="@currentPage"/><input type="hidden" name="pageSize" value="@pageSize"/><input type="hidden" name="search" value="@search"/><input type="hidden" name="filterStatus" value="@selectedStatus"/><input type="hidden" name="filterPaymentStatus" value="@selectedPaymentStatus"/><button class="orders-cancel-button" type="button" data-open-cancel-confirmation>Cancel order</button></form> }
                                         else { <button type="button" class="orders-cancel-button is-disabled" disabled>Cancellation unavailable</button> }
                                     </section>
                                 }
@@ -112,6 +112,26 @@
     </details>
 </div>
 
+
+<dialog class="orders-confirm-dialog" id="orders-cancel-confirmation" aria-labelledby="orders-cancel-confirm-title">
+    <div class="orders-confirm-icon" aria-hidden="true"><span>!</span></div>
+    <div class="orders-confirm-content">
+        <span class="orders-confirm-eyebrow">ORDER CANCELLATION</span>
+        <h2 id="orders-cancel-confirm-title">Cancel this order?</h2>
+        <p id="orders-cancel-confirm-message">Please review the cancellation details before continuing.</p>
+        <div class="orders-confirm-info">
+            <div><span>ORDER</span><strong id="orders-confirm-order-number">—</strong></div>
+            <div><span>DELIVERY</span><strong id="orders-confirm-delivery">—</strong></div>
+            <div><span>PREPAID REFUND</span><strong>Refund will be initiated if payment was captured</strong></div>
+        </div>
+        <p class="orders-confirm-footnote">If an AWB exists, UBHAYA will request shipment cancellation from Delhivery. Refund processing time depends on Razorpay and the customer's bank.</p>
+    </div>
+    <div class="orders-confirm-actions">
+        <button type="button" class="orders-confirm-keep" data-close-cancel-confirmation>Keep order</button>
+        <button type="button" class="orders-confirm-submit" id="orders-confirm-submit">Yes, cancel order</button>
+    </div>
+</dialog>
+
 <style>
 .orders-page{color:#29252a}.orders-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:20px}.orders-heading h1{margin:0;font-size:27px;font-weight:750;letter-spacing:-.6px}.orders-heading p{margin:6px 0 0;color:#817982;font-size:13px}.orders-result-count{padding:8px 12px;border:1px solid #eee7eb;border-radius:9px;background:#fff;color:#716873;font-size:12px;font-weight:650}
 .orders-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}.orders-stat{display:flex;align-items:center;gap:13px;min-width:0;padding:17px;border:1px solid #eee9ed;border-radius:13px;background:#fff;box-shadow:0 3px 12px rgba(38,22,31,.035)}.orders-stat-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:12px;font-size:22px;font-weight:700}.orders-stat-icon.blue{background:#edf3ff;color:#3268d8}.orders-stat-icon.amber{background:#fff6e5;color:#c58a18}.orders-stat-icon.violet{background:#f2edff;color:#7851c9}.orders-stat-icon.green{background:#eaf8ef;color:#27945a}.orders-stat small,.orders-stat em{display:block;color:#817982;font-size:11px;font-style:normal}.orders-stat strong{display:block;margin:3px 0;font-size:25px;line-height:1.1;color:#28232a}
@@ -125,7 +145,7 @@
 
 /* Spacious order-management modal */
 .orders-manage-button{padding:9px 13px;border:1px solid #e6d6de;border-radius:8px;background:#fff;color:#741b3d;font-size:11px;font-weight:750;cursor:pointer;white-space:nowrap}.orders-manage-button:hover{background:#fff6f9;border-color:#cda9b8}.orders-manage-dialog{width:min(680px,calc(100vw - 28px));max-width:680px;max-height:min(88vh,820px);padding:0;border:1px solid #eadfe5;border-radius:16px;background:#fff;color:#302832;box-shadow:0 24px 80px rgba(35,18,28,.28);overflow:hidden}.orders-manage-dialog::backdrop{background:rgba(28,17,24,.48);backdrop-filter:blur(3px)}.orders-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:23px 25px 19px;border-bottom:1px solid #f0e9ed;background:#fffafb}.orders-dialog-eyebrow{color:#9b6a7d;font-size:9px;font-weight:800;letter-spacing:1.2px}.orders-dialog-head h2{margin:5px 0 4px;font-size:22px;letter-spacing:-.4px}.orders-dialog-head p{margin:0;color:#8b818a;font-size:12px}.orders-dialog-close{width:34px;height:34px;border:1px solid #eee4e9;border-radius:9px;background:#fff;color:#6f5e68;font-size:23px;line-height:1;cursor:pointer}.orders-dialog-body{max-height:calc(88vh - 145px);overflow-y:auto;padding:20px 25px}.orders-dialog-section{padding:0 0 20px;margin:0 0 19px;border-bottom:1px solid #f0e9ed}.orders-dialog-section h3,.orders-dialog-cancel h3{margin:0 0 13px;font-size:13px;font-weight:800}.orders-dialog-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.orders-dialog-fields .orders-field-wide{grid-column:1/-1}.orders-dialog-fields label{display:grid;gap:6px;color:#625b64;font-size:11px;font-weight:650}.orders-dialog-fields input,.orders-dialog-fields select{width:100%;height:40px;padding:0 11px;border:1px solid #e6dce2;border-radius:8px;background:#fff;color:#332b33;font:inherit;font-size:12px}.orders-update-form,.orders-shipment-form{display:grid;gap:13px}.orders-update-form button,.orders-shipment-form button{min-height:40px}.orders-awb-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border:1px solid #e9e0e5;border-radius:10px;background:#fcfafb}.orders-awb-card small,.orders-awb-card strong{display:block}.orders-awb-card small{color:#958994;font-size:9px;font-weight:800;letter-spacing:.8px}.orders-awb-card strong{margin-top:5px;color:#641832;font-size:15px;overflow-wrap:anywhere}.orders-shipment-state{padding:6px 10px;border-radius:20px;background:#edf3ff;color:#4167ae;font-size:10px;font-weight:750}.orders-tracking-link{display:inline-block;margin-top:11px;color:#751b3d;font-size:11px;font-weight:750;text-decoration:none}.orders-dialog-note{color:#8b818a;font-size:12px}.orders-dialog-cancel{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px;border:1px solid #f0dddd;border-radius:11px;background:#fffafa}.orders-dialog-cancel h3{margin:0 0 5px;color:#9e3434}.orders-dialog-cancel p{max-width:390px;margin:0;color:#817780;font-size:11px;line-height:1.5}.orders-dialog-cancel form{flex:0 0 145px}.orders-dialog-cancel .orders-cancel-button{margin:0;min-height:39px}.orders-cancel-button.is-disabled{opacity:.55;cursor:not-allowed}.orders-dialog-footer{display:flex;justify-content:flex-end;padding:13px 25px;border-top:1px solid #f0e9ed;background:#fff}.orders-dialog-done{padding:9px 18px;border:1px solid #e6dce2;border-radius:8px;background:#fff;color:#655761;font-size:11px;font-weight:700;cursor:pointer}@@media(max-width:600px){.orders-dialog-head{padding:18px}.orders-dialog-body{padding:17px}.orders-dialog-fields{grid-template-columns:1fr}.orders-dialog-fields .orders-field-wide{grid-column:auto}.orders-dialog-cancel{align-items:stretch;flex-direction:column}.orders-dialog-cancel form{flex:auto}.orders-dialog-footer{padding:12px 17px}}
-</style>
+.orders-confirm-dialog{width:min(460px,calc(100vw - 28px));max-width:460px;padding:0;border:1px solid #eee2e7;border-radius:20px;background:#fff;box-shadow:0 28px 90px rgba(35,18,28,.28);color:#302832;overflow:hidden}.orders-confirm-dialog::backdrop{background:rgba(25,16,22,.58);backdrop-filter:blur(5px)}.orders-confirm-icon{display:grid;place-items:center;width:48px;height:48px;margin:25px 26px 0;border-radius:15px;background:#fff0ed;color:#b7473f}.orders-confirm-icon span{display:grid;place-items:center;width:24px;height:24px;border:2px solid currentColor;border-radius:50%;font-size:15px;font-weight:800}.orders-confirm-content{padding:17px 26px 22px}.orders-confirm-eyebrow{color:#a16a7d;font-size:9px;font-weight:850;letter-spacing:1.3px}.orders-confirm-content h2{margin:7px 0;font-size:22px;letter-spacing:-.45px}.orders-confirm-content>p{margin:0;color:#817780;font-size:12px;line-height:1.6}.orders-confirm-info{display:grid;gap:12px;margin:18px 0;padding:15px;border:1px solid #eee7eb;border-radius:12px;background:#fcfafb}.orders-confirm-info div{display:grid;grid-template-columns:115px 1fr;gap:10px;align-items:start}.orders-confirm-info span{color:#968b94;font-size:9px;font-weight:800;letter-spacing:.7px}.orders-confirm-info strong{color:#443943;font-size:11px;font-weight:750;line-height:1.45}.orders-confirm-content .orders-confirm-footnote{padding-top:2px;font-size:10px}.orders-confirm-actions{display:flex;justify-content:flex-end;gap:9px;padding:15px 26px 20px;border-top:1px solid #f1eaee;background:#fff}.orders-confirm-actions button{min-height:40px;padding:0 17px;border-radius:9px;font-size:11px;font-weight:750;cursor:pointer}.orders-confirm-keep{border:1px solid #e8dfe4;background:#fff;color:#655761}.orders-confirm-submit{border:1px solid #a33d35;background:#a33d35;color:#fff;box-shadow:0 3px 8px rgba(163,61,53,.16)}.orders-confirm-submit:hover{background:#8e302b}.orders-confirm-submit:disabled{opacity:.65;cursor:wait}@@media(max-width:520px){.orders-confirm-content{padding:15px 19px 19px}.orders-confirm-icon{margin:20px 19px 0}.orders-confirm-actions{padding:13px 19px 17px}.orders-confirm-actions button{flex:1;padding:0 10px}.orders-confirm-info div{grid-template-columns:100px 1fr}}</style>
 
 <script>
 document.addEventListener('click',function(event){
@@ -141,6 +161,41 @@ document.addEventListener('click',function(event){
     if(summary){
         const current=summary.parentElement;
         document.querySelectorAll('.orders-action-menu[open]').forEach(function(menu){if(menu!==current)menu.open=false;});
+    }
+});
+
+let pendingCancelForm = null;
+const cancelConfirmation = document.getElementById('orders-cancel-confirmation');
+document.addEventListener('click', function (event) {
+    const trigger = event.target.closest('[data-open-cancel-confirmation]');
+    if (trigger) {
+        pendingCancelForm = trigger.closest('form');
+        if (!pendingCancelForm || !cancelConfirmation) return;
+        const orderId = pendingCancelForm.dataset.orderId || '';
+        const hasAwb = pendingCancelForm.dataset.hasAwb === 'true';
+        document.getElementById('orders-confirm-order-number').textContent = '#' + orderId;
+        document.getElementById('orders-confirm-delivery').textContent = hasAwb ? 'Delhivery cancellation will be requested' : 'No AWB generated';
+        document.getElementById('orders-cancel-confirm-message').textContent = hasAwb
+            ? 'You are about to cancel this order and request cancellation of its Delhivery shipment.'
+            : 'You are about to cancel this order. No Delhivery shipment has been generated.';
+        cancelConfirmation.showModal();
+    }
+    if (event.target.closest('[data-close-cancel-confirmation]') && cancelConfirmation) {
+        cancelConfirmation.close();
+        pendingCancelForm = null;
+    }
+});
+document.getElementById('orders-confirm-submit')?.addEventListener('click', function () {
+    if (!pendingCancelForm) return;
+    this.disabled = true;
+    this.textContent = 'Submitting…';
+    pendingCancelForm.submit();
+});
+cancelConfirmation?.addEventListener('close', function () {
+    const submitButton = document.getElementById('orders-confirm-submit');
+    if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Yes, cancel order';
     }
 });
 </script>
