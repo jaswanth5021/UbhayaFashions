@@ -442,8 +442,16 @@ public class AccountController(ApiService api) : Controller
             return View(model);
         }
 
-        TempData["PasswordResetSent"] = "If an account exists for that email, a password reset link has been sent.";
-        return RedirectToAction(nameof(ForgotPassword));
+        if (!result.AccountExists)
+        {
+            TempData["SignupNotice"] = "We couldn't find an account with that email address. Create an account to continue.";
+            return RedirectToAction(nameof(Signup));
+        }
+
+        ViewBag.PasswordResetSent = true;
+        ViewBag.ResetEmail = model.Email;
+        ViewBag.ResendAvailableAt = DateTimeOffset.UtcNow.AddMinutes(2).ToUnixTimeMilliseconds();
+        return View(model);
     }
 
     [HttpGet]
