@@ -113,10 +113,11 @@ public sealed class RazorpayWebhookController(
             await db.SaveChangesAsync(cancellationToken);
 
             var payment = await db.Payments
+                .FromSqlInterpolated($"SELECT * FROM dbo.Payments WITH (UPDLOCK, ROWLOCK) WHERE RazorpayOrderId = {razorpayOrderId}")
                 .Include(x => x.Order).ThenInclude(x => x.Items)
                 .Include(x => x.Order).ThenInclude(x => x.Customer)
                 .Include(x => x.Order).ThenInclude(x => x.DelhiveryShipment)
-                .SingleOrDefaultAsync(x => x.RazorpayOrderId == razorpayOrderId, cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken);
 
             if (payment is null || payment.Order is null)
             {
