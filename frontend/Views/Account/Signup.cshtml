@@ -12,6 +12,8 @@
         <p>Join us for a more personal shopping experience. You can verify your email later from your profile.</p>
     </div>
 
+    @if (TempData["SignupNotice"] is string signupNotice) { <div class="success signup-notice" role="status">@signupNotice</div> }
+
     <div asp-validation-summary="ModelOnly" class="error signup-validation-summary" data-app-notification="error" role="alert"></div>
 
     <form asp-action="Signup" method="post" class="signup-form">
