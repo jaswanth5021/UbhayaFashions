@@ -368,4 +368,72 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             throw;
         }
     }
+    private static async Task CreatePaidOrderShipmentAsync(
+        Order order,
+        PaymentDeliveryAddress? address,
+        IDelhiveryService delhivery,
+        ApplicationDbContext db,
+        IConfiguration configuration,
+        ILogger logger)
+    {
+        if (order.DelhiveryShipment is not null && !string.IsNullOrWhiteSpace(order.DelhiveryShipment.Waybill))
+            return;
+
+        var pickup = configuration["Delhivery:PickupLocationName"];
+        var clientName = configuration["Delhivery:ClientName"];
+        if (address is null ||
+            string.IsNullOrWhiteSpace(address.Name) ||
+            string.IsNullOrWhiteSpace(address.Mobile) ||
+            string.IsNullOrWhiteSpace(address.AddressLine1) ||
+            string.IsNullOrWhiteSpace(address.City) ||
+            string.IsNullOrWhiteSpace(address.State) ||
+            string.IsNullOrWhiteSpace(address.PostalCode) ||
+            string.IsNullOrWhiteSpace(pickup) ||
+            string.IsNullOrWhiteSpace(clientName))
+        {
+            logger.LogWarning("Order {OrderId} is paid, but automatic Delhivery shipment was skipped because delivery address or Delhivery configuration is incomplete.", order.Id);
+            return;
+        }
+
+        var shipment = order.DelhiveryShipment ?? new DelhiveryShipment { OrderId = order.Id };
+        if (order.DelhiveryShipment is null)
+            db.DelhiveryShipments.Add(shipment);
+
+        shipment.PickupLocation = pickup.Trim();
+        shipment.RecipientName = address.Name.Trim();
+        shipment.RecipientPhone = address.Mobile.Trim();
+        shipment.Address = string.Join(", ", new[] { address.AddressLine1, address.AddressLine2 }
+            .Where(value => !string.IsNullOrWhiteSpace(value)));
+        shipment.City = address.City.Trim();
+        shipment.State = address.State.Trim();
+        shipment.PostalCode = address.PostalCode.Trim();
+        shipment.Country = string.IsNullOrWhiteSpace(address.Country) ? "India" : address.Country.Trim();
+        shipment.WeightGrams = 1000;
+        shipment.ShipmentStatus = "Creating";
+        shipment.LastError = null;
+        shipment.AttemptCount++;
+        shipment.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        try
+        {
+            var created = await delhivery.CreateShipmentAsync(order, shipment, CancellationToken.None);
+            shipment.Waybill = created.Waybill;
+            shipment.LabelUrl = created.LabelUrl;
+            shipment.ShipmentStatus = "Shipment Created";
+            shipment.LastError = null;
+            shipment.UpdatedAtUtc = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+            logger.LogInformation("Automatic Delhivery shipment created for paid order {OrderId}; AWB {Waybill}.", order.Id, shipment.Waybill);
+        }
+        catch (Exception ex)
+        {
+            shipment.ShipmentStatus = "Creation Failed";
+            shipment.LastError = ex.Message.Length > 1900 ? ex.Message[..1900] : ex.Message;
+            shipment.UpdatedAtUtc = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+            logger.LogError(ex, "Order {OrderId} is paid, but automatic Delhivery shipment creation failed. Admin retry is required.", order.Id);
+        }
+    }
+
 }
