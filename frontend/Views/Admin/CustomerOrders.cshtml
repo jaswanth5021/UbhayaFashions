@@ -2,15 +2,106 @@
 @{
     ViewData["Title"] = $"Customer - {Model.Customer.Name}";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    var page=(int)ViewBag.CurrentPage;var pageCount=(int)ViewBag.PageCount;var pageSize=(int)ViewBag.PageSize;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var pageCount = (int)ViewBag.PageCount;
+    var pageSize = (int)ViewBag.PageSize;
+    var firstItem = Model.Orders.Count == 0 ? 0 : ((currentPage - 1) * Math.Max(1, pageSize)) + 1;
+    var lastItem = ((currentPage - 1) * Math.Max(1, pageSize)) + Model.Orders.Count;
 }
 <div class="customer-orders-page">
-    <header class="co-heading"><div><a asp-action="Customers" class="co-back">← Back to customers</a><div class="co-profile"><span class="co-avatar">@((string.IsNullOrWhiteSpace(Model.Customer.Name)?"C":Model.Customer.Name.Trim().Substring(0,1).ToUpperInvariant()))</span><div><span class="co-eyebrow">CUSTOMER PROFILE</span><h1>@Model.Customer.Name</h1><p>@Model.Customer.Email · @(Model.Customer.Mobile??"Phone not provided")</p></div></div></div><span class="co-customer-id">Customer #@Model.Customer.Id</span></header>
-    <section class="co-stats"><article><small>Total orders</small><strong>@ViewBag.TotalOrders</strong></article><article><small>Customer lifetime value</small><strong>₹@(((decimal)ViewBag.TotalSpend).ToString("N2"))</strong><em>All recorded orders</em></article><article><small>Last order</small><strong>@(Model.Customer.LastOrderDate?.ToLocalTime().ToString("dd MMM yyyy")??"—")</strong></article><article><small>Customer ID</small><strong>#@Model.Customer.Id</strong></article></section>
-    <section class="co-card"><div class="co-card-head"><div><h2>Order history</h2><p>All orders placed by this customer, newest first.</p></div><span>@ViewBag.TotalOrders orders</span></div>
-    @if(Model.Orders.Count==0){<div class="co-empty"><strong>No orders yet</strong><span>This customer has not placed any orders.</span></div>}else{
-    <div class="co-order-list">@foreach(var order in Model.Orders){<a class="co-order-row" asp-action="OrderDetails" asp-route-id="@order.Id" asp-route-customerId="@Model.Customer.Id"><div class="co-order-main"><strong>Order #@order.Id</strong><small>@order.CreatedDate.ToLocalTime().ToString("dd MMM yyyy · hh:mm tt") · @order.Items.Sum(i=>i.Quantity) item(s)</small></div><div class="co-order-shipping"><strong>@(string.IsNullOrWhiteSpace(order.ShippingWaybill)?"AWB not created":order.ShippingWaybill)</strong><small>@(order.ShippingStatus??"Awaiting shipment")</small></div><div class="co-order-end"><span class="co-order-status">@order.Status</span><strong>₹@order.TotalAmount.ToString("N2")</strong></div><span class="co-view">View order →</span></a>}</div>}
-    <footer class="co-pagination"><span>Showing @((Model.Orders.Count==0)?0:(page-1)*pageSize+1)–@((page-1)*pageSize+Model.Orders.Count) of @ViewBag.TotalOrders orders</span><nav class="admin-pagination">@if(pageCount>1){if(page>1){<a asp-action="CustomerOrders" asp-route-id="@Model.Customer.Id" asp-route-page="@(page-1)" asp-route-pageSize="@pageSize">← Previous</a>}else{<span class="is-disabled">← Previous</span>}<span class="is-current">@page / @pageCount</span>@if(page<pageCount){<a asp-action="CustomerOrders" asp-route-id="@Model.Customer.Id" asp-route-page="@(page+1)" asp-route-pageSize="@pageSize">Next →</a>}else{<span class="is-disabled">Next →</span>}}</nav><form asp-action="CustomerOrders" method="get"><input type="hidden" name="id" value="@Model.Customer.Id"/><label>Rows <select name="pageSize" onchange="this.form.submit()"><option value="5" selected="@(pageSize==5)">5</option><option value="10" selected="@(pageSize==10)">10</option><option value="15" selected="@(pageSize==15)">15</option><option value="50" selected="@(pageSize==50)">50</option><option value="100" selected="@(pageSize==100)">100</option><option value="0" selected="@(pageSize==0)">All</option></select></label></form></footer>
+    <header class="co-heading">
+        <div>
+            <a asp-action="Customers" class="co-back">← Back to customers</a>
+            <div class="co-profile">
+                <span class="co-avatar">@((string.IsNullOrWhiteSpace(Model.Customer.Name) ? "C" : Model.Customer.Name.Trim().Substring(0, 1).ToUpperInvariant()))</span>
+                <div>
+                    <span class="co-eyebrow">CUSTOMER PROFILE</span>
+                    <h1>@Model.Customer.Name</h1>
+                    <p>@Model.Customer.Email · @(Model.Customer.Mobile ?? "Phone not provided")</p>
+                </div>
+            </div>
+        </div>
+        <span class="co-customer-id">Customer #@Model.Customer.Id</span>
+    </header>
+
+    <section class="co-stats">
+        <article><small>Total orders</small><strong>@ViewBag.TotalOrders</strong></article>
+        <article><small>Customer lifetime value</small><strong>₹@(((decimal)ViewBag.TotalSpend).ToString("N2"))</strong><em>All recorded orders</em></article>
+        <article><small>Last order</small><strong>@(Model.Customer.LastOrderDate?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")</strong></article>
+        <article><small>Customer ID</small><strong>#@Model.Customer.Id</strong></article>
+    </section>
+
+    <section class="co-card">
+        <div class="co-card-head">
+            <div><h2>Order history</h2><p>All orders placed by this customer, newest first.</p></div>
+            <span>@ViewBag.TotalOrders orders</span>
+        </div>
+        @if (Model.Orders.Count == 0)
+        {
+            <div class="co-empty"><strong>No orders yet</strong><span>This customer has not placed any orders.</span></div>
+        }
+        else
+        {
+            <div class="co-order-list">
+                @foreach (var order in Model.Orders)
+                {
+                    <a class="co-order-row" asp-action="OrderDetails" asp-route-id="@order.Id" asp-route-customerId="@Model.Customer.Id">
+                        <div class="co-order-main">
+                            <strong>Order #@order.Id</strong>
+                            <small>@order.CreatedDate.ToLocalTime().ToString("dd MMM yyyy · hh:mm tt") · @order.Items.Sum(item => item.Quantity) item(s)</small>
+                        </div>
+                        <div class="co-order-shipping">
+                            <strong>@(string.IsNullOrWhiteSpace(order.ShippingWaybill) ? "AWB not created" : order.ShippingWaybill)</strong>
+                            <small>@(order.ShippingStatus ?? "Awaiting shipment")</small>
+                        </div>
+                        <div class="co-order-end">
+                            <span class="co-order-status">@order.Status</span>
+                            <strong>₹@order.TotalAmount.ToString("N2")</strong>
+                        </div>
+                        <span class="co-view">View order →</span>
+                    </a>
+                }
+            </div>
+        }
+
+        <footer class="co-pagination">
+            <span>Showing @firstItem–@lastItem of @ViewBag.TotalOrders orders</span>
+            <nav class="admin-pagination" aria-label="Customer order pages">
+                @if (pageCount > 1)
+                {
+                    if (currentPage > 1)
+                    {
+                        <a href="@Url.Action("CustomerOrders", new { id = Model.Customer.Id, page = currentPage - 1, pageSize = pageSize })">← Previous</a>
+                    }
+                    else
+                    {
+                        <span class="is-disabled">← Previous</span>
+                    }
+                    <span class="is-current">@currentPage / @pageCount</span>
+                    @if (currentPage < pageCount)
+                    {
+                        <a href="@Url.Action("CustomerOrders", new { id = Model.Customer.Id, page = currentPage + 1, pageSize = pageSize })">Next →</a>
+                    }
+                    else
+                    {
+                        <span class="is-disabled">Next →</span>
+                    }
+                }
+            </nav>
+            <form asp-action="CustomerOrders" method="get">
+                <input type="hidden" name="id" value="@Model.Customer.Id" />
+                <label>Rows
+                    <select name="pageSize" onchange="this.form.submit()">
+                        <option value="5" selected="@(pageSize == 5)">5</option>
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="15" selected="@(pageSize == 15)">15</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                        <option value="0" selected="@(pageSize == 0)">All</option>
+                    </select>
+                </label>
+            </form>
+        </footer>
     </section>
 </div>
 <style>
