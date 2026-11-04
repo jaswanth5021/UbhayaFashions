@@ -754,7 +754,18 @@ public class ApiService(
             orderId = model.OrderId,
             razorpayOrderId = model.RazorpayOrderId,
             razorpayPaymentId = model.RazorpayPaymentId,
-            razorpaySignature = model.RazorpaySignature
+            razorpaySignature = model.RazorpaySignature,
+            deliveryAddress = new
+            {
+                name = model.Address.Name,
+                mobile = model.Address.Mobile,
+                addressLine1 = model.Address.AddressLine1,
+                addressLine2 = model.Address.AddressLine2,
+                city = model.Address.City,
+                state = model.Address.State,
+                postalCode = model.Address.PostalCode,
+                country = model.Address.Country
+            }
         });
 
         var response = await Client.SendAsync(request);
