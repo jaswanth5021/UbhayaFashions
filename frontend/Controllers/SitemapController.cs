@@ -62,17 +62,16 @@ public sealed class SitemapController(
             new("/Home/Privacy", null),
             new("/Home/Terms", null),
             new("/Home/Returns", null),
-            new("/Home/Cancellation", null)
+            new("/Home/Cancellation", null),
+            new("/Contact", null),
+            new("/Shipping", null)
         };
 
-        entries.AddRange(categories
-            .Where(category => category.Id > 0 && !string.IsNullOrWhiteSpace(category.Name))
-            .Select(category => new SitemapEntry(
-                $"/Products?category={Uri.EscapeDataString(category.Name.Trim())}",
-                null)));
+        // Category query URLs currently canonicalize to the main Products listing.
+        // Keep them out of the sitemap until dedicated, self-canonical category routes exist.
 
         entries.AddRange(products
-            .Where(product => product.Id > 0)
+            .Where(product => product.Id > 0 && !string.IsNullOrWhiteSpace(product.Name))
             .Select(product => new SitemapEntry(
                 $"/Products/Details/{product.Id}",
                 product.UpdatedDate ?? (product.CreatedDate == default ? null : product.CreatedDate))));
