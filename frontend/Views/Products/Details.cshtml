@@ -8,31 +8,37 @@
         ? ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"])
         : Model.Images.OrderBy(image => image.SortOrder).Select(image => ImageUrlHelper.Resolve(image.ImageUrl, Configuration["ApiBaseUrl"])).FirstOrDefault();
     var seoVariant = Model.Variants.OrderBy(variant => variant.Price).FirstOrDefault();
-    var seoProduct = new
+    var seoProduct = new Dictionary<string, object?>
     {
-        @context = "https://schema.org",
-        @type = "Product",
-        name = Model.Name,
-        description = Model.Description,
-        image = string.IsNullOrWhiteSpace(seoImageUrl) ? null : seoImageUrl,
-        sku = Model.Id.ToString(),
-        category = Model.Category,
-        brand = new { @type = "Brand", name = "Ubhaya Fashions" },
-        offers = seoVariant is null ? null : new
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Product",
+        ["name"] = Model.Name,
+        ["description"] = Model.Description,
+        ["image"] = string.IsNullOrWhiteSpace(seoImageUrl) ? null : seoImageUrl,
+        ["sku"] = Model.Id.ToString(),
+        ["category"] = Model.Category,
+        ["brand"] = new Dictionary<string, object?>
         {
-            @type = "Offer",
-            url = Url.Action("Details", "Products", new { id = Model.Id }, protocol: "https", host: "ubhayafashions.in"),
-            priceCurrency = "INR",
-            price = seoVariant.Price,
-            availability = Model.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-            itemCondition = "https://schema.org/NewCondition"
+            ["@type"] = "Brand",
+            ["name"] = "Ubhaya Fashions"
         },
-        aggregateRating = Model.AverageRating.HasValue && Model.ReviewCount.GetValueOrDefault() > 0 ? new
+        ["offers"] = seoVariant is null ? null : new Dictionary<string, object?>
         {
-            @type = "AggregateRating",
-            ratingValue = Model.AverageRating.Value,
-            reviewCount = Model.ReviewCount.Value
-        } : null
+            ["@type"] = "Offer",
+            ["url"] = Url.Action("Details", "Products", new { id = Model.Id }, protocol: "https", host: "ubhayafashions.in"),
+            ["priceCurrency"] = "INR",
+            ["price"] = seoVariant.Price,
+            ["availability"] = Model.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            ["itemCondition"] = "https://schema.org/NewCondition"
+        },
+        ["aggregateRating"] = Model.AverageRating.HasValue && Model.ReviewCount.GetValueOrDefault() > 0
+            ? new Dictionary<string, object?>
+            {
+                ["@type"] = "AggregateRating",
+                ["ratingValue"] = Model.AverageRating.Value,
+                ["reviewCount"] = Model.ReviewCount.Value
+            }
+            : null
     };
 
     var productColors = (Model.Colors ?? "")
