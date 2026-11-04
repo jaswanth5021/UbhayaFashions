@@ -1,7 +1,39 @@
 @model ProductViewModel
 
 @{
-    ViewData["Title"] = Model.Name;
+    ViewData["Title"] = $"{Model.Name} | {Model.Category}";
+    ViewData["MetaDescription"] = $"{Model.Name} - shop this {Model.Category} style at Ubhaya Fashions. View product details, available sizes, colours and current price.";
+
+    var seoImageUrl = !string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"])
+        : Model.Images.OrderBy(image => image.SortOrder).Select(image => ImageUrlHelper.Resolve(image.ImageUrl, Configuration["ApiBaseUrl"])).FirstOrDefault();
+    var seoVariant = Model.Variants.OrderBy(variant => variant.Price).FirstOrDefault();
+    var seoProduct = new
+    {
+        @context = "https://schema.org",
+        @type = "Product",
+        name = Model.Name,
+        description = Model.Description,
+        image = string.IsNullOrWhiteSpace(seoImageUrl) ? null : seoImageUrl,
+        sku = Model.Id.ToString(),
+        category = Model.Category,
+        brand = new { @type = "Brand", name = "Ubhaya Fashions" },
+        offers = seoVariant is null ? null : new
+        {
+            @type = "Offer",
+            url = Url.Action("Details", "Products", new { id = Model.Id }, protocol: "https", host: "ubhayafashions.in"),
+            priceCurrency = "INR",
+            price = seoVariant.Price,
+            availability = Model.Stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            itemCondition = "https://schema.org/NewCondition"
+        },
+        aggregateRating = Model.AverageRating.HasValue && Model.ReviewCount.GetValueOrDefault() > 0 ? new
+        {
+            @type = "AggregateRating",
+            ratingValue = Model.AverageRating.Value,
+            reviewCount = Model.ReviewCount.Value
+        } : null
+    };
 
     var productColors = (Model.Colors ?? "")
         .Split(new[] { ',', '|', '/' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -71,6 +103,10 @@
                     Configuration["ApiBaseUrl"]))
             .Where(url => !string.IsNullOrWhiteSpace(url))
             .Select(url => (url, true, string.Empty)));
+}
+
+@section Head {
+    <script type="application/ld+json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(seoProduct))</script>
 }
 
 <main class="product-details-page">
