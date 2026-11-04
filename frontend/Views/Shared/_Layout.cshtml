@@ -17,16 +17,19 @@
     });
     var metaDescription = ViewData["MetaDescription"]?.ToString() ?? (ViewContext.RouteData.Values["controller"]?.ToString() switch
     {
-        "Home" => "Discover thoughtfully curated womenâ€™s fashion from Ubhaya Fashions. Shop dresses, ethnic wear, and new arrivals.",
-        "Products" => "Explore the Ubhaya Fashions collection of womenâ€™s dresses and ethnic wear. Find new arrivals, best sellers, and more.",
+        "Home" => "Discover thoughtfully curated women's fashion from Ubhaya Fashions. Shop dresses, ethnic wear, and new arrivals.",
+        "Products" => "Explore the Ubhaya Fashions collection of women's dresses and ethnic wear. Find new arrivals, best sellers, and more.",
         "Contact" => "Contact Ubhaya Fashions about your order, products, or any other questions.",
         "Shipping" => "Read about shipping and delivery for Ubhaya Fashions orders across India.",
         "Cart" => "Review the items in your Ubhaya Fashions shopping cart.",
         "Orders" => "Complete your Ubhaya Fashions order securely.",
         "Account" => "Manage your Ubhaya Fashions account and orders.",
         "Wishlist" => "View your saved Ubhaya Fashions products.",
-        _ => "Shop womenâ€™s fashion at Ubhaya Fashions."
+        _ => "Shop women's fashion at Ubhaya Fashions."
     });
+    var documentTitle = string.Equals(pageTitle, "Ubhaya Fashions", StringComparison.OrdinalIgnoreCase)
+        ? "Ubhaya Fashions | Women's Dresses & Ethnic Wear"
+        : $"{pageTitle} | Ubhaya Fashions";
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
     var isHomePage = currentController == "Home" && currentAction == "Index";
@@ -188,7 +191,7 @@
 
     <link rel="icon" type="image/png" href="~/images/favicon.png" asp-append-version="true" />
 
-    <title>@pageTitle - UBHAYA FASHIONS</title>
+    <title>@documentTitle</title>
 
     <!-- Shared and page feature styles, in cascade order -->
     <link rel="stylesheet" href="~/css/pages/home/index.css" asp-append-version="true" />
@@ -273,6 +276,7 @@
     {
         <link rel="stylesheet" href="~/css/pages/home/returns-policy.css" asp-append-version="true" />
     }
+    @await RenderSectionAsync("Head", required: false)
 </head>
 
 <body class="@(isHomePage ? "home-page" : string.Empty)">
