@@ -4,6 +4,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,7 +22,8 @@ namespace backend.Controllers;
 [Route("api/auth")]
 public class AuthController(
     ApplicationDbContext db,
-    IConfiguration config) : ControllerBase
+    IConfiguration config,
+    IMemoryCache resetEmailCooldowns) : ControllerBase
 {
     // =====================================================
     // SIGNUP
@@ -498,6 +500,18 @@ public class AuthController(
         var customer = await db.Customers.FirstOrDefaultAsync(x => x.Email == email);
         if (customer is null) return Ok(new { success = true, accountExists = false });
 
+        var cooldownKey = "password-reset:" + email;
+        if (resetEmailCooldowns.TryGetValue<DateTimeOffset>(cooldownKey, out var resendAvailableAt) &&
+            resendAvailableAt > DateTimeOffset.UtcNow)
+        {
+            var retryAfterSeconds = (int)Math.Ceiling((resendAvailableAt - DateTimeOffset.UtcNow).TotalSeconds);
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                message = "Please wait before requesting another password reset email.",
+                retryAfterSeconds
+            });
+        }
+
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
             .TrimEnd('=').Replace('+', '-').Replace('/', '_');
         customer.PasswordResetTokenHash = HashResetToken(token);
@@ -572,6 +586,7 @@ public class AuthController(
             return StatusCode(503, "Could not send the reset email. Check the backend SMTP settings.");
         }
 
+        resetEmailCooldowns.Set(cooldownKey, DateTimeOffset.UtcNow.AddMinutes(2), TimeSpan.FromMinutes(2));
         return Ok(new { success = true, accountExists = true });
     }
 
