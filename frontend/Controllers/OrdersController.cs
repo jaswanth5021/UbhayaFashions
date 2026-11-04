@@ -195,7 +195,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         if (cart.Count == 0)
             return RedirectToAction("Index", "Cart");
 
-        var result = await api.CreateRazorpayOrderAsync(cart, model.ShippingAddress);
+        var result = await api.CreateRazorpayOrderAsync(cart, model.ShippingAddress, model.Address);
         if (!result.Success || result.Data is null)
         {
             TempData["Error"] = result.Message;
