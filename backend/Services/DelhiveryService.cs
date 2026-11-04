@@ -223,6 +223,21 @@ public sealed class DelhiveryService(
             !string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Prepaid shipment creation is allowed only after payment is verified.");
 
+        // Check destination serviceability before attempting manifestation. Delhivery can
+        // return HTTP 200 with a package-level failure and no waybill for unsupported pins.
+        var pincodeResult = await CheckPincodeServiceabilityAsync(shipment.PostalCode, cancellationToken);
+        var isPaymentModeServiceable = paymentMode == "COD"
+            ? pincodeResult.Cod
+            : pincodeResult.Prepaid;
+
+        if (!isPaymentModeServiceable)
+        {
+            var paymentService = paymentMode == "COD" ? "COD" : "prepaid";
+            throw new InvalidOperationException(
+                $"Delhivery does not currently report destination PIN code {shipment.PostalCode} as serviceable for {paymentService} shipments in the configured environment. " +
+                "Shipment creation was stopped before manifestation. Verify the PIN code in Delhivery One and confirm whether the staging or production environment supports it.");
+        }
+
         var payload = new
         {
             shipments = new[]
