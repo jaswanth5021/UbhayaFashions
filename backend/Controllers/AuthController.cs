@@ -940,13 +940,13 @@ public class AuthController(
     {
         var configuredUrl = config["FrontendUrl"]?.TrimEnd('/');
         if (Uri.TryCreate(configuredUrl, UriKind.Absolute, out var configuredUri)
-            && !configuredUri.IsLoopback
             && (configuredUri.Scheme == Uri.UriSchemeHttps || configuredUri.Scheme == Uri.UriSchemeHttp))
         {
             return configuredUri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
         }
 
-        return "https://ubhaya1.duckdns.org";
+        throw new InvalidOperationException(
+            "FrontendUrl must be configured in backend appsettings.json as an absolute HTTP or HTTPS URL.");
     }
 }
 
