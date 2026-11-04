@@ -17,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // =====================================================
 
 builder.Services.AddControllers(options => options.Filters.AddService<ApiErrorLogFilter>());
+builder.Services.AddMemoryCache();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
