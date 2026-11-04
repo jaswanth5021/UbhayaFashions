@@ -350,7 +350,15 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             await transaction.CommitAsync();
 
             // Payment is already committed. Courier failures must not reverse a successful payment.
-            await CreatePaidOrderShipmentAsync(order, request.DeliveryAddress, delhivery, db, configuration, logger);
+            try
+            {
+                await CreatePaidOrderShipmentAsync(order, request.DeliveryAddress, delhivery, db, configuration, logger);
+            }
+            catch (Exception shipmentException)
+            {
+                logger.LogError(shipmentException, "Order {OrderId} is paid, but automatic shipment processing could not complete. Admin retry is required.", order.Id);
+            }
+
             await orderEmail.SendOrderConfirmationAsync(order, order.Customer);
 
             return Ok(new
