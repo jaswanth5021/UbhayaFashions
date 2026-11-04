@@ -496,7 +496,7 @@ public class AuthController(
         var email = request.Email?.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(email)) return Ok(new { success = true });
         var customer = await db.Customers.FirstOrDefaultAsync(x => x.Email == email);
-        if (customer is null) return Ok(new { success = true });
+        if (customer is null) return Ok(new { success = true, accountExists = false });
 
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
             .TrimEnd('=').Replace('+', '-').Replace('/', '_');
@@ -572,7 +572,7 @@ public class AuthController(
             return StatusCode(503, "Could not send the reset email. Check the backend SMTP settings.");
         }
 
-        return Ok(new { success = true });
+        return Ok(new { success = true, accountExists = true });
     }
 
     [HttpPost("reset-password")]
