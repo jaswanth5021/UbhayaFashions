@@ -136,6 +136,8 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
         }
         else if (prepaid && payment is null && !string.Equals(order.PaymentStatus, "Refunded", StringComparison.OrdinalIgnoreCase)) refundWarning = "No Razorpay payment reference was found; refund needs manual review."; 
 
+        if (refundInitiated) order.PaymentStatus = "Refund Initiated";
+
         if (!alreadyCancelled)
         {
             order.Status = "Cancelled";
