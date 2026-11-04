@@ -489,6 +489,7 @@ public class AuthController(
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
         var from = smtp["Senders:Support"] ?? smtp["From"];
+        var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
             return StatusCode(503, "Password reset email is not configured. Set the Smtp configuration for the backend.");
 
@@ -541,12 +542,14 @@ public class AuthController(
         var plainText = $"Use this one-time link to reset your password. It expires in one hour:\n\n{resetUrl}\n\nIf you did not request this, you can ignore this email.";
         try
         {
-            using var message = new MailMessage(from, email)
+            using var message = new MailMessage
             {
+                From = new MailAddress(from, displayName),
                 Subject = "Reset your Ubhaya Fashions password",
                 Body = html,
                 IsBodyHtml = true
             };
+            message.To.Add(email);
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
             var port = int.TryParse(smtp["Port"], out var configuredPort) ? configuredPort : 587;
@@ -783,6 +786,7 @@ public class AuthController(
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
         var from = smtp["Senders:Support"] ?? smtp["From"];
+        var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
             throw new InvalidOperationException("Email verification is not configured. Set the backend Smtp configuration.");
         var plainText = $"Your Ubhaya Fashions verification code is {code}. It expires in 10 minutes. If you did not request this, you can ignore this email.";
@@ -810,7 +814,14 @@ public class AuthController(
                 </body>
                 </html>
                 """;
-        using var message = new MailMessage(from, recipient) { Subject = subject, Body = plainText, IsBodyHtml = false };
+        using var message = new MailMessage
+        {
+            From = new MailAddress(from, displayName),
+            Subject = subject,
+            Body = plainText,
+            IsBodyHtml = false
+        };
+        message.To.Add(recipient);
         message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
         message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
         var port = int.TryParse(smtp["Port"], out var configuredPort) ? configuredPort : 587;
