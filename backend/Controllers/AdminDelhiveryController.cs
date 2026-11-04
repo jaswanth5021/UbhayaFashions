@@ -121,7 +121,14 @@ public sealed class AdminDelhiveryController(
         catch (Exception ex)
         {
             logger.LogError(ex, "Delhivery pickup request creation failed");
-            return StatusCode(502, new { error = ex.Message });
+            var message = ex.Message;
+            if (message.Contains("already exist", StringComparison.OrdinalIgnoreCase) ||
+                message.Contains("already raised", StringComparison.OrdinalIgnoreCase) ||
+                message.Contains("previous PUR", StringComparison.OrdinalIgnoreCase))
+                return Conflict(new { error = "Pickup already scheduled for this Delhivery pickup location. Delhivery will not accept another request until the existing pickup is completed or cancelled." });
+            if (message.Contains("auto pickup", StringComparison.OrdinalIgnoreCase))
+                return Conflict(new { error = "Automatic pickup is enabled for this Delhivery account. Manual pickup scheduling is not required; contact Delhivery support if this is unexpected." });
+            return StatusCode(502, new { error = message });
         }
     }
 
