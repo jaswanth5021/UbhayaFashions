@@ -189,15 +189,89 @@
         <link rel="canonical" href="@canonicalUrl" />
     }
 
-    @if (isHomePage)
-    {
+    @{
         var organizationSchema = new Dictionary<string, object?>
         {
             ["@context"] = "https://schema.org",
             ["@type"] = "Organization",
             ["name"] = "Ubhaya Fashions",
             ["url"] = "https://ubhayafashions.in/",
-            ["logo"] = "https://ubhayafashions.in/images/logo.png"
+            ["logo"] = "https://ubhayafashions.in/images/logo.png",
+            ["hasMerchantReturnPolicy"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "MerchantReturnPolicy",
+                ["applicableCountry"] = "IN",
+                ["returnPolicyCategory"] = "https://schema.org/MerchantReturnNotPermitted",
+                ["merchantReturnLink"] = "https://ubhayafashions.in/Home/Returns"
+            },
+            ["hasShippingService"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "ShippingService",
+                ["name"] = "Standard shipping across serviceable Indian PIN codes",
+                ["description"] = "Free shipping on orders of INR 999 or more. Orders below INR 999 may incur a shipping charge shown at checkout. Orders are generally processed within 1–2 days and delivered within 3–7 business days after dispatch.",
+                ["handlingTime"] = new Dictionary<string, object?>
+                {
+                    ["@type"] = "ServicePeriod",
+                    ["duration"] = new Dictionary<string, object?>
+                    {
+                        ["@type"] = "QuantitativeValue",
+                        ["minValue"] = 1,
+                        ["maxValue"] = 2,
+                        ["unitCode"] = "DAY"
+                    }
+                },
+                ["shippingConditions"] = new object[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["@type"] = "ShippingConditions",
+                        ["shippingDestination"] = new Dictionary<string, object?>
+                        {
+                            ["@type"] = "DefinedRegion",
+                            ["addressCountry"] = "IN"
+                        },
+                        ["orderValue"] = new Dictionary<string, object?>
+                        {
+                            ["@type"] = "MonetaryAmount",
+                            ["maxValue"] = 998.99,
+                            ["currency"] = "INR"
+                        },
+                        ["description"] = "Shipping charges, if applicable, are calculated and displayed at checkout."
+                    },
+                    new Dictionary<string, object?>
+                    {
+                        ["@type"] = "ShippingConditions",
+                        ["shippingDestination"] = new Dictionary<string, object?>
+                        {
+                            ["@type"] = "DefinedRegion",
+                            ["addressCountry"] = "IN"
+                        },
+                        ["orderValue"] = new Dictionary<string, object?>
+                        {
+                            ["@type"] = "MonetaryAmount",
+                            ["minValue"] = 999,
+                            ["currency"] = "INR"
+                        },
+                        ["shippingRate"] = new Dictionary<string, object?>
+                        {
+                            ["@type"] = "MonetaryAmount",
+                            ["value"] = 0,
+                            ["currency"] = "INR"
+                        },
+                        ["transitTime"] = new Dictionary<string, object?>
+                        {
+                            ["@type"] = "ServicePeriod",
+                            ["duration"] = new Dictionary<string, object?>
+                            {
+                                ["@type"] = "QuantitativeValue",
+                                ["minValue"] = 3,
+                                ["maxValue"] = 7,
+                                ["unitCode"] = "DAY"
+                            }
+                        }
+                    }
+                }
+            }
         };
         var websiteSchema = new Dictionary<string, object?>
         {
@@ -208,7 +282,10 @@
             ["publisher"] = organizationSchema,
             ["inLanguage"] = "en-IN"
         };
-        <script type="application/ld+json">@Html.Raw(JsonSerializer.Serialize(organizationSchema))</script>
+    }
+    <script type="application/ld+json">@Html.Raw(JsonSerializer.Serialize(organizationSchema))</script>
+    @if (isHomePage)
+    {
         <script type="application/ld+json">@Html.Raw(JsonSerializer.Serialize(websiteSchema))</script>
     }
 
