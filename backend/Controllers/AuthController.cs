@@ -488,7 +488,7 @@ public class AuthController(
     {
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["From"];
+        var from = smtp["Senders:Support"] ?? smtp["From"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
             return StatusCode(503, "Password reset email is not configured. Set the Smtp configuration for the backend.");
 
@@ -782,7 +782,7 @@ public class AuthController(
        
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["From"];
+        var from = smtp["Senders:Support"] ?? smtp["From"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
             throw new InvalidOperationException("Email verification is not configured. Set the backend Smtp configuration.");
         var plainText = $"Your Ubhaya Fashions verification code is {code}. It expires in 10 minutes. If you did not request this, you can ignore this email.";
