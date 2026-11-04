@@ -191,25 +191,23 @@
 
     @if (isHomePage)
     {
-        @{
-            var organizationSchema = new Dictionary<string, object?>
-            {
-                ["@context"] = "https://schema.org",
-                ["@type"] = "Organization",
-                ["name"] = "Ubhaya Fashions",
-                ["url"] = "https://ubhayafashions.in/",
-                ["logo"] = "https://ubhayafashions.in/images/logo.png"
-            };
-            var websiteSchema = new Dictionary<string, object?>
-            {
-                ["@context"] = "https://schema.org",
-                ["@type"] = "WebSite",
-                ["name"] = "Ubhaya Fashions",
-                ["url"] = "https://ubhayafashions.in/",
-                ["publisher"] = organizationSchema,
-                ["inLanguage"] = "en-IN"
-            };
-        }
+        var organizationSchema = new Dictionary<string, object?>
+        {
+            ["@context"] = "https://schema.org",
+            ["@type"] = "Organization",
+            ["name"] = "Ubhaya Fashions",
+            ["url"] = "https://ubhayafashions.in/",
+            ["logo"] = "https://ubhayafashions.in/images/logo.png"
+        };
+        var websiteSchema = new Dictionary<string, object?>
+        {
+            ["@context"] = "https://schema.org",
+            ["@type"] = "WebSite",
+            ["name"] = "Ubhaya Fashions",
+            ["url"] = "https://ubhayafashions.in/",
+            ["publisher"] = organizationSchema,
+            ["inLanguage"] = "en-IN"
+        };
         <script type="application/ld+json">@Html.Raw(JsonSerializer.Serialize(organizationSchema))</script>
         <script type="application/ld+json">@Html.Raw(JsonSerializer.Serialize(websiteSchema))</script>
     }
@@ -236,12 +234,12 @@
 
     <!-- Hamburger Menu CSS -->
     <link rel="stylesheet"
-          href="~/css/pages/shared/menu.css?v=colored-menu-cards-20261029-1"
+          href="~/css/pages/shared/menu.css"
           asp-append-version="true" />
 
     <!-- Footer CSS -->
     <link rel="stylesheet"
-          href="~/css/pages/shared/footer.css?v=footer-burgundy-2026-10-07"
+          href="~/css/pages/shared/footer.css"
           asp-append-version="true" />
 
     <!-- Contact Page CSS -->
@@ -263,33 +261,33 @@
     <link rel="stylesheet"
           href="~/css/pages/shared/ui-refresh.css"
           asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/pages/shared/search-polish.css?v=search-polish-2026-10-07-2" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/shared/search-polish.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/site-fixes.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/store-policies.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/api-loader.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/customer-notifications.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/pages/account/login.css?v=login-shared-notice-20261029-3" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/account/login.css" asp-append-version="true" />
     @if (currentController == "Account" && currentAction == "ResetPassword")
     {
         <link rel="stylesheet" href="~/css/pages/account/password-reset.css" asp-append-version="true" />
     }
     @if (currentController == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile")
     {
-        <link rel="stylesheet" href="~/css/pages/account/profile-tabs-polish.css?v=profile-tabs-2026-10-07-1" asp-append-version="true" />
-        <link rel="stylesheet" href="~/css/pages/account/profile-orders-polish.css?v=profile-orders-2026-10-07-5" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/pages/account/profile-tabs-polish.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/pages/account/profile-orders-polish.css" asp-append-version="true" />
     }
     @if (currentController == "Cart" && ViewContext.RouteData.Values["action"]?.ToString() == "Index")
     {
-        <link rel="stylesheet" href="~/css/pages/cart/cart-compact.css?v=cart-compact-2026-10-07-1" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/pages/cart/cart-compact.css" asp-append-version="true" />
     }
     @if (currentController == "Products" && ViewContext.RouteData.Values["action"]?.ToString() == "Index")
     {
-        <link rel="stylesheet" href="~/css/pages/products/catalog-color-cards.css?v=2026-10-07-3" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/pages/products/catalog-color-cards.css" asp-append-version="true" />
     }
     @if (isHomePage)
     {
-        <link rel="stylesheet" href="~/css/pages/home/clean-home.css?v=home-clean-2026-10-07" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/pages/home/clean-home.css" asp-append-version="true" />
     }
     @if (currentController == "Home" && currentAction == "About")
     {
@@ -656,7 +654,7 @@
         </div>
         <section class="cart-drawer-address-step" id="cartDrawerAddressStep" hidden aria-label="Choose delivery address">
             <div class="checkout-drawer-title-row">
-                <button type="button" class="cart-drawer-back" id="cartDrawerBackToItems">â† Back</button>
+                <button type="button" class="cart-drawer-back" id="cartDrawerBackToItems">&#8592; Back</button>
                 <span>Delivery</span>
                 <button type="button" class="cart-drawer-close checkout-inline-close" id="cartDrawerAddressClose" aria-label="Close">&times;</button>
             </div>
@@ -694,7 +692,7 @@
                     }
                 </div>
 
-                <button type="button" class="drawer-add-address" id="drawerAddNewAddress">ï¼‹ Add new address</button>
+                <button type="button" class="drawer-add-address" id="drawerAddNewAddress">&#65291; Add new address</button>
 
                 <div class="drawer-new-address" id="drawerNewAddress" hidden>
                     <div class="drawer-new-address-head">
@@ -703,7 +701,7 @@
                     </div>
 
                     <button type="button" class="use-location-button" id="drawerUseLocation">
-                        <span aria-hidden="true">âŒ–</span> Use my current location
+                        <span aria-hidden="true">&#x2316;</span> Use my current location
                     </button>
                     <div id="drawerAddressAutocomplete" data-google-maps-key="@Configuration["Google:MapsApiKey"]"></div>
                     <p class="drawer-address-hint">Search your address or use your current location.</p>
