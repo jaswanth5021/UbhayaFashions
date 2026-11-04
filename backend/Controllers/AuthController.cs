@@ -23,7 +23,8 @@ namespace backend.Controllers;
 public class AuthController(
     ApplicationDbContext db,
     IConfiguration config,
-    IMemoryCache resetEmailCooldowns) : ControllerBase
+    IMemoryCache resetEmailCooldowns,
+    ILogger<AuthController> logger) : ControllerBase
 {
     // =====================================================
     // SIGNUP
@@ -55,7 +56,7 @@ public class AuthController(
              x.Mobile.Replace("+", "").Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace(".", "") == "0" + mobileDigits)))
             return Conflict("An account with this mobile number already exists. Please login.");
 
-        db.Customers.Add(new Customer
+        var customer = new Customer
         {
             Name = request.Name.Trim(),
             Email = email,
@@ -63,8 +64,10 @@ public class AuthController(
             Age = request.Age,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             EmailVerified = false
-        });
+        };
+        db.Customers.Add(customer);
         await db.SaveChangesAsync();
+        await SendWelcomeEmailAsync(customer);
         return Ok(new { success = true, message = "Account created. You can verify your email from your profile after logging in." });
     }
 
@@ -179,17 +182,20 @@ public class AuthController(
             return Conflict("An account with this mobile number already exists. Please login.");
 
         await using var transaction = await db.Database.BeginTransactionAsync();
-        db.Customers.Add(new Customer
+        var customer = new Customer
         {
             Name = pending.Name,
             Email = pending.Email,
             Mobile = pending.Mobile,
             Age = pending.Age,
-            PasswordHash = pending.PasswordHash
-        });
+            PasswordHash = pending.PasswordHash,
+            EmailVerified = true
+        };
+        db.Customers.Add(customer);
         db.PendingSignups.Remove(pending);
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
+        await SendWelcomeEmailAsync(customer);
         return Ok(new { success = true, message = "Email verified and account created." });
     }
 
@@ -785,6 +791,100 @@ public class AuthController(
             $"{GetFrontendUrl()}/oauth-callback?token={Uri.EscapeDataString(token)}");
     }
 
+
+    private async Task SendWelcomeEmailAsync(Customer customer)
+    {
+        var recipient = customer.Email?.Trim();
+        if (string.IsNullOrWhiteSpace(recipient)) return;
+
+        var smtp = config.GetSection("Smtp");
+        var host = smtp["Host"];
+        var from = smtp["Senders:Support"] ?? smtp["From"];
+        var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
+        if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
+        {
+            logger.LogWarning("Welcome email skipped for customer {CustomerId}: SMTP is not configured.", customer.Id);
+            return;
+        }
+
+        var safeName = WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(customer.Name) ? "there" : customer.Name.Trim());
+        var storeUrl = config["FrontendUrl"]?.TrimEnd('/') ?? "https://ubhayafashions.in";
+        var safeStoreUrl = WebUtility.HtmlEncode(storeUrl);
+        var plainText = $"""
+            Hi {customer.Name},
+
+            Welcome to Ubhaya Fashions!
+            Your account has been created successfully. We're delighted to have you with us.
+
+            Discover our latest collections: {storeUrl}
+
+            If you need help, simply reply to this email.
+
+            Warm regards,
+            Team Ubhaya Fashions
+            """;
+        var html = $"""
+            <!doctype html>
+            <html lang="en">
+            <body style="margin:0;padding:0;background:#f8f3f0;font-family:Arial,Helvetica,sans-serif;color:#302522;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8f3f0;padding:32px 12px;">
+                <tr><td align="center">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;border:1px solid #efdfdf;border-radius:14px;background:#fffdfb;overflow:hidden;">
+                    <tr><td style="padding:34px 28px;background:#68142e;text-align:center;color:#fff;">
+                      <div style="font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#f0d8a7;">UBHAYA FASHIONS</div>
+                      <h1 style="margin:14px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;">Welcome to our family</h1>
+                    </td></tr>
+                    <tr><td style="padding:32px 30px;">
+                      <p style="margin:0 0 14px;font-size:16px;">Hello {safeName},</p>
+                      <p style="margin:0;font-size:15px;line-height:1.8;color:#665557;">Your Ubhaya Fashions account has been created successfully. We're delighted to welcome you. Explore styles that bring tradition and today together.</p>
+                      <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto;border-collapse:separate;">
+                        <tr><td align="center" style="border-radius:7px;background:#68142e;">
+                          <a href="{safeStoreUrl}" style="display:block;padding:15px 30px;color:#fff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.7px;">EXPLORE THE COLLECTION</a>
+                        </td></tr>
+                      </table>
+                      <p style="margin:22px 0 0;font-size:13px;line-height:1.7;color:#80645f;">You can sign in anytime to manage your profile, view your orders and save your favourite styles. If you need assistance, reply to this email and our team will be happy to help.</p>
+                      <p style="margin:24px 0 0;font-size:14px;color:#665557;">Warm regards,<br><strong>Team Ubhaya Fashions</strong></p>
+                    </td></tr>
+                    <tr><td style="padding:18px 20px;border-top:1px solid #eee5e1;text-align:center;color:#9a918a;font-size:12px;">Tradition meets today · Ubhaya Fashions</td></tr>
+                  </table>
+                </td></tr>
+              </table>
+            </body>
+            </html>
+            """;
+
+        try
+        {
+            using var message = new MailMessage
+            {
+                From = new MailAddress(from, displayName),
+                Subject = "Welcome to Ubhaya Fashions!",
+                Body = html,
+                IsBodyHtml = true
+            };
+            message.To.Add(recipient);
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
+
+            var port = int.TryParse(smtp["Port"], out var configuredPort) ? configuredPort : 587;
+            using var client = new SmtpClient(host, port)
+            {
+                EnableSsl = bool.TryParse(smtp["EnableSsl"], out var enableSsl) ? enableSsl : true,
+                DeliveryMethod = SmtpDeliveryMethod.Network
+            };
+            var username = smtp["Username"];
+            if (!string.IsNullOrWhiteSpace(username))
+                client.Credentials = new NetworkCredential(username, smtp["Password"]);
+
+            await client.SendMailAsync(message);
+            logger.LogInformation("Welcome email sent to customer {CustomerId}.", customer.Id);
+        }
+        catch (Exception exception)
+        {
+            // Account creation must succeed even when the email provider is temporarily unavailable.
+            logger.LogError(exception, "Customer {CustomerId} was created, but the welcome email could not be sent.", customer.Id);
+        }
+    }
 
     private string HashSignupCode(string email, string code)
     {
