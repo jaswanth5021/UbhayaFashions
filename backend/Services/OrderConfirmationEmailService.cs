@@ -30,6 +30,7 @@ public sealed class OrderConfirmationEmailService(
         var smtp = configuration.GetSection("Smtp");
         var host = smtp["Host"];
         var from = smtp["Senders:Orders"] ?? smtp["From"];
+        var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         var supportEmail = smtp["Senders:Support"] ?? smtp["From"];
         var internalCopy = smtp["InternalCopy"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
@@ -116,7 +117,7 @@ public sealed class OrderConfirmationEmailService(
         {
             using var message = new MailMessage
             {
-                From = new MailAddress(from, "Ubhaya Fashions"),
+                From = new MailAddress(from, displayName),
                 Subject = $"Order #{order.Id} cancelled - Ubhaya Fashions",
                 Body = html,
                 IsBodyHtml = true
@@ -159,6 +160,7 @@ public sealed class OrderConfirmationEmailService(
         var smtp = configuration.GetSection("Smtp");
         var host = smtp["Host"];
         var from = smtp["Senders:Orders"] ?? smtp["From"];
+        var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         var supportEmail = smtp["Senders:Support"] ?? smtp["From"];
         var internalCopy = smtp["InternalCopy"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
@@ -324,7 +326,7 @@ public sealed class OrderConfirmationEmailService(
         {
             using var message = new MailMessage
             {
-                From = new MailAddress(from, "Ubhaya Fashions"),
+                From = new MailAddress(from, displayName),
                 Subject = $"Order #{order.Id} confirmed - Ubhaya Fashions",
                 Body = html,
                 IsBodyHtml = true
