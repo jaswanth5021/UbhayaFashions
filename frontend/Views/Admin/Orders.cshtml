@@ -6,91 +6,121 @@
     var search = ViewBag.Search as string;
     var selectedStatus = ViewBag.SelectedStatus as string;
     var selectedPaymentStatus = ViewBag.SelectedPaymentStatus as string;
+    var dateFrom = ViewBag.DateFrom as string;
+    var dateTo = ViewBag.DateTo as string;
     ViewData["Title"] = "Orders";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-<div class="page-head"><div><h1>Orders</h1><p>@ViewBag.ItemCount matching orders · Page @currentPage of @pageCount</p></div></div>
-@if (TempData["DelhiverySuccess"] is string success) { <div class="admin-alert success">@success</div> }
-@if (TempData["DelhiveryError"] is string error) { <div class="admin-alert error">@error</div> }
-<form class="admin-product-filters" asp-action="Orders" method="get">
-    <label>Search<input type="search" name="search" value="@search" placeholder="Order number, customer, email" /></label>
-    <label>Order status<select name="status"><option value="">All order statuses</option>@foreach (var value in new[] { "Pending", "Confirmed", "Processing", "Packed", "Shipped", "Delivered", "Cancelled" }) { <option value="@value" selected="@(string.Equals(selectedStatus, value, StringComparison.OrdinalIgnoreCase))">@value</option> }</select></label>
-    <label>Payment status<select name="paymentStatus"><option value="">All payment statuses</option>@foreach (var value in new[] { "Pending", "Paid", "Failed", "Refunded" }) { <option value="@value" selected="@(string.Equals(selectedPaymentStatus, value, StringComparison.OrdinalIgnoreCase))">@value</option> }</select></label>
-    <button class="primary" type="submit">Apply filters</button><a class="admin-filter-clear" asp-action="Orders">Clear</a>
-</form>
-
-<section class="dl-unified-panel">
-    <div class="dl-unified-heading"><div><h2>Delhivery fulfilment</h2><p>Manage shipment creation and warehouse pickup requests alongside your orders.</p></div><span>@Model.Count(o => !string.IsNullOrWhiteSpace(o.ShippingWaybill)) AWB(s)</span></div>
-    <form asp-action="CreateDelhiveryPickupRequest" method="post" class="dl-unified-pickup">
-        @Html.AntiForgeryToken()
-        <strong>Schedule warehouse pickup</strong>
-        <p>Delhivery pickup requests apply to the registered warehouse and can cover multiple ready-to-ship AWBs.</p>
-        <label>Pickup date<input type="date" name="pickupDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" max="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" required /></label>
-        <label>Pickup time<input type="time" name="pickupTime" value="10:00" required /></label>
-        <label>Expected packages<input type="number" name="expectedPackageCount" value="@Math.Max(1, Model.Count(o => !string.IsNullOrWhiteSpace(o.ShippingWaybill)))" min="1" max="1000" required /></label>
-        <button class="primary" type="submit" @(Model.All(o => string.IsNullOrWhiteSpace(o.ShippingWaybill)) ? "disabled" : null)>Check with Delhivery &amp; schedule</button>
-        <small>Delhivery rejects a second active pickup request for the same pickup location. If automatic pickup is enabled, manual scheduling is not required.</small>
-    </form>
-    <div class="dl-unified-list">
-    @foreach (var shipmentOrder in Model.OrderByDescending(o => o.CreatedDate))
-    {
-        <article class="dl-unified-order">
-            <div><strong>Order #@shipmentOrder.Id</strong><small>@shipmentOrder.Customer?.Name · @shipmentOrder.Status</small></div>
-            <div><strong>@(string.IsNullOrWhiteSpace(shipmentOrder.ShippingWaybill) ? "AWB not created" : shipmentOrder.ShippingStatus)</strong><small>@(string.IsNullOrWhiteSpace(shipmentOrder.ShippingWaybill) ? "Create a shipment below" : "AWB: " + shipmentOrder.ShippingWaybill)</small></div>
-            @if (string.IsNullOrWhiteSpace(shipmentOrder.ShippingWaybill) && !string.Equals(shipmentOrder.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
-            {
-                <details><summary>Create Delhivery shipment</summary>
-                    <form asp-action="CreateDelhiveryShipment" method="post" class="dl-unified-create">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="OrderId" value="@shipmentOrder.Id" />
-                        <label>Recipient<input name="RecipientName" value="@shipmentOrder.Customer?.Name" required maxlength="150" /></label>
-                        <label>Phone<input name="RecipientPhone" value="@shipmentOrder.Customer?.Mobile" required maxlength="20" /></label>
-                        <label class="wide">Address<input name="Address" value="@shipmentOrder.ShippingAddress" required maxlength="500" /></label>
-                        <label>City<input name="City" required maxlength="100" /></label>
-                        <label>State<input name="State" required maxlength="100" /></label>
-                        <label>PIN code<input name="PostalCode" inputmode="numeric" pattern="[0-9]{6}" required maxlength="6" /></label>
-                        <label>Weight (grams)<input name="WeightGrams" type="number" min="1" max="100000" value="1000" required /></label>
-                        <input type="hidden" name="Country" value="India" />
-                        <button class="secondary" type="submit">Create shipment</button>
-                    </form>
-                </details>
-            }
-        </article>
-    }
+<div class="orders-page">
+    <div class="orders-heading">
+        <div><h1>Orders</h1><p>Track orders, fulfilment and customer purchases in one place.</p></div>
+        <span class="orders-result-count">@ViewBag.ItemCount orders found</span>
     </div>
-</section>
-<style>
-.dl-unified-panel{margin:20px 0;padding:18px;border:1px solid #eadde0;border-radius:14px;background:#fff}
-.dl-unified-heading{display:flex;justify-content:space-between;gap:12px;align-items:center}.dl-unified-heading h2{margin:0;color:#6c1531;font-size:18px}.dl-unified-heading p,.dl-unified-pickup p,.dl-unified-pickup small{color:#817777;font-size:12px}.dl-unified-heading span{font-size:12px;font-weight:700;background:#f5eff1;padding:7px 10px;border-radius:20px}
-.dl-unified-pickup{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:end;padding:14px;margin:14px 0;background:#fff9fb;border-radius:10px}.dl-unified-pickup strong,.dl-unified-pickup p,.dl-unified-pickup small{grid-column:1/-1;margin:0}.dl-unified-pickup label,.dl-unified-create label{display:grid;gap:5px;font-size:12px}.dl-unified-pickup input,.dl-unified-create input{width:100%;min-width:0;padding:9px;border:1px solid #e5d9d5;border-radius:7px}.dl-unified-list{display:grid;gap:9px}.dl-unified-order{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;border:1px solid #f0e9e7;border-radius:9px}.dl-unified-order small{display:block;color:#817777;font-size:12px;margin-top:4px}.dl-unified-order details{grid-column:1/-1}.dl-unified-order summary{cursor:pointer;color:#6c1531;font-weight:700}.dl-unified-create{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.dl-unified-create .wide,.dl-unified-create button{grid-column:1/-1}
-@@media(max-width:700px){.dl-unified-pickup{grid-template-columns:1fr 1fr}.dl-unified-pickup button{grid-column:1/-1}.dl-unified-create{grid-template-columns:1fr}.dl-unified-create .wide,.dl-unified-create button{grid-column:auto}}
-</style>
+    @if (TempData["DelhiverySuccess"] is string success) { <div class="admin-alert success">@success</div> }
+    @if (TempData["DelhiveryError"] is string error) { <div class="admin-alert error">@error</div> }
 
-<div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Order status</th><th>Update</th></tr></thead><tbody>
-@foreach(var o in Model)
-{
-    var customerPhone = new string((o.Customer?.Mobile ?? "").Where(char.IsDigit).ToArray());
-    if (customerPhone.Length == 10) { customerPhone = "91" + customerPhone; }
-    else if (customerPhone.Length == 11 && customerPhone.StartsWith("0")) { customerPhone = "91" + customerPhone[1..]; }
-    var customerName = string.IsNullOrWhiteSpace(o.Customer?.Name) ? "Customer" : o.Customer!.Name;
-    var whatsappMessage = $"Hello {customerName}, thank you for shopping with UBHAYA FASHIONS! Your order #{o.Id} has been placed successfully. Order total: ₹{o.TotalAmount:N2}. We will keep you updated on your order status.";
-    var whatsappUrl = $"https://wa.me/{customerPhone}?text={Uri.EscapeDataString(whatsappMessage)}";
-    <tr><td><b>#@o.Id</b><small>@o.CreatedDate.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small></td><td>@o.Customer?.Name<small>@o.Customer?.Email</small></td><td>@string.Join(", ",o.Items.Select(i=>$"{i.ProductName} x{i.Quantity}"))</td><td>₹@o.TotalAmount.ToString("N0")</td><td>@o.PaymentStatus</td><td>@o.Status@if(!string.IsNullOrWhiteSpace(o.ShippingWaybill)){<small>AWB: @o.ShippingWaybill</small>}</td><td><form class="order-form" asp-action="UpdateOrder" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@o.Id"/><input type="hidden" name="page" value="@currentPage"/><input type="hidden" name="pageSize" value="@pageSize"/><input type="hidden" name="search" value="@search"/><input type="hidden" name="filterStatus" value="@selectedStatus"/><input type="hidden" name="filterPaymentStatus" value="@selectedPaymentStatus"/><select name="status"><option selected="@(o.Status=="Pending")">Pending</option><option selected="@(o.Status=="Confirmed")">Confirmed</option><option selected="@(o.Status=="Processing")">Processing</option><option selected="@(o.Status=="Packed")">Packed</option><option selected="@(o.Status=="Shipped")">Shipped</option><option selected="@(o.Status=="Delivered")">Delivered</option><option selected="@(o.Status=="Cancelled")">Cancelled</option></select><select name="paymentStatus"><option selected="@(o.PaymentStatus=="Pending")">Pending</option><option selected="@(o.PaymentStatus=="Paid")">Paid</option><option selected="@(o.PaymentStatus=="Failed")">Failed</option><option selected="@(o.PaymentStatus=="Refunded")">Refunded</option></select><button class="secondary" type="submit">Save</button></form>@if(!string.Equals(o.Status,"Cancelled",StringComparison.OrdinalIgnoreCase) && !string.Equals(o.Status,"Delivered",StringComparison.OrdinalIgnoreCase) && !string.Equals(o.Status,"Shipped",StringComparison.OrdinalIgnoreCase)){<form asp-action="CancelOrder" method="post" onsubmit="return confirm('Cancel order #@o.Id? Delhivery cancellation must be accepted before stock is restored. Any prepaid refund must be processed separately in Razorpay.')">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@o.Id"/><input type="hidden" name="page" value="@currentPage"/><input type="hidden" name="pageSize" value="@pageSize"/><input type="hidden" name="search" value="@search"/><input type="hidden" name="filterStatus" value="@selectedStatus"/><input type="hidden" name="filterPaymentStatus" value="@selectedPaymentStatus"/><button class="secondary" type="submit">Cancel order</button></form>}</td></tr>
-}
-@if (Model.Count == 0) { <tr><td colspan="7" class="inventory-empty">No orders match these filters.</td></tr> }
-</tbody></table></div>
-<div class="admin-grid-footer">
-    @if (pageCount > 1)
-    {
-        <nav class="admin-pagination" aria-label="Order pages">
-            @if (currentPage > 1) { <a asp-action="Orders" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-status="@selectedStatus" asp-route-paymentStatus="@selectedPaymentStatus">← Previous</a> } else { <span class="is-disabled" aria-disabled="true">← Previous</span> }
-            <div class="admin-page-numbers">@for (var pageNumber = 1; pageNumber <= pageCount; pageNumber++) { if (pageNumber == currentPage) { <span class="is-current" aria-current="page">@pageNumber</span> } else { <a asp-action="Orders" asp-route-page="@pageNumber" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-status="@selectedStatus" asp-route-paymentStatus="@selectedPaymentStatus" aria-label="Page @pageNumber">@pageNumber</a> } }</div>
-            @if (currentPage < pageCount) { <a asp-action="Orders" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-status="@selectedStatus" asp-route-paymentStatus="@selectedPaymentStatus">Next →</a> } else { <span class="is-disabled" aria-disabled="true">Next →</span> }
-        </nav>
-    }
-    <form class="admin-page-size" asp-action="Orders" method="get"><input type="hidden" name="search" value="@search"/><input type="hidden" name="status" value="@selectedStatus"/><input type="hidden" name="paymentStatus" value="@selectedPaymentStatus"/><label for="orders-page-size">Rows per page</label><select id="orders-page-size" name="pageSize" onchange="this.form.submit()"><option value="5" selected="@(pageSize == 5)">5</option><option value="10" selected="@(pageSize == 10)">10</option><option value="15" selected="@(pageSize == 15)">15</option><option value="50" selected="@(pageSize == 50)">50</option><option value="100" selected="@(pageSize == 100)">100</option><option value="0" selected="@(pageSize == 0)">All</option></select></form>
+    <section class="orders-stats" aria-label="Order summary">
+        <article class="orders-stat"><span class="orders-stat-icon blue">▤</span><div><small>Total orders</small><strong>@ViewBag.TotalOrders</strong><em>All orders</em></div></article>
+        <article class="orders-stat"><span class="orders-stat-icon amber">◷</span><div><small>Pending</small><strong>@ViewBag.PendingOrders</strong><em>Awaiting processing</em></div></article>
+        <article class="orders-stat"><span class="orders-stat-icon violet">↗</span><div><small>Shipped</small><strong>@ViewBag.ShippedOrders</strong><em>In transit</em></div></article>
+        <article class="orders-stat"><span class="orders-stat-icon green">✓</span><div><small>Delivered</small><strong>@ViewBag.DeliveredOrders</strong><em>Successfully delivered</em></div></article>
+    </section>
+
+    <form class="orders-filter-panel" asp-action="Orders" method="get">
+        <div class="orders-filter-title"><div><strong>Filter orders</strong><small>Search and narrow down your order list</small></div><a asp-action="Orders">Reset filters</a></div>
+        <div class="orders-filter-fields">
+            <label class="orders-search">Search<input type="search" name="search" value="@search" placeholder="Order ID, AWB, customer name or email" /></label>
+            <label>Order status<select name="status"><option value="">All statuses</option>@foreach (var value in new[] { "Pending", "Confirmed", "Processing", "Packed", "Shipped", "Delivered", "Cancelled" }) { <option value="@value" selected="@(string.Equals(selectedStatus,value,StringComparison.OrdinalIgnoreCase))">@value</option> }</select></label>
+            <label>Payment<select name="paymentStatus"><option value="">All payments</option>@foreach (var value in new[] { "Pending", "Paid", "Failed", "Refunded", "Refund Pending" }) { <option value="@value" selected="@(string.Equals(selectedPaymentStatus,value,StringComparison.OrdinalIgnoreCase))">@value</option> }</select></label>
+            <label>From date<input type="date" name="dateFrom" value="@dateFrom" /></label>
+            <label>To date<input type="date" name="dateTo" value="@dateTo" /></label>
+            <button class="primary" type="submit">Apply filters</button>
+        </div>
+    </form>
+
+    <section class="orders-table-card">
+        <div class="orders-table-heading"><div><h2>All orders</h2><p>Latest orders appear first. Select an action to manage an order.</p></div></div>
+        <div class="table-wrap orders-table-wrap"><table class="orders-modern-table">
+            <thead><tr><th>Order ID</th><th>AWB / Shipment</th><th>Customer</th><th>Order status</th><th>Order date</th><th>Action</th></tr></thead>
+            <tbody>
+            @foreach (var o in Model)
+            {
+                var canCancel = !string.Equals(o.Status,"Cancelled",StringComparison.OrdinalIgnoreCase) && !string.Equals(o.Status,"Delivered",StringComparison.OrdinalIgnoreCase) && !string.Equals(o.Status,"Shipped",StringComparison.OrdinalIgnoreCase);
+                <tr>
+                    <td><strong class="orders-id">#@o.Id</strong><small class="orders-subline">@o.Items.Sum(i=>i.Quantity) item(s) · ₹@o.TotalAmount.ToString("N0")</small></td>
+                    <td>@if (!string.IsNullOrWhiteSpace(o.ShippingWaybill)) { <strong class="awb-value">@o.ShippingWaybill</strong><small class="orders-subline">@(string.IsNullOrWhiteSpace(o.ShippingStatus) ? "Shipment created" : o.ShippingStatus)</small> } else { <span class="awb-missing">Not created</span> }</td>
+                    <td><strong>@(string.IsNullOrWhiteSpace(o.Customer?.Name) ? "Customer" : o.Customer.Name)</strong><small class="orders-subline">@o.Customer?.Email</small></td>
+                    <td><span class="order-status status-@((o.Status??"").ToLowerInvariant().Replace(" ","-"))">@o.Status</span><small class="orders-subline">Payment: @o.PaymentStatus</small></td>
+                    <td><strong>@o.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</strong><small class="orders-subline">@o.CreatedDate.ToLocalTime().ToString("hh:mm tt")</small></td>
+                    <td><div class="orders-actions">
+                        <details class="orders-action-menu"><summary>Manage</summary><div class="orders-action-content">
+                            <form class="orders-update-form" asp-action="UpdateOrder" method="post">
+                                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@o.Id"/><input type="hidden" name="page" value="@currentPage"/><input type="hidden" name="pageSize" value="@pageSize"/><input type="hidden" name="search" value="@search"/><input type="hidden" name="filterStatus" value="@selectedStatus"/><input type="hidden" name="filterPaymentStatus" value="@selectedPaymentStatus"/>
+                                <label>Order status<select name="status">@foreach(var value in new[]{"Pending","Confirmed","Processing","Packed","Shipped","Delivered","Cancelled"}){<option value="@value" selected="@(string.Equals(o.Status,value,StringComparison.OrdinalIgnoreCase))">@value</option>}</select></label>
+                                <label>Payment status<select name="paymentStatus">@foreach(var value in new[]{"Pending","Paid","Failed","Refunded","Refund Pending"}){<option value="@value" selected="@(string.Equals(o.PaymentStatus,value,StringComparison.OrdinalIgnoreCase))">@value</option>}</select></label>
+                                <button class="primary" type="submit">Save changes</button>
+                            </form>
+                            @if (string.IsNullOrWhiteSpace(o.ShippingWaybill) && !string.Equals(o.Status,"Cancelled",StringComparison.OrdinalIgnoreCase))
+                            {
+                                <details class="orders-shipment-details"><summary>Create Delhivery shipment</summary>
+                                    <form asp-action="CreateDelhiveryShipment" method="post" class="orders-shipment-form">
+                                        @Html.AntiForgeryToken()<input type="hidden" name="OrderId" value="@o.Id"/>
+                                        <label>Recipient<input name="RecipientName" value="@o.Customer?.Name" required maxlength="150"/></label>
+                                        <label>Phone<input name="RecipientPhone" value="@o.Customer?.Mobile" required maxlength="20"/></label>
+                                        <label>Address<input name="Address" value="@o.ShippingAddress" required maxlength="500"/></label>
+                                        <label>City<input name="City" required maxlength="100"/></label><label>State<input name="State" required maxlength="100"/></label>
+                                        <label>PIN code<input name="PostalCode" inputmode="numeric" pattern="[0-9]{6}" required maxlength="6"/></label>
+                                        <label>Weight (grams)<input name="WeightGrams" type="number" min="1" max="100000" value="1000" required/></label>
+                                        <input type="hidden" name="Country" value="India"/><button class="secondary" type="submit">Create shipment</button>
+                                    </form>
+                                </details>
+                            }
+                            @if (canCancel) {
+                                <form asp-action="CancelOrder" method="post" onsubmit="return confirm('Cancel order #@o.Id? Any prepaid refund must be processed separately in Razorpay.')">
+                                    @Html.AntiForgeryToken()<input type="hidden" name="id" value="@o.Id"/><input type="hidden" name="page" value="@currentPage"/><input type="hidden" name="pageSize" value="@pageSize"/><input type="hidden" name="search" value="@search"/><input type="hidden" name="filterStatus" value="@selectedStatus"/><input type="hidden" name="filterPaymentStatus" value="@selectedPaymentStatus"/>
+                                    <button class="orders-cancel-button" type="submit">Cancel order</button>
+                                </form>
+                            }
+                        </div></details>
+                    </div></td>
+                </tr>
+            }
+            @if (Model.Count == 0) { <tr><td colspan="6" class="inventory-empty">No orders match these filters. Try clearing one or more filters.</td></tr> }
+            </tbody>
+        </table></div>
+        <div class="orders-pagination">
+            <span>Showing @((Model.Count==0)?0:((currentPage-1)*pageSize+1))–@((currentPage-1)*pageSize+Model.Count) of @ViewBag.ItemCount orders</span>
+            @if (pageCount > 1) {
+                <nav class="admin-pagination" aria-label="Order pages">
+                    @if(currentPage>1){<a asp-action="Orders" asp-route-page="@(currentPage-1)" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-status="@selectedStatus" asp-route-paymentStatus="@selectedPaymentStatus" asp-route-dateFrom="@dateFrom" asp-route-dateTo="@dateTo">←</a>}
+                    <span class="orders-page-current">@currentPage / @pageCount</span>
+                    @if(currentPage<pageCount){<a asp-action="Orders" asp-route-page="@(currentPage+1)" asp-route-pageSize="@pageSize" asp-route-search="@search" asp-route-status="@selectedStatus" asp-route-paymentStatus="@selectedPaymentStatus" asp-route-dateFrom="@dateFrom" asp-route-dateTo="@dateTo">→</a>}
+                </nav>
+            }
+            <form class="admin-page-size" asp-action="Orders" method="get"><input type="hidden" name="search" value="@search"/><input type="hidden" name="status" value="@selectedStatus"/><input type="hidden" name="paymentStatus" value="@selectedPaymentStatus"/><input type="hidden" name="dateFrom" value="@dateFrom"/><input type="hidden" name="dateTo" value="@dateTo"/><label for="orders-page-size">Rows</label><select id="orders-page-size" name="pageSize" onchange="this.form.submit()"><option value="5" selected="@(pageSize==5)">5</option><option value="10" selected="@(pageSize==10)">10</option><option value="15" selected="@(pageSize==15)">15</option><option value="50" selected="@(pageSize==50)">50</option><option value="100" selected="@(pageSize==100)">100</option><option value="0" selected="@(pageSize==0)">All</option></select></form>
+        </div>
+    </section>
+
+    <details class="orders-delhivery-panel">
+        <summary><span><strong>Delhivery pickup management</strong><small>Schedule warehouse pickup for generated AWBs</small></span><span class="orders-awb-count">@Model.Count(o=>!string.IsNullOrWhiteSpace(o.ShippingWaybill)) AWB(s) on this page</span></summary>
+        <form asp-action="CreateDelhiveryPickupRequest" method="post" class="orders-pickup-form">
+            @Html.AntiForgeryToken()
+            <label>Pickup date<input type="date" name="pickupDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" max="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" required/></label>
+            <label>Pickup time<input type="time" name="pickupTime" value="10:00" required/></label>
+            <label>Expected packages<input type="number" name="expectedPackageCount" value="@Math.Max(1,Model.Count(o=>!string.IsNullOrWhiteSpace(o.ShippingWaybill)))" min="1" max="1000" required/></label>
+            <button class="primary" type="submit" @(Model.All(o=>string.IsNullOrWhiteSpace(o.ShippingWaybill))?"disabled":null)>Schedule pickup</button>
+            <small>Duplicate active pickup requests may be rejected by Delhivery. Automatic pickup may make manual scheduling unnecessary.</small>
+        </form>
+    </details>
 </div>
 
 <style>
-.admin-delhivery-create summary{cursor:pointer;font-weight:600;min-width:125px}.admin-delhivery-form{display:grid;gap:8px;min-width:230px;max-width:300px;padding:12px 0}.admin-delhivery-form label{display:grid;gap:4px;font-size:12px}.admin-delhivery-form input{width:100%;min-width:0;padding:7px;border:1px solid #ddd;border-radius:6px}.admin-delhivery-form button{white-space:normal}.admin-alert{padding:12px 16px;border-radius:8px;margin:12px 0}.admin-alert.success{background:#edf7ef}.admin-alert.error{background:#fff0ed}.whatsapp-order-link{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;border-radius:7px;background:#e9f8ee;color:#176b38;font-weight:600;font-size:12px;text-decoration:none;white-space:nowrap}.whatsapp-order-link:hover{background:#d7f1e0}.whatsapp-missing{color:#777;max-width:120px}
+.orders-page{color:#29252a}.orders-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:20px}.orders-heading h1{margin:0;font-size:27px;font-weight:750;letter-spacing:-.6px}.orders-heading p{margin:6px 0 0;color:#817982;font-size:13px}.orders-result-count{padding:8px 12px;border:1px solid #eee7eb;border-radius:9px;background:#fff;color:#716873;font-size:12px;font-weight:650}
+.orders-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}.orders-stat{display:flex;align-items:center;gap:13px;min-width:0;padding:17px;border:1px solid #eee9ed;border-radius:13px;background:#fff;box-shadow:0 3px 12px rgba(38,22,31,.035)}.orders-stat-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:12px;font-size:22px;font-weight:700}.orders-stat-icon.blue{background:#edf3ff;color:#3268d8}.orders-stat-icon.amber{background:#fff6e5;color:#c58a18}.orders-stat-icon.violet{background:#f2edff;color:#7851c9}.orders-stat-icon.green{background:#eaf8ef;color:#27945a}.orders-stat small,.orders-stat em{display:block;color:#817982;font-size:11px;font-style:normal}.orders-stat strong{display:block;margin:3px 0;font-size:25px;line-height:1.1;color:#28232a}
+.orders-filter-panel,.orders-table-card{background:#fff;border:1px solid #eee9ed;border-radius:13px;box-shadow:0 3px 12px rgba(38,22,31,.035);margin-bottom:18px}.orders-filter-panel{padding:17px}.orders-filter-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.orders-filter-title strong,.orders-filter-title small{display:block}.orders-filter-title small{margin-top:3px;color:#918992;font-size:11px}.orders-filter-title a{color:#771b3c;font-size:12px;font-weight:650;text-decoration:none}.orders-filter-fields{display:grid;grid-template-columns:minmax(210px,2fr) repeat(4,minmax(125px,1fr)) auto;gap:10px;align-items:end}.orders-filter-fields label,.orders-update-form label,.orders-shipment-form label,.orders-pickup-form label{display:grid;gap:6px;color:#625b64;font-size:11px;font-weight:650}.orders-filter-fields input,.orders-filter-fields select,.orders-update-form select,.orders-shipment-form input,.orders-pickup-form input{width:100%;min-width:0;height:38px;padding:0 10px;border:1px solid #e8e1e6;border-radius:8px;background:#fff;color:#383139;font:inherit;font-size:12px}.orders-filter-fields button{height:38px;white-space:nowrap}
+.orders-table-card{overflow:visible}.orders-table-heading{padding:17px 18px 13px}.orders-table-heading h2{margin:0;font-size:16px}.orders-table-heading p{margin:4px 0 0;color:#8b838c;font-size:11px}.orders-table-wrap{overflow-x:auto;border-top:1px solid #f0ecef}.orders-modern-table{width:100%;border-collapse:collapse;min-width:850px}.orders-modern-table th{padding:13px 14px;background:#fbfafb;color:#716a73;text-align:left;font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.45px;white-space:nowrap}.orders-modern-table td{padding:13px 14px;border-top:1px solid #f1edf0;vertical-align:middle;font-size:12px}.orders-modern-table tbody tr:hover{background:#fdfbfc}.orders-id,.awb-value{color:#3b3039;font-weight:750}.orders-subline{display:block;margin-top:4px;color:#928a93;font-size:10px}.awb-value{font-size:11px;overflow-wrap:anywhere}.awb-missing{color:#aaa1aa;font-size:11px}.order-status{display:inline-flex;padding:5px 9px;border-radius:20px;background:#f2f0f2;color:#6d6570;font-size:10px;font-weight:750;white-space:nowrap}.status-pending{background:#fff4df;color:#a96d0a}.status-confirmed,.status-processing,.status-packed{background:#edf2ff;color:#4569b8}.status-shipped{background:#eaf3ff;color:#2869bd}.status-delivered{background:#e9f7ee;color:#23824c}.status-cancelled{background:#fff0ef;color:#bd4945}.orders-actions{position:relative}.orders-action-menu{position:relative}.orders-action-menu>summary{list-style:none;cursor:pointer;padding:8px 12px;border:1px solid #e8dce2;border-radius:8px;color:#741b3d;font-size:11px;font-weight:700;white-space:nowrap}.orders-action-menu>summary::-webkit-details-marker{display:none}.orders-action-menu[open]>summary{background:#fff7fa}.orders-action-content{position:absolute;z-index:20;right:0;top:38px;width:260px;max-height:65vh;overflow:auto;padding:13px;border:1px solid #eee5e9;border-radius:11px;background:#fff;box-shadow:0 12px 30px rgba(40,20,30,.14)}.orders-update-form{display:grid;gap:9px}.orders-update-form button,.orders-shipment-form button{width:100%;margin-top:3px}.orders-shipment-details{margin-top:12px;padding-top:10px;border-top:1px solid #eee}.orders-shipment-details>summary{cursor:pointer;color:#6e1b3b;font-size:11px;font-weight:700}.orders-shipment-form{display:grid;gap:8px;margin-top:10px}.orders-shipment-form input{height:34px}.orders-cancel-button{width:100%;margin-top:10px;padding:8px;border:1px solid #f1d5d3;border-radius:7px;background:#fff7f6;color:#b3443f;font-size:11px;font-weight:700;cursor:pointer}
+.orders-pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 17px;color:#827a84;font-size:11px}.orders-pagination .admin-pagination{display:flex;align-items:center;gap:12px}.orders-pagination .admin-pagination a{display:grid;place-items:center;width:29px;height:29px;border:1px solid #e9e3e8;border-radius:7px;color:#6f1939;text-decoration:none}.orders-page-current{font-weight:700;color:#4c424b}.orders-pagination .admin-page-size{display:flex;align-items:center;gap:7px}.orders-pagination .admin-page-size select{padding:5px;border:1px solid #e8e1e6;border-radius:6px}
+.orders-delhivery-panel{margin:18px 0;padding:0 16px;border:1px solid #eee5e9;border-radius:12px;background:#fff}.orders-delhivery-panel>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 0;cursor:pointer;list-style:none}.orders-delhivery-panel>summary::-webkit-details-marker{display:none}.orders-delhivery-panel>summary strong,.orders-delhivery-panel>summary small{display:block}.orders-delhivery-panel>summary strong{font-size:13px}.orders-delhivery-panel>summary small{margin-top:3px;color:#8a818a;font-size:11px}.orders-awb-count{color:#761b3c;font-size:11px;font-weight:700}.orders-pickup-form{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr)) auto;gap:10px;align-items:end;padding:0 0 15px}.orders-pickup-form small{grid-column:1/-1;color:#8a818a;font-size:10px}.orders-pickup-form button{height:38px}.admin-alert{padding:12px 16px;border-radius:8px;margin:12px 0}.admin-alert.success{background:#edf7ef}.admin-alert.error{background:#fff0ed}
+@@media(max-width:1050px){.orders-filter-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.orders-search{grid-column:span 2}.orders-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@@media(max-width:650px){.orders-heading{align-items:flex-start;flex-direction:column}.orders-heading h1{font-size:23px}.orders-stats{gap:9px}.orders-stat{padding:12px;gap:9px}.orders-stat-icon{flex-basis:34px;height:34px;font-size:18px}.orders-stat strong{font-size:21px}.orders-filter-panel{padding:13px}.orders-filter-fields{grid-template-columns:1fr 1fr}.orders-search{grid-column:1/-1}.orders-filter-fields button{grid-column:1/-1}.orders-pagination{flex-wrap:wrap}.orders-pagination>span{width:100%}.orders-pickup-form{grid-template-columns:1fr 1fr}.orders-pickup-form button{grid-column:1/-1}.orders-delhivery-panel>summary{align-items:flex-start;flex-direction:column}.orders-action-content{position:fixed;top:20%;left:5%;right:5%;width:auto;max-height:65vh}}
 </style>
