@@ -849,22 +849,42 @@ public class ApiService(
             : (false, await response.Content.ReadAsStringAsync());
     }
 
-    public async Task<(bool Success, string Message, bool AccountExists)> RequestPasswordResetAsync(string email)
+    public async Task<(bool Success, string Message, bool AccountExists, int RetryAfterSeconds)> RequestPasswordResetAsync(string email)
     {
         using var response = await Client.PostAsJsonAsync("api/auth/forgot-password", new { email });
+        var body = await response.Content.ReadAsStringAsync();
+
         if (!response.IsSuccessStatusCode)
-            return (false, await response.Content.ReadAsStringAsync(), false);
+        {
+            try
+            {
+                using var errorJson = System.Text.Json.JsonDocument.Parse(body);
+                var root = errorJson.RootElement;
+                var message = root.TryGetProperty("message", out var messageElement)
+                    ? messageElement.GetString()
+                    : null;
+                var retryAfter = root.TryGetProperty("retryAfterSeconds", out var retryElement) &&
+                                 retryElement.TryGetInt32(out var seconds)
+                    ? Math.Max(0, seconds)
+                    : 0;
+                return (false, message ?? "We couldn't send the reset email. Please try again.", false, retryAfter);
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                return (false, "We couldn't send the reset email. Please try again.", false, 0);
+            }
+        }
 
         try
         {
-            using var json = await System.Text.Json.JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            using var json = System.Text.Json.JsonDocument.Parse(body);
             var exists = json.RootElement.TryGetProperty("accountExists", out var accountExists)
                 && accountExists.ValueKind == System.Text.Json.JsonValueKind.True;
-            return (true, "", exists);
+            return (true, "", exists, 0);
         }
         catch (System.Text.Json.JsonException)
         {
-            return (false, "The password reset service returned an unexpected response.", false);
+            return (false, "The password reset service returned an unexpected response.", false, 0);
         }
     }
 
