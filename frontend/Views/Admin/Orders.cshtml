@@ -45,7 +45,7 @@
             <tbody>
             @foreach (var o in Model)
             {
-                var canCancel = !string.Equals(o.Status,"Cancelled",StringComparison.OrdinalIgnoreCase) && !string.Equals(o.Status,"Delivered",StringComparison.OrdinalIgnoreCase) && !string.Equals(o.Status,"Shipped",StringComparison.OrdinalIgnoreCase);
+                var canCancel = !string.Equals(o.Status,"Cancelled",StringComparison.OrdinalIgnoreCase) && !string.Equals(o.Status,"Delivered",StringComparison.OrdinalIgnoreCase);
                 <tr>
                     <td><a class="orders-id-link" asp-action="OrderDetails" asp-route-id="@o.Id">#@o.Id</a><small class="orders-subline">@o.Items.Sum(i=>i.Quantity) item(s) · ₹@o.TotalAmount.ToString("N0")</small></td>
                     <td>@if (!string.IsNullOrWhiteSpace(o.ShippingWaybill)) { <strong class="awb-value">@o.ShippingWaybill</strong><small class="orders-subline">@(string.IsNullOrWhiteSpace(o.ShippingStatus) ? "Shipment created" : o.ShippingStatus)</small> } else { <span class="awb-missing">Not created</span> }</td>
@@ -72,8 +72,8 @@
                                     } else { <p class="orders-dialog-note">This order is cancelled. No new shipment can be created.</p> }
                                 </section>
                                 @if (canCancel) {
-                                    var canCancelShipment = string.IsNullOrWhiteSpace(o.ShippingWaybill) || new[] { "Manifested", "Pending", "Open", "Scheduled" }.Contains(o.ShippingStatus ?? "", StringComparer.OrdinalIgnoreCase);
-                                    <section class="orders-dialog-cancel"><div><h3>Cancel order</h3><p>@(canCancelShipment ? "This also requests Delhivery cancellation when an AWB exists. Any prepaid refund must be processed separately in Razorpay." : $"Shipment status is '{o.ShippingStatus}'. Automatic cancellation is unavailable after courier handover.")</p></div>
+                                    var canCancelShipment = true;
+                                    <section class="orders-dialog-cancel"><div><h3>Cancel order</h3><p>@(canCancelShipment ? "This requests Delhivery cancellation for the AWB and automatically initiates a full Razorpay refund for captured prepaid payments." : $"Shipment status is '{o.ShippingStatus}'. Delhivery may reject cancellation if the parcel is no longer eligible for cancellation.")</p></div>
                                         @if (canCancelShipment) { <form asp-action="CancelOrder" method="post" onsubmit="return confirm('Cancel order #@o.Id and request Delhivery cancellation if an AWB exists? Any prepaid refund must be processed separately in Razorpay.')">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@o.Id"/><input type="hidden" name="page" value="@currentPage"/><input type="hidden" name="pageSize" value="@pageSize"/><input type="hidden" name="search" value="@search"/><input type="hidden" name="filterStatus" value="@selectedStatus"/><input type="hidden" name="filterPaymentStatus" value="@selectedPaymentStatus"/><button class="orders-cancel-button" type="submit">Cancel order</button></form> }
                                         else { <button type="button" class="orders-cancel-button is-disabled" disabled>Cancellation unavailable</button> }
                                     </section>
