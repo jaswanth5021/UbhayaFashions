@@ -412,30 +412,6 @@ await using (var scope = app.Services.CreateAsyncScope())
         """);
 
    
-    // Razorpay webhook schema is created idempotently for existing SQL Server installations.
-    await db.Database.ExecuteSqlRawAsync("""
-        IF COL_LENGTH(N'dbo.Orders', N'DeliveryAddressJson') IS NULL
-            ALTER TABLE dbo.Orders ADD DeliveryAddressJson nvarchar(max) NULL;
-
-        IF OBJECT_ID(N'dbo.RazorpayWebhookEvents', N'U') IS NULL
-        BEGIN
-            CREATE TABLE dbo.RazorpayWebhookEvents
-            (
-                Id int IDENTITY(1,1) NOT NULL CONSTRAINT PK_RazorpayWebhookEvents PRIMARY KEY,
-                EventId nvarchar(100) NOT NULL,
-                EventType nvarchar(100) NOT NULL,
-                RazorpayPaymentId nvarchar(100) NULL,
-                RazorpayOrderId nvarchar(100) NULL,
-                ProcessingStatus nvarchar(30) NOT NULL CONSTRAINT DF_RazorpayWebhookEvents_ProcessingStatus DEFAULT N'Received',
-                ReceivedAtUtc datetime2 NOT NULL CONSTRAINT DF_RazorpayWebhookEvents_ReceivedAtUtc DEFAULT SYSUTCDATETIME(),
-                ProcessedAtUtc datetime2 NULL,
-                ErrorMessage nvarchar(2000) NULL
-            );
-            CREATE UNIQUE INDEX UX_RazorpayWebhookEvents_EventId
-                ON dbo.RazorpayWebhookEvents(EventId);
-        END;
-        """);
-
     // If you are using EF migrations:
     //
     // db.Database.Migrate();
