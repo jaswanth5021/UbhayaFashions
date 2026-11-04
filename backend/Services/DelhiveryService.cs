@@ -25,6 +25,7 @@ public interface IDelhiveryService
     Task<DelhiveryLabelResult> DownloadLabelAsync(string waybill, CancellationToken cancellationToken);
     Task<(string Waybill, string? LabelUrl)> CreateShipmentAsync(Order order, DelhiveryShipment shipment, CancellationToken cancellationToken);
     Task<string?> RefreshTrackingAsync(string waybill, CancellationToken cancellationToken);
+    Task<string> CancelShipmentAsync(string waybill, CancellationToken cancellationToken);
 }
 
 public sealed class DelhiveryService(
@@ -412,6 +413,23 @@ public sealed class DelhiveryService(
         return (waybill, FindString(root, "label_url"));
     }
 
+    public async Task<string> CancelShipmentAsync(string waybill, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(waybill)) throw new ArgumentException("A Delhivery waybill is required.", nameof(waybill));
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/p/edit")
+        {
+            Content = JsonContent.Create(new { waybill = waybill.Trim(), cancellation = "true" })
+        };
+        using var response = await CreateClient().SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        EnsureSuccess(response, body, "Shipment cancellation");
+        using var document = JsonDocument.Parse(body);
+        var root = document.RootElement;
+        var accepted = root.ValueKind == JsonValueKind.Object && root.TryGetProperty("status", out var status) &&
+            (status.ValueKind == JsonValueKind.True || (status.ValueKind == JsonValueKind.String && string.Equals(status.GetString(), "true", StringComparison.OrdinalIgnoreCase)));
+        if (!accepted) throw new InvalidOperationException("Delhivery did not confirm shipment cancellation: " + ExtractShipmentError(root));
+        return body;
+    }
     public async Task<string?> RefreshTrackingAsync(string waybill, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(waybill)) return null;
