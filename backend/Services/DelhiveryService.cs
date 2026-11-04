@@ -20,6 +20,7 @@ public interface IDelhiveryService
     Task<DelhiveryPincodeResult> CheckPincodeServiceabilityAsync(string postalCode, CancellationToken cancellationToken);
     Task<JsonElement> CalculateShippingCostAsync(string originPin, string destinationPin, int weightGrams, string shipmentMode, string paymentMode, string status, CancellationToken cancellationToken);
     Task<string> FetchWaybillsAsync(int count, CancellationToken cancellationToken);
+    Task<string> CreatePickupRequestAsync(string pickupDate, string pickupTime, int expectedPackageCount, CancellationToken cancellationToken);
     Task<DelhiveryLabelResult> DownloadLabelAsync(string waybill, CancellationToken cancellationToken);
     Task<(string Waybill, string? LabelUrl)> CreateShipmentAsync(Order order, DelhiveryShipment shipment, CancellationToken cancellationToken);
     Task<string?> RefreshTrackingAsync(string waybill, CancellationToken cancellationToken);
@@ -115,6 +116,46 @@ public sealed class DelhiveryService(IHttpClientFactory httpClientFactory, IConf
             cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
         EnsureSuccess(response, body, "Waybill fetch");
+        return body;
+    }
+
+    public async Task<string> CreatePickupRequestAsync(
+        string pickupDate, string pickupTime, int expectedPackageCount, CancellationToken cancellationToken)
+    {
+        var pickupLocation = configuration["Delhivery:PickupLocationName"];
+        if (string.IsNullOrWhiteSpace(pickupLocation))
+            throw new InvalidOperationException("Delhivery:PickupLocationName is not configured.");
+
+        if (!DateOnly.TryParseExact(pickupDate, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out var parsedDate) ||
+            parsedDate < DateOnly.FromDateTime(DateTime.Today) ||
+            parsedDate > DateOnly.FromDateTime(DateTime.Today.AddDays(7)))
+            throw new ArgumentException("Pickup date must be today or within the next 7 days (yyyy-MM-dd).", nameof(pickupDate));
+
+        if (!TimeOnly.TryParseExact(pickupTime, "HH:mm:ss", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out _))
+            throw new ArgumentException("Pickup time must use HH:mm:ss format.", nameof(pickupTime));
+
+        if (expectedPackageCount < 1 || expectedPackageCount > 1000)
+            throw new ArgumentOutOfRangeException(nameof(expectedPackageCount), "Expected package count must be between 1 and 1000.");
+
+        var payload = new
+        {
+            pickup_time = pickupTime,
+            pickup_date = pickupDate,
+            pickup_location = pickupLocation,
+            expected_package_count = expectedPackageCount
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "fm/request/new/")
+        {
+            Content = System.Net.Http.Json.JsonContent.Create(payload)
+        };
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        using var response = await CreateClient().SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        EnsureSuccess(response, body, "Pickup request creation");
         return body;
     }
 
