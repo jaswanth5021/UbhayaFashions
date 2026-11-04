@@ -37,6 +37,22 @@ Open Admin → Orders, expand **Create shipment**, check the recipient fields an
 
 Delhivery's FAQ confirms that the waybill can be left blank in the shipment creation request to let Delhivery generate it, and that the exact client name is case-sensitive. The shipment is only considered created when the API returns a successful package and a waybill.
 
+### Troubleshooting: `shipment list contains no data`
+
+Delhivery's FAQ identifies this response as a client-name mismatch. The manifestation request in `backend/Services/DelhiveryService.cs` already sends the configured client name in `shipments[0].client`, together with the `shipments` array and `pickup_location.name`. The service trims accidental leading/trailing whitespace from the configured client and pickup-location values, but it does not change capitalization or guess the registered name.
+
+If Delhivery returns `shipment list contains no data`:
+
+1. Sign in to Delhivery One and confirm the exact client name registered for the B2C account/API.
+2. Set the backend hosting environment variable `Delhivery__ClientName` to that exact value, preserving capitalization and internal spaces.
+3. Confirm `Delhivery__PickupLocationName` is the exact active warehouse name.
+4. Restart the backend application so the updated environment variables are loaded.
+5. Retry with a new order reference if Delhivery reports that the earlier order was partially created.
+
+When this specific provider error is returned, the admin error now explicitly identifies the configured `shipments[0].client` value and directs the operator to verify it. Do not replace it with a guessed value or move the `client` property out of the shipment object unless Delhivery confirms a different schema.
+
+The complete request payload contains recipient and seller personal information. Keep `Delhivery:EnableSupportPayloadLogging` disabled during normal operation; enable it only temporarily when collecting a support payload, restrict access to the logs, and disable it again after collection.
+
 ## Rate calculation
 
 Delhivery's invoice/rate endpoint returns an estimate only. The rate calculation uses billing mode `E` (Express) or `S` (Surface), chargeable weight in grams, origin and destination PIN codes, shipment status (`Delivered`, `RTO`, or `DTO`), and payment type (`Pre-paid` or `COD`). Staging may return zero charges; use the approved production token/environment for current rates.
