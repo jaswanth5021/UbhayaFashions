@@ -1,0 +1,51 @@
+@model AdminOrderViewModel
+@{
+    ViewData["Title"] = $"Order #{Model.Id}";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var customerName = string.IsNullOrWhiteSpace(Model.Customer?.Name) ? "Customer" : Model.Customer!.Name;
+}
+<div class="order-details-page">
+    <div class="od-topbar">
+        <div><a asp-action="Orders" class="od-back">← Back to orders</a><h1>Order #@Model.Id</h1><p>Complete order information and fulfilment overview</p></div>
+        <span class="od-status">@Model.Status</span>
+    </div>
+    <section class="od-summary">
+        <article><small>Order total</small><strong>₹@Model.TotalAmount.ToString("N2")</strong><span>Including order charges</span></article>
+        <article><small>Payment status</small><strong>@Model.PaymentStatus</strong><span>Payment information available in order record</span></article>
+        <article><small>Order date</small><strong>@Model.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</strong><span>@Model.CreatedDate.ToLocalTime().ToString("hh:mm tt")</span></article>
+        <article><small>Items</small><strong>@Model.Items.Sum(item => item.Quantity)</strong><span>@Model.Items.Count product line(s)</span></article>
+    </section>
+    <div class="od-grid">
+        <section class="od-card od-items">
+            <div class="od-card-head"><h2>Items ordered</h2><span>@Model.Items.Sum(item=>item.Quantity) units</span></div>
+            <div class="od-table-wrap"><table><thead><tr><th>Product</th><th>Variant</th><th>Unit price</th><th>Qty</th><th>Subtotal</th></tr></thead><tbody>
+            @foreach(var item in Model.Items) {
+                <tr><td><strong>@item.ProductName</strong><small>Product ID: @item.ProductId</small></td><td>@(string.IsNullOrWhiteSpace(item.Color) && string.IsNullOrWhiteSpace(item.Size) ? "—" : $"{item.Color} / {item.Size}")</td><td>₹@item.Price.ToString("N2")</td><td>@item.Quantity</td><td><strong>₹@((item.Price*item.Quantity).ToString("N2"))</strong></td></tr>
+            }
+            @if(Model.Items.Count==0){<tr><td colspan="5">No item details were returned for this order.</td></tr>}
+            </tbody></table></div>
+            <div class="od-total"><span>Order total</span><strong>₹@Model.TotalAmount.ToString("N2")</strong></div>
+        </section>
+        <section class="od-card">
+            <div class="od-card-head"><h2>Customer details</h2></div>
+            <dl class="od-info"><dt>Customer</dt><dd>@customerName</dd><dt>Email</dt><dd>@(Model.Customer?.Email ?? "Not available")</dd><dt>Mobile</dt><dd>@(Model.Customer?.Mobile ?? "Not available")</dd><dt>Customer ID</dt><dd>@Model.CustomerId</dd></dl>
+        </section>
+        <section class="od-card">
+            <div class="od-card-head"><h2>Delivery address</h2></div>
+            <p class="od-address">@(!string.IsNullOrWhiteSpace(Model.ShippingAddress) ? Model.ShippingAddress : "Delivery address is not available.")</p>
+        </section>
+        <section class="od-card">
+            <div class="od-card-head"><h2>Shipping & fulfilment</h2></div>
+            <dl class="od-info"><dt>Order status</dt><dd>@Model.Status</dd><dt>AWB number</dt><dd>@(Model.ShippingWaybill ?? "Not created")</dd><dt>Shipment status</dt><dd>@(Model.ShippingStatus ?? "Not available")</dd><dt>Courier</dt><dd>@(!string.IsNullOrWhiteSpace(Model.ShippingWaybill) ? "Delhivery" : "Not assigned")</dd></dl>
+        </section>
+        <section class="od-card od-payment">
+            <div class="od-card-head"><h2>Payment summary</h2></div>
+            <dl class="od-info"><dt>Payment status</dt><dd>@Model.PaymentStatus</dd><dt>Order amount</dt><dd>₹@Model.TotalAmount.ToString("N2")</dd><dt>Refund status</dt><dd>@(string.Equals(Model.PaymentStatus,"Refund Pending",StringComparison.OrdinalIgnoreCase) ? "Refund pending — process separately in Razorpay" : string.Equals(Model.PaymentStatus,"Refunded",StringComparison.OrdinalIgnoreCase) ? "Refunded" : "No refund recorded")</dd></dl>
+        </section>
+    </div>
+    <div class="od-footer"><a asp-action="Orders" class="od-back-button">Back to orders</a></div>
+</div>
+<style>
+.order-details-page{color:#302a30}.od-topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:20px}.od-back{display:inline-block;color:#741b3c;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:10px}.od-topbar h1{font-size:26px;margin:0}.od-topbar p{margin:5px 0 0;color:#8b828b;font-size:12px}.od-status{padding:7px 12px;border-radius:20px;background:#edf2ff;color:#4569b8;font-size:11px;font-weight:750}.od-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.od-summary article,.od-card{background:#fff;border:1px solid #eee8ed;border-radius:12px;box-shadow:0 3px 12px rgba(38,22,31,.035)}.od-summary article{padding:16px}.od-summary small,.od-summary span{display:block;color:#8b828b;font-size:11px}.od-summary strong{display:block;margin:7px 0;font-size:21px;color:#332b33}.od-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}.od-card{padding:17px;min-width:0}.od-items{grid-row:span 2}.od-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.od-card-head h2{font-size:15px;margin:0}.od-card-head span{color:#8b828b;font-size:11px}.od-table-wrap{overflow-x:auto}.od-table-wrap table{width:100%;border-collapse:collapse;min-width:520px}.od-table-wrap th{text-align:left;background:#fbf9fa;color:#756c76;padding:10px;font-size:10px;text-transform:uppercase}.od-table-wrap td{padding:12px 10px;border-bottom:1px solid #f0ebef;font-size:11px}.od-table-wrap td small{display:block;margin-top:4px;color:#918892}.od-total{display:flex;justify-content:space-between;padding:16px 10px 0;font-size:13px}.od-total strong{font-size:17px;color:#6f1939}.od-info{display:grid;grid-template-columns: minmax(100px,.8fr) 1.2fr;gap:12px 10px;margin:0;font-size:12px}.od-info dt{color:#8a818a}.od-info dd{margin:0;font-weight:650;overflow-wrap:anywhere}.od-address{white-space:pre-line;line-height:1.7;color:#4c444c;font-size:12px;margin:0}.od-payment{grid-column:2}.od-footer{margin-top:18px}.od-back-button{display:inline-block;padding:9px 14px;border:1px solid #eadde3;border-radius:8px;color:#741b3c;text-decoration:none;font-size:12px;font-weight:700}
+@@media(max-width:760px){.od-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.od-grid{grid-template-columns:1fr}.od-items{grid-row:auto}.od-payment{grid-column:auto}.od-topbar h1{font-size:22px}}
+</style>
