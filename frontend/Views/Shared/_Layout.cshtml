@@ -189,6 +189,31 @@
         <link rel="canonical" href="@canonicalUrl" />
     }
 
+    @if (isHomePage)
+    {
+        @{
+            var organizationSchema = new Dictionary<string, object?>
+            {
+                ["@context"] = "https://schema.org",
+                ["@type"] = "Organization",
+                ["name"] = "Ubhaya Fashions",
+                ["url"] = "https://ubhayafashions.in/",
+                ["logo"] = "https://ubhayafashions.in/images/logo.png"
+            };
+            var websiteSchema = new Dictionary<string, object?>
+            {
+                ["@context"] = "https://schema.org",
+                ["@type"] = "WebSite",
+                ["name"] = "Ubhaya Fashions",
+                ["url"] = "https://ubhayafashions.in/",
+                ["publisher"] = organizationSchema,
+                ["inLanguage"] = "en-IN"
+            };
+        }
+        <script type="application/ld+json">@Html.Raw(JsonSerializer.Serialize(organizationSchema))</script>
+        <script type="application/ld+json">@Html.Raw(JsonSerializer.Serialize(websiteSchema))</script>
+    }
+
     <link rel="icon" type="image/png" href="~/images/favicon.png" asp-append-version="true" />
 
     <title>@documentTitle</title>
