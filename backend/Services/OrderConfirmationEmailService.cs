@@ -29,7 +29,9 @@ public sealed class OrderConfirmationEmailService(
 
         var smtp = configuration.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["From"];
+        var from = smtp["Senders:Orders"] ?? smtp["From"];
+        var supportEmail = smtp["Senders:Support"] ?? smtp["From"];
+        var internalCopy = smtp["InternalCopy"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
         {
             logger.LogWarning("Order {OrderId} was cancelled, but cancellation email was skipped because SMTP is not configured.", order.Id);
@@ -64,7 +66,7 @@ public sealed class OrderConfirmationEmailService(
 
             {refundMessage}
 
-            If you need help, email ubhayafashions@gmail.com and mention order #{order.Id}.
+            If you need help, email {supportEmail} and mention order #{order.Id}.
 
             Thank you,
             Ubhaya Fashions
@@ -99,7 +101,7 @@ public sealed class OrderConfirmationEmailService(
                         <div style="margin-bottom:6px;color:#9a6b64;font-size:11px;font-weight:700;letter-spacing:1.2px;">DELIVERY ADDRESS ON THE ORDER</div>
                         <div style="font-size:13px;line-height:1.6;color:#665557;">{encodedAddress}</div>
                       </div>
-                      <p style="margin:24px 0 0;font-size:13px;line-height:1.7;color:#665557;">If you have questions, reply to this email or contact <a href="mailto:ubhayafashions@gmail.com" style="color:#813c40;font-weight:700;">ubhayafashions@gmail.com</a> and mention order #{order.Id}.</p>
+                      <p style="margin:24px 0 0;font-size:13px;line-height:1.7;color:#665557;">If you have questions, reply to this email or contact <a href="mailto:{WebUtility.HtmlEncode(supportEmail)}" style="color:#813c40;font-weight:700;">{supportEmail}</a> and mention order #{order.Id}.</p>
                       <p style="margin:18px 0 0;font-size:13px;color:#665557;">Thank you,<br><strong>Ubhaya Fashions</strong></p>
                     </td></tr>
                     <tr><td style="padding:16px 24px;border-top:1px solid #eee5e1;text-align:center;color:#9a918a;font-size:12px;">Tradition meets today · Ubhaya Fashions</td></tr>
@@ -120,7 +122,7 @@ public sealed class OrderConfirmationEmailService(
                 IsBodyHtml = true
             };
             message.To.Add(recipient);
-            message.CC.Add("ubhayafashions@gmail.com");
+            if (!string.IsNullOrWhiteSpace(internalCopy)) message.CC.Add(internalCopy);
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
 
@@ -156,7 +158,9 @@ public sealed class OrderConfirmationEmailService(
 
         var smtp = configuration.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["From"];
+        var from = smtp["Senders:Orders"] ?? smtp["From"];
+        var supportEmail = smtp["Senders:Support"] ?? smtp["From"];
+        var internalCopy = smtp["InternalCopy"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
         {
             logger.LogWarning("Order {OrderId} was placed, but confirmation email was skipped because SMTP is not configured.", order.Id);
@@ -184,7 +188,7 @@ public sealed class OrderConfirmationEmailService(
             If an item is damaged, defective, missing, or incorrect, keep the packaging and take 5-6 clear photos
             of the item, issue, parcel label, and outer packaging. Contact us with your order number.
             A video is helpful but is not a strict requirement for raising a concern. See our Returns, Refunds &
-            Product Issues Policy, or email ubhayafashions@gmail.com for help.
+            Product Issues Policy, or email {supportEmail} for help.
 
             Thank you for shopping with Ubhaya Fashions.
             """;
@@ -297,7 +301,7 @@ public sealed class OrderConfirmationEmailService(
                             </td>
                             <td valign="top" style="padding:12px;border:1px solid #efdfdd;border-left:0;border-radius:0 10px 10px 0;background:#fff;">
                               <div style="margin:0 0 4px;color:#492d30;font-size:14px;font-weight:700;">Keep packaging and contact us</div>
-                              <div style="font-size:12px;line-height:1.65;color:#746668;">Keep the original packaging and email <a href="mailto:ubhayafashions@gmail.com" style="color:#813c40;font-weight:700;">ubhayafashions@gmail.com</a> with your order number.</div>
+                              <div style="font-size:12px;line-height:1.65;color:#746668;">Keep the original packaging and email <a href="mailto:{WebUtility.HtmlEncode(supportEmail)}" style="color:#813c40;font-weight:700;">{supportEmail}</a> with your order number.</div>
                             </td>
                           </tr>
                         </table>
@@ -326,7 +330,7 @@ public sealed class OrderConfirmationEmailService(
                 IsBodyHtml = true
             };
             message.To.Add(recipient);
-            message.CC.Add("ubhayafashions@gmail.com");
+            if (!string.IsNullOrWhiteSpace(internalCopy)) message.CC.Add(internalCopy);
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(plainText, null, "text/plain"));
             message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, "text/html"));
 
