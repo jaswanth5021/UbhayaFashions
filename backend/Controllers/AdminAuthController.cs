@@ -89,7 +89,7 @@ public class AdminAuthController(
         const string messageText = "If an active admin account matches that email, a reset link has been sent.";
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["Senders:Support"] ?? smtp["From"];
+        var from = smtp["From"];
         var displayName = smtp["DisplayName"] ?? "UBHAYA FASHIONS";
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
         {
