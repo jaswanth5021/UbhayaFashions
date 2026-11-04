@@ -49,7 +49,7 @@ public sealed class SitemapController(
             or TaskCanceledException)
         {
             logger.LogError(exception, "Could not load catalog data while generating the XML sitemap.");
-            Response.Headers.RetryAfter = "300";
+            Response.Headers["Retry-After"] = "300";
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
 
@@ -91,7 +91,7 @@ public sealed class SitemapController(
             OmitXmlDeclaration = false
         };
 
-        await using (var writer = XmlWriter.Create(stream, settings))
+        using (var writer = XmlWriter.Create(stream, settings))
         {
             await writer.WriteStartDocumentAsync();
             await writer.WriteStartElementAsync(
