@@ -12,3 +12,5 @@ public class AdminCustomerSummary : AdminCustomer { public int OrderCount{get;se
 public class AdminAccountViewModel { public int Id{get;set;} public string Name{get;set;}=""; public string Email{get;set;}=""; public bool IsActive{get;set;}=true; }
 public class AdminAccountInput { public int Id{get;set;} public string Name{get;set;}=""; public string Email{get;set;}=""; public string? Password{get;set;} public bool IsActive{get;set;}=true; }
 public class AdminOrderItem { public int ProductId{get;set;} public string ProductName{get;set;}=""; public decimal Price{get;set;} public int Quantity{get;set;} public string? Size{get;set;} public string? Color{get;set;} public string? ProductImageUrl{get;set;} }
+
+public class AdminCustomerOrdersViewModel { public AdminCustomerSummary Customer{get;set;}=new(); public List<AdminOrderViewModel> Orders{get;set;}=[]; }
