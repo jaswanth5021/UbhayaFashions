@@ -18,6 +18,54 @@
     <label>Payment status<select name="paymentStatus"><option value="">All payment statuses</option>@foreach (var value in new[] { "Pending", "Paid", "Failed", "Refunded" }) { <option value="@value" selected="@(string.Equals(selectedPaymentStatus, value, StringComparison.OrdinalIgnoreCase))">@value</option> }</select></label>
     <button class="primary" type="submit">Apply filters</button><a class="admin-filter-clear" asp-action="Orders">Clear</a>
 </form>
+
+<section class="dl-unified-panel">
+    <div class="dl-unified-heading"><div><h2>Delhivery fulfilment</h2><p>Manage shipment creation and warehouse pickup requests alongside your orders.</p></div><span>@Model.Count(o => !string.IsNullOrWhiteSpace(o.ShippingWaybill)) AWB(s)</span></div>
+    <form asp-action="CreateDelhiveryPickupRequest" method="post" class="dl-unified-pickup">
+        @Html.AntiForgeryToken()
+        <strong>Schedule warehouse pickup</strong>
+        <p>Delhivery pickup requests apply to the registered warehouse and can cover multiple ready-to-ship AWBs.</p>
+        <label>Pickup date<input type="date" name="pickupDate" value="@DateTime.Today.ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" max="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")" required /></label>
+        <label>Pickup time<input type="time" name="pickupTime" value="10:00" required /></label>
+        <label>Expected packages<input type="number" name="expectedPackageCount" value="@Math.Max(1, Model.Count(o => !string.IsNullOrWhiteSpace(o.ShippingWaybill)))" min="1" max="1000" required /></label>
+        <button class="primary" type="submit" @(Model.All(o => string.IsNullOrWhiteSpace(o.ShippingWaybill)) ? "disabled" : null)>Check with Delhivery &amp; schedule</button>
+        <small>Delhivery rejects a second active pickup request for the same pickup location. If automatic pickup is enabled, manual scheduling is not required.</small>
+    </form>
+    <div class="dl-unified-list">
+    @foreach (var shipmentOrder in Model.OrderByDescending(o => o.CreatedDate))
+    {
+        <article class="dl-unified-order">
+            <div><strong>Order #@shipmentOrder.Id</strong><small>@shipmentOrder.Customer?.Name · @shipmentOrder.Status</small></div>
+            <div><strong>@(string.IsNullOrWhiteSpace(shipmentOrder.ShippingWaybill) ? "AWB not created" : shipmentOrder.ShippingStatus)</strong><small>@(string.IsNullOrWhiteSpace(shipmentOrder.ShippingWaybill) ? "Create a shipment below" : "AWB: " + shipmentOrder.ShippingWaybill)</small></div>
+            @if (string.IsNullOrWhiteSpace(shipmentOrder.ShippingWaybill) && !string.Equals(shipmentOrder.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                <details><summary>Create Delhivery shipment</summary>
+                    <form asp-action="CreateDelhiveryShipment" method="post" class="dl-unified-create">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="OrderId" value="@shipmentOrder.Id" />
+                        <label>Recipient<input name="RecipientName" value="@shipmentOrder.Customer?.Name" required maxlength="150" /></label>
+                        <label>Phone<input name="RecipientPhone" value="@shipmentOrder.Customer?.Mobile" required maxlength="20" /></label>
+                        <label class="wide">Address<input name="Address" value="@shipmentOrder.ShippingAddress" required maxlength="500" /></label>
+                        <label>City<input name="City" required maxlength="100" /></label>
+                        <label>State<input name="State" required maxlength="100" /></label>
+                        <label>PIN code<input name="PostalCode" inputmode="numeric" pattern="[0-9]{6}" required maxlength="6" /></label>
+                        <label>Weight (grams)<input name="WeightGrams" type="number" min="1" max="100000" value="1000" required /></label>
+                        <input type="hidden" name="Country" value="India" />
+                        <button class="secondary" type="submit">Create shipment</button>
+                    </form>
+                </details>
+            }
+        </article>
+    }
+    </div>
+</section>
+<style>
+.dl-unified-panel{margin:20px 0;padding:18px;border:1px solid #eadde0;border-radius:14px;background:#fff}
+.dl-unified-heading{display:flex;justify-content:space-between;gap:12px;align-items:center}.dl-unified-heading h2{margin:0;color:#6c1531;font-size:18px}.dl-unified-heading p,.dl-unified-pickup p,.dl-unified-pickup small{color:#817777;font-size:12px}.dl-unified-heading span{font-size:12px;font-weight:700;background:#f5eff1;padding:7px 10px;border-radius:20px}
+.dl-unified-pickup{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:end;padding:14px;margin:14px 0;background:#fff9fb;border-radius:10px}.dl-unified-pickup strong,.dl-unified-pickup p,.dl-unified-pickup small{grid-column:1/-1;margin:0}.dl-unified-pickup label,.dl-unified-create label{display:grid;gap:5px;font-size:12px}.dl-unified-pickup input,.dl-unified-create input{width:100%;min-width:0;padding:9px;border:1px solid #e5d9d5;border-radius:7px}.dl-unified-list{display:grid;gap:9px}.dl-unified-order{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;border:1px solid #f0e9e7;border-radius:9px}.dl-unified-order small{display:block;color:#817777;font-size:12px;margin-top:4px}.dl-unified-order details{grid-column:1/-1}.dl-unified-order summary{cursor:pointer;color:#6c1531;font-weight:700}.dl-unified-create{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.dl-unified-create .wide,.dl-unified-create button{grid-column:1/-1}
+@media(max-width:700px){.dl-unified-pickup{grid-template-columns:1fr 1fr}.dl-unified-pickup button{grid-column:1/-1}.dl-unified-create{grid-template-columns:1fr}.dl-unified-create .wide,.dl-unified-create button{grid-column:auto}}
+</style>
+
 <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Order status</th><th>Update</th></tr></thead><tbody>
 @foreach(var o in Model)
 {
