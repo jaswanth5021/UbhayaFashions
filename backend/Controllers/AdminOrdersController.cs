@@ -129,7 +129,7 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
                 refundId = root.TryGetProperty("id", out var rid) ? rid.GetString() : null;
                 var state = root.TryGetProperty("status", out var st) ? st.GetString() : null;
                 if (string.IsNullOrWhiteSpace(refundId) || !(string.Equals(state, "pending", StringComparison.OrdinalIgnoreCase) || string.Equals(state, "processed", StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("Razorpay did not confirm the refund request: " + body);
-                payment.Status = "Refunded"; refundInitiated = true;
+                payment.Status = "Refund Initiated"; refundInitiated = true;
                 logger.LogInformation("Razorpay refund initiated for order {OrderId}. RefundId={RefundId}, Status={Status}", id, refundId, state);
             }
             catch (Exception ex) { refundWarning = ex.Message; logger.LogError(ex, "Refund initiation failed for cancelled order {OrderId}.", id); }
