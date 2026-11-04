@@ -89,7 +89,7 @@ public class AdminAuthController(
         const string messageText = "If an active admin account matches that email, a reset link has been sent.";
         var smtp = config.GetSection("Smtp");
         var host = smtp["Host"];
-        var from = smtp["From"];
+        var from = smtp["Senders:Support"] ?? smtp["From"];
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
         {
             logger.LogError("Admin password reset email is not configured.");
