@@ -13,4 +13,5 @@ public class Payment
     public string? Signature { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime? PaidDate { get; set; }
+    public bool Ga4PurchaseSent { get; set; }
 }
