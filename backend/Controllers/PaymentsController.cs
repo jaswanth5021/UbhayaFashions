@@ -16,7 +16,7 @@ namespace backend.Controllers;
 [ApiController]
 [Route("api/payments")]
 [Authorize]
-public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, ILogger<PaymentsController> logger) : ControllerBase
+public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, IGa4MeasurementProtocolService ga4, ILogger<PaymentsController> logger) : ControllerBase
 {
     [HttpPost("create-order")]
     public async Task<IActionResult> CreateOrder(CreatePaymentOrderRequest request)
@@ -278,6 +278,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         // Idempotent retry: do not reduce stock twice.
         if (order.PaymentStatus == "Paid" || payment.Status == "Captured")
         {
+            await ga4.TrackPurchaseAsync(payment.Id);
             return Ok(new { success = true, orderId = order.Id, status = "Paid" });
         }
 
@@ -317,7 +318,11 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
                 .SingleAsync();
 
             if (currentPayment.Status == "Captured")
+            {
+                await transaction.CommitAsync();
+                await ga4.TrackPurchaseAsync(payment.Id);
                 return Ok(new { success = true, orderId = order.Id, status = "Paid" });
+            }
 
             // Re-check stock inside the transaction immediately before committing it.
             var productIds = order.Items.Select(x => x.ProductId).Distinct().ToList();
@@ -359,6 +364,9 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
 
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            // GA4 tracking is best-effort and must never undo a verified payment.
+            await ga4.TrackPurchaseAsync(payment.Id);
 
             // Payment is already committed. Courier failures must not reverse a successful payment.
             try
