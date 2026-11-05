@@ -122,7 +122,20 @@ public class CartController : Controller
         }
 
         SaveCart(cart);
-        if (isAjax) return Json(new { success = true, message = $"{product.Name} added to your bag.", cartCount = cart.Sum(x => x.Quantity) });
+        if (isAjax) return Json(new
+        {
+            success = true,
+            message = $"{product.Name} added to your bag.",
+            cartCount = cart.Sum(x => x.Quantity),
+            analytics = new
+            {
+                itemId = product.Id.ToString(),
+                itemName = product.Name,
+                price = variant.Price,
+                quantity,
+                itemVariant = string.Join(" / ", new[] { variant.Size, normalizedColor }.Where(value => !string.IsNullOrWhiteSpace(value)))
+            }
+        });
         TempData["OpenCartDrawer"] = true;
         return RedirectToAction("Details", "Products", new { id = productId });
     }
