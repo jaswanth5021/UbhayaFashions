@@ -311,6 +311,7 @@
             @if (Model.Count > 0)
             {
                 <div class="catalog-grid">
+                    @{ var catalogProductIndex = 0; }
                     @foreach (var product in Model)
                     {
                         var hasPriceRange = product.Variants.Select(variant => variant.Price).Distinct().Count() > 1;
@@ -348,7 +349,11 @@
                                                      alt="@product.Name - image @(imageIndex + 1)"
                                                      class="catalog-image product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
                                                      data-carousel-image="@imageIndex"
-                                                     loading="@(imageIndex == 0 ? "eager" : "lazy")" />
+                                                     loading="@(imageIndex == 0 && catalogProductIndex < 2 ? "eager" : "lazy")"
+                                                     decoding="async"
+                                                     width="600"
+                                                     height="732"
+                                                     fetchpriority="@(imageIndex == 0 && catalogProductIndex == 0 ? "high" : "auto")" />
                                             }
 
                                             @if (productImages.Count > 1)
@@ -486,6 +491,7 @@
                                 <button class="catalog-action disabled catalog-action-mobile" type="button" disabled>OUT OF STOCK</button>
                             }
                         </article>
+                        catalogProductIndex++;
                     }
                 </div>
 
