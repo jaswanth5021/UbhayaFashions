@@ -89,6 +89,19 @@
                 const response = await fetch('/Cart/Add', { method: 'POST', body, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 const result = await response.json();
                 if (!response.ok || !result.success) throw new Error(result.message || 'Could not add this item to your bag.');
+                if (typeof window.gtag === 'function' && result.analytics) {
+                    window.gtag('event', 'add_to_cart', {
+                        currency: 'INR',
+                        value: Number(result.analytics.price) * Number(result.analytics.quantity),
+                        items: [{
+                            item_id: result.analytics.itemId,
+                            item_name: result.analytics.itemName,
+                            item_variant: result.analytics.itemVariant,
+                            price: Number(result.analytics.price),
+                            quantity: Number(result.analytics.quantity)
+                        }]
+                    });
+                }
                 updateCount(document.getElementById('cartDrawerOpen'), result.cartCount);
                 updateCount(document.querySelector('.mobile-bottom-nav-cart'), result.cartCount, 'mobile-bottom-nav-badge');
                 announce(result.message);
