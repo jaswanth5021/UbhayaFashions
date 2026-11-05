@@ -8,6 +8,21 @@
     var heroBannerUrls = ViewBag.HeroBannerUrls as List<string> ?? [];
 }
 
+@section Head {
+    @if (heroBannerUrls.Count > 0)
+    {
+        <link rel="preload" as="image"
+              href="@ImageUrlHelper.Resolve(heroBannerUrls[0], Configuration["ApiBaseUrl"])"
+              fetchpriority="high"
+              media="(max-width: 767px)" />
+    }
+    else
+    {
+        <link rel="preload" as="image" href="/images/dress-banner.jpeg"
+              fetchpriority="high" media="(max-width: 767px)" />
+    }
+}
+
 @if (catalogUnavailable)
 {
     <p class="home-catalog-status" role="status">Our collection is temporarily unavailable. Please try again shortly.</p>
@@ -29,7 +44,9 @@
                          class="home-hero-image"
                          loading="@(bannerIndex == 0 ? "eager" : "lazy")"
                          decoding="async"
-                         fetchpriority="@(bannerIndex == 0 ? "high" : "auto")" />
+                         fetchpriority="@(bannerIndex == 0 ? "high" : "auto")"
+                         width="1600"
+                         height="900" />
                     <div class="home-hero-overlay"></div>
                     <div class="home-hero-content">
                         <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
@@ -48,7 +65,9 @@
                      class="home-hero-image"
                      loading="eager"
                      decoding="async"
-                     fetchpriority="high" />
+                     fetchpriority="high"
+                     width="1600"
+                     height="900" />
                 <div class="home-hero-overlay"></div>
                 <div class="home-hero-content">
                     <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
