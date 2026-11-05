@@ -20,6 +20,7 @@ public sealed class RazorpayWebhookController(
     IConfiguration configuration,
     IDelhiveryService delhivery,
     IOrderConfirmationEmailService orderEmail,
+    IGa4MeasurementProtocolService ga4,
     ILogger<RazorpayWebhookController> logger) : ControllerBase
 {
     [HttpPost("webhook")]
@@ -95,6 +96,7 @@ public sealed class RazorpayWebhookController(
         Order? paidOrderForFollowUp = null;
         PaymentDeliveryAddress? deliveryAddress = null;
         var shouldSendConfirmation = false;
+        int? paidPaymentIdForGa4 = null;
 
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         var webhookEvent = new RazorpayWebhookEvent
@@ -141,6 +143,8 @@ public sealed class RazorpayWebhookController(
                 else if (order.PaymentStatus == "Paid" || payment.Status == "Captured")
                 {
                     webhookEvent.ProcessingStatus = "Processed";
+                    paidOrderForFollowUp = order;
+                    paidPaymentIdForGa4 = payment.Id;
                 }
                 else
                 {
@@ -195,6 +199,7 @@ public sealed class RazorpayWebhookController(
                         payment.PaidDate = DateTime.UtcNow;
                         webhookEvent.ProcessingStatus = "Processed";
                         paidOrderForFollowUp = order;
+                        paidPaymentIdForGa4 = payment.Id;
                         shouldSendConfirmation = true;
 
                         if (!string.IsNullOrWhiteSpace(order.DeliveryAddressJson))
@@ -246,6 +251,12 @@ public sealed class RazorpayWebhookController(
             await transaction.RollbackAsync(cancellationToken);
             logger.LogError(ex, "Failed to process Razorpay webhook event {EventId}.", eventId);
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        if (paidPaymentIdForGa4.HasValue)
+        {
+            // Tracking failure is isolated from Razorpay payment processing.
+            await ga4.TrackPurchaseAsync(paidPaymentIdForGa4.Value, cancellationToken);
         }
 
         if (paidOrderForFollowUp is not null)
