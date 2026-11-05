@@ -6,11 +6,6 @@
         max-width: 100%;
     }
 
-    .catalog-image-wrap,
-    .product-image-wrapper {
-        contain: layout paint;
-    }
-
     .catalog-mobile-toolbar button,
     .catalog-apply-filters,
     .catalog-mobile-filter-close,
