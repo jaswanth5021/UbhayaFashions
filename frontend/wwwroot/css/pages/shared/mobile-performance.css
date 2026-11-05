@@ -1,0 +1,60 @@
+/* Mobile-only storefront refinements. Desktop styles are intentionally untouched. */
+@media (max-width: 767px) {
+    .home-page .home-hero-image,
+    .home-hero .home-hero-image {
+        display: block;
+        max-width: 100%;
+    }
+
+    .catalog-image-wrap,
+    .product-image-wrapper {
+        contain: layout paint;
+    }
+
+    .catalog-mobile-toolbar button,
+    .catalog-apply-filters,
+    .catalog-mobile-filter-close,
+    .catalog-image-wrap .product-image-arrow,
+    .product-image-wrapper .product-image-arrow,
+    .product-image-wrapper .wishlist-button,
+    .product-image-wrapper .add-to-bag,
+    .home-page .wishlist-button,
+    .home-page .add-to-bag {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .catalog-mobile-toolbar input,
+    .catalog-mobile-toolbar select,
+    .catalog-search-row input,
+    .catalog-search-row button,
+    .catalog-search-row a {
+        min-height: 44px;
+    }
+
+    .catalog-image-wrap .product-image-arrow,
+    .product-image-wrapper .product-image-arrow {
+        opacity: 1;
+    }
+
+    .catalog-image-link:focus-visible,
+    .catalog-mobile-toolbar button:focus-visible,
+    .catalog-apply-filters:focus-visible,
+    .product-image-wrapper button:focus-visible,
+    .home-page a:focus-visible,
+    .home-page button:focus-visible {
+        outline: 2px solid #68142e;
+        outline-offset: 3px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .catalog-image-wrap .product-image,
+    .product-image-wrapper .product-image,
+    .catalog-image-link .catalog-image {
+        scroll-behavior: auto;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
