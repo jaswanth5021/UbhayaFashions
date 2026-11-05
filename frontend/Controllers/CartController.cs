@@ -136,6 +136,22 @@ public class CartController : Controller
                 itemVariant = string.Join(" / ", new[] { variant.Size, normalizedColor }.Where(value => !string.IsNullOrWhiteSpace(value)))
             }
         });
+        TempData["Ga4AddToCart"] = JsonSerializer.Serialize(new
+        {
+            currency = "INR",
+            value = variant.Price * quantity,
+            items = new[]
+            {
+                new
+                {
+                    item_id = product.Id.ToString(),
+                    item_name = product.Name,
+                    item_variant = string.Join(" / ", new[] { variant.Size, normalizedColor }.Where(value => !string.IsNullOrWhiteSpace(value))),
+                    price = variant.Price,
+                    quantity
+                }
+            }
+        });
         TempData["OpenCartDrawer"] = true;
         return RedirectToAction("Details", "Products", new { id = productId });
     }
