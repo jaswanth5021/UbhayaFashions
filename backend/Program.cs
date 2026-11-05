@@ -57,6 +57,12 @@ builder.Services.AddHttpClient("Razorpay", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+builder.Services.AddHttpClient("GA4", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddScoped<IGa4MeasurementProtocolService, Ga4MeasurementProtocolService>();
+
 // Delhivery B2C client. Environment is explicit; production is never inferred
 // from the presence of a token. BaseUrl can override the environment default.
 builder.Services.AddHttpClient("Delhivery", client =>
@@ -268,6 +274,12 @@ await using (var scope = app.Services.CreateAsyncScope())
             .GetRequiredService<ApplicationDbContext>();
 
     await db.Database.MigrateAsync();
+
+    // Add the GA4 idempotency flag to existing payment tables without an EF migration.
+    await db.Database.ExecuteSqlRawAsync("""
+        IF COL_LENGTH(N'dbo.Payments', N'Ga4PurchaseSent') IS NULL
+            ALTER TABLE dbo.Payments ADD Ga4PurchaseSent bit NOT NULL CONSTRAINT DF_Payments_Ga4PurchaseSent DEFAULT 0;
+        """);
 
     await db.Database.ExecuteSqlRawAsync("""
         IF OBJECT_ID(N'dbo.Categories', N'U') IS NULL
