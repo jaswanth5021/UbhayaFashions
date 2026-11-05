@@ -926,6 +926,16 @@
     <script src="~/js/customer-notifications.js" asp-append-version="true"></script>
     <script src="~/js/app-notifications.js" asp-append-version="true"></script>
 
+
+    @if (TempData["Ga4AddToCart"] is string ga4AddToCartJson)
+    {
+        <script>
+            if (typeof window.gtag === 'function') {
+                window.gtag('event', 'add_to_cart', @Html.Raw(ga4AddToCartJson));
+            }
+        </script>
+    }
+
 </body>
 
 </html>
