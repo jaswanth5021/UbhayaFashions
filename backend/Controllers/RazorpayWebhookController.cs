@@ -143,7 +143,6 @@ public sealed class RazorpayWebhookController(
                 else if (order.PaymentStatus == "Paid" || payment.Status == "Captured")
                 {
                     webhookEvent.ProcessingStatus = "Processed";
-                    paidOrderForFollowUp = order;
                     paidPaymentIdForGa4 = payment.Id;
                 }
                 else
