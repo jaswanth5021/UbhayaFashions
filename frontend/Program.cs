@@ -166,7 +166,16 @@ app.UseStatusCodePagesWithReExecute("/Home/NotFoundPage");
 // STATIC FILES
 // =====================================================
 
-app.UseStaticFiles();
+// Cache public, versioned storefront assets so repeat visits do not need to
+// download the same CSS, JavaScript, fonts, and images on every page load.
+// Keep the lifetime moderate because these assets currently use stable URLs.
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        context.Context.Response.Headers.CacheControl = "public,max-age=86400";
+    }
+});
 
 // Expose uploaded media from the shared upload directory under /uploads.
 // Configure UploadsPath to the same directory used by the API, especially on EC2.
@@ -182,7 +191,13 @@ Directory.CreateDirectory(fullUploadsPath);
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(fullUploadsPath),
-    RequestPath = "/uploads"
+    RequestPath = "/uploads",
+    OnPrepareResponse = context =>
+    {
+        // Product media is public storefront content. A one-day cache reduces
+        // repeat image downloads while allowing relatively prompt image updates.
+        context.Context.Response.Headers.CacheControl = "public,max-age=86400";
+    }
 });
 
 // =====================================================
