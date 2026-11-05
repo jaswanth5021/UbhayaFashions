@@ -349,7 +349,7 @@
                                                      alt="@product.Name - image @(imageIndex + 1)"
                                                      class="catalog-image product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
                                                      data-carousel-image="@imageIndex"
-                                                     loading="@(imageIndex == 0 && catalogProductIndex == 0 ? "eager" : "lazy")"
+                                                     loading="@(imageIndex == 0 && catalogProductIndex < 2 ? "eager" : "lazy")"
                                                      decoding="async"
                                                      width="600"
                                                      height="732"
