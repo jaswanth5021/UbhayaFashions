@@ -184,6 +184,15 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="@metaDescription" />
+
+    <!-- Google tag (gtag.js) - Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-X374DQ44X9"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-X374DQ44X9');
+    </script>
     @if (!string.IsNullOrWhiteSpace(canonicalUrl))
     {
         <link rel="canonical" href="@canonicalUrl" />
