@@ -379,6 +379,10 @@
     {
         <link rel="stylesheet" href="~/css/pages/home/clean-home.css" asp-append-version="true" />
     }
+    @if (isHomePage || (currentController == "Products" && currentAction == "Index"))
+    {
+        <link rel="stylesheet" href="~/css/pages/shared/mobile-performance.css" asp-append-version="true" />
+    }
     @if (currentController == "Home" && currentAction == "About")
     {
         <link rel="stylesheet" href="~/css/pages/home/about.css" asp-append-version="true" />

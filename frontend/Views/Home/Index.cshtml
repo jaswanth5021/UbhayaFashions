@@ -27,7 +27,9 @@
                     <img src="@ImageUrlHelper.Resolve(heroBannerUrls[bannerIndex], Configuration["ApiBaseUrl"])"
                          alt="The Ubhaya Edit - banner @(bannerIndex + 1)"
                          class="home-hero-image"
-                         loading="@(bannerIndex == 0 ? "eager" : "lazy")" />
+                         loading="@(bannerIndex == 0 ? "eager" : "lazy")"
+                         decoding="async"
+                         fetchpriority="@(bannerIndex == 0 ? "high" : "auto")" />
                     <div class="home-hero-overlay"></div>
                     <div class="home-hero-content">
                         <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
@@ -44,6 +46,8 @@
                 <img src="/images/dress-banner.jpeg"
                      alt="The Ubhaya Edit"
                      class="home-hero-image"
+                     loading="eager"
+                     decoding="async"
                      fetchpriority="high" />
                 <div class="home-hero-overlay"></div>
                 <div class="home-hero-content">
@@ -131,7 +135,7 @@
                 <a class="category-tile" asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">
                     @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
                     {
-                        <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])" alt="@category.Name" />
+                        <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])" alt="@category.Name" loading="lazy" decoding="async" width="600" height="800" />
                     }
                     else
                     {
@@ -264,7 +268,10 @@
                                              alt="@p.Name - image @(imageIndex + 1)"
                                              class="product-image @(imageIndex == 0 ? "is-active" : string.Empty)"
                                              data-carousel-image="@imageIndex"
-                                             loading="@(imageIndex == 0 ? "eager" : "lazy")" />
+                                             loading="lazy"
+                                             decoding="async"
+                                             width="600"
+                                             height="750" />
                                     }
 
                                     @if (productImages.Count > 1)
