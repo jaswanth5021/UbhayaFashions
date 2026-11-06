@@ -1,92 +1,163 @@
 # Backend schema
 
-The EF Core source of truth is `backend/Data/ApplicationDbContext.cs`, the model configuration, and the migrations in `backend/Migrations/`. These simplified diagrams are split by domain so their entity names and relationships remain readable. They omit most columns, indexes, and some standalone support tables.
+The EF Core source of truth is `backend/Data/ApplicationDbContext.cs`, the model configuration, and the migrations in `backend/Migrations/`. These diagrams are simplified views of the current model. They focus on entity relationships and omit most scalar columns and indexes.
 
-## Core relationship diagram
+## Core relationship overview
 
-The overview below groups the current EF Core entities by business domain. Relationships are labelled with their cardinality. Standalone records are shown without artificial links. The diagram uses a simple Mermaid flowchart for readability in GitHub and common Markdown previews.
+The schema is split into small diagrams so entity names, cardinalities, and relationship lines remain readable in GitHub and common Markdown previews. Each domain has its own colour. The final diagram shows the links that cross domain boundaries.
+
+### 1. Accounts
 
 ```mermaid
 flowchart TB
-    subgraph ACCOUNTS["ACCOUNTS"]
-        direction TB
-        CUSTOMER["Customer"]
-        ADDRESS["CustomerAddress"]
-        LOGIN["ExternalLogin"]
-        PENDING["PendingSignup"]
-        ADMIN["AdminUser"]
-        CUSTOMER -->|"1 : many"| ADDRESS
-        CUSTOMER -->|"1 : many"| LOGIN
-    end
+    C(["Customer"])
+    A["CustomerAddress"]
+    L["ExternalLogin"]
+    P["PendingSignup"]
+    AD["AdminUser"]
 
-    subgraph CATALOG["CATALOG AND INVENTORY"]
-        direction TB
-        CATEGORY["Category"]
-        PRODUCT["Product"]
-        VARIANT["ProductVariant"]
-        IMAGE["ProductImage"]
-        VIDEO["ProductVideo"]
-        INVENTORY["InventoryTransaction"]
-        CATEGORY -->|"1 : many"| PRODUCT
-        PRODUCT -->|"1 : many"| VARIANT
-        PRODUCT -->|"1 : many"| IMAGE
-        PRODUCT -->|"1 : many"| VIDEO
-        PRODUCT -->|"1 : many"| INVENTORY
-    end
+    C -->|"1 : many"| A
+    C -->|"1 : many"| L
 
-    subgraph COMMERCE["ORDERS AND PAYMENTS"]
-        direction TB
-        ORDER["Order"]
-        ORDER_ITEM["OrderItem"]
-        PAYMENT["Payment"]
-        SHIPMENT["DelhiveryShipment"]
-        WEBHOOK["RazorpayWebhookEvent"]
-        ORDER -->|"1 : many"| ORDER_ITEM
-        ORDER -->|"1 : many"| PAYMENT
-        ORDER -->|"1 : zero-or-one"| SHIPMENT
-    end
+    classDef primary fill:#DCEBFF,stroke:#2563EB,color:#172554,stroke-width:2px;
+    classDef child fill:#EFF6FF,stroke:#60A5FA,color:#1E3A8A;
+    classDef standalone fill:#F3F4F6,stroke:#6B7280,color:#111827;
+    class C primary;
+    class A,L child;
+    class P,AD standalone;
+```
 
-    subgraph CUSTOMER_ACTIVITY["CUSTOMER ACTIVITY"]
-        direction TB
-        WISHLIST["WishlistItem"]
-        RECENT["RecentlyViewedProduct"]
-        REVIEW["ProductReview"]
-        REVIEW_IMAGE["ProductReviewImage"]
-        REVIEW_VOTE["ProductReviewVote"]
-        REVIEW -->|"1 : many"| REVIEW_IMAGE
-        REVIEW -->|"1 : many"| REVIEW_VOTE
-    end
+### 2. Catalog and inventory
 
-    subgraph NOTIFICATIONS["NOTIFICATIONS"]
-        direction TB
-        NOTIFICATION["StoreNotification"]
-        NOTIFICATION_STATE["CustomerNotificationState"]
-        NOTIFICATION -->|"1 : many"| NOTIFICATION_STATE
-    end
+```mermaid
+flowchart TB
+    CAT(["Category"])
+    P(["Product"])
+    V["ProductVariant"]
+    I["ProductImage"]
+    VID["ProductVideo"]
+    T["InventoryTransaction"]
 
-    CUSTOMER -->|"1 : many"| ORDER
-    PRODUCT -->|"1 : many"| ORDER_ITEM
-    CUSTOMER -->|"1 : many"| WISHLIST
-    PRODUCT -->|"1 : many"| WISHLIST
-    CUSTOMER -->|"1 : many"| RECENT
-    PRODUCT -->|"1 : many"| RECENT
-    CUSTOMER -->|"1 : many"| REVIEW
-    PRODUCT -->|"1 : many"| REVIEW
-    CUSTOMER -->|"1 : many"| REVIEW_VOTE
-    CUSTOMER -->|"1 : many"| NOTIFICATION_STATE
-    PRODUCT -.->|"0..1 product link"| NOTIFICATION
+    CAT -->|"1 : many"| P
+    P -->|"1 : many"| V
+    P -->|"1 : many"| I
+    P -->|"1 : many"| VID
+    P -->|"1 : many"| T
 
-    classDef account fill:#f7e9ed,stroke:#8b4055,color:#302522,stroke-width:1.5px;
-    classDef catalog fill:#f8efe1,stroke:#ad7b36,color:#302522,stroke-width:1.5px;
-    classDef commerce fill:#e9eff9,stroke:#5577a5,color:#202b3a,stroke-width:1.5px;
-    classDef activity fill:#e9f3ed,stroke:#54866a,color:#24372b,stroke-width:1.5px;
-    classDef notification fill:#f1ecf8,stroke:#8066a5,color:#302542,stroke-width:1.5px;
+    classDef primary fill:#D1FAE5,stroke:#059669,color:#064E3B,stroke-width:2px;
+    classDef child fill:#ECFDF5,stroke:#34D399,color:#065F46;
+    class CAT,P primary;
+    class V,I,VID,T child;
+```
 
-    class CUSTOMER,ADDRESS,LOGIN,PENDING,ADMIN account;
-    class CATEGORY,PRODUCT,VARIANT,IMAGE,VIDEO,INVENTORY catalog;
-    class ORDER,ORDER_ITEM,PAYMENT,SHIPMENT,WEBHOOK commerce;
-    class WISHLIST,RECENT,REVIEW,REVIEW_IMAGE,REVIEW_VOTE activity;
-    class NOTIFICATION,NOTIFICATION_STATE notification;
+### 3. Orders and payments
+
+```mermaid
+flowchart TB
+    O(["Order"])
+    OI["OrderItem"]
+    PAY["Payment"]
+    S["DelhiveryShipment"]
+    W["RazorpayWebhookEvent"]
+
+    O -->|"1 : many"| OI
+    O -->|"1 : many"| PAY
+    O -->|"1 : zero-or-one"| S
+
+    classDef primary fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:2px;
+    classDef child fill:#FFF7ED,stroke:#FB923C,color:#9A3412;
+    classDef standalone fill:#F3F4F6,stroke:#6B7280,color:#111827;
+    class O primary;
+    class OI,PAY,S child;
+    class W standalone;
+```
+
+### 4. Customer activity
+
+```mermaid
+flowchart TB
+    C(["Customer"])
+    P(["Product"])
+    W["WishlistItem"]
+    R["RecentlyViewedProduct"]
+    REV["ProductReview"]
+    RI["ProductReviewImage"]
+    RV["ProductReviewVote"]
+
+    C -->|"1 : many"| W
+    P -->|"1 : many"| W
+    C -->|"1 : many"| R
+    P -->|"1 : many"| R
+    C -->|"1 : many"| REV
+    P -->|"1 : many"| REV
+    REV -->|"1 : many"| RI
+    REV -->|"1 : many"| RV
+    C -->|"1 : many"| RV
+
+    classDef parent fill:#EDE9FE,stroke:#7C3AED,color:#4C1D95,stroke-width:2px;
+    classDef activity fill:#F5F3FF,stroke:#A78BFA,color:#5B21B6;
+    class C,P parent;
+    class W,R,REV,RI,RV activity;
+```
+
+### 5. Notifications
+
+```mermaid
+flowchart TB
+    N(["StoreNotification"])
+    S["CustomerNotificationState"]
+    P["Product (optional link)"]
+    C["Customer"]
+
+    N -->|"1 : many"| S
+    C -->|"1 : many"| S
+    P -.->|"optional product reference"| N
+
+    classDef notification fill:#FCE7F3,stroke:#DB2777,color:#831843,stroke-width:2px;
+    classDef related fill:#FDF2F8,stroke:#F472B6,color:#9D174D;
+    N classDef notification;
+    class S,P,C related;
+```
+
+### 6. Cross-domain relationships
+
+This view contains only the main links between business areas. Refer to the domain diagrams above for each area's internal relationships.
+
+```mermaid
+flowchart TB
+    C(["Customer"])
+    P(["Product"])
+    O(["Order"])
+    OI["OrderItem"]
+    W["WishlistItem"]
+    R["RecentlyViewedProduct"]
+    REV["ProductReview"]
+    NS["CustomerNotificationState"]
+    N["StoreNotification"]
+
+    C -->|"places"| O
+    O -->|"contains"| OI
+    P -->|"appears in"| OI
+    C -->|"saves"| W
+    P -->|"saved as"| W
+    C -->|"views"| R
+    P -->|"viewed as"| R
+    C -->|"writes"| REV
+    P -->|"reviewed in"| REV
+    C -->|"receives state for"| NS
+    N -->|"has customer state"| NS
+    P -.->|"optional link"| N
+
+    classDef customer fill:#DCEBFF,stroke:#2563EB,color:#172554,stroke-width:2px;
+    classDef product fill:#D1FAE5,stroke:#059669,color:#064E3B,stroke-width:2px;
+    classDef order fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:2px;
+    classDef activity fill:#F5F3FF,stroke:#7C3AED,color:#4C1D95;
+    classDef notice fill:#FCE7F3,stroke:#DB2777,color:#831843;
+    class C customer;
+    class P product;
+    class O order;
+    class OI,W,R,REV activity;
+    class NS,N notice;
 ```
 
 **Relationship notes**
@@ -95,7 +166,7 @@ flowchart TB
 - `DelhiveryShipment` has a unique `OrderId`, so an order can have at most one shipment record.
 - Customer activity records connect customers and products through their own entity rows.
 - A store notification may optionally reference a product; deleting that product clears the notification link.
-- The diagram shows the principal foreign-key relationships, not every scalar property or index.
+- The diagrams show principal foreign-key relationships, not every scalar property or index.
 
 ## Model groups
 
