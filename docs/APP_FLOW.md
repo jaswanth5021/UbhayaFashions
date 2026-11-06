@@ -1,136 +1,119 @@
-<div align="center">
-
-# Application Flow
-### The customer journey and store operations
-
-**A map of the key screens, transitions and system responsibilities.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · EXPERIENCE DESIGN</span><span class="doc-pill">Map every customer journey</span>
+<h1>Application Flow</h1>
+<p>A visual guide to customer shopping, administrator operations, payment verification and order fulfilment.</p>
+<div class="doc-meta"><div><strong>Primary users</strong>Customers & administrators</div><div><strong>Critical path</strong>Browse → Pay → Deliver</div><div><strong>Integrations</strong>Razorpay · Delhivery</div></div>
 </div>
 
----
-
-## 01 · Customer journey
+## <strong>01</strong> Customer journey
 
 ```mermaid
 flowchart TD
-    A[Home] --> B[Browse / Search]
-    B --> C[Filter and Sort]
-    C --> D[Product Details]
-    D --> E[Select Size and Colour]
-    E --> F[Add to Cart]
-    F --> G{Signed in?}
-    G -- No --> H[Sign in / Register]
-    G -- Yes --> I[Checkout]
-    H --> I
-    I --> J[Delivery Address]
-    J --> K[Create Payment Order]
-    K --> L[Razorpay Checkout]
-    L --> M[Verify Payment on Server]
-    M --> N{Verified?}
-    N -- No --> O[Show Payment Pending / Failed]
-    N -- Yes --> P[Persist Order and Update Stock]
-    P --> Q[Confirmation]
-    Q --> R[My Orders / Tracking]
+ A[Home] --> B[Browse / Search]
+ B --> C[Filter and Sort]
+ C --> D[Product Details]
+ D --> E[Choose Size and Colour]
+ E --> F[Add to Cart]
+ F --> G{Signed in?}
+ G -- No --> H[Sign in / Register]
+ G -- Yes --> I[Checkout]
+ H --> I
+ I --> J[Delivery Address]
+ J --> K[Create Payment Order]
+ K --> L[Razorpay Checkout]
+ L --> M[Server Payment Verification]
+ M --> N{Verified?}
+ N -- No --> O[Pending / Failed State]
+ N -- Yes --> P[Save Order and Update Stock]
+ P --> Q[Confirmation]
+ Q --> R[My Orders / Tracking]
 ```
 
-### Journey details
+<div class="doc-grid four">
+<div class="doc-card pink"><span class="ico">🔎</span><strong>01 · Discover</strong><p>Home, category, search and product listing.</p></div>
+<div class="doc-card purple"><span class="ico">👗</span><strong>02 · Evaluate</strong><p>Images, sizes, colours, price and availability.</p></div>
+<div class="doc-card blue"><span class="ico">🛒</span><strong>03 · Checkout</strong><p>Cart, address validation and payment.</p></div>
+<div class="doc-card green"><span class="ico">📦</span><strong>04 · Aftercare</strong><p>Confirmation, order history and tracking.</p></div>
+</div>
 
-| Step | Screen / action | Responsibility |
+## <strong>02</strong> Administrator journey
+
+```mermaid
+flowchart TD
+ A[Admin Login] --> B[Dashboard]
+ B --> C[Catalogue]
+ B --> D[Inventory]
+ B --> E[Orders]
+ B --> F[Customers]
+ B --> G[Storefront Banners]
+ C --> H[Product and Variant Editor]
+ H --> I[Validate and Save]
+ E --> J[Review Order and Payment]
+ J --> K{Eligible to Ship?}
+ K -- No --> L[Resolve Order Issue]
+ K -- Yes --> M[Check PIN Serviceability]
+ M --> N[Delhivery Manifest]
+ N --> O{AWB returned?}
+ O -- Yes --> P[Save Shipment and Tracking]
+ O -- No --> Q[Show Provider Error]
+```
+
+## <strong>03</strong> Payment lifecycle
+
+| Stage | System action | Expected result |
 |---|---|---|
-| Discover | Home, category, product listing | Render catalogue and navigation |
-| Evaluate | Product detail | Show product media, variant options, stock and price |
-| Select | Size, colour, quantity | Validate selected variant |
-| Cart | Cart drawer/page | Re-check item availability and quantity |
-| Checkout | Address and order summary | Validate address and authoritative totals |
-| Pay | Razorpay Checkout | Complete provider payment interaction |
-| Verify | Backend verification | Verify signature/provider state; protect against duplicate callbacks |
-| Confirm | Order confirmation | Show only persisted order state |
-| Aftercare | My Orders and tracking | Enforce customer ownership and show saved carrier status |
-
-## 02 · Administrator journey
-
-```mermaid
-flowchart TD
-    A[Admin Login] --> B[Admin Dashboard]
-    B --> C[Catalogue]
-    B --> D[Inventory]
-    B --> E[Orders]
-    B --> F[Customers]
-    B --> G[Storefront Banners]
-    C --> H[Product / Variant Editor]
-    H --> I[Save and Validate]
-    E --> J[Review Payment and Address]
-    J --> K{Eligible to ship?}
-    K -- No --> L[Resolve payment / order issue]
-    K -- Yes --> M[Check PIN Serviceability]
-    M --> N[Manifest with Delhivery]
-    N --> O{AWB returned?}
-    O -- Yes --> P[Persist Shipment and Tracking]
-    O -- No --> Q[Show provider error; investigate safely]
-```
-
-## 03 · Payment state flow
-
-```mermaid
-stateDiagram-v2
-    [*] --> Created
-    Created --> PaymentPending
-    PaymentPending --> Paid: server verification succeeds
-    PaymentPending --> Failed: verified failure
-    PaymentPending --> Pending: provider outcome unclear
-    Pending --> Paid: reconciliation confirms
-    Pending --> Failed: reconciliation confirms failure
-    Paid --> Processing
-    Processing --> Shipped
-    Shipped --> Delivered
-    Paid --> RefundPending: approved refund workflow
-    RefundPending --> Refunded: provider confirms refund
-```
+| Create | Backend creates Razorpay order | Provider order ID saved |
+| Pay | Customer completes checkout | Provider payment result |
+| Verify | Backend validates signature/status | Trusted payment outcome |
+| Commit | Persist payment and order state | Consistent database state |
+| Notify | Confirmation workflow | Customer receives order update |
+| Reconcile | Resolve uncertain provider outcome | No duplicate payment/order |
 
 > [!IMPORTANT]
-> Treat this as a conceptual state model. Use the actual enum/status values and transition rules implemented in the current code before changing production behaviour.
+> A browser redirect is not proof of payment. Only server-side verification and trusted provider events can establish the paid state.
 
-## 04 · Shipment flow
+## <strong>04</strong> Shipment sequence
 
 ```mermaid
 sequenceDiagram
-    participant Admin
-    participant Web as Admin Website
-    participant API as UBHAYA API
-    participant Carrier as Delhivery
-    participant DB as SQL Server
-    Admin->>Web: Request shipment
-    Web->>API: Authenticated shipment request
-    API->>DB: Load order and verify eligibility
-    API->>Carrier: Check serviceability
-    Carrier-->>API: Serviceability result
-    API->>Carrier: Manifest shipment
-    Carrier-->>API: Result and AWB
-    API->>DB: Persist shipment only on success
-    API-->>Web: Shipment status
-    Web-->>Admin: Confirmation or actionable error
+ participant Admin
+ participant Web as Admin Website
+ participant API as UBHAYA API
+ participant D as Delhivery
+ participant DB as SQL Server
+ Admin->>Web: Request shipment
+ Web->>API: Authenticated request
+ API->>DB: Check order and payment
+ API->>D: Check serviceability
+ D-->>API: Serviceability result
+ API->>D: Manifest shipment
+ D-->>API: AWB and result
+ API->>DB: Save successful shipment
+ API-->>Web: Outcome
+ Web-->>Admin: Confirmation or actionable error
 ```
 
-## 05 · Navigation map
+## <strong>05</strong> Key screens and routes
 
 | Area | Typical route |
 |---|---|
 | Store home | `/` |
 | Product listing | `/Products` |
-| Admin sign-in | `/Admin/Login` |
+| Admin login | `/Admin/Login` |
 | Admin area | `/Admin` |
 | Customer account | `/Account` |
 | Customer orders | `/Orders` |
 | Order tracking | `/Orders/Track/{id}` |
 
-Routes can evolve; check the relevant MVC controller and route attributes before relying on a path.
+Confirm exact routes in the current controllers before relying on them.
 
-## 06 · UX states every journey needs
+## <strong>06</strong> UX states
 
-- Initial loading and skeleton state where appropriate.
-- Empty state with a useful next action.
-- Inline validation close to the relevant field.
-- Success feedback after server confirmation.
-- Failure feedback that explains the next safe action.
-- Retry behaviour that does not duplicate payments, orders or shipments.
-- Mobile-friendly focus, keyboard navigation and touch targets.
+<div class="doc-grid">
+<div class="doc-card blue"><span class="ico">⏳</span><strong>Loading</strong><p>Show progress without blocking unrelated navigation.</p></div>
+<div class="doc-card purple"><span class="ico">🗂️</span><strong>Empty</strong><p>Explain what is missing and provide a next action.</p></div>
+<div class="doc-card green"><span class="ico">✓</span><strong>Success</strong><p>Show only after server confirmation.</p></div>
+<div class="doc-card orange"><span class="ico">⚠️</span><strong>Error</strong><p>Explain the issue and safe recovery path.</p></div>
+</div>
+
+<div class="doc-footer">UBHAYA FASHIONS · Experience documentation · Keep journeys aligned with actual routes and state transitions.</div>
