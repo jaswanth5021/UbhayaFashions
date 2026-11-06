@@ -22,15 +22,10 @@ Protect the working storefront and revenue-critical workflows. Deliver small cha
 
 ## <strong>03</strong> Milestone roadmap
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-flowchart LR
- A[01 Baseline Audit] --> B[02 Stabilize Core]
- B --> C[03 UX and Performance]
- C --> D[04 Security and Operations]
- D --> E[05 Release Validation]
- E --> F[06 Measure and Improve]
-```
+<figure class="doc-diagram">
+  <img src="assets/implementation-roadmap.svg" alt="Implementation roadmap with six delivery milestones." />
+  <figcaption>Implementation roadmap with six delivery milestones.</figcaption>
+</figure>
 
 ## <strong>04</strong> Phase details
 
