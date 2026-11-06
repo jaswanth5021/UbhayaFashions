@@ -1,0 +1,161 @@
+/* UBHAYA FASHIONS — VS Code Markdown Preview theme
+   Loaded by .vscode/settings.json. Affects preview only, never source files. */
+
+body {
+  color: #29232a;
+  background: #fbf8fa;
+  font-family: "Segoe UI", Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.72;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 28px 42px 64px;
+}
+
+.markdown-body { color: #29232a; }
+
+.markdown-body h1 {
+  color: #76264f;
+  font-size: 2.25em;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  border-bottom: 3px solid #d9a4bf;
+  padding-bottom: 14px;
+  margin: 34px 0 22px;
+}
+
+.markdown-body h2 {
+  color: #8b3564;
+  font-size: 1.48em;
+  font-weight: 750;
+  border-left: 5px solid #c65c91;
+  padding: 5px 0 5px 14px;
+  margin: 34px 0 16px;
+  background: linear-gradient(90deg, #f7eaf1 0%, rgba(247,234,241,0) 78%);
+}
+
+.markdown-body h3 {
+  color: #5c477d;
+  font-size: 1.13em;
+  font-weight: 700;
+  margin-top: 25px;
+}
+
+.markdown-body h4 { color: #8b3564; }
+
+.markdown-body p { margin: 12px 0; }
+
+.markdown-body a {
+  color: #9b3d70;
+  font-weight: 650;
+  text-decoration: none;
+  border-bottom: 1px solid #d9a4bf;
+}
+.markdown-body a:hover { color: #612044; border-bottom-color: #612044; }
+
+.markdown-body strong { color: #562541; }
+
+.markdown-body hr {
+  height: 2px;
+  border: 0;
+  background: linear-gradient(90deg, #b94d82, #ead2df, transparent);
+  margin: 30px 0;
+}
+
+.markdown-body blockquote {
+  color: #5f3b53;
+  background: #f8edf3;
+  border-left: 5px solid #bd5a8a;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 18px;
+  margin: 20px 0;
+}
+
+.markdown-body table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #eadbe4;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 20px 0 26px;
+  font-size: 0.94em;
+}
+
+.markdown-body thead { background: #76264f; color: #fff; }
+.markdown-body th {
+  color: #fff;
+  font-weight: 700;
+  text-align: left;
+  padding: 13px 15px;
+  border: 0;
+}
+.markdown-body td {
+  padding: 11px 15px;
+  border: 0;
+  border-top: 1px solid #f0e5eb;
+}
+.markdown-body tbody tr:nth-child(odd) { background: #fff; }
+.markdown-body tbody tr:nth-child(even) { background: #fbf1f6; }
+.markdown-body tbody tr:hover { background: #f5e3ed; }
+
+.markdown-body ul, .markdown-body ol { padding-left: 1.7em; }
+.markdown-body li { margin: 6px 0; }
+.markdown-body li::marker { color: #b34e80; font-weight: 800; }
+
+.markdown-body code {
+  color: #842d5d;
+  background: #f4e8ef;
+  border: 1px solid #ead6e2;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+}
+.markdown-body pre {
+  background: #211a25 !important;
+  border: 1px solid #453347;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 5px 18px rgba(55, 26, 45, .10);
+}
+.markdown-body pre code {
+  color: #f7edf3;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.markdown-body img {
+  border-radius: 12px;
+  max-width: 100%;
+  box-shadow: 0 5px 18px rgba(55, 26, 45, .10);
+}
+
+.markdown-body input[type="checkbox"] { accent-color: #8b3564; }
+
+.markdown-alert {
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 18px 0;
+}
+.markdown-alert-note { background: #edf4ff; border-left-color: #5486c5; }
+.markdown-alert-important { background: #f2edfb; border-left-color: #8060b2; }
+.markdown-alert-warning { background: #fff5e5; border-left-color: #d28a2f; }
+.markdown-alert-tip { background: #eaf7f0; border-left-color: #3d9a6b; }
+
+.markdown-body .mermaid, .markdown-body pre.mermaid {
+  background: #fff;
+  border: 1px solid #eadbe4;
+  border-radius: 12px;
+  padding: 18px;
+  margin: 18px 0;
+}
+
+@media (max-width: 700px) {
+  body { padding: 18px 16px 40px; font-size: 14px; }
+  .markdown-body h1 { font-size: 1.8em; }
+  .markdown-body h2 { font-size: 1.3em; }
+  .markdown-body table { display: block; overflow-x: auto; }
+}
