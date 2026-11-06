@@ -1,69 +1,58 @@
-<div align="center">
-
-# Backend Data Model
-### Persistence guide and relationship map
-
-**A developer-oriented guide to the database boundary and schema evolution.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · DATA ENGINEERING</span><span class="doc-pill">Model data with confidence</span>
+<h1>Backend Data Model</h1>
+<p>A practical guide to persistence, domain relationships, migrations and the data integrity rules behind the store.</p>
+<div class="doc-meta"><div><strong>Database</strong>SQL Server</div><div><strong>ORM</strong>Entity Framework Core</div><div><strong>Source of truth</strong>ApplicationDbContext</div></div>
 </div>
 
----
+## <strong>01</strong> Data ownership
 
-## 01 · Source of truth
+The backend owns database access. The EF Core model is defined in `backend/Data/ApplicationDbContext.cs`, entity classes and versioned changes in `backend/Migrations/`.
 
-The EF Core model is defined in:
+## <strong>02</strong> Domain areas
 
-- `backend/Data/ApplicationDbContext.cs`
-- Entity/model classes in the backend project
-- Versioned schema changes in `backend/Migrations/`
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">👤</span><strong>Identity</strong><p>Customer and administrator accounts, roles and authentication metadata.</p></div>
+<div class="doc-card purple"><span class="ico">👗</span><strong>Catalogue</strong><p>Products, categories, product images and videos.</p></div>
+<div class="doc-card blue"><span class="ico">🎨</span><strong>Variants</strong><p>Sizes, colours, price, discount and stock quantities.</p></div>
+<div class="doc-card green"><span class="ico">🛒</span><strong>Commerce</strong><p>Orders, order items, payments and customer addresses.</p></div>
+<div class="doc-card yellow"><span class="ico">🚚</span><strong>Fulfilment</strong><p>Carrier references, AWB and shipment tracking state.</p></div>
+<div class="doc-card orange"><span class="ico">📣</span><strong>Storefront</strong><p>Homepage banner metadata and media references.</p></div>
+</div>
 
-The database is SQL Server. The API owns all database access. This document intentionally describes domain areas rather than guessing every column or relationship; inspect the entity and migration definitions before writing a migration.
-
-## 02 · Domain areas
-
-| Domain | Responsibility | Examples of data |
-|---|---|---|
-| Identity | Customer and administrator access | Accounts, credentials metadata, roles/tokens |
-| Catalogue | Product discovery | Products, categories, product media |
-| Variants | Sellable options | Sizes, colours, prices, stock |
-| Customer | Shopping preferences | Addresses, wishlist, recently viewed |
-| Commerce | Purchase lifecycle | Orders, order items, payments |
-| Fulfilment | Carrier workflow | Shipment identifiers, AWB and tracking state |
-| Storefront content | Homepage merchandising | Banner metadata and media references |
-| Operations | Support and diagnostics | Error logs and operational records |
-
-## 03 · Conceptual relationships
+## <strong>03</strong> Conceptual relationship map
 
 ```mermaid
 erDiagram
-    CUSTOMER ||--o{ ADDRESS : saves
-    CUSTOMER ||--o{ ORDER : places
-    CUSTOMER ||--o{ WISHLIST_ITEM : owns
-    PRODUCT ||--o{ PRODUCT_VARIANT : offers
-    PRODUCT ||--o{ PRODUCT_MEDIA : displays
-    PRODUCT ||--o{ PRODUCT_REVIEW : receives
-    CATEGORY ||--o{ PRODUCT : groups
-    ORDER ||--|{ ORDER_ITEM : contains
-    ORDER ||--o{ PAYMENT : records
-    ORDER ||--o| SHIPMENT : fulfils
-    PRODUCT ||--o{ ORDER_ITEM : referenced_by
+ CUSTOMER ||--o{ ADDRESS : saves
+ CUSTOMER ||--o{ ORDER : places
+ CUSTOMER ||--o{ WISHLIST_ITEM : owns
+ PRODUCT ||--o{ PRODUCT_VARIANT : offers
+ PRODUCT ||--o{ PRODUCT_MEDIA : displays
+ PRODUCT ||--o{ PRODUCT_REVIEW : receives
+ CATEGORY ||--o{ PRODUCT : groups
+ ORDER ||--|{ ORDER_ITEM : contains
+ ORDER ||--o{ PAYMENT : records
+ ORDER ||--o| SHIPMENT : fulfils
+ PRODUCT ||--o{ ORDER_ITEM : referenced_by
 ```
 
 > [!NOTE]
-> This ER diagram is a domain-level illustration, not a generated schema diagram. Confirm exact table names, cardinalities, nullable relationships and delete behaviours from the current EF model and migrations.
+> This is a conceptual domain diagram, not a generated database schema. Verify exact table names, nullability, foreign keys and delete behaviours in the current EF model and migrations.
 
-## 04 · Persistence rules
+## <strong>04</strong> Persistence rules
 
-- Use EF Core migrations for schema changes; do not manually change only one environment.
-- Review generated migration SQL for destructive or locking operations.
-- Preserve historical order-item price and product description snapshots where the model supports them.
-- Use decimal types for money; never use floating-point types for financial amounts.
-- Store timestamps consistently and display them in the user's expected timezone.
-- Add indexes based on measured query patterns and uniqueness requirements.
-- Define delete behaviour deliberately for orders, payments, customers and product history.
-- Keep uploaded binary files in durable file storage; store their references/metadata in SQL Server.
+| Concern | Standard |
+|---|---|
+| Money | Use `decimal`, never floating point |
+| Relationships | Explicit foreign keys and delete behaviours |
+| Migrations | Version all schema changes with EF Core |
+| Indexes | Add based on query patterns and uniqueness |
+| Time | Store consistently; display in user timezone |
+| Media | Store files durably; persist references/metadata |
+| History | Preserve order and payment history appropriately |
 
-## 05 · Migration workflow
+## <strong>05</strong> Migration workflow
 
 ```bash
 cd backend
@@ -71,20 +60,19 @@ dotnet ef migrations add <DescriptiveMigrationName>
 dotnet ef database update
 ```
 
-Before release:
+<div class="doc-grid four">
+<div class="doc-card pink"><span class="ico">1️⃣</span><strong>Generate</strong><p>Create migration from model changes.</p></div>
+<div class="doc-card purple"><span class="ico">2️⃣</span><strong>Review</strong><p>Inspect generated SQL and destructive changes.</p></div>
+<div class="doc-card blue"><span class="ico">3️⃣</span><strong>Backup</strong><p>Take and verify a database backup.</p></div>
+<div class="doc-card green"><span class="ico">4️⃣</span><strong>Apply</strong><p>Deploy and validate critical data paths.</p></div>
+</div>
 
-1. Confirm the correct connection string/environment.
-2. Review the migration and generated SQL.
-3. Take a verified database backup.
-4. Test upgrade against a recent non-production copy.
-5. Confirm rollback/recovery strategy.
-6. Apply the migration through the approved deployment process.
-7. Verify application health and critical read/write paths.
+## <strong>06</strong> Data protection
 
-## 06 · Data protection
+- Never add real customer information or secrets to seed data.
+- Restrict production database and backup access.
+- Avoid logging full addresses, phone numbers and payment payloads.
+- Define retention and deletion rules.
+- Use synthetic data in automated tests.
 
-- Never add real customer records, passwords, access tokens or payment secrets to seed data.
-- Restrict access to production databases and backups.
-- Avoid logging full addresses, phone numbers, payment payloads or authentication headers.
-- Define retention and deletion rules for account and operational data.
-- Keep test fixtures synthetic.
+<div class="doc-footer">UBHAYA FASHIONS · Data handbook · Keep this aligned with EF Core entities and migrations.</div>
