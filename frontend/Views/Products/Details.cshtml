@@ -150,7 +150,10 @@
                 {
                     <img id="productMainImage"
                          src="@galleryItems[0].Url"
-                         alt="@Model.Name" />
+                         alt="@Model.Name"
+                         loading="eager"
+                         fetchpriority="high"
+                         decoding="async" />
                 }
             }
             else

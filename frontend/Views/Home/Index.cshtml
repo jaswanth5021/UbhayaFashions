@@ -19,7 +19,7 @@
     else
     {
         <link rel="preload" as="image" href="/images/dress-banner.jpeg"
-              fetchpriority="high" media="(max-width: 767px)" />
+              asp-append-version="true" fetchpriority="high" media="(max-width: 767px)" />
     }
 }
 
@@ -60,7 +60,7 @@
         else
         {
             <div class="home-hero-slide is-active" data-hero-slide>
-                <img src="/images/dress-banner.jpeg"
+                <img src="/images/dress-banner.jpeg" asp-append-version="true"
                      alt="The Ubhaya Edit"
                      class="home-hero-image"
                      loading="eager"

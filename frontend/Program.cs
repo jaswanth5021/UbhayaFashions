@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews(options => options.Filters.AddService<UserErrorLogFilter>());
 builder.Services.AddMemoryCache();
+builder.Services.AddResponseCompression();
 
 // =====================================================
 // HTTP CONTEXT
@@ -166,14 +167,27 @@ app.UseStatusCodePagesWithReExecute("/Home/NotFoundPage");
 // STATIC FILES
 // =====================================================
 
-// Cache public, versioned storefront assets so repeat visits do not need to
-// download the same CSS, JavaScript, fonts, and images on every page load.
-// Keep the lifetime moderate because these assets currently use stable URLs.
+// Compress static assets only; personalized storefront HTML can contain user data.
+app.UseWhen(
+    context => context.Request.Path.StartsWithSegments("/css")
+        || context.Request.Path.StartsWithSegments("/js")
+        || context.Request.Path.StartsWithSegments("/images")
+        || context.Request.Path.StartsWithSegments("/uploads"),
+    branch => branch.UseResponseCompression());
+
+const string longLivedAssetCacheControl = "public,max-age=31536000,immutable";
+const string shortLivedAssetCacheControl = "public,max-age=86400";
+
+// Versioned static assets can stay cached for a year because their URL changes
+// when their contents change.
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = context =>
     {
-        context.Context.Response.Headers.CacheControl = "public,max-age=86400";
+        context.Context.Response.Headers.CacheControl =
+            context.Context.Request.Query.ContainsKey("v")
+                ? longLivedAssetCacheControl
+                : shortLivedAssetCacheControl;
     }
 });
 
@@ -194,9 +208,15 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads",
     OnPrepareResponse = context =>
     {
-        // Product media is public storefront content. A one-day cache reduces
-        // repeat image downloads while allowing relatively prompt image updates.
-        context.Context.Response.Headers.CacheControl = "public,max-age=86400";
+        // Product uploads use unique GUID filenames, so replacing an image creates
+        // a new URL and these files can be cached immutably. Keep legacy names short-lived.
+        var fileStem = Path.GetFileNameWithoutExtension(context.Context.Request.Path.Value ?? string.Empty);
+        var isUniqueUpload = Guid.TryParseExact(fileStem, "N", out _)
+            || (fileStem.StartsWith("banner-", StringComparison.OrdinalIgnoreCase)
+                && Guid.TryParseExact(fileStem["banner-".Length..], "N", out _));
+        context.Context.Response.Headers.CacheControl = isUniqueUpload
+            ? longLivedAssetCacheControl
+            : shortLivedAssetCacheControl;
     }
 });
 
