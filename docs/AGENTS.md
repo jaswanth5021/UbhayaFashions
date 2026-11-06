@@ -19,6 +19,7 @@ Improve UBHAYA FASHIONS while preserving customer journeys, business rules, data
 ## <strong>03</strong> Required working process
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
 flowchart TD
  A[Inspect Existing Code] --> B[Read Relevant Docs]
  B --> C[Identify Trust Boundary]
