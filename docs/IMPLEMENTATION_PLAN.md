@@ -1,119 +1,74 @@
-<div align="center">
-
-# Implementation Plan
-### From stable foundations to continuous improvement
-
-**A phased delivery plan with concrete outcomes and release gates.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · DELIVERY ROADMAP</span><span class="doc-pill">Turn priorities into progress</span>
+<h1>Implementation Plan</h1>
+<p>A phased delivery roadmap to stabilize core commerce, improve the shopping experience and prepare reliable releases.</p>
+<div class="doc-meta"><div><strong>Approach</strong>Incremental delivery</div><div><strong>Focus</strong>Quality · Security · UX</div><div><strong>Release rule</strong>Evidence before done</div></div>
 </div>
 
----
+## <strong>01</strong> Delivery strategy
 
-## 01 · Delivery approach
+Protect the working storefront and revenue-critical workflows. Deliver small changes with clear validation, rollback awareness and measurable outcomes.
 
-Deliver in small increments. Protect the working storefront and revenue-critical flows while improving reliability, performance, security and maintainability.
+## <strong>02</strong> Main workstreams
 
-## 02 · Workstreams
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">🛍️</span><strong>Product experience</strong><p>Polished responsive shopping and admin journeys.</p></div>
+<div class="doc-card blue"><span class="ico">⚡</span><strong>Performance</strong><p>Optimized assets, rendering and API/database usage.</p></div>
+<div class="doc-card green"><span class="ico">💳</span><strong>Checkout reliability</strong><p>Verified and idempotent payment-to-order flow.</p></div>
+<div class="doc-card purple"><span class="ico">🚚</span><strong>Fulfilment</strong><p>Safe shipment creation and clear tracking.</p></div>
+<div class="doc-card yellow"><span class="ico">🛡️</span><strong>Security</strong><p>Authorization, secrets and upload safeguards.</p></div>
+<div class="doc-card orange"><span class="ico">🧪</span><strong>Quality</strong><p>Regression tests and operational readiness.</p></div>
+</div>
 
-| Workstream | Outcome | Priority |
-|---|---|---|
-| Product experience | Clear, polished and responsive shopping journey | High |
-| Performance | Faster page loads and stable Core Web Vitals | High |
-| Checkout reliability | Verified, idempotent payment-to-order flow | Critical |
-| Fulfilment | Safe shipment creation and useful tracking | High |
-| Security | Strong authorization, secrets and upload controls | Critical |
-| Quality | Automated regression coverage for business rules | High |
-| Operations | Durable uploads, backups, logs and recovery | Critical |
-| Documentation | Current, useful engineering handbook | Medium |
-
-## 03 · Phases and milestones
+## <strong>03</strong> Milestone roadmap
 
 ```mermaid
 flowchart LR
-    A[01 Baseline and Audit] --> B[02 Stabilize Core]
-    B --> C[03 Experience and Performance]
-    C --> D[04 Security and Operations]
-    D --> E[05 Release Validation]
-    E --> F[06 Measure and Improve]
+ A[01 Baseline Audit] --> B[02 Stabilize Core]
+ B --> C[03 UX and Performance]
+ C --> D[04 Security and Operations]
+ D --> E[05 Release Validation]
+ E --> F[06 Measure and Improve]
 ```
 
-### Phase 1 — Baseline and audit
+## <strong>04</strong> Phase details
 
-**Deliverables**
-- Confirm current branch, build state and deployment configuration.
-- Map customer and admin critical journeys.
-- Capture baseline PageSpeed/Lighthouse metrics for home and product pages.
-- Inventory configuration, secrets, storage and database backup procedures.
-- Identify untested payment, shipping and authorization paths.
+| Phase | Focus | Deliverables | Exit gate |
+|---|---|---|---|
+| 01 | Baseline audit | Build, journey, performance and configuration review | Reproducible baseline |
+| 02 | Core workflows | Identity, cart, checkout, payment, inventory and shipping tests | Critical paths validated |
+| 03 | Experience | Responsive UI, images, API and query optimization | No major regressions; metrics reviewed |
+| 04 | Security/operations | Secrets, access, uploads, backups and recovery | Operational checks complete |
+| 05 | Release | Build, tests, migration, smoke tests and monitoring | Release owner approval |
+| 06 | Improve | Analytics, support issues and performance review | Evidence-based backlog |
 
-**Exit gate:** agreed baseline, prioritized defects and a reproducible local build.
+## <strong>05</strong> Prioritization
 
-### Phase 2 — Stabilize core workflows
+<div class="doc-grid two">
+<div class="doc-card orange"><span class="ico">🔴</span><strong>P0 · Critical</strong><p>Payment integrity, data loss, security exposure and production outage.</p></div>
+<div class="doc-card pink"><span class="ico">🟠</span><strong>P1 · High</strong><p>Checkout blockers, order/stock inconsistency and major mobile defects.</p></div>
+<div class="doc-card blue"><span class="ico">🔵</span><strong>P2 · Medium</strong><p>Performance improvements, admin workflow and accessibility gaps.</p></div>
+<div class="doc-card purple"><span class="ico">⚪</span><strong>P3 · Later</strong><p>Cosmetic polish and non-essential enhancements.</p></div>
+</div>
 
-**Deliverables**
-- Verify account and password-reset flows.
-- Verify cart, checkout and server-side pricing/stock checks.
-- Verify Razorpay signature and webhook handling.
-- Verify order persistence and inventory consistency.
-- Verify shipment eligibility, provider failures and duplicate protection.
+## <strong>06</strong> Milestone tracking
 
-**Exit gate:** critical workflows pass automated tests and sandbox smoke tests.
-
-### Phase 3 — Experience and performance
-
-**Deliverables**
-- Improve responsive navigation and product-card consistency.
-- Optimize image formats, dimensions, responsive sources and loading priority.
-- Reduce unnecessary frontend/API calls and expensive database queries.
-- Improve loading, empty and error states.
-- Re-test home, listing and detail pages under consistent PageSpeed conditions.
-
-**Exit gate:** no major visual regressions; measured performance improves or trade-offs are documented.
-
-### Phase 4 — Security and operations
-
-**Deliverables**
-- Review authentication and authorization boundaries.
-- Move all production secrets to managed configuration.
-- Verify durable upload storage and independent backups.
-- Review logs for sensitive data.
-- Validate database restore and deployment rollback procedures.
-
-**Exit gate:** operational recovery and security checklist completed.
-
-### Phase 5 — Release validation
-
-**Deliverables**
-- Build and automated test run.
-- Database migration review and backup.
-- Production configuration verification.
-- Mobile/desktop smoke test.
-- Payment and shipment readiness confirmation.
-- Monitoring and support handover.
-
-**Exit gate:** release owner approves all critical checks.
-
-### Phase 6 — Measure and improve
-
-Review real usage, conversion, support issues, provider reliability and performance. Prioritize changes from evidence rather than assumptions.
-
-## 04 · Prioritization model
-
-- **P0 — Critical:** payment integrity, data loss, security exposure, production outage.
-- **P1 — High:** checkout blockers, order/stock inconsistency, major mobile usability defects.
-- **P2 — Medium:** performance opportunities, admin workflow improvements, accessibility gaps.
-- **P3 — Later:** cosmetic polish and non-essential enhancements.
-
-## 05 · Change tracking
-
-For each milestone, record:
-
-| Field | Record |
+| Field | What to record |
 |---|---|
 | Owner | Responsible contributor |
 | Status | Not started / In progress / Blocked / Done |
-| Evidence | PR, test run, metric or deployment reference |
-| Risks | Known dependencies and rollback plan |
-| Decision | Approved scope or trade-off |
+| Evidence | Pull request, test run, metric or deployment reference |
+| Risks | Dependencies, impact and rollback plan |
+| Decision | Approved scope and trade-offs |
 
-Do not mark a phase complete based only on code being committed. Require validation evidence.
+## <strong>07</strong> Definition of milestone complete
+
+- [ ] Implementation merged.
+- [ ] Relevant automated tests pass.
+- [ ] Manual acceptance completed where needed.
+- [ ] Performance/security impact reviewed.
+- [ ] Documentation and configuration updated.
+- [ ] Deployment and rollback implications understood.
+- [ ] Evidence attached to the milestone.
+
+<div class="doc-footer">UBHAYA FASHIONS · Delivery roadmap · Update status only when validation evidence exists.</div>
