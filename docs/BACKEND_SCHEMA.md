@@ -4,116 +4,98 @@ The EF Core source of truth is `backend/Data/ApplicationDbContext.cs`, the model
 
 ## Core relationship diagram
 
-### Accounts
+The overview below groups the current EF Core entities by business domain. Relationships are labelled with their cardinality. Standalone records are shown without artificial links. The diagram uses a simple Mermaid flowchart for readability in GitHub and common Markdown previews.
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
-erDiagram
-    CUSTOMER ||--o{ EXTERNAL_LOGIN : links
-    CUSTOMER ||--o{ CUSTOMER_ADDRESS : saves
-    CUSTOMER {
-        int Id PK
-        string Email
-        bool EmailVerified
-    }
-    EXTERNAL_LOGIN {
-        int CustomerId FK
-        string Provider
-    }
-    CUSTOMER_ADDRESS {
-        int CustomerId FK
-        string PostalCode
-        bool IsDefault
-    }
+flowchart TB
+    subgraph ACCOUNTS["ACCOUNTS"]
+        direction TB
+        CUSTOMER["Customer"]
+        ADDRESS["CustomerAddress"]
+        LOGIN["ExternalLogin"]
+        PENDING["PendingSignup"]
+        ADMIN["AdminUser"]
+        CUSTOMER -->|"1 : many"| ADDRESS
+        CUSTOMER -->|"1 : many"| LOGIN
+    end
+
+    subgraph CATALOG["CATALOG AND INVENTORY"]
+        direction TB
+        CATEGORY["Category"]
+        PRODUCT["Product"]
+        VARIANT["ProductVariant"]
+        IMAGE["ProductImage"]
+        VIDEO["ProductVideo"]
+        INVENTORY["InventoryTransaction"]
+        CATEGORY -->|"1 : many"| PRODUCT
+        PRODUCT -->|"1 : many"| VARIANT
+        PRODUCT -->|"1 : many"| IMAGE
+        PRODUCT -->|"1 : many"| VIDEO
+        PRODUCT -->|"1 : many"| INVENTORY
+    end
+
+    subgraph COMMERCE["ORDERS AND PAYMENTS"]
+        direction TB
+        ORDER["Order"]
+        ORDER_ITEM["OrderItem"]
+        PAYMENT["Payment"]
+        SHIPMENT["DelhiveryShipment"]
+        WEBHOOK["RazorpayWebhookEvent"]
+        ORDER -->|"1 : many"| ORDER_ITEM
+        ORDER -->|"1 : many"| PAYMENT
+        ORDER -->|"1 : zero-or-one"| SHIPMENT
+    end
+
+    subgraph CUSTOMER_ACTIVITY["CUSTOMER ACTIVITY"]
+        direction TB
+        WISHLIST["WishlistItem"]
+        RECENT["RecentlyViewedProduct"]
+        REVIEW["ProductReview"]
+        REVIEW_IMAGE["ProductReviewImage"]
+        REVIEW_VOTE["ProductReviewVote"]
+        REVIEW -->|"1 : many"| REVIEW_IMAGE
+        REVIEW -->|"1 : many"| REVIEW_VOTE
+    end
+
+    subgraph NOTIFICATIONS["NOTIFICATIONS"]
+        direction TB
+        NOTIFICATION["StoreNotification"]
+        NOTIFICATION_STATE["CustomerNotificationState"]
+        NOTIFICATION -->|"1 : many"| NOTIFICATION_STATE
+    end
+
+    CUSTOMER -->|"1 : many"| ORDER
+    PRODUCT -->|"1 : many"| ORDER_ITEM
+    CUSTOMER -->|"1 : many"| WISHLIST
+    PRODUCT -->|"1 : many"| WISHLIST
+    CUSTOMER -->|"1 : many"| RECENT
+    PRODUCT -->|"1 : many"| RECENT
+    CUSTOMER -->|"1 : many"| REVIEW
+    PRODUCT -->|"1 : many"| REVIEW
+    CUSTOMER -->|"1 : many"| REVIEW_VOTE
+    CUSTOMER -->|"1 : many"| NOTIFICATION_STATE
+    PRODUCT -.->|"0..1 product link"| NOTIFICATION
+
+    classDef account fill:#f7e9ed,stroke:#8b4055,color:#302522,stroke-width:1.5px;
+    classDef catalog fill:#f8efe1,stroke:#ad7b36,color:#302522,stroke-width:1.5px;
+    classDef commerce fill:#e9eff9,stroke:#5577a5,color:#202b3a,stroke-width:1.5px;
+    classDef activity fill:#e9f3ed,stroke:#54866a,color:#24372b,stroke-width:1.5px;
+    classDef notification fill:#f1ecf8,stroke:#8066a5,color:#302542,stroke-width:1.5px;
+
+    class CUSTOMER,ADDRESS,LOGIN,PENDING,ADMIN account;
+    class CATEGORY,PRODUCT,VARIANT,IMAGE,VIDEO,INVENTORY catalog;
+    class ORDER,ORDER_ITEM,PAYMENT,SHIPMENT,WEBHOOK commerce;
+    class WISHLIST,RECENT,REVIEW,REVIEW_IMAGE,REVIEW_VOTE activity;
+    class NOTIFICATION,NOTIFICATION_STATE notification;
 ```
 
-### Catalog and inventory
+**Relationship notes**
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
-erDiagram
-    CATEGORY ||--o{ PRODUCT : groups
-    PRODUCT ||--o{ PRODUCT_VARIANT : has
-    PRODUCT ||--o{ PRODUCT_IMAGE : has
-    PRODUCT ||--o{ PRODUCT_VIDEO : has
-    PRODUCT ||--o{ INVENTORY_TRANSACTION : records
-    PRODUCT {
-        int Id PK
-        int CategoryId FK
-        string Name
-    }
-    PRODUCT_VARIANT {
-        int Id PK
-        int ProductId FK
-        string Color
-        string Size
-        decimal Price
-        int Stock
-    }
-    CATEGORY {
-        int Id PK
-        string Name
-    }
-```
-
-### Orders and payments
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
-erDiagram
-    CUSTOMER ||--o{ ORDER : places
-    ORDER ||--|{ ORDER_ITEM : contains
-    ORDER ||--o{ PAYMENT : has
-    ORDER ||--o| DELHIVERY_SHIPMENT : may_have
-    ORDER {
-        int Id PK
-        int CustomerId FK
-        decimal TotalAmount
-        string Status
-        string PaymentStatus
-    }
-    ORDER_ITEM {
-        int OrderId FK
-        int ProductId FK
-        int Quantity
-    }
-    PAYMENT {
-        int Id PK
-        int OrderId FK
-        string RazorpayOrderId
-        string Status
-    }
-    DELHIVERY_SHIPMENT {
-        int OrderId FK
-        string Waybill
-        string ShipmentStatus
-    }
-```
-
-### Customer activity
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
-erDiagram
-    CUSTOMER ||--o{ WISHLIST_ITEM : owns
-    CUSTOMER ||--o{ RECENTLY_VIEWED_PRODUCT : views
-    CUSTOMER ||--o{ PRODUCT_REVIEW : writes
-    CUSTOMER ||--o{ PRODUCT_REVIEW_VOTE : votes
-    PRODUCT ||--o{ WISHLIST_ITEM : appears_in
-    PRODUCT ||--o{ RECENTLY_VIEWED_PRODUCT : appears_in
-    PRODUCT ||--o{ PRODUCT_REVIEW : receives
-    PRODUCT_REVIEW ||--o{ PRODUCT_REVIEW_IMAGE : includes
-    PRODUCT_REVIEW ||--o{ PRODUCT_REVIEW_VOTE : receives
-```
-
-### Notifications
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
-erDiagram
-    STORE_NOTIFICATION ||--o{ CUSTOMER_NOTIFICATION_STATE : has_state
-    CUSTOMER ||--o{ CUSTOMER_NOTIFICATION_STATE : tracks
-```
+- `PendingSignup`, `AdminUser`, and `RazorpayWebhookEvent` are independent records in the current EF Core model; no entity foreign-key relationship is drawn for them.
+- `DelhiveryShipment` has a unique `OrderId`, so an order can have at most one shipment record.
+- Customer activity records connect customers and products through their own entity rows.
+- A store notification may optionally reference a product; deleting that product clears the notification link.
+- The diagram shows the principal foreign-key relationships, not every scalar property or index.
 
 ## Model groups
 
