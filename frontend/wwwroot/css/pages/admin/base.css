@@ -1,4 +1,25 @@
 
+.admin-skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 10000;
+    transform: translateY(calc(-100% - 12px));
+    padding: 12px 16px;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    background: #68142e;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.admin-skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid #302326;
+    outline-offset: 2px;
+}
+
 .admin-shell {
     min-height: 100vh;
     display: grid;

@@ -10,6 +10,8 @@
     var absoluteSeoImageUrl = string.IsNullOrWhiteSpace(seoImageUrl)
         ? null
         : new Uri(new Uri("https://ubhayafashions.in/"), seoImageUrl).AbsoluteUri;
+    ViewData["SocialImage"] = absoluteSeoImageUrl;
+    ViewData["SocialImageAlt"] = Model.Name;
     var seoOffers = (Model.Variants ?? [])
         .Select(variant => new Dictionary<string, object?>
         {
@@ -119,10 +121,14 @@
 }
 
 @section Head {
+    @if (!string.IsNullOrWhiteSpace(absoluteSeoImageUrl))
+    {
+        <link rel="preload" as="image" href="@absoluteSeoImageUrl" fetchpriority="high" />
+    }
     <script type="application/ld+json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(seoProduct))</script>
 }
 
-<main class="product-details-page">
+<section class="product-details-page">
 
     <!-- =====================================================
          PRODUCT GALLERY
@@ -153,7 +159,9 @@
                          alt="@Model.Name"
                          loading="eager"
                          fetchpriority="high"
-                         decoding="async" />
+                         decoding="async"
+                         width="800"
+                         height="1000" />
                 }
             }
             else
@@ -524,7 +532,7 @@
                             <span id="selectedColorLabel">@productColors[0]</span>
                         </legend>
 
-                        <div class="product-color-options" role="radiogroup" aria-label="Choose color">
+                        <div class="product-color-options" role="group" aria-label="Choose color">
                             @foreach (var color in productColors)
                             {
                                 var knownColor = ProductColorCatalog.All.FirstOrDefault(item => item.Name.Equals(color, StringComparison.OrdinalIgnoreCase));
@@ -645,7 +653,7 @@
 
     </section>
 
-</main>
+</section>
 
 <div class="product-mobile-sticky-bar" id="productMobileStickyBar" aria-label="Quick purchase">
     <div class="product-mobile-sticky-price">

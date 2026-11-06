@@ -6,7 +6,7 @@
     ViewData["MetaDescription"] = $"Read customer reviews and ratings for {Model.Name} at Ubhaya Fashions.";
 }
 
-<main class="all-reviews-page" id="allReviews" data-product-id="@Model.Id"
+<section class="all-reviews-page" id="allReviews" data-product-id="@Model.Id"
       data-page-url="@Url.Action("ReviewPage", "Products")" data-vote-url="@Url.Action("VoteReview", "Products")"
       data-return-url="@Url.Action("Reviews", "Products", new { productId = Model.Id })">
     <div class="all-reviews-container">
@@ -66,7 +66,7 @@
         </section>
     </div>
     <form hidden id="reviewVoteToken">@Html.AntiForgeryToken()</form>
-</main>
+</section>
 <dialog class="reviews-lightbox" id="reviewsLightbox" aria-label="Customer photo gallery" tabindex="-1">
     <button type="button" class="reviews-lightbox-close" data-close-lightbox aria-label="Close image viewer">×</button>
     <div class="reviews-lightbox-stage">

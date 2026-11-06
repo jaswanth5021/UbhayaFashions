@@ -26,6 +26,14 @@
 }
 
 .home-page .home-hero-content > .hero-location { display: none; }
+.home-page .home-hero-content > h1 {
+    margin: 0 0 14px;
+    color: #fff;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    text-shadow: 0 2px 16px rgb(0 0 0 / 25%);
+}
 
 .home-page .hero-shop-button {
     display: inline-flex;
@@ -49,6 +57,29 @@
 .home-page .hero-shop-button:hover {
     transform: translateY(-2px);
     background: #84243f;
+}
+
+.home-page .home-hero-pause {
+    position: absolute;
+    right: 18px;
+    bottom: 12px;
+    z-index: 5;
+    min-width: 58px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid rgb(255 255 255 / 72%);
+    border-radius: 4px;
+    background: rgb(255 255 255 / 94%);
+    color: #68142e;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.home-page .home-hero-pause:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
 }
 
 .home-page .hero-arrow { font-size: 17px; }
@@ -253,15 +284,7 @@
         left: 24px;
         max-width: 420px;
     }
-    .home-page .home-hero-content::before {
-        display: block;
-        margin-bottom: 14px;
-        color: #fff;
-        content: "The Ubhaya Edit";
-        font: 400 clamp(30px, 8vw, 40px)/1.05 Georgia, "Times New Roman", serif;
-        letter-spacing: -.02em;
-        text-shadow: 0 2px 16px rgb(0 0 0 / 25%);
-    }
+    .home-page .home-hero-content::before { display: none; content: none; }
     .home-page .hero-shop-button { min-width: 174px; min-height: 44px; font-size: 10px; }
     .home-page .home-hero-dots { bottom: 13px; }
     .home-page .home-benefits {
@@ -928,6 +951,7 @@
 
 .home-page .home-hero-arrow { top: 46%; }
 .home-page .home-hero-dots { bottom: 58px; }
+.home-page .home-hero-pause { right: 14px; bottom: 10px; }
 
 .home-page .home-benefits {
     margin-top: 24px;
@@ -940,6 +964,7 @@
     }
 
     .home-page .home-hero-content { padding: 7px 12px 9px; }
+    .home-page .home-hero-content > h1 { font-size: clamp(30px, 8vw, 40px); }
     .home-page .hero-shop-button { min-height: 36px; }
     .home-page .home-hero-arrow { top: 44%; width: 32px; height: 32px; }
     .home-page .home-hero-dots { bottom: 49px; }

@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://ubhayafashions.in/sitemap.xml
+# Machine-readable site overview: https://ubhayafashions.in/llms.txt

@@ -1,0 +1,26 @@
+# Ubhaya Fashions
+
+> Official online storefront for women's fashion and ethnic wear in India. Browse products, product sizes and colours, delivery details, and customer support information.
+
+## Storefront
+
+- [Home](https://ubhayafashions.in/): Featured collections and new arrivals.
+- [Shop all products](https://ubhayafashions.in/Products): Search and browse the public product catalogue.
+- [Shop by category](https://ubhayafashions.in/Products/Categories): Browse available product categories.
+- [Contact](https://ubhayafashions.in/Contact): Contact the store about products or orders.
+- [Shipping information](https://ubhayafashions.in/Shipping): Read delivery and shipping details.
+
+## Policies
+
+- [Returns and refunds](https://ubhayafashions.in/Home/Returns)
+- [Cancellations](https://ubhayafashions.in/Home/Cancellation)
+- [Privacy](https://ubhayafashions.in/Home/Privacy)
+- [Terms and conditions](https://ubhayafashions.in/Home/Terms)
+
+## Product catalogue
+
+Product detail pages use `/Products/Details/{id}`. Product availability, prices, sizes, and colours can change; read the current product page before answering questions about them.
+
+## Discovery
+
+- [XML sitemap](https://ubhayafashions.in/sitemap.xml): Public pages and product detail URLs.

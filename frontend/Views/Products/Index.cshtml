@@ -100,7 +100,13 @@
         </div>
     </header>
 
-    <form asp-action="Index" method="get" class="catalog-search-form">
+    <form asp-action="Index"
+          method="get"
+          class="catalog-search-form"
+          role="search"
+          toolautosubmit
+          toolname="search_catalog"
+          tooldescription="Search the current Ubhaya Fashions catalog by product keywords.">
         <label for="catalogSearch">Search our collection</label>
         <div class="catalog-search-row">
             <input id="catalogSearch"
@@ -133,7 +139,7 @@
     </form>
 
     <div class="catalog-layout">
-        <aside class="catalog-sidebar" data-mobile-filter-panel>
+        <aside class="catalog-sidebar" id="catalogFilterPanel" data-mobile-filter-panel aria-label="Product filters">
             <div class="catalog-sidebar-header">
                 <button type="button" class="catalog-mobile-filter-close" data-mobile-filter-close aria-label="Close filters">×</button>
                 <span>FILTERS</span>
@@ -143,7 +149,10 @@
                    asp-route-newArrivals="@newArrivalsOnly">Clear All</a>
             </div>
 
-            <form asp-action="Index" method="get" class="catalog-sidebar-form" data-price-ceiling="@priceCeiling">
+            <form asp-action="Index"
+                  method="get"
+                  class="catalog-sidebar-form"
+                  data-price-ceiling="@priceCeiling">
                 <input type="hidden" name="search" value="@search" />
                 @if (bestSellersOnly)
                 {
@@ -231,7 +240,9 @@
                         <input id="maxPriceRange" type="range" min="0" max="@priceCeiling" step="100" value="@(maxPrice ?? priceCeiling)" aria-label="Maximum price" />
                     </div>
                     <div class="filter-price-inputs">
+                        <label class="visually-hidden" for="minPriceInput">Minimum price in rupees</label>
                         <input id="minPriceInput" name="minPrice" type="number" min="0" max="@priceCeiling" step="100" value="@minPrice" placeholder="₹ Min" />
+                        <label class="visually-hidden" for="maxPriceInput">Maximum price in rupees</label>
                         <input id="maxPriceInput" name="maxPrice" type="number" min="0" max="@priceCeiling" step="100" value="@maxPrice" placeholder="₹ Max" />
                     </div>
                 </section>
@@ -258,11 +269,11 @@
             </form>
         </aside>
 
-        <main class="catalog-results">
+        <section class="catalog-results">
             <div class="catalog-mobile-toolbar">
-                <form asp-action="Index" method="get" class="catalog-mobile-search">
+                <form asp-action="Index" method="get" class="catalog-mobile-search" role="search">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
-                    <input name="search" value="@search" type="search" placeholder="Search dresses, kurtis..." autocomplete="off" />
+                    <input name="search" value="@search" type="search" placeholder="Search dresses, kurtis..." autocomplete="off" aria-label="Search products" />
                     @if (!string.IsNullOrWhiteSpace(category)) { <input type="hidden" name="category" value="@category" /> }
                     @if (bestSellersOnly) { <input type="hidden" name="bestSellers" value="true" /> }
                     @if (newArrivalsOnly) { <input type="hidden" name="newArrivals" value="true" /> }
@@ -292,7 +303,7 @@
                             <option value="price-high" selected="@(selectedSort == "price-high" ? "selected" : null)">Sort: High price</option>
                         </select>
                     </form>
-                    <button class="catalog-mobile-filter-toggle" type="button" data-mobile-filter-toggle aria-expanded="false"><span>☰</span> FILTERS</button>
+                    <button class="catalog-mobile-filter-toggle" type="button" data-mobile-filter-toggle aria-controls="catalogFilterPanel" aria-expanded="false"><span>☰</span> FILTERS</button>
                 </div>
             </div>
             <div class="catalog-results-toolbar">
@@ -547,7 +558,7 @@
                     }
                 </div>
             }
-        </main>
+        </section>
     </div>
 </section>
 

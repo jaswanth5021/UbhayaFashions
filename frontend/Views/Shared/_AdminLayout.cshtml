@@ -5,11 +5,12 @@
         : Context.Request.Cookies["admin_name"]!;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IN">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Manage Ubhaya Fashions store operations." />
+    <meta name="robots" content="noindex,nofollow" />
     <title>@title - Ubhaya Admin</title>
     <link rel="stylesheet" href="~/css/pages/admin/base.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/admin/management.css" asp-append-version="true" />
@@ -18,6 +19,7 @@
     <link rel="stylesheet" href="~/css/pages/shared/api-loader.css" asp-append-version="true" />
 </head>
 <body class="admin-body">
+    <a class="admin-skip-link" href="#adminMain">Skip to admin content</a>
     <partial name="_ApiLoader" />
     <partial name="_FlashMessages" />
     <div class="admin-shell">
@@ -38,7 +40,7 @@
                 <a asp-action="ChangePassword">Change password</a>
             </nav>
         </aside>
-        <main class="admin-main">
+        <main class="admin-main" id="adminMain" tabindex="-1">
             <header class="admin-top">
                 <div class="admin-top-title"><span>UBHAYA FASHIONS</span><strong>Administration</strong></div>
                 <div class="admin-user">

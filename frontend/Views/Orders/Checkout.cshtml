@@ -38,7 +38,7 @@
         <input type="hidden" name="Address.AddressLine2" id="checkoutAddressLine2" value="@(savedAddresses.FirstOrDefault()?.AddressLine2 ?? "")" />
 
         <div class="checkout-screen-layout">
-            <main class="checkout-screen-main">
+            <section class="checkout-screen-main">
 
                 <!-- STEP 1: CART / ORDER DETAILS -->
                 <section class="checkout-screen-panel checkout-step-cart is-visible" data-checkout-screen-step="1">
@@ -284,7 +284,7 @@
                         <button type="submit" class="checkout-screen-primary">PAY ₹@total.ToString("N0") WITH RAZORPAY</button>
                     </div>
                 </section>
-            </main>
+            </section>
 
             <aside class="checkout-screen-summary">
                 <h2>Order Summary</h2>

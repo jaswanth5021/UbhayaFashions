@@ -13,13 +13,12 @@
     {
         <link rel="preload" as="image"
               href="@ImageUrlHelper.Resolve(heroBannerUrls[0], Configuration["ApiBaseUrl"])"
-              fetchpriority="high"
-              media="(max-width: 767px)" />
+              fetchpriority="high" />
     }
     else
     {
         <link rel="preload" as="image" href="/images/dress-banner.jpeg"
-              asp-append-version="true" fetchpriority="high" media="(max-width: 767px)" />
+              asp-append-version="true" fetchpriority="high" />
     }
 }
 
@@ -32,13 +31,13 @@
      HERO
      ===================================================== -->
 
-<section class="home-hero" data-hero-slider>
+<section class="home-hero" data-hero-slider aria-label="Featured Ubhaya Fashions collections" aria-roledescription="carousel">
     <div class="home-hero-slides">
         @if (heroBannerUrls.Count > 0)
         {
             @for (var bannerIndex = 0; bannerIndex < heroBannerUrls.Count; bannerIndex++)
             {
-                <div class="home-hero-slide @(bannerIndex == 0 ? "is-active" : string.Empty)" data-hero-slide>
+                <div class="home-hero-slide @(bannerIndex == 0 ? "is-active" : string.Empty)" data-hero-slide role="group" aria-roledescription="slide" aria-label="Banner @(bannerIndex + 1) of @heroBannerUrls.Count" aria-hidden="@(bannerIndex == 0 ? "false" : "true")">
                     <img src="@ImageUrlHelper.Resolve(heroBannerUrls[bannerIndex], Configuration["ApiBaseUrl"])"
                          alt="The Ubhaya Edit - banner @(bannerIndex + 1)"
                          class="home-hero-image"
@@ -48,18 +47,13 @@
                          width="1600"
                          height="900" />
                     <div class="home-hero-overlay"></div>
-                    <div class="home-hero-content">
-                        <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
-                        <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
-                            <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
-                        </a>
-                    </div>
+
                 </div>
             }
         }
         else
         {
-            <div class="home-hero-slide is-active" data-hero-slide>
+            <div class="home-hero-slide is-active" data-hero-slide role="group" aria-roledescription="slide" aria-label="Featured collection">
                 <img src="/images/dress-banner.jpeg" asp-append-version="true"
                      alt="The Ubhaya Edit"
                      class="home-hero-image"
@@ -69,26 +63,29 @@
                      width="1600"
                      height="900" />
                 <div class="home-hero-overlay"></div>
-                <div class="home-hero-content">
-                    <p class="hero-location">THE UBHAYA EDIT · HYDERABAD</p>
-                    <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
-                        <span>SHOP NEW ARRIVALS</span><span class="hero-arrow">→</span>
-                    </a>
-                </div>
+
             </div>
         }
+    </div>
+
+    <div class="home-hero-content">
+        <h1>The Ubhaya Edit</h1>
+        <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
+            <span>SHOP NEW ARRIVALS</span><span class="hero-arrow" aria-hidden="true">&#8594;</span>
+        </a>
     </div>
 
     @if (heroBannerUrls.Count > 1)
     {
         <button type="button" class="home-hero-arrow home-hero-arrow-prev" data-hero-prev aria-label="Previous banner">‹</button>
         <button type="button" class="home-hero-arrow home-hero-arrow-next" data-hero-next aria-label="Next banner">›</button>
-        <div class="home-hero-dots" aria-label="Hero banners">
+        <div class="home-hero-dots" role="group" aria-label="Choose featured banner">
             @for (var bannerIndex = 0; bannerIndex < heroBannerUrls.Count; bannerIndex++)
             {
-                <button type="button" class="@(bannerIndex == 0 ? "is-active" : string.Empty)" data-hero-dot="@bannerIndex" aria-label="Banner @(bannerIndex + 1)"></button>
+                <button type="button" class="@(bannerIndex == 0 ? "is-active" : string.Empty)" data-hero-dot="@bannerIndex" aria-label="Show banner @(bannerIndex + 1)" aria-current="@(bannerIndex == 0 ? "true" : "false")"></button>
             }
         </div>
+        <button type="button" class="home-hero-pause" data-hero-pause aria-label="Pause automatic banner rotation">Pause</button>
     }
 </section>
 

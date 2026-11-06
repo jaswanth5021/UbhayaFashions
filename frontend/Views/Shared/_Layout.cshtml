@@ -65,6 +65,24 @@
     {
         canonicalUrl = Url.Action("Index", "Shipping", values: null, protocol: "https", host: "ubhayafashions.in");
     }
+    var catalogQueryKeys = new[]
+    {
+        "search", "category", "size", "color", "minPrice", "maxPrice",
+        "availability", "sort", "page", "bestSellers", "newArrivals"
+    };
+    var hasCatalogQuery = isProductsIndex && catalogQueryKeys.Any(key => Context.Request.Query.ContainsKey(key));
+    var isIndexablePage = (currentController switch
+    {
+        "Home" => currentAction is "Index" or "About" or "Privacy" or "Terms" or "Returns" or "Cancellation",
+        "Products" => currentAction is "Index" or "Categories" or "Details",
+        "Contact" or "Shipping" => currentAction == "Index",
+        _ => false
+    }) && !hasCatalogQuery;
+    var robotsContent = isIndexablePage ? "index,follow" : "noindex,follow";
+    var socialImage = ViewData["SocialImage"]?.ToString() ?? "https://ubhayafashions.in/images/logo.png";
+    var socialImageAlt = ViewData["SocialImageAlt"]?.ToString() ?? "Ubhaya Fashions";
+    var socialType = isProductDetails ? "product" : "website";
+    var socialCardType = ViewData["SocialImage"] is string ? "summary_large_image" : "summary";
     var navQuery = Context.Request.Query;
     var isAboutNavActive = currentController == "Home" && currentAction == "About";
     var isNewArrivalsNavActive = currentController == "Products" && navQuery.ContainsKey("newArrivals");
@@ -109,8 +127,12 @@
     });
     var accountIsSignedIn = User.Identity?.IsAuthenticated == true;
     var wishlistTask = accountIsSignedIn ? Api.GetWishlistAsync() : null;
-    var addressesTask = accountIsSignedIn ? Api.GetMyAddressesAsync() : null;
-    var profileTask = accountIsSignedIn ? Api.GetMyProfileAsync() : null;
+    var addressesTask = accountIsSignedIn && cartItems.Count > 0
+        ? Api.GetMyAddressesAsync()
+        : Task.FromResult(new List<LadiesDressStore.Web.Models.SavedAddressViewModel>());
+    var profileTask = accountIsSignedIn && currentController == "Account" && currentAction == "Profile"
+        ? Api.GetMyProfileAsync()
+        : null;
     foreach (var productData in await Task.WhenAll(cartProductTasks))
     {
         if (productData.Variants is not null) cartVariants[productData.Id] = productData.Variants;
@@ -158,27 +180,30 @@
         catch (HttpRequestException) { }
         catch (JsonException) { }
 
-        try
+        if (profileTask is not null)
         {
-            var profileResult = await profileTask!;
-            if (profileResult.Data is not null)
+            try
             {
-                var profileName = profileResult.Data.Name?.Trim();
-                // Do not replace a useful claim-based name with a single-character/initial profile value.
-                if (!string.IsNullOrWhiteSpace(profileName) && profileName.Length > 2)
+                var profileResult = await profileTask;
+                if (profileResult.Data is not null)
                 {
-                    accountName = profileName;
+                    var profileName = profileResult.Data.Name?.Trim();
+                    // Do not replace a useful claim-based name with a single-character/initial profile value.
+                    if (!string.IsNullOrWhiteSpace(profileName) && profileName.Length > 2)
+                    {
+                        accountName = profileName;
+                    }
+                    accountMobile = profileResult.Data.Mobile ?? "";
                 }
-                accountMobile = profileResult.Data.Mobile ?? "";
             }
+            catch (HttpRequestException) { }
+            catch (JsonException) { }
         }
-        catch (HttpRequestException) { }
-        catch (JsonException) { }
     }
 }
 
 <!DOCTYPE html>
-<html lang="en" class="@(isContactPage ? "contact-page-view" : string.Empty)">
+<html lang="en-IN" class="@(isContactPage ? "contact-page-view" : string.Empty)">
 
 <head>
     <meta charset="utf-8" />
@@ -186,6 +211,21 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="@metaDescription" />
+    <meta name="robots" content="@robotsContent" />
+    <meta property="og:site_name" content="Ubhaya Fashions" />
+    <meta property="og:title" content="@documentTitle" />
+    <meta property="og:description" content="@metaDescription" />
+    <meta property="og:type" content="@socialType" />
+    <meta property="og:image" content="@socialImage" />
+    <meta property="og:image:alt" content="@socialImageAlt" />
+    <meta name="twitter:card" content="@socialCardType" />
+    <meta name="twitter:title" content="@documentTitle" />
+    <meta name="twitter:description" content="@metaDescription" />
+    <meta name="twitter:image" content="@socialImage" />
+    @if (!string.IsNullOrWhiteSpace(canonicalUrl))
+    {
+        <meta property="og:url" content="@canonicalUrl" />
+    }
 
     @if (!string.IsNullOrWhiteSpace(Configuration["GA4:MeasurementId"]))
     {
@@ -425,6 +465,7 @@
 </head>
 
 <body class="@(isHomePage ? "home-page" : string.Empty)">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 <partial name="_ApiLoader" />
 <partial name="_FlashMessages" />
 
@@ -469,7 +510,14 @@
             </span>
         </a>
 
-        <form class="desktop-header-search" asp-controller="Products" asp-action="Index" method="get" role="search">
+        <form class="desktop-header-search"
+              asp-controller="Products"
+              asp-action="Index"
+              method="get"
+              role="search"
+              toolautosubmit
+              toolname="search_products"
+              tooldescription="Find products in the Ubhaya Fashions catalog using shopper-provided keywords.">
             <input type="search" name="search" placeholder="Search sarees, kurtis, dresses..." aria-label="Search products" autocomplete="off" />
             <button type="submit" aria-label="Search">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -705,7 +753,7 @@
     <!-- =========================================
          MAIN CONTENT
          ========================================= -->
-    <main class="container">
+    <main class="container" id="main-content" tabindex="-1">
         @RenderBody()
     </main>
 
