@@ -29,7 +29,7 @@
 | [Code Style](CODE_STYLE.md) | Conventions for safe, consistent changes |
 | [Testing](TESTING.md) | Validation strategy and test commands |
 | [Implementation Plan](IMPLEMENTATION_PLAN.md) | Delivery phases, milestones and release gates |
-| [AI Agent Guide](AGENTS.md) | Rules for AI coding agents and contributors |
+| [AI Agent Guide](AGENTS.md) | Rules for AI coding agents and contributors |\n| [Razorpay Webhook Setup](RAZORPAY_WEBHOOK_SETUP.md) | Production webhook configuration and verification |
 
 ## Start here
 
