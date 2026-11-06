@@ -8,6 +8,7 @@
 ## <strong>01</strong> System at a glance
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
 flowchart LR
  U[Customer / Admin Browser] --> W[ASP.NET Core MVC]
  W -->|HTTP JSON| A[ASP.NET Core API]
@@ -39,6 +40,7 @@ flowchart LR
 ## <strong>03</strong> Backend request lifecycle
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
 flowchart TD
  A[HTTP Request] --> B[Middleware]
  B --> C[Authentication]
