@@ -1,6 +1,6 @@
 # Ubhaya Fashions
 
-Ubhaya Fashions is a women’s clothing store. Shoppers browse the catalog, filter by size, color, and price, save a wishlist, and pay with Razorpay. Staff manage products, stock, orders, and customers from the admin area.
+Ubhaya Fashions is a women’s clothing store. Shoppers browse the catalog, filter by size, color, and price, save a wishlist, and pay with Razorpay. Staff manage products, stock, orders, and customers from the admin area.\n\n> **Project handbook:** Start with the [documentation hub](docs/README.md) for the PRD, app flow, architecture, design system, security, testing and contributor guidance.
 
 The application is two ASP.NET Core 8 projects plus SQL Server:
 
