@@ -1,0 +1,166 @@
+/* UBHAYA FASHIONS — workspace-root Markdown preview stylesheet.
+   Keep this file at the repository root so VS Code can resolve it reliably. */
+html, body, body.vscode-body {
+  background: #fbf8fc !important;
+  color: #302638 !important;
+  font-family: "Segoe UI", Inter, Arial, sans-serif !important;
+}
+body, .markdown-body {
+  max-width: 1120px !important;
+  margin: 0 auto !important;
+  padding: 28px 42px 64px !important;
+  font-size: 15px !important;
+  line-height: 1.72 !important;
+  color: #302638 !important;
+}
+.markdown-body { background: transparent !important; }
+.markdown-body h1 {
+  color: #56264e !important;
+  font-size: 2.35em !important;
+  line-height: 1.15 !important;
+  font-weight: 850 !important;
+  letter-spacing: -.04em !important;
+  border: 0 !important;
+  margin: 12px 0 12px !important;
+  padding: 0 !important;
+}
+.markdown-body h2 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  color: #34243a !important;
+  font-size: 1.42em !important;
+  font-weight: 800 !important;
+  border: 0 !important;
+  border-bottom: 1px solid #ead8e9 !important;
+  padding: 0 0 10px !important;
+  margin: 36px 0 18px !important;
+}
+.markdown-body h2 strong:first-child {
+  color: #b52b88 !important;
+  background: #f9e5f3 !important;
+  border-radius: 10px !important;
+  padding: 4px 10px !important;
+  min-width: 44px !important;
+  text-align: center !important;
+}
+.markdown-body h3 { color:#754080 !important; font-weight:750 !important; margin:24px 0 10px !important; }
+.markdown-body p { margin:11px 0 15px !important; }
+.markdown-body a { color:#963a78 !important; font-weight:650 !important; text-decoration:none !important; border-bottom:1px solid #d9b0cc !important; }
+.markdown-body strong { color:#61305e !important; }
+.markdown-body hr { border:0 !important; height:2px !important; background:linear-gradient(90deg,#c65b9d,#ead7e9,transparent) !important; margin:28px 0 !important; }
+.markdown-body blockquote { background:#f5edf9 !important; color:#65436f !important; border-left:5px solid #a76db5 !important; border-radius:0 12px 12px 0 !important; padding:12px 18px !important; margin:18px 0 !important; }
+.markdown-body table { display:table !important; width:100% !important; border-collapse:separate !important; border-spacing:0 !important; border:1px solid #eadfeb !important; border-radius:13px !important; overflow:hidden !important; margin:18px 0 26px !important; font-size:.94em !important; }
+.markdown-body thead { background:#f2e8f5 !important; }
+.markdown-body th { color:#63346f !important; background:#f2e8f5 !important; font-weight:800 !important; text-align:left !important; padding:13px 15px !important; border:0 !important; }
+.markdown-body td { color:#403647 !important; padding:11px 15px !important; border:0 !important; border-top:1px solid #eee6f0 !important; }
+.markdown-body tbody tr:nth-child(even) { background:#fcf7fc !important; }
+.markdown-body tbody tr:nth-child(odd) { background:#fff !important; }
+.markdown-body li { margin:6px 0 !important; }
+.markdown-body li::marker { color:#b34e91 !important; font-weight:800 !important; }
+.markdown-body code { color:#842d70 !important; background:#f5eaf4 !important; border:1px solid #ead9e8 !important; border-radius:5px !important; padding:2px 6px !important; }
+.markdown-body pre { background:#261d2c !important; border:1px solid #49334e !important; border-radius:13px !important; padding:18px 20px !important; }
+.markdown-body pre code { color:#f8edf7 !important; background:transparent !important; border:0 !important; }
+.markdown-body input[type=checkbox] { accent-color:#a33c86 !important; }
+.markdown-body .doc-hero {
+  display:block !important;
+  background:linear-gradient(120deg,#fff 0%,#fbf0f8 58%,#f1eafa 100%) !important;
+  border:1px solid #eddfed !important;
+  border-radius:20px !important;
+  padding:28px 30px 25px !important;
+  margin:8px 0 30px !important;
+  box-shadow:0 9px 28px rgba(82,43,75,.07) !important;
+  overflow:hidden !important;
+}
+.markdown-body .doc-kicker {
+  display:inline-block !important;
+  color:#8d3678 !important;
+  background:#f4e4f1 !important;
+  border:1px solid #ead4e7 !important;
+  border-radius:99px !important;
+  padding:6px 12px !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+  margin:0 8px 12px 0 !important;
+}
+.markdown-body .doc-pill {
+  display:inline-block !important;
+  float:right !important;
+  color:#75418b !important;
+  background:#eee5fa !important;
+  border-radius:99px !important;
+  padding:7px 13px !important;
+  font-size:11px !important;
+  font-weight:750 !important;
+  margin:0 0 12px 8px !important;
+}
+.markdown-body .doc-hero h1 { clear:both !important; }
+.markdown-body .doc-hero p { color:#756b79 !important; font-size:1.05em !important; max-width:850px !important; margin:0 !important; }
+.markdown-body .doc-meta {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:10px !important;
+  margin:20px 0 2px !important;
+}
+.markdown-body .doc-meta div {
+  display:block !important;
+  background:#fff !important;
+  border:1px solid #eee4ef !important;
+  border-radius:11px !important;
+  padding:11px 14px !important;
+  color:#766d7b !important;
+  font-size:12px !important;
+}
+.markdown-body .doc-meta strong { display:block !important; color:#49334d !important; font-size:14px !important; margin-bottom:3px !important; }
+.markdown-body .doc-grid {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:12px !important;
+  margin:16px 0 24px !important;
+}
+.markdown-body .doc-grid.two { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+.markdown-body .doc-grid.four { grid-template-columns:repeat(4,minmax(0,1fr)) !important; }
+.markdown-body .doc-card {
+  display:block !important;
+  min-width:0 !important;
+  background:#fff !important;
+  border:1px solid #eee4ef !important;
+  border-radius:14px !important;
+  padding:16px !important;
+  color:#45364b !important;
+}
+.markdown-body .doc-card .ico {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:36px !important;
+  height:36px !important;
+  border-radius:11px !important;
+  background:#f7e8f3 !important;
+  font-size:19px !important;
+  margin-bottom:10px !important;
+}
+.markdown-body .doc-card strong { display:block !important; color:#44334b !important; font-size:13px !important; margin-bottom:5px !important; }
+.markdown-body .doc-card p { color:#766d7b !important; font-size:12px !important; line-height:1.5 !important; margin:0 !important; }
+.markdown-body .doc-card.pink { background:#fff2fa !important; border-color:#f3dceb !important; }
+.markdown-body .doc-card.purple { background:#f5f0ff !important; border-color:#e6dcfa !important; }
+.markdown-body .doc-card.blue { background:#eff7ff !important; border-color:#dceafb !important; }
+.markdown-body .doc-card.green { background:#eefaf4 !important; border-color:#d8f0e2 !important; }
+.markdown-body .doc-card.yellow { background:#fff8e9 !important; border-color:#f2e6c7 !important; }
+.markdown-body .doc-card.orange { background:#fff2ed !important; border-color:#f4ded4 !important; }
+.markdown-body .doc-callout { display:flex !important; gap:12px !important; align-items:flex-start !important; background:#f7f0fa !important; border:1px solid #e9d9ee !important; border-radius:13px !important; padding:14px 17px !important; margin:18px 0 !important; color:#5c4265 !important; }
+.markdown-body .doc-callout span { font-size:20px !important; }
+.markdown-body .doc-callout b { color:#683c7a !important; }
+.markdown-body .doc-footer { color:#938895 !important; font-size:11px !important; border-top:1px solid #eee4ed !important; padding-top:13px !important; margin-top:34px !important; }
+@media(max-width:760px) {
+ body,.markdown-body { padding:16px 14px 42px !important; font-size:14px !important; }
+ .markdown-body .doc-grid,.markdown-body .doc-grid.four { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+ .markdown-body .doc-meta { grid-template-columns:1fr !important; }
+ .markdown-body table { display:block !important; overflow-x:auto !important; }
+}
+@media(max-width:440px) {
+ .markdown-body .doc-grid,.markdown-body .doc-grid.two,.markdown-body .doc-grid.four { grid-template-columns:1fr !important; }
+ .markdown-body .doc-pill { float:none !important; }
+}
