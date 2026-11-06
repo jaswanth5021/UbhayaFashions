@@ -1,147 +1,92 @@
-<div align="center">
-
-# Product Requirements Document
-### UBHAYA FASHIONS · Online fashion storefront
-
-**The product definition — audience, outcomes, capabilities and quality expectations.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · PRODUCT STRATEGY</span><span class="doc-pill">Define what we build</span>
+<h1>Product Requirements</h1>
+<p>A shared product blueprint for building a trusted, elegant and easy-to-use women's fashion shopping experience.</p>
+<div class="doc-meta"><div><strong>Product</strong>UBHAYA FASHIONS</div><div><strong>Platform</strong>ASP.NET Core 8 · Web</div><div><strong>Market</strong>India · INR</div></div>
 </div>
 
----
+## <strong>01</strong> Product vision
 
-## 01 · Product overview
+Build a polished fashion storefront where customers can discover clothing, understand product options, pay securely and follow their orders with confidence. Give store operators reliable tools to manage the catalogue, inventory, orders and fulfilment.
 
-| Field | Definition |
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">🛍️</span><strong>Effortless discovery</strong><p>Beautiful product imagery, useful search, filters and curated collections.</p></div>
+<div class="doc-card purple"><span class="ico">💎</span><strong>Premium experience</strong><p>Consistent visual design, clear product details and frictionless shopping.</p></div>
+<div class="doc-card blue"><span class="ico">🔐</span><strong>Trusted checkout</strong><p>Server-verified payments, protected accounts and reliable order state.</p></div>
+</div>
+
+## <strong>02</strong> Product overview
+
+| Attribute | Definition |
 |---|---|
 | Product | UBHAYA FASHIONS |
-| Category | Women's fashion e-commerce |
-| Primary experience | Responsive web storefront |
-| Application shape | ASP.NET Core MVC frontend + ASP.NET Core Web API |
-| Persistence | SQL Server through Entity Framework Core |
-| Primary market | India |
-| Primary currency | INR (₹) |
-| Current payment provider | Razorpay |
-| Shipping integration | Delhivery B2C |
+| Business | Women's fashion e-commerce |
+| Frontend | ASP.NET Core MVC with Razor |
+| Backend | ASP.NET Core Web API |
+| Database | SQL Server / Entity Framework Core |
+| Payments | Razorpay |
+| Shipping | Delhivery B2C |
+| Currency | INR (₹) |
 
-### Product vision
+## <strong>03</strong> Users and their needs
 
-Make discovering and purchasing women's clothing simple, trustworthy and visually engaging—from product discovery through secure payment, delivery updates and post-purchase support.
+<div class="doc-grid two">
+<div class="doc-card pink"><span class="ico">👩</span><strong>Guest shopper</strong><p>Browse products, compare variants, search and understand delivery information without creating an account.</p></div>
+<div class="doc-card purple"><span class="ico">🧑‍💻</span><strong>Registered customer</strong><p>Manage profile and addresses, wishlist, cart, purchases and shipment tracking.</p></div>
+<div class="doc-card blue"><span class="ico">🧰</span><strong>Store administrator</strong><p>Manage products, categories, variants, images, banners and inventory.</p></div>
+<div class="doc-card green"><span class="ico">📦</span><strong>Order operator</strong><p>Review orders and payments, create eligible shipments and resolve fulfilment exceptions.</p></div>
+</div>
 
-## 02 · Users and needs
+## <strong>04</strong> Functional capabilities
 
-| User | Needs |
+| Capability | Expected behaviour |
 |---|---|
-| Guest shopper | Browse collections, search, filter and understand product details |
-| Registered customer | Manage profile and addresses, wishlist, cart, orders and tracking |
-| Store administrator | Maintain products, variants, media, inventory and storefront content |
-| Order operator | Review payment/order state, create eligible shipments and track fulfilment |
-| Store owner | Manage privileged admin access and monitor business operations |
+| Storefront | Home page, collections, categories, responsive navigation |
+| Catalogue | Search, filters, sorting and product detail |
+| Variants | Size, colour, price, discount and stock selection |
+| Identity | Email verification, sign-in, reset password and optional social login |
+| Cart | Variant-aware cart with server-side stock validation |
+| Checkout | Delivery address and trusted order summary |
+| Payment | Razorpay order creation and backend signature verification |
+| Orders | Customer history, admin management and status transitions |
+| Fulfilment | Delhivery serviceability, manifestation, AWB and tracking |
+| Admin | Product, inventory, customer, order and banner management |
 
-## 03 · Product objectives
+## <strong>05</strong> Quality goals
 
-1. Make product discovery fast and intuitive on mobile and desktop.
-2. Present clear product imagery, sizes, colours, pricing and availability.
-3. Protect customer accounts and payment workflows.
-4. Keep stock and order state consistent across checkout and fulfilment.
-5. Give customers understandable order confirmation and tracking.
-6. Give administrators safe tools to operate the store without direct database edits.
+<div class="doc-grid">
+<div class="doc-card blue"><span class="ico">⚡</span><strong>Performance</strong><p>Optimized images, fast page rendering and efficient API/database calls.</p></div>
+<div class="doc-card green"><span class="ico">♿</span><strong>Accessibility</strong><p>Keyboard support, labels, contrast, focus and reduced-motion support.</p></div>
+<div class="doc-card yellow"><span class="ico">🛡️</span><strong>Security</strong><p>Least privilege, protected secrets and server-side validation.</p></div>
+<div class="doc-card purple"><span class="ico">📱</span><strong>Responsive UX</strong><p>Reliable shopping experience from small phones to desktop screens.</p></div>
+<div class="doc-card pink"><span class="ico">🔄</span><strong>Reliability</strong><p>Idempotent payment/shipping workflows and recoverable failures.</p></div>
+<div class="doc-card orange"><span class="ico">🧩</span><strong>Maintainability</strong><p>Clear boundaries, automated tests and current documentation.</p></div>
+</div>
 
-## 04 · Functional requirements
+## <strong>06</strong> Business rules
 
-### Storefront and discovery
+- The frontend must not connect directly to SQL Server.
+- Backend calculations are authoritative for price, stock, payment and order state.
+- Customers can access only their own private resources.
+- Admin APIs require admin authorization.
+- A prepaid order must not be manifested before payment verification.
+- A shipment is successful only after a successful carrier response and saved AWB.
+- Production secrets and customer data must never be committed to Git.
 
-- Home page with curated collections, categories and promotional banners.
-- Product listing with search, category, size, colour, price and availability filters.
-- Product detail with images, available variants, stock, pricing and reviews where available.
-- Responsive navigation and persistent access to account, wishlist and cart.
-- Clear empty, loading, validation and error states.
+<div class="doc-callout"><span>💡</span><div><b>Product principle</b><br/>Make the shopping journey feel simple, while keeping the complex business rules safely enforced behind the API.</div></div>
 
-### Identity and customer account
+## <strong>07</strong> Success measures
 
-- Email-based registration and verification.
-- Secure sign-in and sign-out.
-- Optional social sign-in only when provider credentials are configured.
-- Password reset with expiring, single-use tokens.
-- Customer profile, saved addresses and account/order history.
-- Authorization must be enforced server-side for customer-owned resources.
+Track real measurements rather than assumed targets: product engagement, add-to-cart rate, checkout completion, payment success, fulfilment time, support contacts and mobile Core Web Vitals.
 
-### Cart, checkout and payment
+## <strong>08</strong> Acceptance checklist
 
-- Cart supports product variant, quantity and price display.
-- Validate current product price and stock on the server at checkout.
-- Checkout collects and validates delivery information.
-- Razorpay order creation and server-side payment signature verification.
-- Persist payment/order state idempotently; do not trust browser success alone.
-- Reduce inventory only after the payment workflow has been verified.
+- [ ] Guests can discover products and understand variants.
+- [ ] Customers can complete a verified payment and view the order.
+- [ ] Customer ownership and admin authorization are enforced.
+- [ ] Stock cannot be oversold using stale browser values.
+- [ ] Shipping failures are visible and safely recoverable.
+- [ ] Critical journeys work on mobile and desktop.
+- [ ] Automated tests and release checks pass.
 
-### Orders and fulfilment
-
-- Customer order history and order details.
-- Admin order management and status transitions.
-- Delhivery serviceability check and shipment manifestation for eligible orders.
-- Save carrier AWB/tracking data only after successful provider response.
-- Customer-facing tracking with ownership checks.
-- Cancellation/refund behaviour must follow the configured business policy and current order state.
-
-### Administration
-
-- Product and category management.
-- Product variants, pricing, discounts, stock, colours and media.
-- Inventory adjustments with auditable outcomes.
-- Storefront banner management.
-- Order, customer and payment visibility.
-- Restricted admin-account management for the designated owner role.
-- Operational error visibility without exposing secrets or sensitive customer data.
-
-## 05 · Non-functional requirements
-
-| Quality | Requirement |
-|---|---|
-| Performance | Fast first render, optimized images/assets, efficient API calls and database queries |
-| Accessibility | Keyboard access, visible focus, labels, semantic structure and sufficient contrast |
-| Responsive design | Usable layouts on small phones through desktop widths |
-| Security | Least privilege, server-side validation, protected secrets and secure sessions |
-| Reliability | Idempotent payment/shipping operations and recoverable provider failures |
-| Maintainability | Clear project boundaries, tests and versioned documentation |
-| Observability | Actionable logs with correlation context and sensitive-data redaction |
-| SEO | Descriptive page titles, metadata, canonical URLs and crawlable product content |
-
-## 06 · Business rules and invariants
-
-- The website frontend does not connect directly to SQL Server.
-- The backend is authoritative for price, stock, payment and order state.
-- A customer can access only their own private account, address and order data.
-- Admin APIs require admin authorization; a customer token is not an admin credential.
-- Never manifest a prepaid order before payment is verified.
-- A failed carrier response must not be represented as a successfully created shipment.
-- Never commit live API keys, SMTP credentials, JWT signing keys or personal customer data.
-
-## 07 · Out of scope unless separately approved
-
-- Native Android/iOS applications.
-- Multi-vendor marketplace workflows.
-- Automatic AI-generated product descriptions without human review.
-- New payment or courier providers without an integration decision.
-- Claims of certifications or compliance that have not been independently established.
-
-## 08 · Success measures
-
-Track these using reliable analytics and operational data; do not invent baseline values.
-
-- Product-list-to-product-detail engagement.
-- Add-to-cart and checkout completion rates.
-- Payment success and reconciliation rates.
-- Order fulfilment time and carrier exception rate.
-- Mobile Core Web Vitals and page performance.
-- Support contacts caused by checkout, payment or tracking confusion.
-
-## 09 · Acceptance checklist
-
-- [ ] A guest can discover products and understand available variants.
-- [ ] A customer can complete a verified payment and view the resulting order.
-- [ ] Customers cannot access another customer's private resources.
-- [ ] Admin operations are protected by role checks.
-- [ ] Stock cannot be oversold by trusting stale browser data.
-- [ ] Shipping failures are visible and safely retryable.
-- [ ] Key journeys work at mobile and desktop widths.
-- [ ] Tests and release checks pass.
+<div class="doc-footer">UBHAYA FASHIONS · Product documentation · Update this document when product scope or business rules change.</div>
