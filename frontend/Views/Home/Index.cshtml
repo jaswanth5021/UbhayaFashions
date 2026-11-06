@@ -234,7 +234,10 @@
                         }
 
 
-                        <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form">
+                        <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form"
+                              toolautosubmit
+                              toolname="toggle_wishlist_@p.Id"
+                              tooldescription="Save or remove @p.Name from the shopper's wishlist.">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@p.Id" />
                             <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(p.Id) ? "true" : "false")" />

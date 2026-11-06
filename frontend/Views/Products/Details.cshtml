@@ -215,7 +215,10 @@
                         {
                             <img src="@galleryItem.Url"
                                  alt=""
-                                 loading="lazy" />
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="820"
+                                 height="1000" />
                         }
 
                     </button>
@@ -264,7 +267,10 @@
                 <form asp-controller="Wishlist"
                       asp-action="Toggle"
                       method="post"
-                      class="product-wishlist-form">
+                      class="product-wishlist-form"
+                      toolautosubmit
+                      toolname="toggle_wishlist_@Model.Id"
+                      tooldescription="Save or remove @Model.Name from the shopper's wishlist.">
 
                     @Html.AntiForgeryToken()
 
@@ -426,7 +432,9 @@
                   method="post"
                   class="product-details-form"
                   id="productPurchaseForm"
-                  novalidate>
+                  novalidate
+                  toolname="add_product_to_cart"
+                  tooldescription="Add the selected product variant and quantity to the shopping bag. This does not place an order.">
 
                 @Html.AntiForgeryToken()
 
@@ -462,7 +470,8 @@
 
                         <input id="productSize"
                                name="size"
-                               type="hidden" />
+                               type="hidden"
+                               toolparamdescription="The selected available size for this product." />
 
 
                         <div class="product-size-options">
@@ -551,7 +560,7 @@
                             }
                         </div>
                     </fieldset>
-                    <input type="hidden" name="color" id="selectedProductColor" value="@productColors[0]" />
+                    <input type="hidden" name="color" id="selectedProductColor" value="@productColors[0]" toolparamdescription="The selected product color." />
                 }
 
 
@@ -582,7 +591,8 @@
                            min="1"
                            max="@Model.Stock"
                            step="1"
-                           inputmode="numeric" />
+                           inputmode="numeric"
+                           toolparamdescription="Number of units to add to the shopping bag." />
 
 
                     <button type="button"
@@ -939,7 +949,9 @@
                   enctype="multipart/form-data"
                   class="product-review-form"
                   id="productReviewForm"
-                  hidden>
+                  hidden
+                  toolname="submit_review_@Model.Id"
+                  tooldescription="Submit the signed-in shopper's review of @Model.Name. The shopper must review the content before submitting.">
 
                 @Html.AntiForgeryToken()
 
@@ -1059,6 +1071,9 @@
                                 <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])"
                                      alt="@item.Name"
                                      loading="lazy"
+                                     decoding="async"
+                                     width="780"
+                                     height="1000"
                                      onerror="this.hidden=true; this.nextElementSibling.hidden=false" />
                                 <div class="product-bestseller-image-fallback" hidden>
                                     UBHAYA
@@ -1094,7 +1109,10 @@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             var isRelatedWishlisted = wishlistedProductIds.Contains(item.Id);
-                            <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="product-related-wishlist-form">
+                            <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="product-related-wishlist-form"
+                                  toolautosubmit
+                                  toolname="toggle_wishlist_@item.Id"
+                                  tooldescription="Save or remove @item.Name from the shopper's wishlist.">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.Id" />
                                 <input type="hidden" name="isWishlisted" value="@isRelatedWishlisted.ToString().ToLowerInvariant()" />

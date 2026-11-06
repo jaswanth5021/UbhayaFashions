@@ -516,9 +516,9 @@
               method="get"
               role="search"
               toolautosubmit
-              toolname="search_products"
+              toolname="search_products_header_desktop"
               tooldescription="Find products in the Ubhaya Fashions catalog using shopper-provided keywords.">
-            <input type="search" name="search" placeholder="Search sarees, kurtis, dresses..." aria-label="Search products" autocomplete="off" />
+            <input type="search" name="search" placeholder="Search sarees, kurtis, dresses..." aria-label="Search products" toolparamdescription="Keywords to find matching products in the catalog." autocomplete="off" />
             <button type="submit" aria-label="Search">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <circle cx="11" cy="11" r="7"></circle>
@@ -734,8 +734,11 @@
                     <span id="headerSearchHeading">Search our collection</span>
                     <button type="button" class="header-search-close" id="headerSearchClose" aria-label="Close search">&times;</button>
                 </div>
-                <form asp-controller="Products" asp-action="Index" method="get" class="header-search-form" id="headerSearchForm" role="search">
-                    <input type="search" name="search" id="headerSearchInput" placeholder="Search sarees, kurtis, dresses..." autocomplete="off" />
+                <form asp-controller="Products" asp-action="Index" method="get" class="header-search-form" id="headerSearchForm" role="search"
+                      toolautosubmit
+                      toolname="search_products_header_mobile"
+                      tooldescription="Find products in the Ubhaya Fashions catalog using shopper-provided keywords.">
+                    <input type="search" name="search" id="headerSearchInput" placeholder="Search sarees, kurtis, dresses..." aria-label="Search products" toolparamdescription="Keywords to find matching products in the catalog." autocomplete="off" />
                     <button type="submit">SEARCH</button>
                 </form>
             </div>

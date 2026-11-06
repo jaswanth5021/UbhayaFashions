@@ -59,7 +59,10 @@
         </div>
 
         <div class="catalog-header-actions">
-            <form asp-action="Index" method="get" class="catalog-sort-form">
+            <form asp-action="Index" method="get" class="catalog-sort-form"
+                  toolautosubmit
+                  toolname="sort_catalog_desktop"
+                  tooldescription="Sort the currently displayed Ubhaya Fashions products.">
                 <input type="hidden" name="search" value="@search" />
                 <input type="hidden" name="category" value="@category" />
                 <input type="hidden" name="size" value="@selectedSize" />
@@ -79,7 +82,7 @@
                 else
                 {
                     <label for="catalogSort">Sort by:</label>
-                    <select id="catalogSort" name="sort" onchange="this.form.submit()">
+                    <select id="catalogSort" name="sort" toolparamdescription="Sort order for the current product results." onchange="this.form.submit()">
                         <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Recommended</option>
                         <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Newest</option>
                         <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Price: Low to High</option>
@@ -105,7 +108,7 @@
           class="catalog-search-form"
           role="search"
           toolautosubmit
-          toolname="search_catalog"
+          toolname="search_catalog_desktop"
           tooldescription="Search the current Ubhaya Fashions catalog by product keywords.">
         <label for="catalogSearch">Search our collection</label>
         <div class="catalog-search-row">
@@ -152,7 +155,10 @@
             <form asp-action="Index"
                   method="get"
                   class="catalog-sidebar-form"
-                  data-price-ceiling="@priceCeiling">
+                  data-price-ceiling="@priceCeiling"
+                  toolautosubmit
+                  toolname="filter_catalog"
+                  tooldescription="Filter the current Ubhaya Fashions product results by the shopper's selected options.">
                 <input type="hidden" name="search" value="@search" />
                 @if (bestSellersOnly)
                 {
@@ -236,8 +242,8 @@
                         <span id="priceMaxLabel">₹@(maxPrice ?? priceCeiling)</span>
                     </div>
                     <div class="filter-range-wrap">
-                        <input id="minPriceRange" type="range" min="0" max="@priceCeiling" step="100" value="@(minPrice ?? 0)" aria-label="Minimum price" />
-                        <input id="maxPriceRange" type="range" min="0" max="@priceCeiling" step="100" value="@(maxPrice ?? priceCeiling)" aria-label="Maximum price" />
+                        <input id="minPriceRange" type="range" min="0" max="@priceCeiling" step="100" value="@(minPrice ?? 0)" aria-label="Minimum price" toolparamdescription="Lowest product price in rupees." />
+                        <input id="maxPriceRange" type="range" min="0" max="@priceCeiling" step="100" value="@(maxPrice ?? priceCeiling)" aria-label="Maximum price" toolparamdescription="Highest product price in rupees." />
                     </div>
                     <div class="filter-price-inputs">
                         <label class="visually-hidden" for="minPriceInput">Minimum price in rupees</label>
@@ -271,9 +277,12 @@
 
         <section class="catalog-results">
             <div class="catalog-mobile-toolbar">
-                <form asp-action="Index" method="get" class="catalog-mobile-search" role="search">
+                <form asp-action="Index" method="get" class="catalog-mobile-search" role="search"
+                      toolautosubmit
+                      toolname="search_catalog_mobile"
+                      tooldescription="Search the current Ubhaya Fashions catalog by product keywords.">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
-                    <input name="search" value="@search" type="search" placeholder="Search dresses, kurtis..." autocomplete="off" aria-label="Search products" />
+                    <input name="search" value="@search" type="search" placeholder="Search dresses, kurtis..." autocomplete="off" aria-label="Search products" toolparamdescription="Keywords to find matching products in the catalog." />
                     @if (!string.IsNullOrWhiteSpace(category)) { <input type="hidden" name="category" value="@category" /> }
                     @if (bestSellersOnly) { <input type="hidden" name="bestSellers" value="true" /> }
                     @if (newArrivalsOnly) { <input type="hidden" name="newArrivals" value="true" /> }
@@ -287,7 +296,10 @@
                 </form>
                 <div class="catalog-mobile-toolbar-actions">
                     <span class="catalog-mobile-count">@productCount @(productCount == 1 ? "style" : "styles")</span>
-                    <form asp-action="Index" method="get" class="catalog-mobile-sort">
+                    <form asp-action="Index" method="get" class="catalog-mobile-sort"
+                          toolautosubmit
+                          toolname="sort_catalog_mobile"
+                          tooldescription="Sort the currently displayed Ubhaya Fashions products.">
                         <input type="hidden" name="search" value="@search" />
                         <input type="hidden" name="category" value="@category" />
                         <input type="hidden" name="size" value="@selectedSize" />
@@ -296,7 +308,7 @@
                         <input type="hidden" name="maxPrice" value="@maxPrice" />
                         <input type="hidden" name="availability" value="@availability" />
                         @if (bestSellersOnly) { <input type="hidden" name="bestSellers" value="true" /> }
-                        <select name="sort" aria-label="Sort products" onchange="this.form.submit()">
+                        <select name="sort" aria-label="Sort products" toolparamdescription="Sort order for the current product results." onchange="this.form.submit()">
                             <option value="recommended" selected="@(selectedSort == "recommended" ? "selected" : null)">Sort: Recommended</option>
                             <option value="newest" selected="@(selectedSort == "newest" ? "selected" : null)">Sort: Newest</option>
                             <option value="price-low" selected="@(selectedSort == "price-low" ? "selected" : null)">Sort: Low price</option>
@@ -405,7 +417,10 @@
                                     <span class="catalog-stock-label sold-out">OUT OF STOCK</span>
                                 }
 
-                                <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form">
+                                <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-toggle-form"
+                                      toolautosubmit
+                                      toolname="toggle_wishlist_@product.Id"
+                                      tooldescription="Save or remove @product.Name from the shopper's wishlist.">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="productId" value="@product.Id" />
                                     <input type="hidden" name="isWishlisted" value="@(wishlistedProductIds.Contains(product.Id) ? "true" : "false")" />

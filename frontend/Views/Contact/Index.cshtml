@@ -82,7 +82,9 @@
                 <p>Fill in the details below and tell us how we can help.</p>
             </div>
 
-            <form asp-controller="Contact" asp-action="Index" method="post">
+            <form asp-controller="Contact" asp-action="Index" method="post"
+                  toolname="contact_store"
+                  tooldescription="Prepare a customer enquiry for Ubhaya Fashions. Review the message before submission.">
                 <div asp-validation-summary="ModelOnly" class="contact-validation" role="alert"></div>
 
                 <div class="contact-field">

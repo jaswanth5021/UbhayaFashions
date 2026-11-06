@@ -69,7 +69,10 @@
                         }
                         <div class="wishlist-card-actions">
                             <a class="button" asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">View product</a>
-                            <form asp-controller="Wishlist" asp-action="Toggle" method="post">
+                            <form asp-controller="Wishlist" asp-action="Toggle" method="post"
+                                  toolautosubmit
+                                  toolname="remove_from_wishlist_@product.Id"
+                                  tooldescription="Remove @product.Name from the shopper's wishlist.">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@product.Id" />
                                 <input type="hidden" name="isWishlisted" value="true" />

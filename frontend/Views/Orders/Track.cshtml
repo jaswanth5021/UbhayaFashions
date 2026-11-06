@@ -109,13 +109,15 @@
     </header>
 
     <section class="track-main-card">
-        <form class="track-lookup" asp-controller="Orders" asp-action="Find" method="get" role="search">
+        <form class="track-lookup" asp-controller="Orders" asp-action="Find" method="get" role="search"
+              toolname="track_order_status"
+              tooldescription="Look up the current delivery status for an order using its order ID.">
             <input type="hidden" name="current" value="@Model.OrderId" />
             <label for="trackOrderId">Enter Order ID</label>
             <div class="track-lookup-row">
                 <div class="track-lookup-input">
                     <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v9"/></svg>
-                    <input id="trackOrderId" name="orderId" type="text" inputmode="numeric" value="@Model.OrderId" autocomplete="off" placeholder="e.g. 1024" />
+                    <input id="trackOrderId" name="orderId" type="text" inputmode="numeric" value="@Model.OrderId" autocomplete="off" placeholder="e.g. 1024" toolparamdescription="The order ID shown in the order confirmation." />
                 </div>
                 <button type="submit">
                     <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>

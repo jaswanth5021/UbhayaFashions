@@ -14,7 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews(options => options.Filters.AddService<UserErrorLogFilter>());
 builder.Services.AddMemoryCache();
-builder.Services.AddResponseCompression();
+builder.Services.AddResponseCompression(options =>
+{
+    // Compression middleware is placed only in the static asset path branch
+    // below, so enabling it for HTTPS does not compress personalized HTML.
+    options.EnableForHttps = true;
+});
 
 // =====================================================
 // HTTP CONTEXT
