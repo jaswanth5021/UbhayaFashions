@@ -1,7 +1,6 @@
 {
   "markdown.styles": [
-    "./markdown-preview.css",
-    "./.vscode/markdown.css"
+    "markdown-preview.css"
   ],
   "markdown.preview.breaks": false,
   "markdown.preview.fontSize": 14,
