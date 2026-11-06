@@ -1,107 +1,96 @@
-<div align="center">
-
-# Testing Strategy
-### Confidence before every release
-
-**Test business behaviour, trust boundaries and the complete customer journey.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · QUALITY ENGINEERING</span><span class="doc-pill">Turn tests into a stable product</span>
+<h1>Testing Guide</h1>
+<p>A practical test strategy to confirm the application is functional, secure, performant and ready for production.</p>
+<div class="doc-meta"><div><strong>Scope</strong>Frontend · Backend · Integrations</div><div><strong>Test layers</strong>Unit · Integration · E2E</div><div><strong>Goal</strong>Release confidence</div></div>
 </div>
 
----
+## <strong>01</strong> Testing overview
 
-## 01 · Test pyramid
+| Area | Coverage |
+|---|---|
+| Product | Search, filters, variants, price and availability |
+| Customer | Registration, login, reset password and addresses |
+| Commerce | Cart, checkout, orders and inventory |
+| Integrations | Razorpay, webhooks, email and Delhivery |
+| Experience | Responsive UI, accessibility and performance |
+| Operations | Migrations, uploads, backups and recovery |
+
+## <strong>02</strong> Testing goals
+
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">✓</span><strong>Feature correctness</strong><p>Ensure core features behave as expected.</p></div>
+<div class="doc-card purple"><span class="ico">👥</span><strong>User experience</strong><p>Provide a smooth experience across devices.</p></div>
+<div class="doc-card orange"><span class="ico">🛡️</span><strong>Early defect detection</strong><p>Catch and fix bugs before release.</p></div>
+<div class="doc-card blue"><span class="ico">⏱️</span><strong>Performance</strong><p>Maintain responsive pages and reliable APIs.</p></div>
+<div class="doc-card green"><span class="ico">♿</span><strong>Accessibility</strong><p>Support inclusive interaction patterns.</p></div>
+<div class="doc-card yellow"><span class="ico">🔒</span><strong>Data security</strong><p>Keep customer and transaction data protected.</p></div>
+</div>
+
+## <strong>03</strong> Test strategy
 
 ```mermaid
 flowchart TD
-    E2E[End-to-end journey tests]
-    INT[API / database / provider integration tests]
-    UNIT[Unit tests for rules and services]
-    E2E --> INT --> UNIT
+ E2E[End-to-End Journey Tests]
+ INT[API and Database Integration Tests]
+ UNIT[Unit Tests for Rules and Services]
+ E2E --> INT --> UNIT
 ```
 
-Use many fast unit tests, focused integration tests for important boundaries and a smaller set of end-to-end tests for revenue-critical journeys.
+Use many fast unit tests, focused integration tests for important boundaries and a smaller number of end-to-end tests for revenue-critical journeys.
 
-## 02 · Local commands
+## <strong>04</strong> Critical user flows
 
-Run from the repository root:
+<div class="doc-grid four">
+<div class="doc-card pink"><span class="ico">👤</span><strong>01 · Account</strong><p>Register, verify, sign in, reset password.</p></div>
+<div class="doc-card purple"><span class="ico">👗</span><strong>02 · Shopping</strong><p>Browse, filter, select variants and cart.</p></div>
+<div class="doc-card blue"><span class="ico">💳</span><strong>03 · Payment</strong><p>Checkout, signature verification and webhook.</p></div>
+<div class="doc-card green"><span class="ico">🚚</span><strong>04 · Fulfilment</strong><p>Manifest, AWB, tracking and delivery.</p></div>
+</div>
+
+## <strong>05</strong> Example test cases
+
+| ID | Feature | Scenario | Expected result |
+|---|---|---|---|
+| TC-01 | Registration | Valid email and details | Account created / verification sent |
+| TC-02 | Login | Invalid password | Safe error; no session |
+| TC-03 | Catalogue | Filter by colour and size | Only matching products shown |
+| TC-04 | Cart | Add unavailable variant | Request rejected with clear message |
+| TC-05 | Payment | Invalid signature | Payment not marked paid |
+| TC-06 | Webhook | Replay same event | No duplicate stock deduction |
+| TC-07 | Shipping | Non-serviceable PIN | No shipment manifested |
+| TC-08 | Authorization | Access another customer's order | Request denied |
+
+## <strong>06</strong> Test commands
 
 ```bash
 dotnet build LadiesDressStore.sln
 dotnet test tests/UbhayaFashions.Tests/UbhayaFashions.Tests.csproj
 ```
 
-The test project path is documented in the root README. If the solution or test project layout changes, update these commands.
+Run from the repository root. Confirm the current solution and test project paths before adapting commands.
 
-## 03 · High-value test areas
+## <strong>07</strong> Testing checklist
 
-| Area | Scenarios |
-|---|---|
-| Catalogue | Search, filters, sorting, variant availability, colour matching |
-| Pricing | Discounts, rounding, authoritative totals, currency precision |
-| Inventory | Concurrent updates, insufficient stock, restore on valid cancellation |
-| Identity | Registration, verification, login, reset token expiry and reuse |
-| Authorization | Customer cannot access another customer's order/address; non-admin cannot call admin API |
-| Cart and checkout | Invalid variant, stale price, stock change, invalid address |
-| Payments | Valid/invalid signature, duplicate callback, timeout and reconciliation |
-| Webhooks | Signature validation, replay/idempotency and out-of-order events |
-| Shipping | Non-serviceable PIN, missing pickup location, provider timeout, duplicate manifestation |
-| Uploads | Invalid type, oversized file, unsafe filename and storage failure |
-| UI | Mobile overflow, navigation, form errors, loading and empty states |
+<div class="doc-grid">
+<div class="doc-card green"><span class="ico">🧪</span><strong>Functional</strong><p>Core features and business rules.</p></div>
+<div class="doc-card purple"><span class="ico">🌐</span><strong>Cross-browser</strong><p>Chrome, Edge, Firefox and Safari where available.</p></div>
+<div class="doc-card blue"><span class="ico">📱</span><strong>Mobile</strong><p>Small and large Android/iOS viewports.</p></div>
+<div class="doc-card yellow"><span class="ico">🚀</span><strong>Performance</strong><p>PageSpeed, Lighthouse and API timings.</p></div>
+<div class="doc-card pink"><span class="ico">♿</span><strong>Accessibility</strong><p>Keyboard, contrast, labels and focus.</p></div>
+<div class="doc-card orange"><span class="ico">🔐</span><strong>Security</strong><p>Authorization, validation and secret handling.</p></div>
+</div>
 
-## 04 · Payment test matrix
+## <strong>08</strong> Release acceptance
 
-| Given | Expected outcome |
-|---|---|
-| Valid provider payment and valid signature | Payment becomes verified; order follows the paid workflow |
-| Invalid signature | Reject verification; do not mark paid |
-| Browser says success but server verification fails | Do not trust browser result |
-| Duplicate webhook/callback | No duplicate order or stock reduction |
-| Provider timeout | Preserve an unknown/pending outcome and reconcile |
-| Payment failure | Show safe retry path without duplicate order creation |
-
-Use Razorpay test credentials and test mode for non-production verification. Never use live credentials in automated tests.
-
-## 05 · Shipping test matrix
-
-- Valid, serviceable PIN and eligible paid order.
-- Non-serviceable PIN.
-- Missing or inactive pickup location.
-- Invalid recipient address or parcel weight.
-- Provider rejects client name or payload.
-- Timeout after provider may have accepted the request.
-- Repeated admin click or duplicate request.
-- Successful AWB response and customer tracking.
-- Tracking provider temporarily unavailable.
-
-Use Delhivery staging credentials where available. Confirm account-specific behaviour with Delhivery before testing production shipments.
-
-## 06 · UI and performance checks
-
-- Test mobile widths and desktop layouts.
-- Check horizontal overflow, image aspect ratios and layout shifts.
-- Verify keyboard navigation and focus states.
-- Confirm all interactive controls have loading and disabled states.
-- Run Lighthouse/PageSpeed on home, product listing and product detail pages.
-- Compare before/after results using the same device profile and test conditions.
-- Optimize the largest contentful image and avoid loading below-the-fold media eagerly.
-
-## 07 · Release gate
-
-- [ ] Solution builds cleanly.
+- [ ] Solution builds successfully.
 - [ ] Automated tests pass.
-- [ ] Critical customer journey verified.
-- [ ] Payment verification and duplicate-event behaviour verified.
+- [ ] Critical customer journeys verified.
+- [ ] Payment signature and duplicate webhook behaviour verified.
 - [ ] Shipment eligibility and duplicate protection verified.
 - [ ] Database migration reviewed and backup confirmed.
-- [ ] Production secrets/configuration validated.
+- [ ] Production configuration validated.
 - [ ] Upload and database persistence verified after deployment.
 - [ ] Mobile and desktop smoke tests complete.
-- [ ] Logs and health checks reviewed after release.
 
-## 08 · Test data and environments
-
-- Use synthetic customer information.
-- Keep test and production credentials separate.
-- Never point automated destructive tests at production.
-- Reset test data deterministically.
-- Avoid depending on unstable third-party services in unit tests; mock provider boundaries and reserve sandbox calls for integration checks.
+<div class="doc-footer">UBHAYA FASHIONS · Testing handbook · Record actual test evidence; never mark unexecuted tests as passed.</div>
