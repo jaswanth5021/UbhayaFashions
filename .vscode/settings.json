@@ -1,0 +1,8 @@
+{
+  "markdown.styles": [
+    ".vscode/markdown.css"
+  ],
+  "markdown.preview.breaks": false,
+  "markdown.preview.fontSize": 14,
+  "markdown.preview.lineHeight": 1.7
+}
