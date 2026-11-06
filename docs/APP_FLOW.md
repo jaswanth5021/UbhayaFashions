@@ -8,6 +8,7 @@
 ## <strong>01</strong> Customer journey
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
 flowchart TD
  A[Home] --> B[Browse / Search]
  B --> C[Filter and Sort]
@@ -39,6 +40,7 @@ flowchart TD
 ## <strong>02</strong> Administrator journey
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
 flowchart TD
  A[Admin Login] --> B[Dashboard]
  B --> C[Catalogue]
@@ -75,6 +77,7 @@ flowchart TD
 ## <strong>04</strong> Shipment sequence
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
 sequenceDiagram
  participant Admin
  participant Web as Admin Website
