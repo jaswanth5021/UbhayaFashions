@@ -29,14 +29,10 @@
 
 ## <strong>03</strong> Test strategy
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-flowchart TD
- E2E[End-to-End Journey Tests]
- INT[API and Database Integration Tests]
- UNIT[Unit Tests for Rules and Services]
- E2E --> INT --> UNIT
-```
+<figure class="doc-diagram">
+  <img src="assets/testing-strategy.svg" alt="Testing strategy showing unit, integration and end-to-end test layers." />
+  <figcaption>Testing strategy showing unit, integration and end-to-end test layers.</figcaption>
+</figure>
 
 Use many fast unit tests, focused integration tests for important boundaries and a smaller number of end-to-end tests for revenue-critical journeys.
 
