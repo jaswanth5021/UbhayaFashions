@@ -7,17 +7,10 @@
 
 ## <strong>01</strong> System at a glance
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-flowchart LR
- U[Customer / Admin Browser] --> W[ASP.NET Core MVC]
- W -->|HTTP JSON| A[ASP.NET Core API]
- A -->|EF Core| DB[(SQL Server)]
- A --> RP[Razorpay]
- A --> DH[Delhivery]
- A --> EM[Email Provider]
- W --> AS[Static Assets]
-```
+<figure class="doc-diagram">
+  <img src="assets/system-architecture.svg" alt="UBHAYA FASHIONS system architecture and integration boundaries." />
+  <figcaption>UBHAYA FASHIONS system architecture and integration boundaries.</figcaption>
+</figure>
 
 <div class="doc-grid">
 <div class="doc-card pink"><span class="ico">🖥️</span><strong>Frontend</strong><p>Razor views, MVC controllers, browser assets and customer/admin experience.</p></div>
@@ -39,19 +32,10 @@ flowchart LR
 
 ## <strong>03</strong> Backend request lifecycle
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-flowchart TD
- A[HTTP Request] --> B[Middleware]
- B --> C[Authentication]
- C --> D[Authorization]
- D --> E[Controller]
- E --> F[Validation and Business Rules]
- F --> G[Service / Provider Client]
- G --> H[ApplicationDbContext]
- H --> I[(SQL Server)]
- I --> H --> G --> E --> J[HTTP Response]
-```
+<figure class="doc-diagram">
+  <img src="assets/backend-request-lifecycle.svg" alt="Backend request lifecycle from HTTP request through validation, services and SQL Server." />
+  <figcaption>Backend request lifecycle from HTTP request through validation, services and SQL Server.</figcaption>
+</figure>
 
 Controllers should handle HTTP concerns. Reusable business rules and provider communication belong in services. DTOs define API contracts.
 
