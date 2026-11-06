@@ -1,128 +1,84 @@
-<div align="center">
-
-# Design System
-### The visual language of UBHAYA FASHIONS
-
-**Elegant fashion editorial meets a clear, modern shopping experience.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · BRAND EXPERIENCE</span><span class="doc-pill">Design with consistency</span>
+<h1>Design System</h1>
+<p>The visual language for a premium, warm and product-first fashion shopping experience across mobile and desktop.</p>
+<div class="doc-meta"><div><strong>Direction</strong>Fashion editorial</div><div><strong>Priority</strong>Mobile-first</div><div><strong>Principle</strong>Product before decoration</div></div>
 </div>
 
----
+## <strong>01</strong> Design principles
 
-## 01 · Design direction
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">📰</span><strong>Editorial</strong><p>Generous imagery, calm layouts and confident typography.</p></div>
+<div class="doc-card purple"><span class="ico">🎯</span><strong>Clarity</strong><p>Price, size, colour, stock and actions are easy to scan.</p></div>
+<div class="doc-card blue"><span class="ico">🧱</span><strong>Consistency</strong><p>Shared spacing, components, controls and feedback.</p></div>
+<div class="doc-card green"><span class="ico">📱</span><strong>Mobile-first</strong><p>Make the small-screen shopping journey excellent.</p></div>
+</div>
 
-The storefront should feel premium, warm and product-led. Clothing photography is the hero; interface decoration should support discovery rather than compete with it.
+## <strong>02</strong> Colour palette
 
-**Design principles**
-
-- Editorial: generous imagery, calm layouts and confident typography.
-- Clarity: price, size, colour, stock and calls to action are easy to scan.
-- Consistency: shared spacing, controls, cards and feedback patterns.
-- Mobile-first: prioritize the small-screen shopping journey.
-- Restraint: use accent colour intentionally; avoid excessive gradients, shadows and borders.
-
-## 02 · Visual tokens
-
-Treat these as design-system starting points. Before introducing global tokens, reconcile them with the current production CSS so existing brand assets and established components are not unintentionally changed.
-
-| Token | Suggested value | Use |
+| Token | Value | Role |
 |---|---|---|
-| Ink | `#242126` | Main text |
+| Ink | `#242126` | Primary text |
 | Muted | `#77717A` | Secondary text |
 | Canvas | `#FAF8F7` | Page background |
 | Surface | `#FFFFFF` | Cards and panels |
 | Brand berry | `#8B3A62` | Primary accent |
-| Soft rose | `#F4E8EE` | Subtle accent backgrounds |
-| Border | `#E9E3E6` | Dividers and control outlines |
+| Soft rose | `#F4E8EE` | Subtle accent surfaces |
+| Border | `#E9E3E6` | Dividers and outlines |
 | Success | `#26734D` | Confirmed success |
 | Warning | `#98651A` | Caution |
-| Danger | `#B33B45` | Errors and destructive actions |
+| Danger | `#B33B45` | Errors |
 
-## 03 · Typography
+These are proposed documentation tokens. Reconcile them with the actual production CSS before applying global changes.
 
-- Use a highly legible sans-serif for body copy, controls and product metadata.
-- Use a restrained editorial display face for campaign headings only if it is already loaded reliably.
-- Establish clear hierarchy: page title, section heading, product title, body and metadata.
-- Avoid tiny low-contrast text for sizes, prices, delivery information or validation errors.
-- Use sentence case for interface labels.
+## <strong>03</strong> Typography and spacing
 
-## 04 · Layout and spacing
-
-Use a consistent spacing scale (4px base):
+Use a legible sans-serif for controls and body copy. Reserve display typography for campaign headings. Use a 4px spacing base and consistent section rhythm.
 
 | Token | Size | Typical use |
 |---|---:|---|
-| `space-1` | 4px | Icon/text gap |
-| `space-2` | 8px | Compact control spacing |
-| `space-3` | 12px | Card internals |
-| `space-4` | 16px | Standard component gap |
-| `space-6` | 24px | Section spacing |
-| `space-8` | 32px | Large section gap |
-| `space-12` | 48px | Editorial separation |
-| `space-16` | 64px | Desktop section rhythm |
+| Space 1 | 4px | Icon gap |
+| Space 2 | 8px | Compact control |
+| Space 3 | 12px | Card internals |
+| Space 4 | 16px | Standard gap |
+| Space 6 | 24px | Section spacing |
+| Space 8 | 32px | Large gap |
+| Space 12 | 48px | Editorial separation |
 
-Use a centered content container with a readable maximum width. Avoid fixed widths that create horizontal scrolling on mobile.
+## <strong>04</strong> Core component patterns
 
-## 05 · Core components
+<div class="doc-grid two">
+<div class="doc-card pink"><span class="ico">🧭</span><strong>Header and navigation</strong><p>Clear logo, search, account, wishlist and cart. Mobile menu must not overlap icons or content.</p></div>
+<div class="doc-card purple"><span class="ico">🛍️</span><strong>Product cards</strong><p>Consistent image ratios, clear product name and price, restrained badges and useful hover states.</p></div>
+<div class="doc-card blue"><span class="ico">🖼️</span><strong>Product detail</strong><p>Visual gallery, obvious variant selection, stock messaging and reachable add-to-cart action.</p></div>
+<div class="doc-card green"><span class="ico">✍️</span><strong>Forms and feedback</strong><p>Persistent labels, inline validation, loading, disabled, success and error states.</p></div>
+</div>
 
-### Header and navigation
-- Keep logo, search, account, wishlist and cart discoverable.
-- Use a clear mobile menu with a large enough touch target.
-- Prevent icon collisions and wrapping at narrow widths.
-- Make the logo a home link with an accessible name.
+## <strong>05</strong> Responsive test matrix
 
-### Product cards
-- Keep image ratios consistent within a collection.
-- Use high-quality, appropriately sized images with explicit dimensions.
-- Show product name and price with strong hierarchy.
-- Show discount and availability without visual clutter.
-- Hover effects must be subtle and must not hide essential information.
-- On touch devices, never make key content dependent on hover.
-
-### Product detail
-- Make the gallery the visual focus.
-- Keep selected size/colour state obvious.
-- Communicate unavailable variants and stock clearly.
-- Keep the add-to-cart action prominent and reachable on mobile.
-- Avoid layout shifts when images load or variants change.
-
-### Forms and feedback
-- Persistent labels, clear required indicators and inline validation.
-- Disabled, loading, success and error states.
-- Confirm destructive actions.
-- Success messages must follow server confirmation, not merely a button click.
-
-## 06 · Responsive behaviour
-
-| Viewport | Guidance |
+| Viewport | Design expectation |
 |---|---|
-| Small mobile | Single-column content, compact header, touch-friendly controls |
-| Large mobile | Flexible product grid and uncluttered filter access |
-| Tablet | Balanced two-column product layouts where appropriate |
-| Desktop | Wider catalogue grid and editorial whitespace |
+| 320px | No horizontal overflow; compact navigation |
+| 360–390px | Comfortable touch targets and readable product details |
+| 768px | Balanced tablet layouts |
+| 1024px | Expanded catalogue and navigation |
+| 1440px | Editorial whitespace and wider product grid |
 
-Test at 320px, 360px, 390px, 768px, 1024px and 1440px. These are test widths, not hard-coded breakpoints.
-
-## 07 · Motion
+## <strong>06</strong> Motion and interaction
 
 - Keep transitions short and purposeful.
 - Respect `prefers-reduced-motion`.
-- Avoid motion that delays product selection or causes accidental interaction.
-- Hover and focus should communicate the same essential affordances.
-- Do not animate large layout regions on every pointer movement.
+- Essential content must never depend on hover.
+- Ensure focus and hover communicate equivalent affordances.
+- Avoid layout shifts when images or content load.
 
-## 08 · Accessibility checklist
+## <strong>07</strong> Accessibility review
 
-- [ ] Semantic headings and landmarks.
-- [ ] Keyboard-operable menus, dialogs, filters and galleries.
-- [ ] Visible focus indicators.
-- [ ] Labels and accessible names for icon-only controls.
-- [ ] Sufficient text and control contrast.
-- [ ] Meaningful alternative text for product imagery.
-- [ ] Errors announced and associated with relevant fields.
-- [ ] Reduced-motion support.
-- [ ] Touch targets comfortable on mobile.
+<div class="doc-grid">
+<div class="doc-card green"><span class="ico">⌨️</span><strong>Keyboard</strong><p>All controls and menus are operable.</p></div>
+<div class="doc-card blue"><span class="ico">👁️</span><strong>Contrast</strong><p>Text and controls remain legible.</p></div>
+<div class="doc-card purple"><span class="ico">🏷️</span><strong>Labels</strong><p>Inputs and icon-only controls have names.</p></div>
+<div class="doc-card yellow"><span class="ico">♿</span><strong>Motion</strong><p>Reduced-motion preferences are respected.</p></div>
+</div>
 
-## 09 · Design review
-
-Review every meaningful UI change on a real narrow viewport and desktop. Check empty/loading/error states as well as the happy path. Product photography, not decorative UI, should remain the strongest visual element.
+<div class="doc-footer">UBHAYA FASHIONS · Design handbook · Review real mobile and desktop screenshots for every meaningful UI change.</div>
