@@ -74,6 +74,7 @@ flowchart TB
     PRODUCT -->|"1 : many"| REVIEW
     CUSTOMER -->|"1 : many"| REVIEW_VOTE
     CUSTOMER -->|"1 : many"| NOTIFICATION_STATE
+    PRODUCT -.->|"0..1 product link"| NOTIFICATION
 
     classDef account fill:#f7e9ed,stroke:#8b4055,color:#302522,stroke-width:1.5px;
     classDef catalog fill:#f8efe1,stroke:#ad7b36,color:#302522,stroke-width:1.5px;
@@ -93,6 +94,7 @@ flowchart TB
 - `PendingSignup`, `AdminUser`, and `RazorpayWebhookEvent` are independent records in the current EF Core model; no entity foreign-key relationship is drawn for them.
 - `DelhiveryShipment` has a unique `OrderId`, so an order can have at most one shipment record.
 - Customer activity records connect customers and products through their own entity rows.
+- A store notification may optionally reference a product; deleting that product clears the notification link.
 - The diagram shows the principal foreign-key relationships, not every scalar property or index.
 
 ## Model groups
