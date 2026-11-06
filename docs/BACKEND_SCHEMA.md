@@ -22,21 +22,10 @@ The backend owns database access. The EF Core model is defined in `backend/Data/
 
 ## <strong>03</strong> Conceptual relationship map
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-erDiagram
- CUSTOMER ||--o{ ADDRESS : saves
- CUSTOMER ||--o{ ORDER : places
- CUSTOMER ||--o{ WISHLIST_ITEM : owns
- PRODUCT ||--o{ PRODUCT_VARIANT : offers
- PRODUCT ||--o{ PRODUCT_MEDIA : displays
- PRODUCT ||--o{ PRODUCT_REVIEW : receives
- CATEGORY ||--o{ PRODUCT : groups
- ORDER ||--|{ ORDER_ITEM : contains
- ORDER ||--o{ PAYMENT : records
- ORDER ||--o| SHIPMENT : fulfils
- PRODUCT ||--o{ ORDER_ITEM : referenced_by
-```
+<figure class="doc-diagram">
+  <img src="assets/conceptual-data-relationships.svg" alt="Conceptual data relationship map for customers, orders, products and fulfilment." />
+  <figcaption>Conceptual data relationship map for customers, orders, products and fulfilment.</figcaption>
+</figure>
 
 > [!NOTE]
 > This is a conceptual domain diagram, not a generated database schema. Verify exact table names, nullability, foreign keys and delete behaviours in the current EF model and migrations.
