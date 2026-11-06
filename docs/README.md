@@ -31,7 +31,7 @@
 | [Implementation Plan](IMPLEMENTATION_PLAN.md) | Delivery phases, milestones and release gates |
 | [AI Agent Guide](AGENTS.md) | Rules for AI coding agents and contributors |\n| [Razorpay Webhook Setup](RAZORPAY_WEBHOOK_SETUP.md) | Production webhook configuration and verification |
 
-## Start here
+## View the designed documentation in VS Code\n\nThe repository includes a workspace Markdown preview theme in `.vscode/markdown.css`. To see the coloured layout, open any file under `docs/` and press **Ctrl+Shift+V** (Windows/Linux) or **Cmd+Shift+V** (macOS), or right-click and choose **Open Preview**. The normal editor tab shows Markdown source; the styled page appears in the preview pane.\n\n## Start here
 
 1. Read the [Product Requirements](PRD.md) for product context.
 2. Follow [Architecture](ARCHITECTURE.md) before changing cross-project behaviour.
