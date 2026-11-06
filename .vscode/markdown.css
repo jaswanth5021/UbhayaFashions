@@ -1,161 +1,69 @@
-/* UBHAYA FASHIONS — VS Code Markdown Preview theme
-   Loaded by .vscode/settings.json. Affects preview only, never source files. */
-
+/* UBHAYA FASHIONS — editorial documentation theme for VS Code Markdown Preview */
+:root { color-scheme: light; }
 body {
-  color: #29232a;
-  background: #fbf8fa;
-  font-family: "Segoe UI", Inter, system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.72;
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 28px 42px 64px;
+  color:#28232b; background:#fbf8fa;
+  font-family:"Segoe UI",Inter,system-ui,sans-serif;
+  font-size:15px; line-height:1.68; max-width:1120px;
+  margin:0 auto; padding:28px 42px 72px;
 }
-
-.markdown-body { color: #29232a; }
-
-.markdown-body h1 {
-  color: #76264f;
-  font-size: 2.25em;
-  line-height: 1.2;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  border-bottom: 3px solid #d9a4bf;
-  padding-bottom: 14px;
-  margin: 34px 0 22px;
+.markdown-body { color:#28232b; }
+.markdown-body h1 { color:#24202a; font-size:2.35em; line-height:1.12; font-weight:850; letter-spacing:-.045em; border:0; margin:14px 0 10px; padding:0; }
+.markdown-body h2 { display:flex; align-items:center; gap:14px; color:#29232b; font-size:1.42em; font-weight:800; border:0; margin:38px 0 17px; padding:0; letter-spacing:-.02em; }
+.markdown-body h2 strong:first-child { color:#b12b83; font-size:1.12em; min-width:42px; }
+.markdown-body h3 { color:#663c79; font-size:1.12em; font-weight:750; margin:25px 0 10px; }
+.markdown-body p { margin:11px 0 15px; }
+.markdown-body a { color:#963a78; font-weight:650; text-decoration:none; border-bottom:1px solid #d9b0cc; }
+.markdown-body a:hover { color:#63264f; border-color:#63264f; }
+.markdown-body strong { color:#4b2d48; }
+.markdown-body hr { height:1px; border:0; background:linear-gradient(90deg,#d7a2c5,#eee3eb,transparent); margin:28px 0; }
+.markdown-body blockquote { background:#f5edf8; color:#60436e; border-left:4px solid #9c68b2; border-radius:0 12px 12px 0; padding:12px 18px; margin:18px 0; }
+.markdown-body table { display:table; width:100%; border-collapse:separate; border-spacing:0; border:1px solid #e9e1eb; border-radius:13px; overflow:hidden; margin:18px 0 25px; font-size:.93em; }
+.markdown-body thead { background:#f6eff8; }
+.markdown-body th { color:#633b72; text-align:left; font-weight:800; padding:13px 15px; border:0; }
+.markdown-body td { padding:11px 15px; border:0; border-top:1px solid #eee8f0; }
+.markdown-body tbody tr:nth-child(even) { background:#fcf8fc; }
+.markdown-body tbody tr:hover { background:#f7edf5; }
+.markdown-body li { margin:6px 0; }
+.markdown-body li::marker { color:#bd4b9a; font-weight:800; }
+.markdown-body code { color:#81366f; background:#f5edf4; border:1px solid #eadce8; border-radius:5px; padding:2px 6px; font-size:.9em; }
+.markdown-body pre { background:#211b28!important; border:1px solid #433449; border-radius:13px; padding:18px 20px; box-shadow:0 7px 22px #3a23300d; }
+.markdown-body pre code { color:#f7eff6; background:transparent; border:0; padding:0; }
+.markdown-body img { max-width:100%; border-radius:14px; }
+.markdown-body input[type=checkbox] { accent-color:#a33c86; }
+.markdown-body .doc-hero { background:linear-gradient(120deg,#fff 0%,#fbf1f8 58%,#f1eafa 100%); border:1px solid #eee0ec; border-radius:20px; padding:28px 30px 25px; margin:8px 0 28px; box-shadow:0 9px 28px #522b4b0b; }
+.markdown-body .doc-hero h1 { margin:12px 0 8px; }
+.markdown-body .doc-hero p { color:#77717d; font-size:1.05em; max-width:850px; margin:0; }
+.markdown-body .doc-kicker { display:inline-block; color:#8d3678; background:#f4e4f1; border:1px solid #ead4e7; border-radius:99px; padding:5px 12px; font-size:11px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+.markdown-body .doc-pill { display:inline-block; float:right; color:#75418b; background:#f0e8fa; border-radius:99px; padding:7px 13px; font-size:11px; font-weight:750; }
+.markdown-body .doc-meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:20px 0 4px; }
+.markdown-body .doc-meta div { background:#fff; border:1px solid #eee5ef; border-radius:11px; padding:10px 13px; color:#77717d; font-size:12px; }
+.markdown-body .doc-meta strong { display:block; color:#49334d; font-size:14px; }
+.markdown-body .doc-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:16px 0 24px; }
+.markdown-body .doc-grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.markdown-body .doc-grid.four { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.markdown-body .doc-card { border:1px solid #eee4ef; border-radius:14px; padding:15px 16px; background:#fff; min-width:0; }
+.markdown-body .doc-card .ico { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:11px; background:#f7e8f3; font-size:18px; margin-bottom:9px; }
+.markdown-body .doc-card strong { display:block; color:#44334b; font-size:13px; margin-bottom:4px; }
+.markdown-body .doc-card p { color:#77717d; font-size:12px; line-height:1.5; margin:0; }
+.markdown-body .pink { background:#fff2fa; border-color:#f3dceb; }
+.markdown-body .purple { background:#f5f0ff; border-color:#e6dcfa; }
+.markdown-body .blue { background:#eff7ff; border-color:#dceafb; }
+.markdown-body .green { background:#eefaf4; border-color:#d8f0e2; }
+.markdown-body .yellow { background:#fff8e9; border-color:#f2e6c7; }
+.markdown-body .orange { background:#fff2ed; border-color:#f4ded4; }
+.markdown-body .doc-callout { display:flex; gap:12px; align-items:flex-start; border:1px solid #e9d9ee; background:#f7f0fa; border-radius:13px; padding:14px 17px; margin:18px 0; }
+.markdown-body .doc-callout b { color:#683c7a; }
+.markdown-body .doc-callout span { font-size:20px; }
+.markdown-body .doc-step { display:flex; gap:12px; align-items:flex-start; margin:12px 0; }
+.markdown-body .doc-step .num { flex:0 0 30px; height:30px; display:grid; place-items:center; border-radius:50%; color:#9f347e; background:#f9e4f2; font-weight:850; }
+.markdown-body .doc-step p { margin:0; }
+.markdown-body .doc-footer { color:#938895; font-size:11px; border-top:1px solid #eee4ed; padding-top:13px; margin-top:34px; }
+@media(max-width:760px) {
+ body { padding:16px 14px 42px; font-size:14px; }
+ .markdown-body h1 { font-size:1.8em; }
+ .markdown-body .doc-hero { padding:20px 18px; }
+ .markdown-body .doc-grid,.markdown-body .doc-grid.four { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .markdown-body .doc-meta { grid-template-columns:1fr; }
+ .markdown-body table { display:block; overflow-x:auto; }
 }
-
-.markdown-body h2 {
-  color: #8b3564;
-  font-size: 1.48em;
-  font-weight: 750;
-  border-left: 5px solid #c65c91;
-  padding: 5px 0 5px 14px;
-  margin: 34px 0 16px;
-  background: linear-gradient(90deg, #f7eaf1 0%, rgba(247,234,241,0) 78%);
-}
-
-.markdown-body h3 {
-  color: #5c477d;
-  font-size: 1.13em;
-  font-weight: 700;
-  margin-top: 25px;
-}
-
-.markdown-body h4 { color: #8b3564; }
-
-.markdown-body p { margin: 12px 0; }
-
-.markdown-body a {
-  color: #9b3d70;
-  font-weight: 650;
-  text-decoration: none;
-  border-bottom: 1px solid #d9a4bf;
-}
-.markdown-body a:hover { color: #612044; border-bottom-color: #612044; }
-
-.markdown-body strong { color: #562541; }
-
-.markdown-body hr {
-  height: 2px;
-  border: 0;
-  background: linear-gradient(90deg, #b94d82, #ead2df, transparent);
-  margin: 30px 0;
-}
-
-.markdown-body blockquote {
-  color: #5f3b53;
-  background: #f8edf3;
-  border-left: 5px solid #bd5a8a;
-  border-radius: 0 10px 10px 0;
-  padding: 12px 18px;
-  margin: 20px 0;
-}
-
-.markdown-body table {
-  display: table;
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border: 1px solid #eadbe4;
-  border-radius: 12px;
-  overflow: hidden;
-  margin: 20px 0 26px;
-  font-size: 0.94em;
-}
-
-.markdown-body thead { background: #76264f; color: #fff; }
-.markdown-body th {
-  color: #fff;
-  font-weight: 700;
-  text-align: left;
-  padding: 13px 15px;
-  border: 0;
-}
-.markdown-body td {
-  padding: 11px 15px;
-  border: 0;
-  border-top: 1px solid #f0e5eb;
-}
-.markdown-body tbody tr:nth-child(odd) { background: #fff; }
-.markdown-body tbody tr:nth-child(even) { background: #fbf1f6; }
-.markdown-body tbody tr:hover { background: #f5e3ed; }
-
-.markdown-body ul, .markdown-body ol { padding-left: 1.7em; }
-.markdown-body li { margin: 6px 0; }
-.markdown-body li::marker { color: #b34e80; font-weight: 800; }
-
-.markdown-body code {
-  color: #842d5d;
-  background: #f4e8ef;
-  border: 1px solid #ead6e2;
-  border-radius: 5px;
-  padding: 2px 6px;
-  font-size: 0.9em;
-}
-.markdown-body pre {
-  background: #211a25 !important;
-  border: 1px solid #453347;
-  border-radius: 12px;
-  padding: 18px 20px;
-  box-shadow: 0 5px 18px rgba(55, 26, 45, .10);
-}
-.markdown-body pre code {
-  color: #f7edf3;
-  background: transparent;
-  border: 0;
-  padding: 0;
-}
-
-.markdown-body img {
-  border-radius: 12px;
-  max-width: 100%;
-  box-shadow: 0 5px 18px rgba(55, 26, 45, .10);
-}
-
-.markdown-body input[type="checkbox"] { accent-color: #8b3564; }
-
-.markdown-alert {
-  border-radius: 10px;
-  padding: 12px 16px;
-  margin: 18px 0;
-}
-.markdown-alert-note { background: #edf4ff; border-left-color: #5486c5; }
-.markdown-alert-important { background: #f2edfb; border-left-color: #8060b2; }
-.markdown-alert-warning { background: #fff5e5; border-left-color: #d28a2f; }
-.markdown-alert-tip { background: #eaf7f0; border-left-color: #3d9a6b; }
-
-.markdown-body .mermaid, .markdown-body pre.mermaid {
-  background: #fff;
-  border: 1px solid #eadbe4;
-  border-radius: 12px;
-  padding: 18px;
-  margin: 18px 0;
-}
-
-@media (max-width: 700px) {
-  body { padding: 18px 16px 40px; font-size: 14px; }
-  .markdown-body h1 { font-size: 1.8em; }
-  .markdown-body h2 { font-size: 1.3em; }
-  .markdown-body table { display: block; overflow-x: auto; }
-}
+@media(max-width:440px) { .markdown-body .doc-grid,.markdown-body .doc-grid.two,.markdown-body .doc-grid.four { grid-template-columns:1fr; } }
