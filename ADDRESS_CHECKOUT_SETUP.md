@@ -1,39 +1,37 @@
-# Ubhaya Fashions – Jaipuri-style checkout address drawer
+# Checkout address flow
 
-The checkout now uses the right-side cart drawer for address selection.
+Checkout lets a signed-in customer choose or manage delivery addresses in the cart drawer.
 
-## Flow
-1. Customer opens the cart drawer.
-2. Clicks Checkout.
-3. Saved addresses load in the same drawer.
-4. Customer can select a saved address.
-5. Customer can click **Add new address** without leaving the drawer.
-6. New address form supports **Use my current location** and Google address search when `Google:MapsApiKey` is configured.
-7. Current-location lookup falls back to server-side OpenStreetMap/Nominatim reverse geocoding when Google Maps is not configured.
-8. Address is saved to the customer's account and immediately appears in the drawer.
-9. Customer continues to Razorpay payment without navigating to another address page.
+## Customer flow
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Open cart drawer] --> B[Choose Checkout]
+    B --> C[Load saved addresses]
+    C --> D{Choose saved address?}
+    D -->|Yes| G[Select address]
+    D -->|No| E[Add address]
+    E --> F[Optional address search or location lookup]
+    F --> H[Validate and save address to account]
+    H --> G
+    G --> I[Continue to payment]
+```
+
+Address records are scoped to the signed-in customer. The first saved address becomes the default unless another address is already present; customers can change the default.
+
+## Address lookup
+
+Google Places/address autocomplete is optional and uses the frontend setting `Google:MapsApiKey`. Restrict any browser key to the production site origin and the APIs enabled for the feature.
+
+The current-location action requires the customer's explicit browser permission. When Google Maps is not configured, the application uses a backend OpenStreetMap/Nominatim reverse-geocoding fallback. Treat returned address data as a suggestion; the customer should review and correct it before saving.
 
 ## Database
-Run from `backend`:
+
+The customer-address schema is included in the backend EF Core migrations. The API applies pending migrations at startup when the database is reachable. To update it manually from the repository root:
 
 ```powershell
-dotnet ef database update
+dotnet ef database update --project backend/backend.csproj --startup-project backend/backend.csproj
 ```
 
-This applies `AddCustomerAddresses`.
-
-## Google Maps (optional but recommended)
-In `frontend/appsettings.json` set:
-
-```json
-"Google": {
-  "MapsApiKey": "YOUR_GOOGLE_MAPS_BROWSER_KEY"
-}
-```
-
-Enable Places API / Maps JavaScript API for that key and restrict the key to your website origin in production.
-
-If the key is blank, **Use my current location** still works through the backend reverse-geocoding fallback. The fallback is suitable for development/testing; for production, use a geocoding provider with an appropriate service agreement and rate limits.
-
-## Browser permission
-The customer must allow location access when the browser asks. The site cannot silently obtain precise GPS location without browser permission.
+Relevant API routes are under `/api/addresses` and require the customer's authentication token.

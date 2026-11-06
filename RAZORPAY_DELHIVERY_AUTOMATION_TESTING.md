@@ -1,62 +1,41 @@
-# Razorpay → Delhivery → Customer AWB Email
+# Razorpay to Delhivery automation
 
-## Implemented flow
+The verified prepaid payment path attempts Delhivery shipment creation after payment finalization. A carrier failure does not roll back a captured payment. Admins can inspect and retry shipment creation from the Orders workflow.
 
-1. Customer checks out and the frontend carries the structured delivery address (recipient name, phone, address lines, city, state, PIN code and country) into the payment verification request.
-2. Razorpay payment signature is validated by the backend.
-3. The backend independently retrieves the Razorpay payment and verifies captured status, Razorpay order ID and amount.
-4. The backend commits the payment as Paid and deducts inventory.
-5. After the payment transaction commits, the backend checks Delhivery configuration and destination serviceability, then creates a Delhivery shipment using the existing Delhivery service.
-6. The returned AWB and label URL are saved in DelhiveryShipments against the order.
-7. The order confirmation email is sent. If an AWB exists, the email contains the AWB and Delhivery tracking link. If shipment creation failed or was skipped, the email says tracking details will follow.
-8. A Delhivery failure does not reverse the captured payment. The shipment is marked Creation Failed when a shipment record was created; the admin can retry from the Orders page.
+## Event flow
 
-## Required backend configuration
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Customer completes Razorpay checkout] --> B[Backend verifies signature and captured payment]
+    B --> C{Amount, order and stock valid?}
+    C -->|No| D[Keep payment/order for error or manual review]
+    C -->|Yes| E[Commit payment and reduce stock]
+    E --> F{Address and Delhivery settings complete?}
+    F -->|No| G[Leave paid order; shipment creation skipped]
+    F -->|Yes| H[Request Delhivery shipment]
+    H --> I{Carrier returned AWB?}
+    I -->|Yes| J[Save AWB/label and include tracking in email]
+    I -->|No| K[Record creation failure for admin retry]
+    G --> L[Send order confirmation]
+    J --> L
+    K --> L
+```
 
-Configure these values in the backend environment / secret store. Do not commit API tokens or SMTP passwords to appsettings or Git.
+## Required backend settings
 
-- `Razorpay:KeyId` and `Razorpay:KeySecret` — matching Razorpay test keys for test mode, or live keys for live mode.
-- `Delhivery:ApiToken` — token for the selected Delhivery environment.
-- `Delhivery:Environment` — `Staging` or `Production`.
-- `Delhivery:PickupLocationName` — exact active pickup location name in Delhivery One.
-- `Delhivery:ClientName` — exact client name configured in Delhivery One (the automatic workflow checks that it is present).
-- Existing Delhivery seller details and SMTP settings must also be configured as required by the current application.
-- `FrontendUrl` should be the public storefront base URL so product images in the confirmation email can be resolved.
+Configure the Delhivery token for the selected environment, environment/base URL, exact pickup location name, client name, and seller details. See [Delhivery setup](DELHIVERY_SETUP.md). Configure order email settings as described in [account setup](backend/ACCOUNT_SETUP.md).
 
-The automatic shipment uses a default parcel weight of **1000 grams**. Change this only after confirming the actual packing weight and the value Delhivery expects.
+The automated shipment currently uses a default parcel weight of 1000 grams. Confirm actual package weight and provider requirements before live orders.
 
-## Test checklist
+## Controlled test checklist
 
-### Before placing an order
+1. Use Razorpay test credentials and Delhivery staging configuration.
+2. Use a controlled test customer and destination supported by the staging account.
+3. Confirm the checkout amount and destination address.
+4. Complete a test payment and confirm the backend returns a paid order.
+5. Inspect the order and shipment record for an AWB or a recorded failure.
+6. Confirm the confirmation email reflects whether tracking information is available.
+7. If creation failed, inspect the recorded provider error and retry only after checking Delhivery One for a possibly-created shipment.
 
-- Confirm Razorpay test keys are active and match the current Razorpay mode.
-- Set Delhivery to Staging and use the corresponding staging token.
-- Confirm the pickup location is active and the exact configured name matches Delhivery One.
-- Confirm `Delhivery:ClientName` is configured.
-- Confirm the destination PIN code is serviceable for prepaid delivery in the selected Delhivery environment.
-- Confirm the SMTP/email provider can send the order confirmation email.
-- Restart the backend after changing environment variables.
-
-### Run one controlled test
-
-1. Sign in to the storefront.
-2. Add one in-stock product to the cart.
-3. Select or enter a complete delivery address. Verify name, mobile, city, state and six-digit PIN code.
-4. Continue to Razorpay and complete a test payment using Razorpay's test payment method.
-5. Wait for the storefront to redirect to the order success page.
-6. Open the admin Orders page and find the new order.
-7. Confirm Payment Status is Paid.
-8. Confirm the Delhivery shipment status is Shipment Created and an AWB is visible.
-9. Open the customer's confirmation email and verify that the AWB and tracking link are present.
-10. Open the tracking link and confirm Delhivery recognises the AWB.
-
-### Expected failure behaviour
-
-- If Razorpay payment is not captured or verification fails, the order must not be marked Paid and no shipment should be created.
-- If Delhivery rejects the PIN code, pickup location, token or shipment payload, the order remains Paid. The email is still sent without an AWB, and the admin should inspect the shipment error and retry after correcting the issue.
-- Do not repeatedly retry if Delhivery may have created a shipment but the API response timed out. First check Delhivery One using the order reference/AWB to avoid duplicate manifests.
-- Do not use a real customer order for initial testing. Use a controlled test order and confirm whether the selected Delhivery environment actually manifests shipments.
-
-## Important scope
-
-This automation is connected to the Razorpay `/api/payments/verify` flow. The separate test-only `/api/payments/test-success` endpoint and COD order flow have not been changed to automatically create Delhivery shipments. Admin shipment creation/retry remains available through the existing Orders workflow.
+The regular `/api/payments/verify` path and the Razorpay webhook can finalize a captured payment and attempt the paid-order shipment flow. The test-only `/api/payments/test-success` shortcut and COD order flow do not run this same automatic shipment path.

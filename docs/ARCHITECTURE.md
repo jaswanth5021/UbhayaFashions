@@ -1,91 +1,61 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · ENGINEERING</span><span class="doc-pill">Understand the system</span>
-<h1>System Architecture</h1>
-<p>How the storefront, API, database and external services work together while maintaining clear security and ownership boundaries.</p>
-<div class="doc-meta"><div><strong>Frontend</strong>ASP.NET Core MVC</div><div><strong>Backend</strong>ASP.NET Core Web API</div><div><strong>Persistence</strong>SQL Server · EF Core</div></div>
-</div>
+# Architecture
 
-## <strong>01</strong> System at a glance
+## System boundaries
 
-<figure class="doc-diagram">
-  <img src="assets/system-architecture.svg" alt="UBHAYA FASHIONS system architecture and integration boundaries." />
-  <figcaption>UBHAYA FASHIONS system architecture and integration boundaries.</figcaption>
-</figure>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    C[Browser<br/>customer or admin] --> F[ASP.NET Core MVC storefront<br/>renders pages and calls API services]
+    F --> A[ASP.NET Core Web API<br/>authenticates and applies business rules]
+    A --> D[(SQL Server<br/>EF Core persistence)]
+    A --> R[Razorpay]
+    A --> H[Delhivery]
+    A --> M[SMTP email provider]
+    F --> S[Static assets and shared uploads]
+    A --> S
+    S --> C
+    classDef app fill:#fff7f5,stroke:#68142e,color:#302522,stroke-width:2px
+    classDef provider fill:#fff8e9,stroke:#c69a45,color:#302522,stroke-width:2px
+    classDef data fill:#eefaf4,stroke:#2f7552,color:#302522,stroke-width:2px
+    class C,F,A,S app
+    class R,H,M provider
+    class D data
+```
 
-<div class="doc-grid">
-<div class="doc-card pink"><span class="ico">🖥️</span><strong>Frontend</strong><p>Razor views, MVC controllers, browser assets and customer/admin experience.</p></div>
-<div class="doc-card purple"><span class="ico">⚙️</span><strong>Backend API</strong><p>Business rules, authentication, integrations and persistence.</p></div>
-<div class="doc-card blue"><span class="ico">🗄️</span><strong>Database</strong><p>Durable application state managed through EF Core.</p></div>
-</div>
+- **Frontend:** `frontend/LadiesDressStore.Web.csproj`, ASP.NET Core MVC on .NET 8. Razor pages serve the storefront and admin UI. `ApiService` and `AdminApiService` call the backend.
+- **Backend:** `backend/backend.csproj`, ASP.NET Core Web API on .NET 8. Controllers validate requests and delegate provider work to services.
+- **Persistence:** SQL Server through EF Core in `backend/Data/ApplicationDbContext.cs`; migrations are in `backend/Migrations/`.
+- **Providers:** Razorpay, Delhivery, SMTP, and optional social sign-in integrations are called from server-side code.
+- **Media:** Both applications expose a shared persistent `UploadsPath` under `/uploads`.
 
-## <strong>02</strong> Repository structure
+## Local and Compose endpoints
 
-| Location | Responsibility |
-|---|---|
-| `frontend/` | MVC controllers, Razor views, services and static assets |
-| `backend/` | API controllers, business services and configuration |
-| `backend/Data/` | EF Core database context |
-| `backend/Migrations/` | Versioned database changes |
-| `tests/` | Automated regression tests |
-| `docs/` | Product and engineering handbook |
-| `docker-compose.yml` | Local container orchestration |
-
-## <strong>03</strong> Backend request lifecycle
-
-<figure class="doc-diagram">
-  <img src="assets/backend-request-lifecycle.svg" alt="Backend request lifecycle from HTTP request through validation, services and SQL Server." />
-  <figcaption>Backend request lifecycle from HTTP request through validation, services and SQL Server.</figcaption>
-</figure>
-
-Controllers should handle HTTP concerns. Reusable business rules and provider communication belong in services. DTOs define API contracts.
-
-## <strong>04</strong> Integration boundaries
-
-| Integration | Responsible layer | Key protection |
+| Service | Local launch profile | Docker Compose |
 |---|---|---|
-| SQL Server | Backend | No browser database access |
-| Razorpay | Backend + checkout UI | Secret server-side; verify signature |
-| Delhivery | Backend | Token server-side; validate order eligibility |
-| Email | Backend | Credentials in secure configuration |
-| Upload storage | Backend | Validate files; use durable storage |
+| Storefront | `https://localhost:5001` and `http://localhost:5000` | `http://localhost:5173` |
+| API | `https://localhost:56738` and `http://localhost:56739` | `http://localhost:5000` |
+| SQL Server | Configured local SQL Server | `localhost:1433` |
 
-## <strong>05</strong> Local runtime
+In local development, the frontend's `ApiBaseUrl` points to `https://localhost:56738/`. Inside Compose, the frontend uses the service address `http://api:5000/`. The host ports differ by environment.
 
-| Component | Local script URL / endpoint |
-|---|---|
-| Storefront | `http://localhost:5000` |
-| API | `http://localhost:5080` |
-| SQL Server | `localhost,1433` |
+## Request and authentication path
 
-Docker Compose uses a different published port arrangement: website on `5173`, API on `5000`. Refer to the root README and compose file when starting services.
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","fontSize":"16px"},"flowchart":{"useMaxWidth":false,"nodeSpacing":24,"rankSpacing":28,"padding":8}}}%%
+flowchart TD
+    B[Browser page request] --> F[MVC storefront and ApiService]
+    F --> A[Backend API<br/>auth, validation and rules]
+    A --> DB[(SQL Server<br/>EF Core read/write)]
+    classDef stage fill:#fff7f5,stroke:#68142e,color:#302522,stroke-width:2px
+    classDef data fill:#eefaf4,stroke:#2f7552,color:#302522,stroke-width:2px
+    class B,F,A stage
+    class DB data
+```
 
-## <strong>06</strong> Configuration map
+The API returns JSON to the MVC service layer, which renders the page. Protected API requests use JWT bearer authentication; the frontend uses distinct customer and admin cookies, and admin API authorization is enforced in the backend.
 
-- `ConnectionStrings:DefaultConnection`
-- `Jwt:Key`, `Jwt:Issuer`, `Jwt:Audience`
-- `FrontendUrl` and `UploadsPath`
-- `Razorpay:KeyId` and `Razorpay:KeySecret`
-- Delhivery environment, token, client and pickup-location settings
-- SMTP host, username and sender configuration
+The API applies EF Core migrations during startup, so its configured database must be available. Production deployments should coordinate this startup behavior with their schema migration and rollback process.
 
-Use environment variables or a secret manager for production. Example settings are placeholders only.
+## Static files
 
-## <strong>07</strong> Reliability and storage
-
-<div class="doc-grid two">
-<div class="doc-card green"><span class="ico">🔁</span><strong>Idempotent operations</strong><p>Protect payment callbacks, webhooks and shipment retries from duplicate side effects.</p></div>
-<div class="doc-card blue"><span class="ico">💾</span><strong>Durable uploads</strong><p>Keep customer/product media outside replaceable publish folders and back it up separately.</p></div>
-</div>
-
-Use transactions for related database writes. Treat provider timeouts as uncertain until reconciled. Avoid holding database transactions open across slow network calls without a deliberate design.
-
-## <strong>08</strong> Architecture review checklist
-
-- [ ] Responsibility belongs to the correct project.
-- [ ] Backend remains authoritative for business rules.
-- [ ] Trust boundaries and authorization are explicit.
-- [ ] External failures and retries are safe.
-- [ ] Configuration and secrets are documented securely.
-- [ ] Tests and deployment steps are updated.
-
-<div class="doc-footer">UBHAYA FASHIONS · Architecture handbook · Update when project boundaries or integrations change.</div>
+The storefront applies response compression to the static asset paths (`/css`, `/js`, `/images`, and `/uploads`). Static files receive cache headers; versioned assets get a long cache lifetime. Personalized HTML is not in the static-asset compression branch.

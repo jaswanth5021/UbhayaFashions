@@ -67,3 +67,49 @@ body {
  .markdown-body table { display:block; overflow-x:auto; }
 }
 @media(max-width:440px) { .markdown-body .doc-grid,.markdown-body .doc-grid.two,.markdown-body .doc-grid.four { grid-template-columns:1fr; } }
+
+/* Mermaid diagrams use a fixed light palette so labels remain readable in every editor theme. */
+.markdown-body .mermaid .node rect,
+.markdown-body .mermaid .node polygon,
+.markdown-body .mermaid .node circle,
+.markdown-body .mermaid .node ellipse,
+.markdown-body .mermaid rect.actor,
+.markdown-body .mermaid rect.actor-top,
+.markdown-body .mermaid rect.actor-bottom,
+.markdown-body .mermaid .actor rect,
+.markdown-body .mermaid .actor-top rect,
+.markdown-body .mermaid .actor-bottom rect,
+.markdown-body .mermaid .labelBox,
+.markdown-body .mermaid .note rect,
+.markdown-body .mermaid .stateGroup rect,
+.markdown-body .mermaid .statediagram-state rect,
+.markdown-body .mermaid .entityBox,
+.markdown-body .mermaid .attributeBoxOdd,
+.markdown-body .mermaid .attributeBoxEven,
+.markdown-body .mermaid .relationshipLabelBox,
+.markdown-body .mermaid rect.er {
+  fill:#fff7f5 !important;
+  stroke:#68142e !important;
+}
+.markdown-body .mermaid .cluster rect,
+.markdown-body .mermaid .cluster polygon { fill:#fbf8fc !important; stroke:#a88ca4 !important; }
+.markdown-body .mermaid .edgeLabel rect,
+.markdown-body .mermaid rect.labelBox { fill:#fbf8fc !important; stroke:#eadedb !important; }
+.markdown-body .mermaid .actor,
+.markdown-body .mermaid .actor-top,
+.markdown-body .mermaid .actor-bottom,
+.markdown-body .mermaid .labelBox { fill:#fff7f5 !important; stroke:#68142e !important; }
+.markdown-body .mermaid text,
+.markdown-body .mermaid tspan { fill:#302522 !important; }
+.markdown-body .mermaid .edgePath path,
+.markdown-body .mermaid .flowchart-link,
+.markdown-body .mermaid .relationshipLine,
+.markdown-body .mermaid .relationshipPath,
+.markdown-body .mermaid .messageLine0,
+.markdown-body .mermaid .messageLine1,
+.markdown-body .mermaid .actor-line,
+.markdown-body .mermaid .relation { stroke:#68142e !important; }
+.markdown-body .mermaid .entityLabel,
+.markdown-body .mermaid .attributeLabel,
+.markdown-body .mermaid .relationshipLabelText { fill:#302522 !important; }
+.markdown-body .mermaid .marker { fill:#68142e !important; stroke:#68142e !important; }

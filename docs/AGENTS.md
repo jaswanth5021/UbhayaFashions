@@ -1,97 +1,61 @@
-<div class="doc-hero"><span class="doc-kicker">UBHAYA FASHIONS · CONTRIBUTOR HANDBOOK</span><span class="doc-pill">AI and developer instructions</span><h1>Agent & Contributor Guide</h1><p>Rules for AI coding assistants and human contributors working safely in the UBHAYA FASHIONS repository.</p><div class="doc-meta"><div><strong>Audience</strong>Developers · AI agents</div><div><strong>Repository</strong>UbhayaFashions</div><div><strong>Goal</strong>Safe, verifiable changes</div></div></div>
+# Contributor and agent guide
 
-## <strong>01</strong> Mission
+This guide applies to changes in this repository. Treat the checked-in application code and configuration as the source of truth; keep documentation synchronized with them.
 
-Improve UBHAYA FASHIONS while preserving customer journeys, business rules, data integrity and production stability.
+## Repository map
 
-## <strong>02</strong> Repository map
-
-| Path | Purpose |
+| Path | Responsibility |
 |---|---|
-| `frontend/` | ASP.NET Core MVC storefront and admin website |
-| `backend/` | ASP.NET Core Web API and business logic |
-| `backend/Data/` | EF Core database context |
-| `backend/Migrations/` | Database migrations |
-| `tests/` | Automated tests |
+| `frontend/` | ASP.NET Core MVC storefront, admin pages, browser assets |
+| `backend/` | ASP.NET Core API, business rules, EF Core models and migrations |
+| `tests/` | xUnit tests |
 | `docs/` | Product and engineering documentation |
-| Root setup guides | Admin, checkout, Razorpay and Delhivery instructions |
+| Root Markdown guides | Local setup and provider integration notes |
 
-## <strong>03</strong> Required working process
+## Working flow
 
-<figure class="doc-diagram">
-  <img src="assets/agent-workflow.svg" alt="AI agent and contributor workflow from code inspection to evidence-based reporting." />
-  <figcaption>AI agent and contributor workflow from code inspection to evidence-based reporting.</figcaption>
-</figure>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart LR
+    A[Read the requirement] --> B[Inspect related code and docs]
+    B --> C[Identify ownership, security and data boundaries]
+    C --> D[Make a focused change]
+    D --> E[Review the diff and configuration]
+    E --> F[Run relevant validation when requested or required]
+    F --> G[Report changed files and actual evidence]
+```
 
-<div class="doc-grid"><div class="doc-card pink"><span class="ico">🔍</span><strong>Inspect first</strong><p>Read relevant controllers, services, DTOs, views, models and tests.</p></div><div class="doc-card purple"><span class="ico">🧠</span><strong>Understand ownership</strong><p>Identify source of truth, business rules and security boundaries.</p></div><div class="doc-card blue"><span class="ico">🧪</span><strong>Prove the change</strong><p>Run builds and tests; report anything not verified.</p></div></div>
+Before changing a behavior, inspect its controller, service, DTO/model, view or browser code, and related tests. Preserve the current customer journey and backend ownership of prices, stock, payment state, and authorization.
 
-## <strong>04</strong> Non-negotiable rules
+## Engineering rules
 
-### Architecture
-- SQL access stays in the backend.
-- Frontend calls API through existing service abstractions.
-- Controllers stay focused; reusable rules belong in services.
-- Do not create a second source of truth for price, stock or payment state.
-
-### Security
-- Never hardcode or expose secrets.
-- Keep Razorpay and Delhivery credentials out of browser code.
-- Enforce authorization and ownership in the backend.
-- Do not weaken validation, authentication or anti-forgery controls to bypass tests.
-- Do not claim certifications without evidence.
-
-### Commerce
+- Keep SQL and business decisions in the backend; use the existing frontend API service abstractions.
+- Keep controller actions focused and reuse service logic where it already exists.
 - Recalculate totals and validate stock on the server.
-- Never trust client-side payment success alone.
-- Verify signatures and provider events.
-- Make callbacks and retries idempotent.
-- Do not manifest prepaid orders before payment verification.
-- Do not report shipment success without a confirmed carrier response.
+- Never trust a browser redirect or callback as proof of payment. Verify signatures and provider status on the backend.
+- Keep Razorpay, Delhivery, SMTP, and OAuth secrets out of browser code and source control.
+- Preserve customer ownership checks, admin roles, antiforgery, validation, and error handling.
+- Preserve semantic markup, keyboard access, visible focus, and responsive behavior when changing the UI.
+- Do not claim a Lighthouse score, deployment, security certification, or test result without evidence.
+- Review migration, backup, upload-storage, and rollback implications before changing persistent data behavior.
+- Keep user uploads in durable shared storage, not an ephemeral publish directory.
 
-### UI
-- Preserve brand identity unless redesign is requested.
-- Test narrow mobile and desktop layouts.
-- Prevent horizontal overflow.
-- Keep essential actions available without hover.
-- Preserve accessible labels, focus and feedback.
-- Avoid unrelated visual changes.
+## Validation commands
 
-### Data and deployment
-- Never delete or overwrite production data as part of a code change.
-- Review migration, backup and restore implications.
-- Keep uploads in durable storage outside ephemeral publish folders.
-- Do not run production migrations or deployments without explicit approval.
+Run from the repository root when relevant:
 
-## <strong>05</strong> Validation commands
-
-```bash
+```powershell
 dotnet build LadiesDressStore.sln
 dotnet test tests/UbhayaFashions.Tests/UbhayaFashions.Tests.csproj
 ```
 
-Run from repository root. If tools or provider access are unavailable, state that limitation instead of claiming success.
+The current test project contains product catalog normalization and price-ceiling tests. Do not describe broader coverage as present unless new tests are added.
 
-## <strong>06</strong> Definition of done
+## Completion checklist
 
-- [ ] Requirement and current behaviour inspected.
-- [ ] Implementation follows project conventions.
-- [ ] Authorization, validation and failure paths covered.
-- [ ] Tests added/updated and run where possible.
-- [ ] Build succeeds.
-- [ ] No secrets or personal data introduced.
-- [ ] UI checked at mobile and desktop sizes when relevant.
-- [ ] Documentation/configuration updated.
-- [ ] Remaining risks and unverified steps reported.
-
-## <strong>07</strong> Completion report format
-
-| Heading | Required information |
-|---|---|
-| Changed | Files and behaviour changed |
-| Why | Problem addressed |
-| Validation | Exact commands and outcomes |
-| Risk | Migration, configuration, deployment or provider dependency |
-| Next action | Remaining human/environment action |
-
-<div class="doc-callout"><span>🚫</span><div><b>Never overstate completion</b><br/>Do not say a change is deployed, live, secure or fully tested unless you have evidence.</div></div>
-<div class="doc-footer">UBHAYA FASHIONS · Contributor guide · Read this before making repository changes.</div>
+- [ ] Existing behavior and its source of truth were inspected.
+- [ ] Authorization, validation, and failure paths were considered.
+- [ ] Persistent schema/configuration changes are documented.
+- [ ] Relevant build, tests, or manual checks were actually run.
+- [ ] Secrets and customer data are absent from the diff.
+- [ ] The final summary names changes and evidence accurately.

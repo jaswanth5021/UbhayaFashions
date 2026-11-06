@@ -1,84 +1,42 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · BRAND EXPERIENCE</span><span class="doc-pill">Design with consistency</span>
-<h1>Design System</h1>
-<p>The visual language for a premium, warm and product-first fashion shopping experience across mobile and desktop.</p>
-<div class="doc-meta"><div><strong>Direction</strong>Fashion editorial</div><div><strong>Priority</strong>Mobile-first</div><div><strong>Principle</strong>Product before decoration</div></div>
-</div>
+# Design system
 
-## <strong>01</strong> Design principles
+The storefront uses a warm fashion palette with deep wine accents, blush surfaces, gold highlights, dark brown text, and muted supporting text. Styles are spread across page stylesheets; the shared refresh tokens are in `frontend/wwwroot/css/pages/shared/ui-refresh.css`.
 
-<div class="doc-grid">
-<div class="doc-card pink"><span class="ico">📰</span><strong>Editorial</strong><p>Generous imagery, calm layouts and confident typography.</p></div>
-<div class="doc-card purple"><span class="ico">🎯</span><strong>Clarity</strong><p>Price, size, colour, stock and actions are easy to scan.</p></div>
-<div class="doc-card blue"><span class="ico">🧱</span><strong>Consistency</strong><p>Shared spacing, components, controls and feedback.</p></div>
-<div class="doc-card green"><span class="ico">📱</span><strong>Mobile-first</strong><p>Make the small-screen shopping journey excellent.</p></div>
-</div>
+## Shared tokens
 
-## <strong>02</strong> Colour palette
-
-| Token | Value | Role |
+| Token | Value | Use |
 |---|---|---|
-| Ink | `#242126` | Primary text |
-| Muted | `#77717A` | Secondary text |
-| Canvas | `#FAF8F7` | Page background |
-| Surface | `#FFFFFF` | Cards and panels |
-| Brand berry | `#8B3A62` | Primary accent |
-| Soft rose | `#F4E8EE` | Subtle accent surfaces |
-| Border | `#E9E3E6` | Dividers and outlines |
-| Success | `#26734D` | Confirmed success |
-| Warning | `#98651A` | Caution |
-| Danger | `#B33B45` | Errors |
+| `--ui-wine` | `#68142e` | Primary brand/action |
+| `--ui-wine-deep` | `#4f1025` | Deep brand accent |
+| `--ui-rose` | `#a84a61` | Secondary accent |
+| `--ui-blush` | `#f8e9e9` | Soft surface |
+| `--ui-blush-light` | `#fff7f5` | Light surface |
+| `--ui-gold` | `#c69a45` | Accent/detail |
+| `--ui-ink` | `#302522` | Main text |
+| `--ui-muted` | `#786a68` | Secondary text |
+| `--ui-line` | `#eadedb` | Borders/dividers |
 
-These are proposed documentation tokens. Reconcile them with the actual production CSS before applying global changes.
+These are shared tokens, not a guarantee that every legacy page currently uses them. Review a page's local stylesheet before changing its visual rules.
 
-## <strong>03</strong> Typography and spacing
+## Type and layout
 
-Use a legible sans-serif for controls and body copy. Reserve display typography for campaign headings. Use a 4px spacing base and consistent section rhythm.
+The storefront primarily uses Arial for interface text and Georgia for selected editorial headings. Keep body text readable, preserve hierarchy, and test both narrow mobile and desktop layouts. Components should not depend on hover for essential actions.
 
-| Token | Size | Typical use |
-|---|---:|---|
-| Space 1 | 4px | Icon gap |
-| Space 2 | 8px | Compact control |
-| Space 3 | 12px | Card internals |
-| Space 4 | 16px | Standard gap |
-| Space 6 | 24px | Section spacing |
-| Space 8 | 32px | Large gap |
-| Space 12 | 48px | Editorial separation |
+## Interaction states
 
-## <strong>04</strong> Core component patterns
+![Design flow from shared tokens through semantic roles and components into page templates, followed by accessibility and responsive checks.](assets/design-system-flow.svg)
 
-<div class="doc-grid two">
-<div class="doc-card pink"><span class="ico">🧭</span><strong>Header and navigation</strong><p>Clear logo, search, account, wishlist and cart. Mobile menu must not overlap icons or content.</p></div>
-<div class="doc-card purple"><span class="ico">🛍️</span><strong>Product cards</strong><p>Consistent image ratios, clear product name and price, restrained badges and useful hover states.</p></div>
-<div class="doc-card blue"><span class="ico">🖼️</span><strong>Product detail</strong><p>Visual gallery, obvious variant selection, stock messaging and reachable add-to-cart action.</p></div>
-<div class="doc-card green"><span class="ico">✍️</span><strong>Forms and feedback</strong><p>Persistent labels, inline validation, loading, disabled, success and error states.</p></div>
-</div>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+stateDiagram-v2
+    [*] --> Default
+    Default --> Hover: Pointer enters
+    Default --> Focus: Keyboard focus
+    Default --> Loading: Action starts
+    Loading --> Success: Request succeeds
+    Loading --> Error: Request fails
+    Success --> Default: Continue
+    Error --> Default: Retry
+```
 
-## <strong>05</strong> Responsive test matrix
-
-| Viewport | Design expectation |
-|---|---|
-| 320px | No horizontal overflow; compact navigation |
-| 360–390px | Comfortable touch targets and readable product details |
-| 768px | Balanced tablet layouts |
-| 1024px | Expanded catalogue and navigation |
-| 1440px | Editorial whitespace and wider product grid |
-
-## <strong>06</strong> Motion and interaction
-
-- Keep transitions short and purposeful.
-- Respect `prefers-reduced-motion`.
-- Essential content must never depend on hover.
-- Ensure focus and hover communicate equivalent affordances.
-- Avoid layout shifts when images or content load.
-
-## <strong>07</strong> Accessibility review
-
-<div class="doc-grid">
-<div class="doc-card green"><span class="ico">⌨️</span><strong>Keyboard</strong><p>All controls and menus are operable.</p></div>
-<div class="doc-card blue"><span class="ico">👁️</span><strong>Contrast</strong><p>Text and controls remain legible.</p></div>
-<div class="doc-card purple"><span class="ico">🏷️</span><strong>Labels</strong><p>Inputs and icon-only controls have names.</p></div>
-<div class="doc-card yellow"><span class="ico">♿</span><strong>Motion</strong><p>Reduced-motion preferences are respected.</p></div>
-</div>
-
-<div class="doc-footer">UBHAYA FASHIONS · Design handbook · Review real mobile and desktop screenshots for every meaningful UI change.</div>
+Every interactive control should have a visible keyboard focus state and a clear loading/success/error response where the action is asynchronous. Use labels and meaningful alternative text for content images; use empty alt text only for decorative images.

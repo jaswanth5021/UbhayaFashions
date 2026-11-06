@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1120" viewBox="0 0 900 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Razorpay prepaid payment flow</title>
+  <desc id="desc">The storefront sends cart and address to the API. The API recalculates totals and checks stock, creates a pending order and Razorpay order, then verifies the returned signature and captured payment before committing payment and stock. Shipping and email follow payment.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#68142e"/></marker>
+    <filter id="shadow" x="-12%" y="-10%" width="124%" height="125%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#56334f" flood-opacity=".10"/></filter>
+  </defs>
+  <rect width="900" height="1120" rx="24" fill="#fbf8fc"/>
+  <text x="450" y="54" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="800" fill="#4f1025">Razorpay prepaid checkout</text>
+  <text x="450" y="83" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="15" fill="#786a68">The API confirms payment before it marks an order paid or deducts stock.</text>
+  <g filter="url(#shadow)">
+    <rect x="100" y="120" width="700" height="112" rx="18" fill="#fff" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="265" width="700" height="112" rx="18" fill="#fff7f5" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="410" width="700" height="112" rx="18" fill="#fff8e9" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="555" width="700" height="112" rx="18" fill="#fff7f5" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="700" width="700" height="112" rx="18" fill="#eefaf4" stroke="#d8f0e2" stroke-width="2"/>
+    <rect x="100" y="845" width="700" height="112" rx="18" fill="#fff" stroke="#eadedb" stroke-width="2"/>
+  </g>
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <g fill="#68142e" font-size="13" font-weight="800"><text x="140" y="150">01 · STOREFRONT</text><text x="140" y="295">02 · BACKEND API</text><text x="140" y="440">03 · RAZORPAY</text><text x="140" y="585">04 · BACKEND VERIFY</text><text x="140" y="730">05 · DATABASE</text><text x="140" y="875">06 · POST-PAYMENT</text></g>
+    <g fill="#302522" font-size="17" font-weight="700"><text x="140" y="180">Send cart items and selected delivery address</text><text x="140" y="325">Recalculate total · check variant stock · save pending order</text><text x="140" y="470">Create provider order · customer completes Checkout</text><text x="140" y="615">Check signature · fetch captured status · match order and amount</text><text x="140" y="760">Commit captured payment · mark order paid · deduct stock once</text><text x="140" y="905">Attempt Delhivery shipment · send order confirmation</text></g>
+    <g fill="#786a68" font-size="13"><text x="140" y="210">POST /api/payments/create-order</text><text x="140" y="355">The server owns prices and order totals</text><text x="140" y="500">Key secret stays on the backend</text><text x="140" y="645">POST /api/payments/verify</text><text x="140" y="790">Idempotent finalization protects stock</text><text x="140" y="935">Carrier failure does not undo payment</text></g>
+  </g>
+  <g fill="none" stroke="#68142e" stroke-width="2.5" marker-end="url(#arrow)"><path d="M450 235 V257"/><path d="M450 380 V402"/><path d="M450 525 V547"/><path d="M450 670 V692"/><path d="M450 815 V837"/></g>
+  <rect x="100" y="990" width="700" height="78" rx="16" fill="#fff2ed" stroke="#f4ded4"/>
+  <text x="450" y="1020" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="800" fill="#7b2e31">If verification fails</text>
+  <text x="450" y="1045" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" fill="#5f4a4a">Do not mark paid or deduct stock. Captured funds with unavailable stock need support/refund review.</text>
+</svg>

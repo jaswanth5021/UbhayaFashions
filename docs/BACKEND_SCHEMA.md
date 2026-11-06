@@ -1,68 +1,135 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · DATA ENGINEERING</span><span class="doc-pill">Model data with confidence</span>
-<h1>Backend Data Model</h1>
-<p>A practical guide to persistence, domain relationships, migrations and the data integrity rules behind the store.</p>
-<div class="doc-meta"><div><strong>Database</strong>SQL Server</div><div><strong>ORM</strong>Entity Framework Core</div><div><strong>Source of truth</strong>ApplicationDbContext</div></div>
-</div>
+# Backend schema
 
-## <strong>01</strong> Data ownership
+The EF Core source of truth is `backend/Data/ApplicationDbContext.cs`, the model configuration, and the migrations in `backend/Migrations/`. These simplified diagrams are split by domain so their entity names and relationships remain readable. They omit most columns, indexes, and some standalone support tables.
 
-The backend owns database access. The EF Core model is defined in `backend/Data/ApplicationDbContext.cs`, entity classes and versioned changes in `backend/Migrations/`.
+## Core relationship diagram
 
-## <strong>02</strong> Domain areas
+### Accounts
 
-<div class="doc-grid">
-<div class="doc-card pink"><span class="ico">👤</span><strong>Identity</strong><p>Customer and administrator accounts, roles and authentication metadata.</p></div>
-<div class="doc-card purple"><span class="ico">👗</span><strong>Catalogue</strong><p>Products, categories, product images and videos.</p></div>
-<div class="doc-card blue"><span class="ico">🎨</span><strong>Variants</strong><p>Sizes, colours, price, discount and stock quantities.</p></div>
-<div class="doc-card green"><span class="ico">🛒</span><strong>Commerce</strong><p>Orders, order items, payments and customer addresses.</p></div>
-<div class="doc-card yellow"><span class="ico">🚚</span><strong>Fulfilment</strong><p>Carrier references, AWB and shipment tracking state.</p></div>
-<div class="doc-card orange"><span class="ico">📣</span><strong>Storefront</strong><p>Homepage banner metadata and media references.</p></div>
-</div>
-
-## <strong>03</strong> Conceptual relationship map
-
-<figure class="doc-diagram">
-  <img src="assets/conceptual-data-relationships.svg" alt="Conceptual data relationship map for customers, orders, products and fulfilment." />
-  <figcaption>Conceptual data relationship map for customers, orders, products and fulfilment.</figcaption>
-</figure>
-
-> [!NOTE]
-> This is a conceptual domain diagram, not a generated database schema. Verify exact table names, nullability, foreign keys and delete behaviours in the current EF model and migrations.
-
-## <strong>04</strong> Persistence rules
-
-| Concern | Standard |
-|---|---|
-| Money | Use `decimal`, never floating point |
-| Relationships | Explicit foreign keys and delete behaviours |
-| Migrations | Version all schema changes with EF Core |
-| Indexes | Add based on query patterns and uniqueness |
-| Time | Store consistently; display in user timezone |
-| Media | Store files durably; persist references/metadata |
-| History | Preserve order and payment history appropriately |
-
-## <strong>05</strong> Migration workflow
-
-```bash
-cd backend
-dotnet ef migrations add <DescriptiveMigrationName>
-dotnet ef database update
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
+erDiagram
+    CUSTOMER ||--o{ EXTERNAL_LOGIN : links
+    CUSTOMER ||--o{ CUSTOMER_ADDRESS : saves
+    CUSTOMER {
+        int Id PK
+        string Email
+        bool EmailVerified
+    }
+    EXTERNAL_LOGIN {
+        int CustomerId FK
+        string Provider
+    }
+    CUSTOMER_ADDRESS {
+        int CustomerId FK
+        string PostalCode
+        bool IsDefault
+    }
 ```
 
-<div class="doc-grid four">
-<div class="doc-card pink"><span class="ico">1️⃣</span><strong>Generate</strong><p>Create migration from model changes.</p></div>
-<div class="doc-card purple"><span class="ico">2️⃣</span><strong>Review</strong><p>Inspect generated SQL and destructive changes.</p></div>
-<div class="doc-card blue"><span class="ico">3️⃣</span><strong>Backup</strong><p>Take and verify a database backup.</p></div>
-<div class="doc-card green"><span class="ico">4️⃣</span><strong>Apply</strong><p>Deploy and validate critical data paths.</p></div>
-</div>
+### Catalog and inventory
 
-## <strong>06</strong> Data protection
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
+erDiagram
+    CATEGORY ||--o{ PRODUCT : groups
+    PRODUCT ||--o{ PRODUCT_VARIANT : has
+    PRODUCT ||--o{ PRODUCT_IMAGE : has
+    PRODUCT ||--o{ PRODUCT_VIDEO : has
+    PRODUCT ||--o{ INVENTORY_TRANSACTION : records
+    PRODUCT {
+        int Id PK
+        int CategoryId FK
+        string Name
+    }
+    PRODUCT_VARIANT {
+        int Id PK
+        int ProductId FK
+        string Color
+        string Size
+        decimal Price
+        int Stock
+    }
+    CATEGORY {
+        int Id PK
+        string Name
+    }
+```
 
-- Never add real customer information or secrets to seed data.
-- Restrict production database and backup access.
-- Avoid logging full addresses, phone numbers and payment payloads.
-- Define retention and deletion rules.
-- Use synthetic data in automated tests.
+### Orders and payments
 
-<div class="doc-footer">UBHAYA FASHIONS · Data handbook · Keep this aligned with EF Core entities and migrations.</div>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ ORDER_ITEM : contains
+    ORDER ||--o{ PAYMENT : has
+    ORDER ||--o| DELHIVERY_SHIPMENT : may_have
+    ORDER {
+        int Id PK
+        int CustomerId FK
+        decimal TotalAmount
+        string Status
+        string PaymentStatus
+    }
+    ORDER_ITEM {
+        int OrderId FK
+        int ProductId FK
+        int Quantity
+    }
+    PAYMENT {
+        int Id PK
+        int OrderId FK
+        string RazorpayOrderId
+        string Status
+    }
+    DELHIVERY_SHIPMENT {
+        int OrderId FK
+        string Waybill
+        string ShipmentStatus
+    }
+```
+
+### Customer activity
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
+erDiagram
+    CUSTOMER ||--o{ WISHLIST_ITEM : owns
+    CUSTOMER ||--o{ RECENTLY_VIEWED_PRODUCT : views
+    CUSTOMER ||--o{ PRODUCT_REVIEW : writes
+    CUSTOMER ||--o{ PRODUCT_REVIEW_VOTE : votes
+    PRODUCT ||--o{ WISHLIST_ITEM : appears_in
+    PRODUCT ||--o{ RECENTLY_VIEWED_PRODUCT : appears_in
+    PRODUCT ||--o{ PRODUCT_REVIEW : receives
+    PRODUCT_REVIEW ||--o{ PRODUCT_REVIEW_IMAGE : includes
+    PRODUCT_REVIEW ||--o{ PRODUCT_REVIEW_VOTE : receives
+```
+
+### Notifications
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","textColor":"#302522","fontSize":"16px"},"er":{"theme":"base","look":"classic","layoutDirection":"LR","fill":"#fff7f5","stroke":"#68142e","fontSize":16,"entityPadding":10,"minEntityWidth":145,"minEntityHeight":58,"nodeSpacing":28,"rankSpacing":36,"diagramPadding":12}}}%%
+erDiagram
+    STORE_NOTIFICATION ||--o{ CUSTOMER_NOTIFICATION_STATE : has_state
+    CUSTOMER ||--o{ CUSTOMER_NOTIFICATION_STATE : tracks
+```
+
+## Model groups
+
+- **Accounts:** `Customers`, `PendingSignups`, `ExternalLogins`, `AdminUsers`, `CustomerAddresses`
+- **Catalog:** `Categories`, `Products`, `ProductVariants`, `ProductImages`, `ProductVideos`
+- **Commerce:** `Orders`, `OrderItems`, `Payments`, `RazorpayWebhookEvents`, `DelhiveryShipments`, `InventoryTransactions`
+- **Customer activity:** `WishlistItems`, `RecentlyViewedProducts`, `ProductReviews`, `ProductReviewImages`, `ProductReviewVotes`
+- **Notifications:** `StoreNotification` records (DbSet exposed as `Notifications`) and `CustomerNotificationStates`
+
+## Important constraints
+
+- Product variant identity is unique by `(ProductId, Color, Size)`.
+- Razorpay order IDs and webhook event IDs are unique; a non-null Razorpay payment ID is unique.
+- An order has at most one Delhivery shipment record.
+- A customer can review a product once; review votes are unique per customer and review.
+- Customer notification state uses the composite key `(CustomerId, NotificationId)`.
+- Product categories are protected from deletion while referenced. Deleting a product clears its optional product link from a store notification.
+
+Migrations are applied automatically at API startup. For a deployment that manages schema changes separately, use `dotnet ef database update --project backend/backend.csproj --startup-project backend/backend.csproj` and coordinate the operation with the database backup and rollback plan.

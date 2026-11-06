@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1120" viewBox="0 0 900 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Razorpay webhook processing flow</title>
+  <desc id="desc">The backend receives a signed payment event, verifies the raw-body HMAC and event ID, deduplicates it, matches the local payment and order, checks payment status and amount, then commits once or records a safe ignored, rejected, or manual-review outcome.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#68142e"/></marker>
+    <filter id="shadow" x="-12%" y="-10%" width="124%" height="125%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#56334f" flood-opacity=".10"/></filter>
+  </defs>
+  <rect width="900" height="1120" rx="24" fill="#fbf8fc"/>
+  <text x="450" y="54" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="800" fill="#4f1025">Razorpay webhook processing</text>
+  <text x="450" y="83" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="15" fill="#786a68">Validate the event before any order or stock state changes.</text>
+  <g filter="url(#shadow)">
+    <rect x="100" y="120" width="700" height="112" rx="18" fill="#fff8e9" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="265" width="700" height="112" rx="18" fill="#fff7f5" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="410" width="700" height="112" rx="18" fill="#fff" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="555" width="700" height="112" rx="18" fill="#fff7f5" stroke="#eadedb" stroke-width="2"/>
+    <rect x="100" y="700" width="700" height="112" rx="18" fill="#eefaf4" stroke="#d8f0e2" stroke-width="2"/>
+    <rect x="100" y="845" width="700" height="112" rx="18" fill="#fff" stroke="#eadedb" stroke-width="2"/>
+  </g>
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <g fill="#68142e" font-size="13" font-weight="800"><text x="140" y="150">01 · RECEIVE</text><text x="140" y="295">02 · VERIFY</text><text x="140" y="440">03 · DEDUPLICATE</text><text x="140" y="585">04 · MATCH PAYMENT</text><text x="140" y="730">05 · PROCESS EVENT</text><text x="140" y="875">06 · ACKNOWLEDGE</text></g>
+    <g fill="#302522" font-size="17" font-weight="700"><text x="140" y="180">payment.captured or payment.failed</text><text x="140" y="325">Check HMAC over raw body and require event ID</text><text x="140" y="470">Persist unique event ID; serialize payment update</text><text x="140" y="615">Find local order; validate status, amount, currency, and reference</text><text x="140" y="760">Commit captured payment and stock once, or record review state</text><text x="140" y="905">Return provider response; run paid-order follow-up</text></g>
+    <g fill="#786a68" font-size="13"><text x="140" y="210">POST /api/payment/razorpay/webhook</text><text x="140" y="355">X-Razorpay-Signature</text><text x="140" y="500">Duplicate event IDs are acknowledged safely</text><text x="140" y="645">Reject mismatched payment details</text><text x="140" y="790">Unavailable stock becomes NeedsReview</text><text x="140" y="935">Shipment and confirmation email are post-commit</text></g>
+  </g>
+  <g fill="none" stroke="#68142e" stroke-width="2.5" marker-end="url(#arrow)"><path d="M450 235 V257"/><path d="M450 380 V402"/><path d="M450 525 V547"/><path d="M450 670 V692"/><path d="M450 815 V837"/></g>
+  <rect x="100" y="990" width="700" height="78" rx="16" fill="#f8e9e9" stroke="#eadedb"/>
+  <text x="450" y="1020" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="800" fill="#4f1025">Safe outcomes</text>
+  <text x="450" y="1045" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" fill="#5f4a4a">Invalid signature: reject · Unsupported event: ignore · Missing stock after capture: operator review</text>
+</svg>

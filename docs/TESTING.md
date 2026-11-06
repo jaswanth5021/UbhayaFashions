@@ -1,93 +1,58 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · QUALITY ENGINEERING</span><span class="doc-pill">Turn tests into a stable product</span>
-<h1>Testing Guide</h1>
-<p>A practical test strategy to confirm the application is functional, secure, performant and ready for production.</p>
-<div class="doc-meta"><div><strong>Scope</strong>Frontend · Backend · Integrations</div><div><strong>Test layers</strong>Unit · Integration · E2E</div><div><strong>Goal</strong>Release confidence</div></div>
-</div>
+# Testing guide
 
-## <strong>01</strong> Testing overview
+This guide describes the available automated test project and useful manual journeys. It does not report a test run.
 
-| Area | Coverage |
-|---|---|
-| Product | Search, filters, variants, price and availability |
-| Customer | Registration, login, reset password and addresses |
-| Commerce | Cart, checkout, orders and inventory |
-| Integrations | Razorpay, webhooks, email and Delhivery |
-| Experience | Responsive UI, accessibility and performance |
-| Operations | Migrations, uploads, backups and recovery |
+## Automated tests
 
-## <strong>02</strong> Testing goals
+Run these commands from the repository root:
 
-<div class="doc-grid">
-<div class="doc-card pink"><span class="ico">✓</span><strong>Feature correctness</strong><p>Ensure core features behave as expected.</p></div>
-<div class="doc-card purple"><span class="ico">👥</span><strong>User experience</strong><p>Provide a smooth experience across devices.</p></div>
-<div class="doc-card orange"><span class="ico">🛡️</span><strong>Early defect detection</strong><p>Catch and fix bugs before release.</p></div>
-<div class="doc-card blue"><span class="ico">⏱️</span><strong>Performance</strong><p>Maintain responsive pages and reliable APIs.</p></div>
-<div class="doc-card green"><span class="ico">♿</span><strong>Accessibility</strong><p>Support inclusive interaction patterns.</p></div>
-<div class="doc-card yellow"><span class="ico">🔒</span><strong>Data security</strong><p>Keep customer and transaction data protected.</p></div>
-</div>
-
-## <strong>03</strong> Test strategy
-
-<figure class="doc-diagram">
-  <img src="assets/testing-strategy.svg" alt="Testing strategy showing unit, integration and end-to-end test layers." />
-  <figcaption>Testing strategy showing unit, integration and end-to-end test layers.</figcaption>
-</figure>
-
-Use many fast unit tests, focused integration tests for important boundaries and a smaller number of end-to-end tests for revenue-critical journeys.
-
-## <strong>04</strong> Critical user flows
-
-<div class="doc-grid four">
-<div class="doc-card pink"><span class="ico">👤</span><strong>01 · Account</strong><p>Register, verify, sign in, reset password.</p></div>
-<div class="doc-card purple"><span class="ico">👗</span><strong>02 · Shopping</strong><p>Browse, filter, select variants and cart.</p></div>
-<div class="doc-card blue"><span class="ico">💳</span><strong>03 · Payment</strong><p>Checkout, signature verification and webhook.</p></div>
-<div class="doc-card green"><span class="ico">🚚</span><strong>04 · Fulfilment</strong><p>Manifest, AWB, tracking and delivery.</p></div>
-</div>
-
-## <strong>05</strong> Example test cases
-
-| ID | Feature | Scenario | Expected result |
-|---|---|---|---|
-| TC-01 | Registration | Valid email and details | Account created / verification sent |
-| TC-02 | Login | Invalid password | Safe error; no session |
-| TC-03 | Catalogue | Filter by colour and size | Only matching products shown |
-| TC-04 | Cart | Add unavailable variant | Request rejected with clear message |
-| TC-05 | Payment | Invalid signature | Payment not marked paid |
-| TC-06 | Webhook | Replay same event | No duplicate stock deduction |
-| TC-07 | Shipping | Non-serviceable PIN | No shipment manifested |
-| TC-08 | Authorization | Access another customer's order | Request denied |
-
-## <strong>06</strong> Test commands
-
-```bash
+```powershell
 dotnet build LadiesDressStore.sln
 dotnet test tests/UbhayaFashions.Tests/UbhayaFashions.Tests.csproj
 ```
 
-Run from the repository root. Confirm the current solution and test project paths before adapting commands.
+The current xUnit project contains tests for product color normalization/matching and price-ceiling behavior. It does not currently represent broad API, browser, payment-provider, or accessibility integration coverage.
 
-## <strong>07</strong> Testing checklist
+## Recommended test layers
 
-<div class="doc-grid">
-<div class="doc-card green"><span class="ico">🧪</span><strong>Functional</strong><p>Core features and business rules.</p></div>
-<div class="doc-card purple"><span class="ico">🌐</span><strong>Cross-browser</strong><p>Chrome, Edge, Firefox and Safari where available.</p></div>
-<div class="doc-card blue"><span class="ico">📱</span><strong>Mobile</strong><p>Small and large Android/iOS viewports.</p></div>
-<div class="doc-card yellow"><span class="ico">🚀</span><strong>Performance</strong><p>PageSpeed, Lighthouse and API timings.</p></div>
-<div class="doc-card pink"><span class="ico">♿</span><strong>Accessibility</strong><p>Keyboard, contrast, labels and focus.</p></div>
-<div class="doc-card orange"><span class="ico">🔐</span><strong>Security</strong><p>Authorization, validation and secret handling.</p></div>
-</div>
+The diagram shows a recommended coverage mix, not the current automated test inventory.
 
-## <strong>08</strong> Release acceptance
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    U[Unit tests: catalog and business rules] --> I[Integration tests: API, database and providers]
+    I --> E[End-to-end tests: checkout, payment and fulfilment]
+    U -.many fast checks.-> R[Focused coverage for revenue-critical journeys]
+    I -.targeted.-> R
+    E -.few but complete.-> R
+```
 
-- [ ] Solution builds successfully.
-- [ ] Automated tests pass.
-- [ ] Critical customer journeys verified.
-- [ ] Payment signature and duplicate webhook behaviour verified.
-- [ ] Shipment eligibility and duplicate protection verified.
-- [ ] Database migration reviewed and backup confirmed.
-- [ ] Production configuration validated.
-- [ ] Upload and database persistence verified after deployment.
-- [ ] Mobile and desktop smoke tests complete.
+## Manual smoke-test flow
 
-<div class="doc-footer">UBHAYA FASHIONS · Testing handbook · Record actual test evidence; never mark unexecuted tests as passed.</div>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Start SQL Server and API] --> B[Start storefront]
+    B --> C[Browse home, catalog and product detail]
+    C --> D[Check mobile and keyboard navigation]
+    D --> E[Sign in and manage address]
+    E --> F{Checkout path}
+    F -->|Test Razorpay| G[Verify order/payment and stock]
+    F -->|COD| H[Verify COD order and stock]
+    G --> I[Inspect email and tracking/shipment state]
+    H --> I
+    I --> J[Check robots, sitemap and product feed]
+```
+
+## Recommended focused checks
+
+- Catalog: missing product, unavailable variant, zero stock, and invalid quantity.
+- Account: signup, login, optional email verification, reset expiry and one-time use.
+- Address: add/edit/delete, default selection, ownership, and location permission denied.
+- Payment: signature mismatch, unpaid status, amount/order mismatch, retry, webhook duplicate, and inventory race.
+- Shipping: missing configuration, provider rejection, timeout/possible duplicate, and admin retry.
+- SEO: `/robots.txt`, `/llms.txt`, `/sitemap.xml`, and `/feeds/google-products.xml`.
+- Accessibility: keyboard-only use, focus visibility, labels, contrast, zoom/reflow, and screen reader announcements.
+- Responsive behavior: test common narrow mobile and desktop widths for overflow and clipped controls.
+
+Use Razorpay test mode and Delhivery staging for provider checks. Never create a real customer payment to smoke-test local code. Record environment, URL, device profile, and actual output when sharing results.

@@ -1,61 +1,62 @@
-# Ubhaya Fashions Admin Panel
+# Admin panel setup
 
-The admin panel has been added to the existing frontend/backend solution. No separate project is required.
+The admin panel is part of the existing MVC storefront and backend API.
 
-## URLs
+## Local URLs
 
-- Store: https://localhost:5001/
-- Admin login: https://localhost:5001/Admin/Login
-- Backend Swagger: https://localhost:56738/swagger
+| Page | Development URL |
+|---|---|
+| Storefront | `https://localhost:5001/` |
+| Admin login | `https://localhost:5001/Admin/Login` |
+| Backend Swagger | `https://localhost:56738/swagger` |
 
-## Admin account
+Use the launch profiles in the root [README](README.md) to start the API and website.
 
-The admin login uses records in `dbo.AdminUsers`. The repository lists `admin@ubhaya.com` / `Admin@123` as sample credentials, but the current backend does not seed that account automatically. Confirm that an active row exists and has a BCrypt password hash before expecting those credentials to work.
+## First administrator
 
-## Admin features
+Administrator records are stored in `dbo.AdminUsers`. The application does not seed a default administrator or provide a first-owner bootstrap command. Provision the initial owner account through a controlled deployment procedure, using a BCrypt-compatible password hash and a unique email. Do not rely on credentials copied from old examples or documentation.
 
-- Dashboard
-- Product create/edit/delete
-- Product image upload (JPG/JPEG/PNG/WEBP, up to 10 MB)
-- Stock management
-- Inventory transaction history API
-- Order list
-- Order status updates
-- Payment status tracking using the existing Order.PaymentStatus field
-- Admin-only JWT role protection on backend admin APIs
-- Admin password recovery by one-time email link
+The account whose email is `admin@ubhaya.com` is treated as the owner by the admin-account API. It must remain active and keep that email. After this owner account exists, it can create and manage other admin accounts from the protected admin account workflow. Keep the owner mailbox and credentials under organization control.
 
-## Admin password recovery
+## Admin capabilities
 
-Use **Forgot your password?** on `/Admin/Login`. Reset email uses the backend SMTP settings documented in `backend/ACCOUNT_SETUP.md`. Apply the latest EF migration from the backend directory before deploying:
+- Dashboard and catalog management
+- Product and image updates
+- Variant stock management and inventory history
+- Order list and status management
+- Payment status visibility
+- Delhivery shipment creation/retry actions
+- Admin password reset and password change
+
+Admin APIs require an Admin role token. The frontend uses a separate admin cookie from the customer sign-in cookie.
+
+## Account recovery
+
+Forgot-password links require backend SMTP configuration. See [backend account setup](backend/ACCOUNT_SETUP.md). Reset links are single-use and expire after one hour.
+
+## Database and uploaded media
+
+The backend applies EF Core migrations during startup. The database must be reachable before starting the API. Run migrations explicitly when managing schema separately:
 
 ```powershell
-dotnet ef database update
+dotnet ef database update --project backend/backend.csproj --startup-project backend/backend.csproj
 ```
 
-- Signed-in admin password change with current-password confirmation
+The API and storefront must use the same `UploadsPath` for shared media. The example in `backend/appsettings.example.json` is `C:\UbhayaFashions\Uploads`; Linux/container deployments should use a persistent shared volume. Keep uploads outside ephemeral publish folders and back them up with the database.
 
-## Database note
+## Sign-in and management flow
 
-The existing application uses `EnsureCreatedAsync()`. Because this stage must also work against an already-created `LadiesDressStore` database, startup creates the two new tables when they do not exist:
-
-- AdminUsers
-- InventoryTransactions
-
-No existing customer/product/order tables are dropped.
-
-For a production environment, convert these changes to normal EF Core migrations and remove the startup SQL initializer.
-
-## Image storage
-
-On Windows/EC2, uploaded media is stored outside the IIS publish folders at:
-
-`C:\\UbhayaFashions\\Uploads`
-
-The API saves product images, additional product images, product videos, category images, review photos, and storefront banners under this shared directory (in subfolders where applicable). The frontend and API both expose the shared folder under `/uploads`, so existing image URL formats such as `/uploads/products/...` remain unchanged.
-
-Keep `UploadsPath` configured to the same physical directory for both the API and website. Do not use `backend/wwwroot/uploads` or either publish directory as the permanent upload location. Back up the shared directory separately from application deployments.
-
-## Run
-
-Start backend first on `https://localhost:56738`, then frontend on `https://localhost:5001`.
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Admin opens /Admin/Login] --> B[Frontend sends credentials to backend]
+    B --> C{Active admin and password valid?}
+    C -->|No| D[Show sign-in failure]
+    C -->|Yes| E[Issue admin session]
+    E --> F[Open protected admin pages and APIs]
+    F --> G{Owner account?}
+    G -->|Yes| H[Manage admin accounts]
+    G -->|No| I[Use permitted admin features]
+    F --> J[Forgot password]
+    J --> K[Backend sends one-hour reset link through SMTP]
+```

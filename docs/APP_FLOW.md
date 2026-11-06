@@ -1,73 +1,53 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · EXPERIENCE DESIGN</span><span class="doc-pill">Map every customer journey</span>
-<h1>Application Flow</h1>
-<p>A visual guide to customer shopping, administrator operations, payment verification and order fulfilment.</p>
-<div class="doc-meta"><div><strong>Primary users</strong>Customers & administrators</div><div><strong>Critical path</strong>Browse → Pay → Deliver</div><div><strong>Integrations</strong>Razorpay · Delhivery</div></div>
-</div>
+# Application flow
 
-## <strong>01</strong> Customer journey
+This page describes the current storefront and backend journeys. The frontend renders pages and calls the API; the API owns account, catalog, order, stock, and payment decisions.
 
-<figure class="doc-diagram">
-  <img src="assets/customer-shopping-journey.svg" alt="Customer shopping journey: discovery, checkout, verified payment and order tracking." />
-  <figcaption>Customer shopping journey: discovery, checkout, verified payment and order tracking.</figcaption>
-</figure>
+## Browse to order
 
-<div class="doc-grid four">
-<div class="doc-card pink"><span class="ico">🔎</span><strong>01 · Discover</strong><p>Home, category, search and product listing.</p></div>
-<div class="doc-card purple"><span class="ico">👗</span><strong>02 · Evaluate</strong><p>Images, sizes, colours, price and availability.</p></div>
-<div class="doc-card blue"><span class="ico">🛒</span><strong>03 · Checkout</strong><p>Cart, address validation and payment.</p></div>
-<div class="doc-card green"><span class="ico">📦</span><strong>04 · Aftercare</strong><p>Confirmation, order history and tracking.</p></div>
-</div>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Home, search or product listing] --> B[Open product details]
+    B --> C[Choose size, color and quantity]
+    C --> D[Add to cart]
+    D --> E[Open cart drawer]
+    E --> F[Select or add delivery address]
+    F --> G{Payment method}
+    G -->|Prepaid| H[Create pending order and Razorpay order]
+    H --> I[Complete Razorpay Checkout]
+    I --> J[Verify signature and captured payment]
+    J --> K[Validate final stock and commit paid order]
+    K --> L[Attempt shipment creation and send confirmation]
+    G -->|COD| M[Create COD order and reduce stock]
+    M --> N[Send order confirmation]
+    L --> O[Customer views order/tracking]
+    N --> O
+```
 
-## <strong>02</strong> Administrator journey
+## Payment boundaries
 
-<figure class="doc-diagram">
-  <img src="assets/admin-operations-flow.svg" alt="Administrator workflow: catalogue, inventory, customer and order fulfilment operations." />
-  <figcaption>Administrator workflow: catalogue, inventory, customer and order fulfilment operations.</figcaption>
-</figure>
+- `POST /api/payments/create-order` recalculates price from stored product variants and saves a pending order before creating the Razorpay order.
+- `POST /api/payments/verify` validates the Razorpay signature, checks the payment's captured status, amount, and order association, then finalizes the order and stock change.
+- `POST /api/payment/razorpay/webhook` accepts signed Razorpay events and deduplicates event IDs.
+- A captured payment with an inventory conflict requires manual review/refund handling. A carrier failure does not reverse a captured payment.
+- The test-only `POST /api/payments/test-success` endpoint is separate and controlled by `PaymentTesting:Enabled`.
 
-## <strong>03</strong> Payment lifecycle
+## Account journeys
 
-| Stage | System action | Expected result |
-|---|---|---|
-| Create | Backend creates Razorpay order | Provider order ID saved |
-| Pay | Customer completes checkout | Provider payment result |
-| Verify | Backend validates signature/status | Trusted payment outcome |
-| Commit | Persist payment and order state | Consistent database state |
-| Notify | Confirmation workflow | Customer receives order update |
-| Reconcile | Resolve uncertain provider outcome | No duplicate payment/order |
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart LR
+    A[Sign up] --> B[Customer account created]
+    B --> C[Sign in]
+    C --> D[Profile and saved addresses]
+    D --> E[Optional email verification]
+    C --> F[Wishlist and order history]
+    C --> G[Request password reset]
+    G --> H[Single-use reset link by email]
+```
 
-> [!IMPORTANT]
-> A browser redirect is not proof of payment. Only server-side verification and trusted provider events can establish the paid state.
+Customers can sign in with the configured supported methods. Email verification is optional after the current storefront signup; a signed-in customer requests a six-digit code from the profile. See [email verification setup](../frontend/EMAIL_VERIFICATION_SETUP.md).
 
-## <strong>04</strong> Shipment sequence
+## Admin journey
 
-<figure class="doc-diagram">
-  <img src="assets/shipment-sequence.svg" alt="Shipment creation sequence across the admin website, UBHAYA API, Delhivery and SQL Server." />
-  <figcaption>Shipment creation sequence across the admin website, UBHAYA API, Delhivery and SQL Server.</figcaption>
-</figure>
-
-## <strong>05</strong> Key screens and routes
-
-| Area | Typical route |
-|---|---|
-| Store home | `/` |
-| Product listing | `/Products` |
-| Admin login | `/Admin/Login` |
-| Admin area | `/Admin` |
-| Customer account | `/Account` |
-| Customer orders | `/Orders` |
-| Order tracking | `/Orders/Track/{id}` |
-
-Confirm exact routes in the current controllers before relying on them.
-
-## <strong>06</strong> UX states
-
-<div class="doc-grid">
-<div class="doc-card blue"><span class="ico">⏳</span><strong>Loading</strong><p>Show progress without blocking unrelated navigation.</p></div>
-<div class="doc-card purple"><span class="ico">🗂️</span><strong>Empty</strong><p>Explain what is missing and provide a next action.</p></div>
-<div class="doc-card green"><span class="ico">✓</span><strong>Success</strong><p>Show only after server confirmation.</p></div>
-<div class="doc-card orange"><span class="ico">⚠️</span><strong>Error</strong><p>Explain the issue and safe recovery path.</p></div>
-</div>
-
-<div class="doc-footer">UBHAYA FASHIONS · Experience documentation · Keep journeys aligned with actual routes and state transitions.</div>
+Admin pages use a separate frontend cookie. Backend admin APIs require an Admin role. Account management is restricted to the fixed owner address `admin@ubhaya.com`. Provision the initial owner out of band; the application does not seed a default admin.

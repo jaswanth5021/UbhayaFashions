@@ -1,74 +1,50 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · ENGINEERING PRACTICE</span><span class="doc-pill">Build clean. Ship safely.</span>
-<h1>Code Style Guide</h1>
-<p>Shared conventions for readable C#, reliable APIs, maintainable Razor views and focused contributions.</p>
-<div class="doc-meta"><div><strong>Runtime</strong>.NET 8</div><div><strong>Projects</strong>Frontend + Backend</div><div><strong>Standard</strong>Consistency first</div></div>
-</div>
+# Code style
 
-## <strong>01</strong> Engineering principles
+Use the conventions of the surrounding code and keep changes focused. The projects target .NET 8 with nullable reference types enabled.
 
-<div class="doc-grid">
-<div class="doc-card pink"><span class="ico">🧭</span><strong>Follow existing patterns</strong><p>Keep conventions consistent with neighbouring code.</p></div>
-<div class="doc-card purple"><span class="ico">✂️</span><strong>Keep changes focused</strong><p>Avoid unrelated refactors and formatting churn.</p></div>
-<div class="doc-card blue"><span class="ico">🧪</span><strong>Test behaviour</strong><p>Cover bug fixes and business-rule changes.</p></div>
-</div>
+## C# and API
 
-## <strong>02</strong> C# and .NET conventions
+- Use async I/O and pass cancellation tokens where the surrounding API supports them.
+- Keep controllers focused; put reusable provider or domain work in services.
+- Use DTOs for API request and response contracts rather than exposing EF entities.
+- Use `decimal` for money and validate business values on the backend.
+- Prefer dependency injection and avoid blocking calls such as `.Result` or `.Wait()` in request paths.
+- Keep customer ownership and admin role checks on the server.
+- Return useful HTTP status codes without exposing secrets or unnecessary internals.
 
-- Target .NET 8 unless an upgrade is approved.
-- Use nullable reference types and resolve warnings intentionally.
-- Use async I/O and propagate cancellation tokens where supported.
-- Keep controllers thin; place reusable rules in services.
-- Use DTOs for API contracts rather than exposing EF entities.
-- Use `decimal` for money.
-- Avoid blocking calls such as `.Result` and `.Wait()` in request paths.
-- Use dependency injection for infrastructure dependencies.
-
-## <strong>03</strong> Naming conventions
+## Naming
 
 | Item | Convention | Example |
 |---|---|---|
-| Class / public member | PascalCase | `OrdersController` |
-| Interface | I + PascalCase | `IEmailService` |
-| Method | PascalCase | `CreateShipmentAsync` |
-| Local / parameter | camelCase | `orderId` |
-| Constant | PascalCase | `MaximumUploadSize` |
-| CSS class | kebab-case | `.product-card__price` |
-| Test | Behaviour-focused | `CreateOrder_WhenPaymentFails_DoesNotReduceStock` |
+| Types and public members | PascalCase | `OrdersController` |
+| Interfaces | `I` plus PascalCase | `IEmailService` |
+| Methods | PascalCase with async suffix for Tasks | `CreateShipmentAsync` |
+| Locals and parameters | camelCase | `orderId` |
+| CSS classes | kebab-case | `.product-card__price` |
+| Tests | Describe behavior and condition | `PriceCeiling_UsesFallbackWhenEmpty` |
 
-## <strong>04</strong> API and frontend standards
+## Frontend and accessibility
 
-<div class="doc-grid two">
-<div class="doc-card purple"><span class="ico">🔌</span><strong>API contracts</strong><p>Correct HTTP methods, status codes, validation and non-sensitive errors.</p></div>
-<div class="doc-card pink"><span class="ico">🧩</span><strong>Razor and UI</strong><p>Semantic HTML, reusable partials, accessible labels and responsive CSS.</p></div>
-<div class="doc-card blue"><span class="ico">⚡</span><strong>JavaScript</strong><p>Modular behaviour, no duplicate handlers and explicit loading states.</p></div>
-<div class="doc-card green"><span class="ico">🛡️</span><strong>Error handling</strong><p>Handle expected failures and log safely at the right boundary.</p></div>
-</div>
+Use semantic HTML and labels, preserve keyboard operation and visible focus, and provide accessible names for icon-only controls. Keep JavaScript modular and avoid duplicate event handlers. Keep CSS responsive and avoid introducing horizontal overflow at narrow widths.
 
-## <strong>05</strong> Git contribution workflow
+## Contribution workflow
 
-<figure class="doc-diagram">
-  <img src="assets/git-contribution-workflow.svg" alt="Git contribution workflow from updating the base branch to an approved merge." />
-  <figcaption>Git contribution workflow from updating the base branch to an approved merge.</figcaption>
-</figure>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Inspect adjacent code and requirements] --> B[Make a focused change]
+    B --> C[Review validation and error paths]
+    C --> D[Update docs/configuration when behavior changes]
+    D --> E[Run relevant build/tests/manual checks]
+    E --> F[Review the diff for secrets and unrelated edits]
+    F --> G[Report evidence and remaining work]
+```
 
-1. Start from an up-to-date base branch.
-2. Use a short branch name describing the work.
-3. Make small commits with imperative messages.
-4. Run relevant build and test commands.
-5. Review the diff for secrets, generated files and unrelated changes.
-6. Include purpose, test evidence and UI screenshots in pull requests.
+From the repository root, the common validation commands are:
 
-## <strong>06</strong> Definition of done
+```powershell
+dotnet build LadiesDressStore.sln
+dotnet test tests/UbhayaFashions.Tests/UbhayaFashions.Tests.csproj
+```
 
-- [ ] Requirement and existing behaviour inspected.
-- [ ] Code follows project conventions.
-- [ ] Validation and authorization remain server-side.
-- [ ] Failure and retry paths considered.
-- [ ] Tests added or updated.
-- [ ] Build and tests pass.
-- [ ] UI checked on mobile and desktop where relevant.
-- [ ] Documentation and configuration updated.
-- [ ] No secrets or personal data introduced.
-
-<div class="doc-footer">UBHAYA FASHIONS · Engineering standards · Prefer small, reviewable and testable changes.</div>
+The current test project is small; do not infer broad integration or browser coverage from these commands.

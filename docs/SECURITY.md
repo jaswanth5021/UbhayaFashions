@@ -1,88 +1,42 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · TRUST & SAFETY</span><span class="doc-pill">Protect every transaction</span>
-<h1>Security Guide</h1>
-<p>Practical safeguards for customer identity, payments, shipping, uploaded files, production data and store operations.</p>
-<div class="doc-meta"><div><strong>Security model</strong>Layered controls</div><div><strong>Trust boundary</strong>Browser → API</div><div><strong>Priority</strong>Production safety</div></div>
-</div>
+# Security notes
 
-## <strong>01</strong> Trust boundaries
+This document records controls visible in the application source and the operational settings that must be supplied by the deployment environment. It is not a security certification.
 
-<figure class="doc-diagram">
-  <img src="assets/security-trust-boundaries.svg" alt="Security trust boundaries between browser, website, backend and external providers." />
-  <figcaption>Security trust boundaries between browser, website, backend and external providers.</figcaption>
-</figure>
+## Implemented controls
 
-Validate every value crossing a boundary. Browser validation is for usability; backend validation is mandatory.
+- The API uses JWT bearer authentication for protected API requests.
+- Middleware checks that the authenticated customer/admin account remains active and prevents customer tokens from accessing admin routes.
+- Backend admin APIs use role authorization; admin account management is additionally restricted to the owner email.
+- The MVC storefront stores customer and admin sessions in separate HttpOnly cookies.
+- Frontend forms use ASP.NET Core antiforgery support.
+- Passwords are hashed with BCrypt. Reset tokens and verification codes are stored as hashes and expire.
+- Razorpay payment and webhook signatures are verified server-side using constant-time comparison.
+- Razorpay webhook events are persisted with a unique provider event ID to prevent duplicate processing.
+- The frontend sets `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and a `Permissions-Policy` that limits geolocation to the site and blocks camera/microphone.
+- Uploaded media is served from the configured shared uploads directory.
 
-## <strong>02</strong> Security pillars
+## Deployment responsibilities
 
-<div class="doc-grid">
-<div class="doc-card pink"><span class="ico">🔑</span><strong>Secrets</strong><p>Keep credentials out of source control and browser code.</p></div>
-<div class="doc-card purple"><span class="ico">🪪</span><strong>Identity</strong><p>Separate customer and admin authentication contexts.</p></div>
-<div class="doc-card blue"><span class="ico">💳</span><strong>Payments</strong><p>Verify signatures and reconcile uncertain outcomes.</p></div>
-<div class="doc-card green"><span class="ico">🚚</span><strong>Shipping</strong><p>Protect carrier tokens and shipment operations.</p></div>
-<div class="doc-card yellow"><span class="ico">📁</span><strong>Uploads</strong><p>Validate file content and store outside executable paths.</p></div>
-<div class="doc-card orange"><span class="ico">📋</span><strong>Observability</strong><p>Log safely without exposing personal or secret data.</p></div>
-</div>
+- Supply strong JWT signing keys, database credentials, Razorpay/Delhivery tokens, OAuth secrets, and SMTP credentials through a secret manager or protected environment variables.
+- Use HTTPS in production and configure secure cookie behavior at the hosting boundary. The frontend source currently supports an HTTP EC2 test setup and does not enable HSTS or HTTPS redirection in its pipeline.
+- Limit production database and uploads access, maintain backups, and plan migrations with rollback.
+- Keep Delhivery support payload logging disabled during normal operation because requests include customer information.
+- Restrict browser Google Maps keys to the storefront origin and enabled APIs.
+- The backend `AllowFrontend` CORS policy currently permits any origin, header, and method. Restrict it to the deployed storefront origin and required methods/headers before production.
 
-## <strong>03</strong> Authentication and authorization
+## Security boundary flow
 
-- Use strong password hashing; never store plaintext passwords.
-- Use secure, HTTP-only cookies and HTTPS in production.
-- Validate JWT signature, issuer, audience and expiry.
-- Enforce authorization on API endpoints.
-- Check ownership for customer orders, addresses, reviews and account actions.
-- Keep admin and customer credentials/claims separate.
-- Use expiring, single-use password-reset tokens.
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    B[Untrusted browser] -->|Customer or admin session| F[Storefront]
+    F -->|Authenticated API call| A[Backend API]
+    A --> V[Authentication, role and ownership checks]
+    V --> D[(SQL Server)]
+    V --> R[Razorpay and Delhivery]
+    V --> S[SMTP provider]
+    K[Secrets stay server-side] -.-> A
+    H[Use HTTPS in production] -.-> F
+```
 
-## <strong>04</strong> Payment protection
-
-| Control | Requirement |
-|---|---|
-| API keys | Secret key stays on backend |
-| Amount | Calculate from trusted server-side data |
-| Signature | Verify on backend |
-| Webhook | Validate signature and event identity |
-| Duplicate event | Process idempotently |
-| Timeout | Reconcile before retrying |
-| Order state | Never trust browser redirect alone |
-
-## <strong>05</strong> Shipping protection
-
-- Keep Delhivery API token server-side.
-- Require admin authorization for shipment and pickup operations.
-- Check order state and payment eligibility before manifestation.
-- Validate destination PIN, recipient details and parcel weight.
-- Save AWB only after confirmed successful response.
-- Prevent duplicate shipment creation.
-- Redact personal details from normal logs.
-
-## <strong>06</strong> Input, files and database
-
-- Validate request DTOs on the server.
-- Use parameterized EF Core queries.
-- Validate file extension, MIME type, signature and size.
-- Generate safe filenames and prevent path traversal.
-- Store uploads outside executable application directories.
-- Use least-privilege database credentials.
-- Back up database and uploads separately; test restore.
-
-## <strong>07</strong> Release security gate
-
-<div class="doc-grid two">
-<div class="doc-card green"><span class="ico">✓</span><strong>Identity and access</strong><p>Authorization, customer ownership and secure sessions tested.</p></div>
-<div class="doc-card blue"><span class="ico">✓</span><strong>Payment integrity</strong><p>Signatures, webhooks and duplicate events tested.</p></div>
-<div class="doc-card purple"><span class="ico">✓</span><strong>Data protection</strong><p>Secrets, uploads, logs and backups reviewed.</p></div>
-<div class="doc-card yellow"><span class="ico">✓</span><strong>Operations</strong><p>Errors, monitoring and recovery process verified.</p></div>
-</div>
-
-- [ ] No live secrets in tracked files or build artifacts.
-- [ ] HTTPS and secure cookie settings verified.
-- [ ] Admin and customer authorization tested.
-- [ ] Upload validation and storage permissions reviewed.
-- [ ] Error responses do not leak secrets or stack traces.
-- [ ] Dependency and production configuration review completed.
-
-<div class="doc-callout"><span>⚠️</span><div><b>Certification claims</b><br/>Do not display security certification logos or compliance claims unless UBHAYA has obtained and can substantiate the certification.</div></div>
-
-<div class="doc-footer">UBHAYA FASHIONS · Security handbook · Revisit after authentication, payment, upload or infrastructure changes.</div>
+Do not put provider secrets in Razor views, JavaScript, public feeds, or client-visible responses. Report only controls verified in code or configuration.

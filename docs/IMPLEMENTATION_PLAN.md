@@ -1,70 +1,38 @@
-<div class="doc-hero">
-<span class="doc-kicker">UBHAYA FASHIONS · DELIVERY ROADMAP</span><span class="doc-pill">Turn priorities into progress</span>
-<h1>Implementation Plan</h1>
-<p>A phased delivery roadmap to stabilize core commerce, improve the shopping experience and prepare reliable releases.</p>
-<div class="doc-meta"><div><strong>Approach</strong>Incremental delivery</div><div><strong>Focus</strong>Quality · Security · UX</div><div><strong>Release rule</strong>Evidence before done</div></div>
-</div>
+# Implementation status and follow-up plan
 
-## <strong>01</strong> Delivery strategy
+This document summarizes implementation visible in the repository and the remaining verification work. It is not a release or deployment report.
 
-Protect the working storefront and revenue-critical workflows. Deliver small changes with clear validation, rollback awareness and measurable outcomes.
+## Current implementation map
 
-## <strong>02</strong> Main workstreams
+| Area | Present in source | Follow-up evidence |
+|---|---|---|
+| Storefront and API | ASP.NET Core MVC and Web API projects target .NET 8 | Build both projects after code changes |
+| Catalog and checkout | Product variants, saved addresses, COD and Razorpay prepaid flows | Walk through representative product and checkout journeys |
+| Payments and shipping | Razorpay verification/webhook handling and Delhivery shipment records | Use provider test environments and inspect logs/orders |
+| SEO endpoints | `robots.txt`, `llms.txt`, generated `/sitemap.xml`, Google product feed | Fetch each public endpoint and validate its output on the deployed host |
+| Static delivery | Static asset compression, cache headers, response headers | Re-run PageSpeed Insights on the deployed pages and record device, URL, date, and scores |
+| Accessibility | Semantic templates and interactive components exist across the storefront | Complete keyboard, screen-reader, contrast, and automated audits across page templates |
+| Security | JWT validation, separate frontend cookies, antiforgery and response headers are present; the API CORS policy currently allows any origin | Restrict CORS, then review HTTPS deployment, cookie settings, secret rotation, and authorization coverage |
+| Tests | Product catalog unit tests are present | Add focused tests for uncovered order, payment, SEO, and accessibility behavior |
 
-<div class="doc-grid">
-<div class="doc-card pink"><span class="ico">🛍️</span><strong>Product experience</strong><p>Polished responsive shopping and admin journeys.</p></div>
-<div class="doc-card blue"><span class="ico">⚡</span><strong>Performance</strong><p>Optimized assets, rendering and API/database usage.</p></div>
-<div class="doc-card green"><span class="ico">💳</span><strong>Checkout reliability</strong><p>Verified and idempotent payment-to-order flow.</p></div>
-<div class="doc-card purple"><span class="ico">🚚</span><strong>Fulfilment</strong><p>Safe shipment creation and clear tracking.</p></div>
-<div class="doc-card yellow"><span class="ico">🛡️</span><strong>Security</strong><p>Authorization, secrets and upload safeguards.</p></div>
-<div class="doc-card orange"><span class="ico">🧪</span><strong>Quality</strong><p>Regression tests and operational readiness.</p></div>
-</div>
+Do not record an audit as passed until its evidence has been collected. PageSpeed results vary with URL, device profile, network, cache, and deployment state.
 
-## <strong>03</strong> Milestone roadmap
+## Recommended sequence
 
-<figure class="doc-diagram">
-  <img src="assets/implementation-roadmap.svg" alt="Implementation roadmap with six delivery milestones." />
-  <figcaption>Implementation roadmap with six delivery milestones.</figcaption>
-</figure>
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Confirm deployed environment and baseline] --> B[Fix shared layout and asset issues]
+    B --> C[Audit accessibility across page templates]
+    C --> D[Validate security and SEO endpoints]
+    D --> E[Measure home, catalog, product and checkout pages]
+    E --> F[Record results and regressions]
+```
 
-## <strong>04</strong> Phase details
+## Source-of-truth files
 
-| Phase | Focus | Deliverables | Exit gate |
-|---|---|---|---|
-| 01 | Baseline audit | Build, journey, performance and configuration review | Reproducible baseline |
-| 02 | Core workflows | Identity, cart, checkout, payment, inventory and shipping tests | Critical paths validated |
-| 03 | Experience | Responsive UI, images, API and query optimization | No major regressions; metrics reviewed |
-| 04 | Security/operations | Secrets, access, uploads, backups and recovery | Operational checks complete |
-| 05 | Release | Build, tests, migration, smoke tests and monitoring | Release owner approval |
-| 06 | Improve | Analytics, support issues and performance review | Evidence-based backlog |
-
-## <strong>05</strong> Prioritization
-
-<div class="doc-grid two">
-<div class="doc-card orange"><span class="ico">🔴</span><strong>P0 · Critical</strong><p>Payment integrity, data loss, security exposure and production outage.</p></div>
-<div class="doc-card pink"><span class="ico">🟠</span><strong>P1 · High</strong><p>Checkout blockers, order/stock inconsistency and major mobile defects.</p></div>
-<div class="doc-card blue"><span class="ico">🔵</span><strong>P2 · Medium</strong><p>Performance improvements, admin workflow and accessibility gaps.</p></div>
-<div class="doc-card purple"><span class="ico">⚪</span><strong>P3 · Later</strong><p>Cosmetic polish and non-essential enhancements.</p></div>
-</div>
-
-## <strong>06</strong> Milestone tracking
-
-| Field | What to record |
-|---|---|
-| Owner | Responsible contributor |
-| Status | Not started / In progress / Blocked / Done |
-| Evidence | Pull request, test run, metric or deployment reference |
-| Risks | Dependencies, impact and rollback plan |
-| Decision | Approved scope and trade-offs |
-
-## <strong>07</strong> Definition of milestone complete
-
-- [ ] Implementation merged.
-- [ ] Relevant automated tests pass.
-- [ ] Manual acceptance completed where needed.
-- [ ] Performance/security impact reviewed.
-- [ ] Documentation and configuration updated.
-- [ ] Deployment and rollback implications understood.
-- [ ] Evidence attached to the milestone.
-
-<div class="doc-footer">UBHAYA FASHIONS · Delivery roadmap · Update status only when validation evidence exists.</div>
+- Project behavior: `frontend/Controllers/`, `frontend/Views/`, `backend/Controllers/`, and `backend/Services/`
+- Database: `backend/Data/ApplicationDbContext.cs` and `backend/Migrations/`
+- Local ports: `frontend/Properties/launchSettings.json` and `backend/Properties/launchSettings.json`
+- Static asset performance: `frontend/Program.cs` and `frontend/wwwroot/`
+- Tests: `tests/UbhayaFashions.Tests/`

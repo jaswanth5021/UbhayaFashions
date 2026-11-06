@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="980" viewBox="0 0 900 980" role="img" aria-labelledby="title desc">
+  <title id="title">Design system application flow</title>
+  <desc id="desc">Shared visual tokens are assigned semantic roles, applied to reusable components and page templates, then checked for contrast, keyboard access, mobile layout, and interaction states.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#68142e"/></marker>
+    <filter id="shadow" x="-12%" y="-10%" width="124%" height="125%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#56334f" flood-opacity=".10"/></filter>
+  </defs>
+  <rect width="900" height="980" rx="24" fill="#fbf8fc"/>
+  <text x="450" y="58" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="800" fill="#4f1025">How the design system is applied</text>
+  <text x="450" y="88" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="15" fill="#786a68">Shared patterns guide new and updated UI; each page still needs review.</text>
+  <g font-family="Segoe UI,Arial,sans-serif" filter="url(#shadow)">
+    <rect x="110" y="125" width="680" height="112" rx="18" fill="#fff" stroke="#eadedb" stroke-width="2"/>
+    <rect x="110" y="275" width="680" height="112" rx="18" fill="#fff7f5" stroke="#eadedb" stroke-width="2"/>
+    <rect x="110" y="425" width="680" height="112" rx="18" fill="#fff" stroke="#eadedb" stroke-width="2"/>
+    <rect x="110" y="575" width="680" height="112" rx="18" fill="#fff7f5" stroke="#eadedb" stroke-width="2"/>
+    <rect x="110" y="725" width="680" height="112" rx="18" fill="#fff8e9" stroke="#eadedb" stroke-width="2"/>
+  </g>
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <g fill="#68142e" font-size="13" font-weight="800"><text x="145" y="155">01 · TOKENS</text><text x="145" y="305">02 · SEMANTIC ROLES</text><text x="145" y="455">03 · SHARED COMPONENTS</text><text x="145" y="605">04 · PAGE TEMPLATES</text><text x="145" y="755">05 · VALIDATION</text></g>
+    <g fill="#302522" font-size="17" font-weight="700"><text x="145" y="185">Wine · rose · blush · gold · ink · muted · line</text><text x="145" y="335">Primary action · surface · body text · border · focus</text><text x="145" y="485">Buttons · forms · cards · navigation · feedback</text><text x="145" y="635">Home · catalog · product · cart · account · admin</text><text x="145" y="785">Contrast · keyboard · mobile reflow · loading and error states</text></g>
+    <g fill="#786a68" font-size="13"><text x="145" y="212">Shared variables live in ui-refresh.css</text><text x="145" y="362">Give each visual token a clear purpose</text><text x="145" y="512">Keep focus and feedback visible</text><text x="145" y="662">Inspect each page's local stylesheet before reuse</text><text x="145" y="812">Check behavior and appearance before calling the change complete</text></g>
+  </g>
+  <g fill="none" stroke="#68142e" stroke-width="2.5" marker-end="url(#arrow)"><path d="M450 240 V267"/><path d="M450 390 V417"/><path d="M450 540 V567"/><path d="M450 690 V717"/></g>
+  <rect x="110" y="875" width="680" height="64" rx="14" fill="#f8e9e9" stroke="#eadedb"/>
+  <text x="450" y="902" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="800" fill="#4f1025">Legacy pages vary</text>
+  <text x="450" y="923" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="12" fill="#655553">The shared tokens are not yet used uniformly across every stylesheet.</text>
+</svg>

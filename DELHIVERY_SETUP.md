@@ -1,88 +1,55 @@
-# Delhivery B2C integration
+# Delhivery integration setup
 
-This integration keeps the Delhivery API token on the backend. The frontend must call the authenticated UBHAYA backend; never call Delhivery directly from browser JavaScript.
+The Delhivery API token and shipment calls stay on the backend. The browser must never call Delhivery directly or receive the provider token.
 
-## Backend environment variables
+## Backend configuration
 
-Keep tokens out of source control. Configure these in the backend hosting environment:
+Configure values in a local secret store or hosting environment. .NET environment-variable names use double underscores.
 
-- `Delhivery__Environment`: set to `Staging` while testing or `Production` only after Delhivery confirms live activation.
-- `Delhivery__BaseUrl`: optional override. If omitted, the backend selects `https://staging-express.delhivery.com/` for Staging or `https://track.delhivery.com/` for Production based on `Delhivery__Environment`.
-- `Delhivery__ApiToken`: the token for the selected environment.
-- `Delhivery__ClientName`: exact, case-sensitive client name shown in the Delhivery B2C API account/manifestation portal. Do not guess this value.
-- `Delhivery__PickupLocationName`: exact registered and active pickup-location name from Delhivery One.
-- `Delhivery__SellerName`: seller name.
-- `Delhivery__SellerAddress`: seller/pickup address.
-- `Delhivery__SellerPin`: seller postal code.
-- `Delhivery__SellerPhone`: seller contact phone.
-- `Delhivery__LabelBaseUrl` (optional): override the base URL for the packing-slip/label endpoint if Delhivery supplies a separate host for the account/environment.
+| Setting | Purpose |
+|---|---|
+| `Delhivery:Environment` | Select staging or production |
+| `Delhivery:BaseUrl` | Optional account-specific base URL override |
+| `Delhivery:ApiToken` | Token for the selected environment |
+| `Delhivery:ClientName` | Exact client name registered with the account |
+| `Delhivery:PickupLocationName` | Exact active pickup location name |
+| `Delhivery:SellerName`, `SellerAddress`, `SellerPin`, `SellerPhone` | Seller details required in shipment payload |
+| `Delhivery:LabelBaseUrl` | Optional label endpoint override |
 
-The service defaults to staging if BaseUrl is absent. Staging and production credentials differ. Do not commit the token or any live secret.
+Confirm values and live activation with the Delhivery account administrator. Do not guess the case-sensitive client or pickup-location name. Never enable payload logging during routine operation because shipment payloads contain customer details.
 
-## Admin API endpoints
+## Shipment flow
 
-All endpoints below require an Admin JWT:
-
-- `GET /api/admin/delhivery/serviceability/{postalCode}` — checks prepaid, COD and pickup serviceability.
-- `GET /api/admin/delhivery/shipping-cost?originPin=500084&destinationPin=500084&weightGrams=1000&shipmentMode=Surface&paymentMode=Pre-paid&status=Delivered` — returns Delhivery's approximate rate response. The API allows 40 requests/minute. Staging can return zero charges because rates are not stored there.
-- `GET /api/admin/delhivery/waybills?count=1` — optionally pre-fetches waybills.
-- `POST /api/admin/delhivery/pickup-request` — creates a pickup request for the configured warehouse after shipments are manifested and packed. For normal shipment creation, the integration leaves the waybill blank so Delhivery can generate it in the manifestation response.
-- `POST /api/admin/orders/{orderId}/delhivery-shipment` — checks serviceability first, then manifests the order. Prepaid orders are only sent after payment is verified.
-- `GET /api/admin/delhivery/label/{waybill}` — downloads a PDF packing slip for a manifested shipment.
-- Customer tracking remains available through `GET /api/orders/{id}/tracking`.
-
-## Create shipments from the admin website
-
-Open Admin → Orders, expand **Create shipment**, check the recipient fields and provide city, state, PIN code and packed parcel weight. The request is admin-authenticated and goes through the backend. Prepaid orders cannot be shipped until payment verification has marked them Paid. A non-serviceable PIN is rejected before the manifestation request is sent, avoiding the partial-save error seen in staging. After a waybill is saved, duplicate creation is blocked.
-
-Delhivery's FAQ confirms that the waybill can be left blank in the shipment creation request to let Delhivery generate it, and that the exact client name is case-sensitive. The shipment is only considered created when the API returns a successful package and a waybill.
-
-### Troubleshooting: `shipment list contains no data`
-
-Delhivery's FAQ identifies this response as a client-name mismatch. The manifestation request in `backend/Services/DelhiveryService.cs` already sends the configured client name in `shipments[0].client`, together with the `shipments` array and `pickup_location.name`. The service trims accidental leading/trailing whitespace from the configured client and pickup-location values, but it does not change capitalization or guess the registered name.
-
-If Delhivery returns `shipment list contains no data`:
-
-1. Sign in to Delhivery One and confirm the exact client name registered for the B2C account/API.
-2. Set the backend hosting environment variable `Delhivery__ClientName` to that exact value, preserving capitalization and internal spaces.
-3. Confirm `Delhivery__PickupLocationName` is the exact active warehouse name.
-4. Restart the backend application so the updated environment variables are loaded.
-5. Retry with a new order reference if Delhivery reports that the earlier order was partially created.
-
-When this specific provider error is returned, the admin error now explicitly identifies the configured `shipments[0].client` value and directs the operator to verify it. Do not replace it with a guessed value or move the `client` property out of the shipment object unless Delhivery confirms a different schema.
-
-The complete request payload contains recipient and seller personal information. Keep `Delhivery:EnableSupportPayloadLogging` disabled during normal operation; enable it only temporarily when collecting a support payload, restrict access to the logs, and disable it again after collection.
-
-## Rate calculation
-
-Delhivery's invoice/rate endpoint returns an estimate only. The rate calculation uses billing mode `E` (Express) or `S` (Surface), chargeable weight in grams, origin and destination PIN codes, shipment status (`Delivered`, `RTO`, or `DTO`), and payment type (`Pre-paid` or `COD`). Staging may return zero charges; use the approved production token/environment for current rates.
-
-## Pickup request workflow
-
-After one or more shipments are manifested, packed and labelled, an admin can create a pickup request for the configured warehouse:
-
-```http
-POST /api/admin/delhivery/pickup-request
-Authorization: Bearer <admin-jwt>
-Content-Type: application/json
-
-{
-  "pickupDate": "YYYY-MM-DD",
-  "pickupTime": "10:00:00",
-  "expectedPackageCount": 1
-}
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#fff7f5","primaryTextColor":"#302522","primaryBorderColor":"#68142e","lineColor":"#68142e","edgeLabelBackground":"#fbf8fc","actorBkg":"#fff7f5","actorBorder":"#68142e","actorTextColor":"#302522","actorLineColor":"#68142e","signalColor":"#68142e","signalTextColor":"#302522","labelBoxBkgColor":"#fff7f5","labelBoxBorderColor":"#68142e","labelTextColor":"#302522","loopTextColor":"#302522","noteBkgColor":"#fff8e9","noteBorderColor":"#c69a45","noteTextColor":"#302522","activationBkgColor":"#f8e9e9","activationBorderColor":"#68142e","sequenceNumberColor":"#302522"}}}%%
+flowchart TD
+    A[Paid order] --> B[Backend validates delivery details and settings]
+    B --> C[Delhivery shipment request]
+    C --> D{Successful response includes waybill?}
+    D -->|Yes| E[Save AWB, label and shipment status]
+    D -->|No| F[Save creation error for admin follow-up]
+    E --> G[Show customer tracking information]
+    F --> H[Admin reviews and retries after provider check]
 ```
 
-The pickup date must be today or within the next seven days; the time must use `HH:mm:ss`. The expected package count is for the warehouse pickup request, not a single order. Do not create a pickup request for every shipment. Delhivery states that a single request covers ready-to-ship shipments from that pickup location, and that pickup requests are not needed when automatic pickup is enabled. If Delhivery returns an existing-pickup-request or auto-pickup message, follow the account's pickup arrangement rather than retrying repeatedly. Keep parcels packed and labels attached before scheduling pickup.
+For prepaid orders, automatic shipment creation is attempted after payment is finalized. COD orders use the normal order flow and are not automatically manifested by that path. A failed carrier request does not reverse a captured payment.
 
-## Customer tracking and labels
+## Admin API routes
 
-Signed-in customers see **Track Order** in Account → Orders. The backend checks both the order ID and the authenticated customer's ID. It refreshes Delhivery status no more frequently than once every two minutes and falls back to the last saved status if the carrier API is temporarily unavailable. Admins can download a PDF label through the label endpoint after a shipment has been manifested.
+These backend routes require an Admin role:
 
-## Apply the database migration
+- `GET /api/admin/delhivery/serviceability/{postalCode}`
+- `GET /api/admin/delhivery/shipping-cost`
+- `POST /api/admin/delhivery/pickup-request`
 
-The existing migration adds `Orders.PaymentMethod` and `DelhiveryShipments`. No new database columns are required for the API additions in this change.
+Shipment create/retry operations are part of the admin orders API. Customers can request their own order tracking through `GET /api/orders/{id}/tracking`; order ownership is checked by the backend.
 
-## Production readiness
+The manual admin create/retry operation is `POST /api/admin/orders/{orderId}/delhivery-shipment`. It checks the order/payment state and destination serviceability before manifesting a shipment; only a confirmed provider response is saved as shipment-created.
 
-The code uses Delhivery's B2C pincode serviceability, bulk waybill, shipment manifestation, tracking, invoice/rate, packing-slip, and pickup-request endpoints. Before switching to production, verify the exact case-sensitive client name, pickup location, seller details, production token, production base URL, label host, prepaid/COD enablement, and account billing requirements with Delhivery. Keep staging and production credentials separate.
+Rate responses are estimates. Delhivery staging can return zero charges, so do not treat a staging estimate as a production quote.
+
+## Troubleshooting
+
+- A client-name or pickup-location error usually means the configured value differs from the active account value. Confirm it in Delhivery One before retrying.
+- If a request times out, first check the provider portal for an existing shipment to avoid creating a duplicate.
+- The backend stores shipment status, waybill, label URL, attempt count, and the latest error on the order's shipment record.
