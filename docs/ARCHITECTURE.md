@@ -1,120 +1,105 @@
-<div align="center">
-
-# System Architecture
-### Boundaries, data flow and integration design
-
-**A maintainable two-application architecture with one authoritative API.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · ENGINEERING</span><span class="doc-pill">Understand the system</span>
+<h1>System Architecture</h1>
+<p>How the storefront, API, database and external services work together while maintaining clear security and ownership boundaries.</p>
+<div class="doc-meta"><div><strong>Frontend</strong>ASP.NET Core MVC</div><div><strong>Backend</strong>ASP.NET Core Web API</div><div><strong>Persistence</strong>SQL Server · EF Core</div></div>
 </div>
 
----
-
-## 01 · System context
+## <strong>01</strong> System at a glance
 
 ```mermaid
 flowchart LR
-    U[Customer / Admin Browser] --> WEB[ASP.NET Core MVC Frontend]
-    WEB -->|HTTP JSON / HttpClient| API[ASP.NET Core Web API]
-    API -->|EF Core| DB[(SQL Server)]
-    API -->|HTTPS| RP[Razorpay]
-    API -->|HTTPS| DH[Delhivery]
-    API --> MAIL[Email / SMTP Provider]
-    WEB --> STATIC[Static assets]
+ U[Customer / Admin Browser] --> W[ASP.NET Core MVC]
+ W -->|HTTP JSON| A[ASP.NET Core API]
+ A -->|EF Core| DB[(SQL Server)]
+ A --> RP[Razorpay]
+ A --> DH[Delhivery]
+ A --> EM[Email Provider]
+ W --> AS[Static Assets]
 ```
 
-The repository contains two .NET 8 web projects:
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">🖥️</span><strong>Frontend</strong><p>Razor views, MVC controllers, browser assets and customer/admin experience.</p></div>
+<div class="doc-card purple"><span class="ico">⚙️</span><strong>Backend API</strong><p>Business rules, authentication, integrations and persistence.</p></div>
+<div class="doc-card blue"><span class="ico">🗄️</span><strong>Database</strong><p>Durable application state managed through EF Core.</p></div>
+</div>
 
-| Project | Path | Responsibility |
-|---|---|---|
-| Storefront | `frontend/` | MVC controllers, Razor views, customer/admin web experience |
-| API | `backend/` | Business rules, API controllers, authentication, persistence and provider integrations |
-| Database | SQL Server | Durable application state |
-| Tests | `tests/` | Automated verification |
+## <strong>02</strong> Repository structure
 
-The browser communicates with the MVC website. The website calls the API. The API is the only application layer that accesses the database through Entity Framework Core.
+| Location | Responsibility |
+|---|---|
+| `frontend/` | MVC controllers, Razor views, services and static assets |
+| `backend/` | API controllers, business services and configuration |
+| `backend/Data/` | EF Core database context |
+| `backend/Migrations/` | Versioned database changes |
+| `tests/` | Automated regression tests |
+| `docs/` | Product and engineering handbook |
+| `docker-compose.yml` | Local container orchestration |
 
-## 02 · Backend request path
+## <strong>03</strong> Backend request lifecycle
 
 ```mermaid
 flowchart TD
-    A[HTTP Request] --> B[ASP.NET Core Middleware]
-    B --> C[Authentication]
-    C --> D[Authorization]
-    D --> E[Controller]
-    E --> F[Validation and Business Rules]
-    F --> G[Service / Provider Client]
-    G --> H[ApplicationDbContext]
-    H --> I[(SQL Server)]
-    I --> H --> G --> E --> J[HTTP Response]
+ A[HTTP Request] --> B[Middleware]
+ B --> C[Authentication]
+ C --> D[Authorization]
+ D --> E[Controller]
+ E --> F[Validation and Business Rules]
+ F --> G[Service / Provider Client]
+ G --> H[ApplicationDbContext]
+ H --> I[(SQL Server)]
+ I --> H --> G --> E --> J[HTTP Response]
 ```
 
-Keep controllers focused on HTTP concerns. Put reusable business rules and provider communication in services. Use DTOs at API boundaries rather than exposing EF entities directly.
+Controllers should handle HTTP concerns. Reusable business rules and provider communication belong in services. DTOs define API contracts.
 
-## 03 · Frontend request path
+## <strong>04</strong> Integration boundaries
 
-- MVC controllers receive browser requests and return views or redirects.
-- Frontend services such as `ApiService` and `AdminApiService` centralize backend communication.
-- Razor views render HTML; CSS and JavaScript provide progressive interaction.
-- Authentication cookies belong to the website session.
-- API tokens are used by the website when calling protected API endpoints.
-- Do not put provider secrets or privileged API tokens in browser code.
-
-## 04 · Key integration boundaries
-
-| Integration | Owner | Security rule |
+| Integration | Responsible layer | Key protection |
 |---|---|---|
-| SQL Server | Backend | Never connect from browser/frontend |
-| Razorpay | Backend + browser checkout | Secret stays server-side; verify payment server-side |
-| Delhivery | Backend | Token stays server-side; validate order eligibility |
-| Email | Backend | Credentials stored in environment/secret store |
-| File uploads | Backend storage | Validate files and persist outside ephemeral deployment folders |
+| SQL Server | Backend | No browser database access |
+| Razorpay | Backend + checkout UI | Secret server-side; verify signature |
+| Delhivery | Backend | Token server-side; validate order eligibility |
+| Email | Backend | Credentials in secure configuration |
+| Upload storage | Backend | Validate files; use durable storage |
 
-## 05 · Runtime and local development
+## <strong>05</strong> Local runtime
 
-The root README documents the `start.sh` workflow:
+| Component | Local script URL / endpoint |
+|---|---|
+| Storefront | `http://localhost:5000` |
+| API | `http://localhost:5080` |
+| SQL Server | `localhost,1433` |
 
-- SQL Server: `localhost,1433`
-- API: `http://localhost:5080`
-- Website: `http://localhost:5000`
+Docker Compose uses a different published port arrangement: website on `5173`, API on `5000`. Refer to the root README and compose file when starting services.
 
-The Docker Compose layout publishes the website on port `5173` and API on port `5000`, with named volumes for database and upload data. Do not assume the container ports are the same as the local script ports.
-
-## 06 · Configuration
-
-Configuration is supplied through ASP.NET Core configuration providers. Use environment variables or a secret manager for deployment secrets.
-
-Examples of settings documented by the repository:
+## <strong>06</strong> Configuration map
 
 - `ConnectionStrings:DefaultConnection`
 - `Jwt:Key`, `Jwt:Issuer`, `Jwt:Audience`
-- `FrontendUrl`
-- `UploadsPath`
-- `Razorpay:KeyId`, `Razorpay:KeySecret`
+- `FrontendUrl` and `UploadsPath`
+- `Razorpay:KeyId` and `Razorpay:KeySecret`
 - Delhivery environment, token, client and pickup-location settings
-- SMTP host, username and credentials
+- SMTP host, username and sender configuration
 
-Use `backend/appsettings.example.json` as a placeholder reference, not as a production configuration file.
+Use environment variables or a secret manager for production. Example settings are placeholders only.
 
-## 07 · Data and consistency
+## <strong>07</strong> Reliability and storage
 
-- Use database transactions for multi-step writes that must succeed or fail together.
-- Enforce uniqueness and foreign-key constraints in the database.
-- Make external side effects idempotent where provider capabilities permit.
-- Do not hold a database transaction open while waiting on a slow external API unless the workflow explicitly requires it.
-- Persist provider identifiers and raw status fields only when useful, with access and retention controls.
-- Treat provider timeouts as unknown outcomes until reconciled; do not blindly repeat a charge or shipment request.
+<div class="doc-grid two">
+<div class="doc-card green"><span class="ico">🔁</span><strong>Idempotent operations</strong><p>Protect payment callbacks, webhooks and shipment retries from duplicate side effects.</p></div>
+<div class="doc-card blue"><span class="ico">💾</span><strong>Durable uploads</strong><p>Keep customer/product media outside replaceable publish folders and back it up separately.</p></div>
+</div>
 
-## 08 · File storage
+Use transactions for related database writes. Treat provider timeouts as uncertain until reconciled. Avoid holding database transactions open across slow network calls without a deliberate design.
 
-Product images and other user-managed uploads must survive application redeployment. Configure a durable external folder or persistent volume using `UploadsPath`. Keep uploaded media out of the application publish directory when that directory is replaced during deployment. Back up uploads and database data independently.
+## <strong>08</strong> Architecture review checklist
 
-## 09 · Architecture decision checklist
+- [ ] Responsibility belongs to the correct project.
+- [ ] Backend remains authoritative for business rules.
+- [ ] Trust boundaries and authorization are explicit.
+- [ ] External failures and retries are safe.
+- [ ] Configuration and secrets are documented securely.
+- [ ] Tests and deployment steps are updated.
 
-Before introducing a new service or dependency, answer:
-
-1. Which project owns the responsibility?
-2. Is the operation authoritative in the backend?
-3. Does it cross a trust boundary?
-4. How will failure, retries and duplicate requests behave?
-5. How will the change be tested and observed?
-6. Does deployment configuration or data migration need an update?
+<div class="doc-footer">UBHAYA FASHIONS · Architecture handbook · Update when project boundaries or integrations change.</div>
