@@ -47,16 +47,10 @@
 
 ## <strong>05</strong> Git contribution workflow
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-flowchart LR
- A[Update Base Branch] --> B[Create Focused Branch]
- B --> C[Implement Change]
- C --> D[Add Tests]
- D --> E[Build and Review]
- E --> F[Pull Request]
- F --> G[Merge After Approval]
-```
+<figure class="doc-diagram">
+  <img src="assets/git-contribution-workflow.svg" alt="Git contribution workflow from updating the base branch to an approved merge." />
+  <figcaption>Git contribution workflow from updating the base branch to an approved merge.</figcaption>
+</figure>
 
 1. Start from an up-to-date base branch.
 2. Use a short branch name describing the work.
