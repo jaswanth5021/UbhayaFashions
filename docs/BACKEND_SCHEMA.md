@@ -115,7 +115,7 @@ flowchart TB
 
     classDef notification fill:#FCE7F3,stroke:#DB2777,color:#831843,stroke-width:2px;
     classDef related fill:#FDF2F8,stroke:#F472B6,color:#9D174D;
-    N classDef notification;
+    class N notification;
     class S,P,C related;
 ```
 
