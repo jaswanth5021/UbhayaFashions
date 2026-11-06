@@ -7,28 +7,10 @@
 
 ## <strong>01</strong> Customer journey
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-flowchart TD
- A[Home] --> B[Browse / Search]
- B --> C[Filter and Sort]
- C --> D[Product Details]
- D --> E[Choose Size and Colour]
- E --> F[Add to Cart]
- F --> G{Signed in?}
- G -- No --> H[Sign in / Register]
- G -- Yes --> I[Checkout]
- H --> I
- I --> J[Delivery Address]
- J --> K[Create Payment Order]
- K --> L[Razorpay Checkout]
- L --> M[Server Payment Verification]
- M --> N{Verified?}
- N -- No --> O[Pending / Failed State]
- N -- Yes --> P[Save Order and Update Stock]
- P --> Q[Confirmation]
- Q --> R[My Orders / Tracking]
-```
+<figure class="doc-diagram">
+  <img src="assets/customer-shopping-journey.svg" alt="Customer shopping journey: discovery, checkout, verified payment and order tracking." />
+  <figcaption>Customer shopping journey: discovery, checkout, verified payment and order tracking.</figcaption>
+</figure>
 
 <div class="doc-grid four">
 <div class="doc-card pink"><span class="ico">🔎</span><strong>01 · Discover</strong><p>Home, category, search and product listing.</p></div>
@@ -39,26 +21,10 @@ flowchart TD
 
 ## <strong>02</strong> Administrator journey
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-flowchart TD
- A[Admin Login] --> B[Dashboard]
- B --> C[Catalogue]
- B --> D[Inventory]
- B --> E[Orders]
- B --> F[Customers]
- B --> G[Storefront Banners]
- C --> H[Product and Variant Editor]
- H --> I[Validate and Save]
- E --> J[Review Order and Payment]
- J --> K{Eligible to Ship?}
- K -- No --> L[Resolve Order Issue]
- K -- Yes --> M[Check PIN Serviceability]
- M --> N[Delhivery Manifest]
- N --> O{AWB returned?}
- O -- Yes --> P[Save Shipment and Tracking]
- O -- No --> Q[Show Provider Error]
-```
+<figure class="doc-diagram">
+  <img src="assets/admin-operations-flow.svg" alt="Administrator workflow: catalogue, inventory, customer and order fulfilment operations." />
+  <figcaption>Administrator workflow: catalogue, inventory, customer and order fulfilment operations.</figcaption>
+</figure>
 
 ## <strong>03</strong> Payment lifecycle
 
@@ -76,25 +42,10 @@ flowchart TD
 
 ## <strong>04</strong> Shipment sequence
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#fbf8fc","primaryColor":"#f7eaf3","primaryTextColor":"#302638","primaryBorderColor":"#b34e91","lineColor":"#8b3a62","secondaryColor":"#eff7ff","tertiaryColor":"#fff8e9","mainBkg":"#f7eaf3","nodeBorder":"#b34e91","clusterBkg":"#f5f0ff","clusterBorder":"#c9b5df","titleColor":"#56264e","edgeLabelBackground":"#fbf8fc","fontFamily":"Segoe UI, Arial, sans-serif"}}}%%
-sequenceDiagram
- participant Admin
- participant Web as Admin Website
- participant API as UBHAYA API
- participant D as Delhivery
- participant DB as SQL Server
- Admin->>Web: Request shipment
- Web->>API: Authenticated request
- API->>DB: Check order and payment
- API->>D: Check serviceability
- D-->>API: Serviceability result
- API->>D: Manifest shipment
- D-->>API: AWB and result
- API->>DB: Save successful shipment
- API-->>Web: Outcome
- Web-->>Admin: Confirmation or actionable error
-```
+<figure class="doc-diagram">
+  <img src="assets/shipment-sequence.svg" alt="Shipment creation sequence across the admin website, UBHAYA API, Delhivery and SQL Server." />
+  <figcaption>Shipment creation sequence across the admin website, UBHAYA API, Delhivery and SQL Server.</figcaption>
+</figure>
 
 ## <strong>05</strong> Key screens and routes
 
