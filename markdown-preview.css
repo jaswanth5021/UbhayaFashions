@@ -164,3 +164,37 @@ body, .markdown-body {
  .markdown-body .doc-grid,.markdown-body .doc-grid.two,.markdown-body .doc-grid.four { grid-template-columns:1fr !important; }
  .markdown-body .doc-pill { float:none !important; }
 }
+
+/* Mermaid diagrams: keep labels readable inside the light documentation theme.
+   Reset Markdown paragraph spacing inside Mermaid's SVG/foreignObject labels. */
+.markdown-body .mermaid,
+.markdown-body pre.mermaid {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  background: transparent !important;
+}
+.markdown-body .mermaid svg {
+  display: block !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+.markdown-body .mermaid .nodeLabel p,
+.markdown-body .mermaid .edgeLabel p,
+.markdown-body .mermaid .cluster-label p,
+.markdown-body .mermaid foreignObject p {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  color: #302638 !important;
+}
+.markdown-body .mermaid .nodeLabel,
+.markdown-body .mermaid .edgeLabel,
+.markdown-body .mermaid .label {
+  color: #302638 !important;
+  font-family: "Segoe UI", Inter, Arial, sans-serif !important;
+}
+.markdown-body .mermaid .edgeLabel {
+  background-color: #fbf8fc !important;
+}
