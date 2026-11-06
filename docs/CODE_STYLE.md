@@ -1,95 +1,79 @@
-<div align="center">
-
-# Engineering Standards
-### Code style and contribution conventions
-
-**Readable code, explicit boundaries and small, verifiable changes.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · ENGINEERING PRACTICE</span><span class="doc-pill">Build clean. Ship safely.</span>
+<h1>Code Style Guide</h1>
+<p>Shared conventions for readable C#, reliable APIs, maintainable Razor views and focused contributions.</p>
+<div class="doc-meta"><div><strong>Runtime</strong>.NET 8</div><div><strong>Projects</strong>Frontend + Backend</div><div><strong>Standard</strong>Consistency first</div></div>
 </div>
 
----
+## <strong>01</strong> Engineering principles
 
-## 01 · General principles
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">🧭</span><strong>Follow existing patterns</strong><p>Keep conventions consistent with neighbouring code.</p></div>
+<div class="doc-card purple"><span class="ico">✂️</span><strong>Keep changes focused</strong><p>Avoid unrelated refactors and formatting churn.</p></div>
+<div class="doc-card blue"><span class="ico">🧪</span><strong>Test behaviour</strong><p>Cover bug fixes and business-rule changes.</p></div>
+</div>
 
-- Follow the conventions already established in the surrounding code.
-- Prefer simple, explicit solutions over clever abstractions.
-- Keep changes focused; avoid unrelated formatting or refactoring.
-- Name concepts consistently across DTOs, services, routes and UI.
-- Validate input at system boundaries.
-- Handle expected failures explicitly; do not swallow exceptions.
-- Add tests for bug fixes and business-rule changes.
+## <strong>02</strong> C# and .NET conventions
 
-## 02 · C# and .NET
-
-- Target the repository's .NET 8 projects unless a planned upgrade is approved.
+- Target .NET 8 unless an upgrade is approved.
 - Use nullable reference types and resolve warnings intentionally.
-- Use async APIs for I/O; propagate cancellation tokens where supported.
-- Use `PascalCase` for public types and members; `camelCase` for locals and parameters.
-- Keep controllers thin and move reusable business logic into services.
-- Use dependency injection instead of constructing infrastructure dependencies inside controllers.
-- Prefer DTOs for request and response contracts.
-- Use `decimal` for currency.
-- Avoid exposing EF Core entities directly from API endpoints.
-- Do not introduce synchronous blocking calls such as `.Result` or `.Wait()` in request paths.
+- Use async I/O and propagate cancellation tokens where supported.
+- Keep controllers thin; place reusable rules in services.
+- Use DTOs for API contracts rather than exposing EF entities.
+- Use `decimal` for money.
+- Avoid blocking calls such as `.Result` and `.Wait()` in request paths.
+- Use dependency injection for infrastructure dependencies.
 
-## 03 · API conventions
-
-- Use clear resource-oriented routes and correct HTTP methods/status codes.
-- Validate DTOs and return actionable, non-sensitive validation errors.
-- Keep authentication and authorization explicit.
-- Make payment, webhook and shipping handlers idempotent where possible.
-- Use consistent response shapes and avoid leaking internal exception details.
-- Document configuration changes and endpoint behaviour.
-
-## 04 · Razor, HTML, CSS and JavaScript
-
-- Use semantic HTML and accessible labels.
-- Keep Razor views focused on presentation.
-- Prefer shared partials/components for repeated UI.
-- Scope CSS to components where practical; avoid broad selectors that cause regressions.
-- Use responsive layouts rather than fixed pixel widths.
-- Keep JavaScript modular and avoid duplicate event handlers.
-- Do not rely on hover for essential touch interactions.
-- Provide loading, empty, disabled and error states.
-
-## 05 · Naming and file organisation
+## <strong>03</strong> Naming conventions
 
 | Item | Convention | Example |
 |---|---|---|
-| C# class | PascalCase | `OrdersController.cs` |
-| Interface | I + PascalCase | `IEmailService.cs` |
+| Class / public member | PascalCase | `OrdersController` |
+| Interface | I + PascalCase | `IEmailService` |
 | Method | PascalCase | `CreateShipmentAsync` |
-| Local variable | camelCase | `orderId` |
+| Local / parameter | camelCase | `orderId` |
 | Constant | PascalCase | `MaximumUploadSize` |
-| CSS class | descriptive kebab-case | `.product-card__price` |
-| Test | behaviour-focused | `CreateOrder_WhenPaymentFails_DoesNotReduceStock` |
+| CSS class | kebab-case | `.product-card__price` |
+| Test | Behaviour-focused | `CreateOrder_WhenPaymentFails_DoesNotReduceStock` |
 
-## 06 · Error handling and observability
+## <strong>04</strong> API and frontend standards
 
-- Return errors that help the caller recover without exposing internals.
-- Log exceptions once at the appropriate boundary with correlation context.
-- Do not log passwords, tokens, full addresses or payment secrets.
-- Distinguish validation errors, authorization failures, provider failures and unexpected faults.
-- Never report a provider action as successful until the result has been confirmed.
+<div class="doc-grid two">
+<div class="doc-card purple"><span class="ico">🔌</span><strong>API contracts</strong><p>Correct HTTP methods, status codes, validation and non-sensitive errors.</p></div>
+<div class="doc-card pink"><span class="ico">🧩</span><strong>Razor and UI</strong><p>Semantic HTML, reusable partials, accessible labels and responsive CSS.</p></div>
+<div class="doc-card blue"><span class="ico">⚡</span><strong>JavaScript</strong><p>Modular behaviour, no duplicate handlers and explicit loading states.</p></div>
+<div class="doc-card green"><span class="ico">🛡️</span><strong>Error handling</strong><p>Handle expected failures and log safely at the right boundary.</p></div>
+</div>
 
-## 07 · Git workflow
+## <strong>05</strong> Git contribution workflow
+
+```mermaid
+flowchart LR
+ A[Update Base Branch] --> B[Create Focused Branch]
+ B --> C[Implement Change]
+ C --> D[Add Tests]
+ D --> E[Build and Review]
+ E --> F[Pull Request]
+ F --> G[Merge After Approval]
+```
 
 1. Start from an up-to-date base branch.
-2. Use a short branch name describing the change.
+2. Use a short branch name describing the work.
 3. Make small commits with imperative messages.
-4. Run relevant tests and build checks.
-5. Review the full diff for secrets, generated files and unrelated changes.
-6. Open a pull request with purpose, implementation notes, tests and screenshots for UI changes.
-7. Update documentation when behaviour or operations change.
+4. Run relevant build and test commands.
+5. Review the diff for secrets, generated files and unrelated changes.
+6. Include purpose, test evidence and UI screenshots in pull requests.
 
-## 08 · Pull request checklist
+## <strong>06</strong> Definition of done
 
-- [ ] Scope is clear and focused.
-- [ ] Naming and patterns match neighbouring code.
-- [ ] Validation and authorization are server-side.
-- [ ] Error and retry paths are considered.
+- [ ] Requirement and existing behaviour inspected.
+- [ ] Code follows project conventions.
+- [ ] Validation and authorization remain server-side.
+- [ ] Failure and retry paths considered.
 - [ ] Tests added or updated.
 - [ ] Build and tests pass.
-- [ ] Responsive/accessibility checks completed for UI changes.
-- [ ] Configuration and documentation updated.
-- [ ] No secrets, personal data or generated build output included.
+- [ ] UI checked on mobile and desktop where relevant.
+- [ ] Documentation and configuration updated.
+- [ ] No secrets or personal data introduced.
+
+<div class="doc-footer">UBHAYA FASHIONS · Engineering standards · Prefer small, reviewable and testable changes.</div>
