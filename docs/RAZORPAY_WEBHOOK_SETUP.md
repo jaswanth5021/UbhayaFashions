@@ -1,60 +1,54 @@
-# Razorpay Webhook Setup – UBHAYA FASHIONS
+<div class="doc-hero"><span class="doc-kicker">UBHAYA FASHIONS · PAYMENT OPERATIONS</span><span class="doc-pill">Production integration guide</span><h1>Razorpay Webhook Setup</h1><p>Configure, validate and monitor server-to-server payment events for reliable order confirmation and inventory updates.</p><div class="doc-meta"><div><strong>Provider</strong>Razorpay</div><div><strong>Events</strong>Captured · Failed</div><div><strong>Secret</strong>Backend only</div></div></div>
 
-## Production endpoint
+## <strong>01</strong> Production endpoint
 
 `POST https://ubhayafashions.in/api/payment/razorpay/webhook`
 
-The endpoint is public because Razorpay calls it server-to-server. It accepts POST requests only and validates the `X-Razorpay-Signature` header against the exact raw request body.
+The endpoint accepts POST requests from Razorpay and validates the `X-Razorpay-Signature` header against the exact raw request body.
 
-## Backend secret
+## <strong>02</strong> Configure the webhook secret
 
-Create a webhook secret in the Razorpay Dashboard and configure it on the backend as:
+| Setting | Value |
+|---|---|
+| Environment variable | `Razorpay__WebhookSecret` |
+| Configuration key | `Razorpay:WebhookSecret` |
+| Storage | Backend hosting environment / secret store |
 
-- Environment variable: `Razorpay__WebhookSecret`
-- Configuration key: `Razorpay:WebhookSecret`
+Use a strong unique secret. Do not reuse `Razorpay:KeySecret`, commit the secret or expose it to the frontend. Restart the backend application after changing IIS/Windows environment variables.
 
-Use a strong, unique secret. Do not reuse `Razorpay:KeySecret`, do not commit the webhook secret to Git, and do not expose it to the frontend.
+## <strong>03</strong> Razorpay dashboard setup
 
-After adding or changing the environment variable on IIS/Windows, restart the backend application pool/site so the process loads the new value.
+<div class="doc-grid two"><div class="doc-card pink"><span class="ico">🌐</span><strong>Webhook URL</strong><p>Use the production endpoint above. It accepts signed server-to-server POST requests.</p></div><div class="doc-card purple"><span class="ico">🔐</span><strong>Webhook secret</strong><p>Enter the exact same value configured as Razorpay__WebhookSecret on the backend.</p></div></div>
 
-## Razorpay Dashboard
+Subscribe to `payment.captured` and `payment.failed`, save the webhook and review delivery logs after testing.
 
-In the Razorpay Dashboard, create a webhook with:
+## <strong>04</strong> What the implementation does
 
-- URL: `https://ubhayafashions.in/api/payment/razorpay/webhook`
-- Secret: the same value configured as `Razorpay__WebhookSecret`
-- Events: `payment.captured`, `payment.failed`
+<div class="doc-grid two"><div class="doc-card green"><span class="ico">✓</span><strong>Signature validation</strong><p>Verifies HMAC-SHA256 against the raw body.</p></div><div class="doc-card blue"><span class="ico">🔁</span><strong>Duplicate protection</strong><p>Stores event IDs with a unique index and avoids repeat processing.</p></div><div class="doc-card purple"><span class="ico">💳</span><strong>Payment reconciliation</strong><p>Checks payment ID, order ID, amount, currency and captured status.</p></div><div class="doc-card pink"><span class="ico">📦</span><strong>Order fulfilment</strong><p>Commits paid state and stock changes before follow-up actions.</p></div></div>
 
-Keep the webhook secret exactly the same in both places.
+If inventory is unavailable after a captured payment, the event is recorded as `NeedsReview` for admin intervention. It must not silently deduct negative stock.
 
-## What the implementation does
+## <strong>05</strong> Deployment and verification checklist
 
-- Verifies the webhook HMAC-SHA256 signature using the raw request body.
-- Requires the `x-razorpay-event-id` header and stores it in a SQL Server table with a unique index.
-- Treats duplicate event deliveries as successful duplicates without processing them again.
-- Checks the payment ID, Razorpay order ID, amount, currency and captured status against the local payment/order.
-- Marks captured payments paid and deducts stock in a database transaction.
-- Records failed payments without changing an already-paid order.
-- Creates a Delhivery shipment and sends the order confirmation after a captured payment is committed.
-- Saves the structured checkout delivery address with the local order so the webhook can finish the paid-order flow even if the customer closes the browser.
+| Step | Action | Expected result |
+|---|---|---|
+| 1 | Deploy backend changes and apply migration | Required columns/table exist |
+| 2 | Configure webhook secret | Backend loads secret |
+| 3 | Create dashboard webhook | Endpoint and events saved |
+| 4 | Send provider test event | Delivery and signature verified |
+| 5 | Complete test-mode payment | Order and stock updated once |
+| 6 | Replay same event | Duplicate safely ignored |
+| 7 | Send invalid signature | HTTP 401 |
+| 8 | Test failed payment | Order not marked paid |
+| 9 | Configure live webhook after test approval | Live delivery verified |
 
-If inventory is no longer available after Razorpay has captured payment, the webhook records the event as `NeedsReview` and logs a critical error. This requires an admin refund/order review; it does not silently mark the order paid or deduct negative stock.
+## <strong>06</strong> Operational notes
 
-## Deployment and test checklist
+- The authenticated `POST /api/payments/verify` checkout verification remains in place; webhook processing supplements it.
+- Do not test by opening the URL in a browser address bar. That sends GET, not a signed POST.
+- Never place the webhook secret in frontend settings, source control or customer-visible output.
+- Monitor backend logs and Razorpay webhook delivery history.
+- Confirm the current deployed route and migration state before production changes.
 
-1. Deploy the backend changes and allow EF Core migrations to run. The migration adds `DeliveryAddressJson` to `Orders` and creates `RazorpayWebhookEvents`.
-2. Configure `Razorpay__WebhookSecret` on the production server and restart the backend.
-3. Create the webhook in Razorpay Dashboard with the URL and events above.
-4. Use Razorpay's webhook test/send option, if available in the account, to verify successful delivery and signature validation.
-5. Complete a Razorpay test-mode payment and confirm the order is paid, stock is deducted once, and the webhook event is stored.
-6. Replay the same event and confirm the response indicates a duplicate and stock is unchanged.
-7. Send an invalid-signature request and confirm the endpoint returns HTTP 401.
-8. Test a failed payment and confirm the order is not marked paid and no stock/shipment/confirmation email is created.
-9. After all tests pass, repeat configuration and verification using the live Razorpay account's webhook settings.
-
-## Important operational notes
-
-- The existing authenticated `POST /api/payments/verify` checkout verification remains in place. The webhook supplements it; it does not replace it.
-- Never test the endpoint by typing its URL into a browser. A browser address-bar request is GET; Razorpay sends POST with signature and event headers.
-- Never place the webhook secret in frontend settings, source control, or a customer-visible response.
-- Monitor backend logs and the Razorpay webhook delivery logs after launch.
+<div class="doc-callout"><span>⚠️</span><div><b>Keep environments separate</b><br/>Use separate test and live credentials. Verify webhook delivery and order behaviour in test mode before enabling live events.</div></div>
+<div class="doc-footer">UBHAYA FASHIONS · Razorpay operations · Keep test and live credentials separate.</div>
