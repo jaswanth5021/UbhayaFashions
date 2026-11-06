@@ -1,111 +1,93 @@
-<div align="center">
-
-# Security Guide
-### Protecting customers, payments and store operations
-
-**Security is a design constraint across every layer—not a final checklist.**
-
+<div class="doc-hero">
+<span class="doc-kicker">UBHAYA FASHIONS · TRUST & SAFETY</span><span class="doc-pill">Protect every transaction</span>
+<h1>Security Guide</h1>
+<p>Practical safeguards for customer identity, payments, shipping, uploaded files, production data and store operations.</p>
+<div class="doc-meta"><div><strong>Security model</strong>Layered controls</div><div><strong>Trust boundary</strong>Browser → API</div><div><strong>Priority</strong>Production safety</div></div>
 </div>
 
----
-
-## 01 · Trust boundaries
+## <strong>01</strong> Trust boundaries
 
 ```mermaid
 flowchart LR
-    B[Untrusted Browser] -->|HTTPS| W[Frontend Session Boundary]
-    W -->|Authenticated API request| A[Backend API Boundary]
-    A --> D[(SQL Server)]
-    A --> P[Razorpay]
-    A --> C[Delhivery]
-    A --> E[Email Provider]
+ B[Untrusted Browser] -->|HTTPS| W[Website Session]
+ W -->|Authenticated API| A[Backend API]
+ A --> D[(SQL Server)]
+ A --> R[Razorpay]
+ A --> C[Delhivery]
+ A --> E[Email Provider]
 ```
 
-Validate every value crossing a boundary. Browser validation improves usability but does not replace backend validation.
+Validate every value crossing a boundary. Browser validation is for usability; backend validation is mandatory.
 
-## 02 · Secrets and configuration
+## <strong>02</strong> Security pillars
 
-- Never commit live credentials, API tokens, SMTP passwords, database passwords or JWT signing keys.
-- Use environment variables, .NET User Secrets for local development, or a managed secret store in production.
-- Keep separate credentials for test/staging and production.
-- Rotate credentials after accidental exposure and review repository history if a secret was committed.
-- Ensure logs and exception responses never expose secret values.
-- Keep `appsettings.example.json` values as placeholders only.
+<div class="doc-grid">
+<div class="doc-card pink"><span class="ico">🔑</span><strong>Secrets</strong><p>Keep credentials out of source control and browser code.</p></div>
+<div class="doc-card purple"><span class="ico">🪪</span><strong>Identity</strong><p>Separate customer and admin authentication contexts.</p></div>
+<div class="doc-card blue"><span class="ico">💳</span><strong>Payments</strong><p>Verify signatures and reconcile uncertain outcomes.</p></div>
+<div class="doc-card green"><span class="ico">🚚</span><strong>Shipping</strong><p>Protect carrier tokens and shipment operations.</p></div>
+<div class="doc-card yellow"><span class="ico">📁</span><strong>Uploads</strong><p>Validate file content and store outside executable paths.</p></div>
+<div class="doc-card orange"><span class="ico">📋</span><strong>Observability</strong><p>Log safely without exposing personal or secret data.</p></div>
+</div>
 
-## 03 · Authentication and authorization
+## <strong>03</strong> Authentication and authorization
 
 - Use strong password hashing; never store plaintext passwords.
-- Protect cookie sessions with secure, HTTP-only and appropriate SameSite settings.
-- Require HTTPS in production.
-- Validate JWT issuer, audience, signature and expiry.
-- Apply authorization policies at API endpoints, not only by hiding frontend links.
-- Keep customer and admin authentication contexts separate.
-- Verify resource ownership for addresses, orders, reviews and account actions.
-- Use short-lived, single-use password-reset tokens and invalidate them after use.
+- Use secure, HTTP-only cookies and HTTPS in production.
+- Validate JWT signature, issuer, audience and expiry.
+- Enforce authorization on API endpoints.
+- Check ownership for customer orders, addresses, reviews and account actions.
+- Keep admin and customer credentials/claims separate.
+- Use expiring, single-use password-reset tokens.
 
-## 04 · Payments
+## <strong>04</strong> Payment protection
 
-- Keep Razorpay secret keys on the backend.
-- Create payment orders from trusted server-side totals.
-- Verify payment signatures on the backend.
-- Reconcile uncertain outcomes with the provider before retrying.
-- Make webhook handling idempotent and validate webhook signatures.
-- Never mark an order Paid based only on a browser redirect or client-side success callback.
-- Do not log full payment credentials or sensitive payment payloads.
+| Control | Requirement |
+|---|---|
+| API keys | Secret key stays on backend |
+| Amount | Calculate from trusted server-side data |
+| Signature | Verify on backend |
+| Webhook | Validate signature and event identity |
+| Duplicate event | Process idempotently |
+| Timeout | Reconcile before retrying |
+| Order state | Never trust browser redirect alone |
 
-## 05 · Shipping
+## <strong>05</strong> Shipping protection
 
-- Keep Delhivery tokens server-side.
-- Require admin authorization for shipment creation and pickup operations.
-- Verify order state and payment eligibility before manifestation.
-- Validate PIN serviceability, recipient details and parcel weight.
-- Persist AWB and shipment status only after a successful carrier response.
-- Prevent duplicate shipment creation and use a safe reconciliation path after timeouts.
-- Avoid logging full addresses, phone numbers or provider payloads during normal operation.
+- Keep Delhivery API token server-side.
+- Require admin authorization for shipment and pickup operations.
+- Check order state and payment eligibility before manifestation.
+- Validate destination PIN, recipient details and parcel weight.
+- Save AWB only after confirmed successful response.
+- Prevent duplicate shipment creation.
+- Redact personal details from normal logs.
 
-## 06 · Input, files and database
+## <strong>06</strong> Input, files and database
 
-- Validate all request DTOs on the server.
-- Use parameterized EF Core queries; do not concatenate untrusted SQL.
-- Validate upload extension, content type, file signature, size and generated filename.
-- Store uploads outside executable application paths and persist them durably.
-- Prevent path traversal and arbitrary file access.
-- Apply least-privilege database credentials.
-- Back up data securely and test restore procedures.
+- Validate request DTOs on the server.
+- Use parameterized EF Core queries.
+- Validate file extension, MIME type, signature and size.
+- Generate safe filenames and prevent path traversal.
+- Store uploads outside executable application directories.
+- Use least-privilege database credentials.
+- Back up database and uploads separately; test restore.
 
-## 07 · Browser security
+## <strong>07</strong> Release security gate
 
-- Encode output and avoid unsafe HTML injection.
-- Use anti-forgery protection for cookie-authenticated state-changing MVC actions.
-- Configure CORS narrowly; do not use wildcard origins with credentials.
-- Add appropriate security headers, including a considered Content Security Policy.
-- Avoid putting tokens or private data in URLs, local storage or analytics events.
-- Use dependency updates and vulnerability scanning as part of maintenance.
+<div class="doc-grid two">
+<div class="doc-card green"><span class="ico">✓</span><strong>Identity and access</strong><p>Authorization, customer ownership and secure sessions tested.</p></div>
+<div class="doc-card blue"><span class="ico">✓</span><strong>Payment integrity</strong><p>Signatures, webhooks and duplicate events tested.</p></div>
+<div class="doc-card purple"><span class="ico">✓</span><strong>Data protection</strong><p>Secrets, uploads, logs and backups reviewed.</p></div>
+<div class="doc-card yellow"><span class="ico">✓</span><strong>Operations</strong><p>Errors, monitoring and recovery process verified.</p></div>
+</div>
 
-## 08 · Logging and incident response
-
-Log enough context to diagnose issues: timestamp, correlation ID, route, safe entity identifier and outcome. Redact credentials, authorization headers, reset tokens, full payment data and unnecessary personal information.
-
-If a credential or customer dataset is exposed:
-
-1. Restrict access and stop further exposure.
-2. Rotate/revoke affected credentials.
-3. Preserve relevant logs securely.
-4. Assess affected data and systems.
-5. Follow applicable incident and customer-notification obligations.
-6. Document root cause and preventive actions.
-
-## 09 · Release security gate
-
-- [ ] No secrets in tracked files or build artifacts.
+- [ ] No live secrets in tracked files or build artifacts.
 - [ ] HTTPS and secure cookie settings verified.
-- [ ] Admin endpoints enforce authorization.
-- [ ] Customer ownership checks tested.
-- [ ] Payment signature and webhook verification tested.
-- [ ] Duplicate payment/shipment requests handled safely.
+- [ ] Admin and customer authorization tested.
 - [ ] Upload validation and storage permissions reviewed.
-- [ ] Error responses do not leak stack traces or secrets.
-- [ ] Dependencies and production configuration reviewed.
+- [ ] Error responses do not leak secrets or stack traces.
+- [ ] Dependency and production configuration review completed.
 
-> [!WARNING]
-> A security badge, certification logo or compliance claim must not be displayed unless UBHAYA has actually obtained and can substantiate that certification.
+<div class="doc-callout"><span>⚠️</span><div><b>Certification claims</b><br/>Do not display security certification logos or compliance claims unless UBHAYA has obtained and can substantiate the certification.</div></div>
+
+<div class="doc-footer">UBHAYA FASHIONS · Security handbook · Revisit after authentication, payment, upload or infrastructure changes.</div>
