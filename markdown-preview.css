@@ -198,3 +198,40 @@ body, .markdown-body {
 .markdown-body .mermaid .edgeLabel {
   background-color: #fbf8fc !important;
 }
+
+/* Standalone documentation diagrams (SVG) */
+.markdown-body figure.doc-diagram {
+  display:block !important;
+  width:100% !important;
+  margin:22px 0 28px !important;
+  padding:14px !important;
+  background:#fff !important;
+  border:1px solid #eadfeb !important;
+  border-radius:16px !important;
+  box-shadow:0 5px 18px rgba(82,43,75,.045) !important;
+  overflow:hidden !important;
+  box-sizing:border-box !important;
+}
+.markdown-body figure.doc-diagram img {
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  height:auto !important;
+  max-height:none !important;
+  object-fit:contain !important;
+  margin:0 auto !important;
+  border:0 !important;
+  background:#fbf8fc !important;
+}
+.markdown-body figure.doc-diagram figcaption {
+  color:#817487 !important;
+  font-size:12px !important;
+  line-height:1.5 !important;
+  text-align:center !important;
+  padding:10px 8px 2px !important;
+  margin:0 !important;
+}
+@media(max-width:760px) {
+  .markdown-body figure.doc-diagram { padding:8px !important; margin:16px 0 22px !important; }
+  .markdown-body figure.doc-diagram img { width:100% !important; }
+}
