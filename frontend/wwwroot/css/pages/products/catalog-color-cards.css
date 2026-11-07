@@ -307,3 +307,27 @@
     .announcement-bar span { padding: 3px 7px; }
     .announcement-bar i { font-size: 11px; }
 }
+
+
+/* Mobile catalogue cards: remove the excess vertical gap between size chips
+   and the stock message across every product card. */
+@media (max-width: 700px) {
+    .catalog-page .catalog-card .catalog-size-options {
+        margin-top: 4px !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+        line-height: 1.2;
+    }
+
+    .catalog-page .catalog-card .catalog-stock-mobile {
+        display: block;
+        margin: 2px 0 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        line-height: 1.35;
+    }
+
+    .catalog-page .catalog-card .catalog-action.catalog-action-mobile {
+        margin: 6px 0 0 !important;
+    }
+}
