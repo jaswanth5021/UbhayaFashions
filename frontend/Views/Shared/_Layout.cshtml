@@ -349,7 +349,7 @@
     <title>@documentTitle</title>
 
     <!-- Shared and page feature styles, in cascade order -->
-    @if (isHomePage)
+    @if (isHomePage || (currentController == "Products" && currentAction == "Categories"))
     {
         <link rel="stylesheet" href="~/css/pages/home/index.css" asp-append-version="true" />
     }
