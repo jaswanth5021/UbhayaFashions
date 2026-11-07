@@ -126,8 +126,7 @@
                                     }
                                     else if (item.Quantity > selectedVariant.Stock)
                                     {
-                                        <p class="checkout-stock-warning" role="alert">Only @selectedVariant.Stock left in this size. Reduce the quantity to continue.</p>
-                                    }
+                                        <p class="checkout-stock-warning" role="alert">Your selected quantity exceeds available stock. Reduce the quantity to continue.</p>
                                     }
                                     <div class="checkout-item-price" aria-label="Product price">
                                         @if (itemHasDiscount)
