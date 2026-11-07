@@ -119,6 +119,10 @@
                                     {
                                         <p class="checkout-stock-warning" role="alert">Your selected size is unavailable. Please choose another in-stock size or remove this item.</p>
                                     }
+                                    else if (item.Quantity > selectedVariant.Stock)
+                                    {
+                                        <p class="checkout-stock-warning" role="alert">Only @selectedVariant.Stock left in this size. Reduce the quantity to continue.</p>
+                                    }
                                     else
                                     {
                                         <p class="checkout-stock-hint">@selectedVariant.Stock available</p>
