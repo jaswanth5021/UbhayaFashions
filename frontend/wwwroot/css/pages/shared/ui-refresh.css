@@ -3787,3 +3787,26 @@ body {
         font-size: 9px;
     }
 }
+
+
+/* The discount badge is a percentage label, never a struck-through price. */
+.price-display .price-discount,
+.checkout-payment-discount-badge {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+}
+
+.cart-drawer-item-pricing,
+.shopping-cart-item-pricing {
+    margin: 5px 0 8px;
+    font-size: 13px;
+}
+.checkout-payment-price-line {
+    justify-content: flex-start;
+    margin-top: 5px;
+    font-size: 13px;
+}
+.checkout-payment-price-line .price-sale {
+    color: #68142e;
+    font-weight: 700;
+}
