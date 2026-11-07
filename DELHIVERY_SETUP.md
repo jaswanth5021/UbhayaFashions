@@ -53,3 +53,16 @@ Rate responses are estimates. Delhivery staging can return zero charges, so do n
 - A client-name or pickup-location error usually means the configured value differs from the active account value. Confirm it in Delhivery One before retrying.
 - If a request times out, first check the provider portal for an existing shipment to avoid creating a duplicate.
 - The backend stores shipment status, waybill, label URL, attempt count, and the latest error on the order's shipment record.
+
+## Checkout delivery charges
+
+For prepaid checkout orders with a product subtotal below ₹1,000, the backend:
+
+1. Uses `Delhivery:SellerPin` as the shipment origin PIN and the customer's delivery PIN as the destination.
+2. Checks that Delhivery supports prepaid delivery to the destination PIN.
+3. Requests an estimated Surface rate for the same 1 kg parcel used by automatic shipment creation.
+4. Adds Delhivery's `total_amount` estimate to the Razorpay order amount and displays the product subtotal, delivery charge, and payable total on the secure payment page.
+
+Orders with a product subtotal of ₹1,000 or more receive free shipping and do not call the rate API.
+
+The invoice charge API returns an approximate amount, not a guaranteed final invoice. Delhivery staging does not return live rate-card amounts; checkout deliberately blocks a below-threshold payment if the quote is zero. Configure `Delhivery:Environment=Production`, a valid production API token, and the correct six-digit `Delhivery:SellerPin` before accepting live orders below ₹1,000.
