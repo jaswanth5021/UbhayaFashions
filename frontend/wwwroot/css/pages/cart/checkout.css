@@ -2140,3 +2140,16 @@
         font-size: 14px;
     }
 }
+
+
+/* Make the final checkout step easier to read. */
+.checkout-four-step .checkout-screen-step[data-checkout-screen-indicator="4"] strong {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    .checkout-four-step .checkout-screen-step[data-checkout-screen-indicator="4"] strong {
+        font-size: 12px;
+    }
+}
