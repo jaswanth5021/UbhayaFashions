@@ -3318,12 +3318,78 @@ body {
     font-size: 13px;
 }
 .checkout-screen-summary .checkout-screen-products article {
-    grid-template-columns: 54px minmax(0, 1fr);
+    grid-template-columns: 54px minmax(0, 1fr) auto;
+    align-items: center;
     gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0e5e2;
 }
 .checkout-screen-summary .checkout-screen-products article img {
     width: 54px;
     height: 68px;
+}
+.checkout-screen-summary .checkout-screen-products article strong {
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: normal;
+}
+.checkout-screen-summary .checkout-screen-products article span,
+.checkout-screen-summary .checkout-screen-products article small {
+    display: block;
+    margin-top: 4px;
+    color: #80645f;
+    font-size: 12px;
+    line-height: 1.4;
+}
+.checkout-screen-summary .checkout-screen-products article b {
+    color: var(--ui-wine);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.checkout-screen-summary .checkout-screen-total-lines {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #eadedb;
+}
+.checkout-screen-summary .checkout-screen-total-lines > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin: 9px 0;
+    color: #655653;
+    font-size: 14px;
+}
+.checkout-screen-summary .checkout-screen-total-lines strong {
+    color: #302522;
+    text-align: right;
+}
+.checkout-screen-summary .checkout-screen-total-lines .free {
+    color: #287642;
+}
+.checkout-screen-summary .checkout-screen-total-payable {
+    margin-top: 14px !important;
+    padding-top: 12px;
+    border-top: 1px solid #eadedb;
+    color: #4f1025 !important;
+    font-size: 16px !important;
+    font-weight: 700;
+}
+.checkout-screen-summary .checkout-screen-total-payable strong {
+    color: var(--ui-wine);
+    font-size: 19px;
+}
+.checkout-screen-summary .checkout-shipping-pending {
+    max-width: 150px;
+    color: #986b25 !important;
+    font-size: 12px;
+}
+.checkout-screen-summary .checkout-shipping-disclaimer {
+    margin: 8px 0 14px;
+    color: #786a68;
+    font-size: 11px;
+    line-height: 1.5;
 }
 @media (max-width: 700px) {
     .checkout-screen,
