@@ -113,7 +113,7 @@
                                                 }
                                             </select>
                                         </label>
-                                        <button type="submit" class="checkout-bag-remove" form="checkout-cart-remove-@itemIndex">Remove</button>
+                                        
                                     </div>
                                     @if (selectedVariant is null)
                                     {
@@ -132,6 +132,13 @@
                                 <div class="checkout-bag-line-total">
                                     ₹@((item.Price * item.Quantity).ToString("N0"))
                                 </div>
+                                <button type="submit"
+                                        class="checkout-bag-remove-icon"
+                                        form="checkout-cart-remove-@itemIndex"
+                                        aria-label="Remove @item.Name from your shopping bag"
+                                        title="Remove item">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                                </button>
                             </article>
                         }
                     </div>
