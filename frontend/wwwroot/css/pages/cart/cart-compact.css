@@ -230,3 +230,31 @@
     .shopping-cart-controls { gap: 8px; }
     .shopping-cart-controls .shopping-cart-update { gap: 8px; }
 }
+
+
+/* Keep the cart drawer footer and checkout action inside the drawer's padded width. */
+.cart-drawer-footer {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 16px 18px calc(18px + env(safe-area-inset-bottom));
+}
+.cart-drawer-footer .cart-drawer-checkout {
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 56px;
+    margin: 14px 0 0;
+    padding: 0 18px;
+    align-items: center;
+    justify-content: center;
+    white-space: normal;
+    line-height: 1.25;
+}
+.cart-drawer-footer .cart-drawer-view-cart {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 0 2px;
+}
