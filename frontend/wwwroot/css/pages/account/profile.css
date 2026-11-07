@@ -652,3 +652,104 @@
     .profile-panel-heading h2 { font-size: 25px; }
     .profile-order-header > strong { font-size: 20px; }
 }
+
+
+/* Final order-history type scale: readable desktop text and controls. */
+.profile-orders-panel,
+.profile-orders-panel .orders-toolbar,
+.profile-orders-panel .orders-filter-tab,
+.profile-orders-panel .orders-sort,
+.profile-orders-panel .orders-page-size {
+    font-size: 15px !important;
+}
+
+.profile-orders-panel .profile-panel-heading p {
+    font-size: 15px !important;
+    line-height: 1.6;
+}
+
+.profile-orders-panel .orders-filter-tab {
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 14px !important;
+}
+
+.profile-orders-panel .orders-sort select,
+.profile-orders-panel .orders-page-size select {
+    min-height: 38px;
+    font-size: 14px !important;
+}
+
+.profile-orders-panel .profile-orders-match-count {
+    font-size: 14px !important;
+}
+
+.profile-orders-panel .profile-order-header > div > span {
+    font-size: 14px !important;
+    line-height: 1.4;
+}
+
+.profile-orders-panel .profile-order-header time {
+    font-size: 15px !important;
+    line-height: 1.5;
+}
+
+.profile-orders-panel .order-card-heading-right .order-card-total {
+    font-size: 25px !important;
+    line-height: 1.25;
+}
+
+.profile-orders-panel .order-open-details-link {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 14px !important;
+}
+
+.profile-orders-panel .order-view-toggle {
+    min-height: 34px;
+    font-size: 14px !important;
+}
+
+.profile-orders-panel .profile-order-badges .order-status-pill,
+.profile-orders-panel .profile-order-badges .order-payment-pill {
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 13px !important;
+}
+
+.profile-orders-panel .profile-order-items > div > span strong,
+.profile-orders-panel .profile-order-item-price {
+    font-size: 15px !important;
+}
+
+.profile-orders-panel .profile-order-items small {
+    font-size: 14px !important;
+}
+
+.profile-orders-panel .profile-order-footer {
+    font-size: 14px !important;
+    line-height: 1.6;
+}
+
+.profile-orders-panel .profile-order-footer small {
+    font-size: 13px !important;
+}
+
+@media (max-width: 600px) {
+    .profile-orders-panel .orders-toolbar,
+    .profile-orders-panel .orders-filter-tab {
+        font-size: 13px !important;
+    }
+
+    .profile-orders-panel .profile-order-header time {
+        font-size: 14px !important;
+    }
+
+    .profile-orders-panel .order-card-heading-right .order-card-total {
+        font-size: 22px !important;
+    }
+
+    .profile-orders-panel .order-open-details-link {
+        font-size: 13px !important;
+    }
+}
