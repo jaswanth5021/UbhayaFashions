@@ -60,44 +60,47 @@
                             {
                                 <p class="shopping-cart-color">Color: @item.Color</p>
                             }
-                            <form asp-controller="Cart" asp-action="Update" method="post" class="shopping-cart-update" data-cart-update>
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@item.ProductId" />
-                                <input type="hidden" name="currentSize" value="@item.Size" />
-                                <input type="hidden" name="currentColor" value="@item.Color" />
-                                <input type="hidden" name="color" value="@item.Color" />
-                                <input type="hidden" name="returnUrl" value="/Cart" />
-                                <label>Size
-                                    <select name="size" data-cart-size>
-                                        @if (variants.Count == 0)
-                                        {
-                                            <option value="@item.Size" selected>@item.Size</option>
-                                        }
-                                        else
-                                        {
-                                            @foreach (var variant in variants)
+                            <div class="shopping-cart-controls">
+                                <form asp-controller="Cart" asp-action="Update" method="post" class="shopping-cart-update" data-cart-update>
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="currentSize" value="@item.Size" />
+                                    <input type="hidden" name="currentColor" value="@item.Color" />
+                                    <input type="hidden" name="color" value="@item.Color" />
+                                    <input type="hidden" name="returnUrl" value="/Cart" />
+                                    <label class="shopping-cart-size-control">
+                                        <span class="visually-hidden">Choose size</span>
+                                        <select name="size" data-cart-size aria-label="Choose size">
+                                            @if (variants.Count == 0)
                                             {
-                                                <option value="@variant.Size" data-stock="@variant.Stock" selected="@(string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@variant.Size</option>
+                                                <option value="@item.Size" selected>@item.Size</option>
                                             }
-                                        }
-                                    </select>
-                                </label>
-                                <label>Quantity
-                                    <select name="quantity" data-cart-quantity>
-                                        @for (var quantity = 1; quantity <= Math.Max(1, selectedVariant?.Stock ?? item.Quantity); quantity++)
-                                        {
-                                            <option value="@quantity" selected="@(quantity == item.Quantity ? "selected" : null)">@quantity</option>
-                                        }
-                                    </select>
-                                </label>
-                            </form>
-                            <form asp-controller="Cart" asp-action="Remove" method="post" class="shopping-cart-remove">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@item.ProductId" />
-                                <input type="hidden" name="size" value="@item.Size" />
-                                <input type="hidden" name="color" value="@item.Color" />
-                                <button type="submit">Remove item</button>
-                            </form>
+                                            else
+                                            {
+                                                @foreach (var variant in variants)
+                                                {
+                                                    <option value="@variant.Size" data-stock="@variant.Stock" selected="@(string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@variant.Size</option>
+                                                }
+                                            }
+                                        </select>
+                                    </label>
+                                    <label class="shopping-cart-quantity-control">Qty
+                                        <select name="quantity" data-cart-quantity aria-label="Quantity">
+                                            @for (var quantity = 1; quantity <= Math.Max(1, selectedVariant?.Stock ?? item.Quantity); quantity++)
+                                            {
+                                                <option value="@quantity" selected="@(quantity == item.Quantity ? "selected" : null)">@quantity</option>
+                                            }
+                                        </select>
+                                    </label>
+                                </form>
+                                <form asp-controller="Cart" asp-action="Remove" method="post" class="shopping-cart-remove">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="size" value="@item.Size" />
+                                    <input type="hidden" name="color" value="@item.Color" />
+                                    <button type="submit">Remove</button>
+                                </form>
+                            </div>
                         </div>
                         <strong class="shopping-cart-price">&#8377;@((item.Price * item.Quantity).ToString("N0"))</strong>
                     </article>
