@@ -39,13 +39,11 @@
         <div class="wishlist-grid">
             @foreach (var product in Model)
             {
-                @{
-                    var wishlistDiscount = product.Discount;
-                    var wishlistHasDiscount = wishlistDiscount > 0 && wishlistDiscount < 100 && product.Price > 0;
-                    var wishlistOriginalPrice = wishlistHasDiscount
-                        ? Math.Round(product.Price / (1 - wishlistDiscount / 100m), 2)
-                        : product.Price;
-                }
+                var wishlistDiscount = product.Discount;
+                var wishlistHasDiscount = wishlistDiscount > 0 && wishlistDiscount < 100 && product.Price > 0;
+                var wishlistOriginalPrice = wishlistHasDiscount
+                    ? Math.Round(product.Price / (1 - wishlistDiscount / 100m), 2)
+                    : product.Price;
                 <article class="wishlist-card">
                     <a class="wishlist-card-image" asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">
                         @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
