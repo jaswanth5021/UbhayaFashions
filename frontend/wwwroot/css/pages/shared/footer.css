@@ -666,3 +666,59 @@
         stroke: currentColor !important;
     }
 }
+
+
+/* Mobile benefit cards: give each promise enough width to read naturally. */
+@media (max-width: 600px) {
+    .footer-benefits {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 20px 0;
+    }
+
+    .footer-benefit {
+        width: 100%;
+        min-height: 76px;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        gap: 14px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        text-align: left;
+    }
+
+    .footer-benefits .footer-benefit > svg {
+        width: 42px;
+        height: 42px;
+        max-width: 42px;
+        max-height: 42px;
+        flex: 0 0 42px;
+        margin: 0;
+        padding: 7px;
+    }
+
+    .footer-benefit-copy {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .footer-benefit-copy strong,
+    .footer-benefit-copy span {
+        display: block;
+        margin: 0;
+        text-align: left;
+        line-height: 1.35;
+    }
+
+    .footer-benefit-copy strong {
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .footer-benefit-copy span {
+        font-size: 12px;
+        overflow-wrap: normal;
+    }
+}
