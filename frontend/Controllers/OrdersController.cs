@@ -260,6 +260,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
 
             // Refresh the cart price from the current variant before creating the payment order.
             item.Price = availableVariant.Price;
+            item.DiscountPercent = availableVariant.Discount;
         }
 
         Response.Cookies.Append(
