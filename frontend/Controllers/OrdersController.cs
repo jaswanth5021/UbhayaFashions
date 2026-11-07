@@ -150,7 +150,24 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         catch (HttpRequestException) { }
         catch (JsonException) { }
 
+        var cartVariants = new Dictionary<int, List<ProductVariantViewModel>>();
+        foreach (var productId in cart.Select(item => item.ProductId).Distinct())
+        {
+            try
+            {
+                var product = await api.GetProductAsync(productId);
+                if (product is not null)
+                    cartVariants[productId] = product.Variants;
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.LogWarning(ex, "Unable to load stock variants for checkout product {ProductId}", productId);
+                cartVariants[productId] = [];
+            }
+        }
+
         ViewBag.SavedAddresses = savedAddresses;
+        ViewBag.CartVariants = cartVariants;
         return View(cart);
     }
 
