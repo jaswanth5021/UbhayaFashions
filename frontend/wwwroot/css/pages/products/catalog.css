@@ -2676,3 +2676,23 @@
         font-size: 11px;
     }
 }
+
+
+/* Mobile product cards: keep inventory and CTA directly below the size options.
+   Avoid auto margins/minimum card heights creating a large empty vertical gap. */
+@media (max-width: 600px) {
+    .catalog-results .catalog-card {
+        height: auto;
+        min-height: 0;
+        justify-content: flex-start;
+    }
+
+    .catalog-results .catalog-card .catalog-stock-mobile {
+        margin-top: 4px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .catalog-results .catalog-card .catalog-action.catalog-action-mobile {
+        margin-top: 8px !important;
+    }
+}
