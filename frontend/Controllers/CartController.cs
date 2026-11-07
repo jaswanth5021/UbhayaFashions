@@ -110,6 +110,7 @@ public class CartController : Controller
                 ProductId = product.Id,
                 Name = product.Name,
                 Price = variant.Price,
+                DiscountPercent = variant.Discount,
                 ImageUrl = product.ImageUrl,
                 Size = variant.Size,
                 Color = normalizedColor,
@@ -229,6 +230,7 @@ public class CartController : Controller
             item.Size = variant.Size;
             item.Quantity = quantity;
             item.Price = variant.Price;
+            item.DiscountPercent = variant.Discount;
         }
         SaveCart(cart);
         TempData["CartMessage"] = "Cart updated.";
