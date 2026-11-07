@@ -439,12 +439,16 @@
                                 <a asp-action="Details" asp-route-id="@product.Id">@product.Name</a>
                             </h2>
 
-                            <div class="product-price">
-                                <span class="current-price">@(hasPriceRange ? "From " : "")₹@product.Price.ToString("N0")</span>
+                            <div class="product-price price-display">
                                 @if (product.Discount > 0 && product.Discount < 100)
                                 {
                                     var originalPrice = product.Price / (1 - (product.Discount / 100));
-                                    <span class="old-price">₹@Math.Round(originalPrice).ToString("N0")</span>
+                                    <span class="old-price price-mrp">₹@Math.Round(originalPrice).ToString("N0")</span>
+                                }
+                                <span class="current-price price-sale">@(hasPriceRange ? "From " : "")₹@product.Price.ToString("N0")</span>
+                                @if (product.Discount > 0 && product.Discount < 100)
+                                {
+                                    <span class="price-discount">-@product.Discount.ToString("0.##")% SALE</span>
                                 }
                             </div>
 
