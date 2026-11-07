@@ -1,3 +1,4 @@
+@inject IConfiguration Configuration
 @model LadiesDressStore.Web.Models.PaymentCheckoutViewModel
 @{
     ViewData["Title"] = "Secure Payment";
@@ -28,7 +29,7 @@
                     <div class="checkout-payment-product">
                         @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
                         {
-                            <img class="checkout-payment-product-image" src="@item.ImageUrl" alt="@item.Name" loading="lazy" />
+                            <img class="checkout-payment-product-image" src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" loading="lazy" />
                         }
                         else
                         {
