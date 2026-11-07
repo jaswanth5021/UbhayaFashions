@@ -746,6 +746,7 @@ public class ApiService(
         data.Items = cart.Select(item => new PaymentOrderItemViewModel
         {
             Name = item.Name,
+            ImageUrl = item.ImageUrl,
             Size = item.Size,
             Color = item.Color,
             Quantity = item.Quantity,
