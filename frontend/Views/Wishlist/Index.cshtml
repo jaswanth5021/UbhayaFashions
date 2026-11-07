@@ -39,6 +39,13 @@
         <div class="wishlist-grid">
             @foreach (var product in Model)
             {
+                @{
+                    var wishlistDiscount = product.Discount;
+                    var wishlistHasDiscount = wishlistDiscount > 0 && wishlistDiscount < 100 && product.Price > 0;
+                    var wishlistOriginalPrice = wishlistHasDiscount
+                        ? Math.Round(product.Price / (1 - wishlistDiscount / 100m), 2)
+                        : product.Price;
+                }
                 <article class="wishlist-card">
                     <a class="wishlist-card-image" asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">
                         @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
@@ -62,7 +69,18 @@
                     <div class="wishlist-card-info">
                         <p>@product.Category</p>
                         <h2><a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">@product.Name</a></h2>
-                        <strong>₹@product.Price.ToString("N0")</strong>
+                        <div class="wishlist-price" aria-label="Product price">
+                            @if (wishlistHasDiscount)
+                            {
+                                <span class="wishlist-price-original">₹@wishlistOriginalPrice.ToString("N0")</span>
+                                <strong class="wishlist-price-current">₹@product.Price.ToString("N0")</strong>
+                                <span class="wishlist-price-discount">@wishlistDiscount.ToString("0.##")% OFF</span>
+                            }
+                            else
+                            {
+                                <strong class="wishlist-price-current">₹@product.Price.ToString("N0")</strong>
+                            }
+                        </div>
                         @if (product.Stock < 1)
                         {
                             <span class="wishlist-stock-out">Out of stock</span>
