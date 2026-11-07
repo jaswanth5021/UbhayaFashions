@@ -2072,3 +2072,103 @@ textarea {
         background: #f7e5eb;
     }
 }
+
+
+/* Desktop account dropdown refinement */
+@media (min-width: 601px) {
+    .header .account-dropdown {
+        width: 330px;
+        padding: 0 12px 10px;
+        border: 1px solid #e5cbd3;
+        border-top: 3px solid #8c2947;
+        border-radius: 14px;
+        background: #fffdfc;
+        box-shadow: 0 16px 38px rgba(64, 22, 37, .18);
+        overflow: hidden;
+    }
+
+    .header .account-dropdown-greeting {
+        margin: 0 -12px;
+        padding: 14px 16px 13px;
+        gap: 4px;
+        border-bottom: 1px solid #f0dfe4;
+    }
+
+    .header .account-dropdown-greeting strong {
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    .header .account-dropdown-greeting span {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .header .account-dropdown-links {
+        gap: 4px;
+        padding: 9px 0;
+        border-bottom: 1px solid #eee0e4;
+    }
+
+    .header .account-dropdown-links a {
+        box-sizing: border-box;
+        min-height: 44px;
+        padding: 0 11px;
+        gap: 12px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        font-size: 14px;
+        line-height: 1.35;
+    }
+
+    .header .account-dropdown-links a > svg:first-child {
+        width: 19px;
+        height: 19px;
+        flex: 0 0 19px;
+        color: #9a294d;
+    }
+
+    .header .account-dropdown-links a > span {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .header .account-dropdown-links a > .account-dropdown-chevron {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+        margin-left: auto;
+        color: #a77b89;
+    }
+
+    .header .account-dropdown-links a:hover,
+    .header .account-dropdown-links a:focus-visible {
+        padding-left: 11px;
+        border-color: #efd8df;
+        background: #fff3f5;
+    }
+
+    .header .account-dropdown-logout-form {
+        margin: 0;
+        padding: 9px 0 0;
+    }
+
+    .header .account-dropdown-logout {
+        box-sizing: border-box;
+        min-height: 42px;
+        padding: 0 11px;
+        gap: 12px;
+        border: 1px solid #f0d6de;
+        border-radius: 8px;
+        background: #fbf0f3;
+        font-size: 14px;
+        line-height: 1.35;
+    }
+
+    .header .account-dropdown-logout:hover {
+        padding-left: 11px;
+        border-color: #d8aab8;
+        background: #f7e5eb;
+    }
+}
