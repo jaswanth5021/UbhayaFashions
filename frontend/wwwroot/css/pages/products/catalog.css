@@ -2513,3 +2513,120 @@
     font-weight: 400;
     line-height: 1.4;
 }
+
+
+/* Mobile viewport containment: prevent catalog controls and product cards
+   from creating a page wider than the device screen. */
+@media (max-width: 700px) {
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: clip;
+    }
+
+    .catalog-page {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding-right: 16px;
+        padding-left: 16px;
+        overflow-x: clip;
+    }
+
+    .catalog-header,
+    .catalog-heading-copy,
+    .catalog-layout,
+    .catalog-results,
+    .catalog-grid,
+    .catalog-card {
+        box-sizing: border-box;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .catalog-layout {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .catalog-mobile-toolbar {
+        box-sizing: border-box;
+        width: calc(100% + 32px);
+        max-width: calc(100% + 32px);
+        margin-right: -16px;
+        margin-left: -16px;
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .catalog-mobile-search {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .catalog-mobile-search input {
+        box-sizing: border-box;
+        flex: 1 1 auto;
+        width: 1%;
+        min-width: 0;
+    }
+
+    .catalog-mobile-search button {
+        box-sizing: border-box;
+        flex: 0 0 auto;
+        min-width: 76px;
+        max-width: 88px;
+        padding-right: 8px;
+        padding-left: 8px;
+        white-space: nowrap;
+    }
+
+    .catalog-mobile-toolbar-actions {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: minmax(0, .65fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
+        gap: 8px;
+    }
+
+    .catalog-mobile-count,
+    .catalog-mobile-sort,
+    .catalog-mobile-filter-toggle {
+        box-sizing: border-box;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .catalog-mobile-sort select {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        padding-right: 5px;
+        padding-left: 7px;
+        font-size: 10px;
+    }
+
+    .catalog-mobile-filter-toggle {
+        width: 100%;
+        gap: 5px;
+        padding: 0 5px;
+        font-size: 9px;
+        letter-spacing: .5px;
+        white-space: nowrap;
+    }
+
+    .catalog-results .catalog-grid,
+    .catalog-grid {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 12px;
+    }
+
+    .catalog-card .product-name,
+    .catalog-card .product-price {
+        overflow-wrap: anywhere;
+    }
+}
