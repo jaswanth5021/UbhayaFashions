@@ -332,9 +332,9 @@
              PRICE
              ===================================================== -->
 
-        <div class="product-details-pricing">
+        <div class="product-details-pricing price-display">
 
-            <span class="product-details-regular-price"
+            <span class="product-details-regular-price price-mrp"
                   id="productRegularPrice"
                   style="@((startingVariant?.Discount ?? Model.Discount) > 0 ? null : "display:none")">
 
@@ -342,18 +342,18 @@
 
             </span>
 
-            <span class="product-details-price"
+            <span class="product-details-price price-sale"
                   id="productSalePrice">
 
                 &#8377;@((startingVariant?.Price ?? Model.Price).ToString("N0"))
 
             </span>
 
-            <span class="product-details-sale-badge"
+            <span class="product-details-sale-badge price-discount"
                   id="productSaleBadge"
                   style="@((startingVariant?.Discount ?? Model.Discount) > 0 ? null : "display:none")">
 
-                -@(startingVariant?.Discount ?? Model.Discount)% SALE
+                -@((startingVariant?.Discount ?? Model.Discount).ToString("0.##"))% SALE
 
             </span>
 
@@ -1145,20 +1145,16 @@
                             </div>
                         }
 
-                        <div class="product-bestseller-pricing">
-
-                            <span class="product-bestseller-price">
-                                &#8377;@item.Price.ToString("N0")
-                            </span>
-
-
+                        <div class="product-bestseller-pricing price-display">
                             @if (hasDiscount)
                             {
-                                <span class="product-bestseller-original-price">
-                                    &#8377;@Math.Round(originalPrice).ToString("N0")
-                                </span>
+                                <span class="product-bestseller-original-price price-mrp">&#8377;@Math.Round(originalPrice).ToString("N0")</span>
                             }
-
+                            <span class="product-bestseller-price price-sale">&#8377;@item.Price.ToString("N0")</span>
+                            @if (hasDiscount)
+                            {
+                                <span class="price-discount">-@item.Discount.ToString("0.##")% SALE</span>
+                            }
                         </div>
                     </a>
 
@@ -1892,7 +1888,7 @@
                         regularPrice.style.display = discount > 0 ? "inline" : "none";
                     }
                     if (saleBadge) {
-                        saleBadge.textContent = "-" + discount + "% SALE";
+                        saleBadge.textContent = "-" + discount.toLocaleString("en-IN", { maximumFractionDigits: 2 }) + "% SALE";
                         saleBadge.style.display = discount > 0 ? "inline-block" : "none";
                     }
                 }
@@ -2111,7 +2107,7 @@
                         if (saleBadge) {
 
                             saleBadge.textContent =
-                                `-${discount}% SALE`;
+                                `-${discount.toLocaleString("en-IN", { maximumFractionDigits: 2 })}% SALE`;
 
 
                             saleBadge.style.display =
