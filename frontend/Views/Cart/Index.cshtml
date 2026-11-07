@@ -48,6 +48,11 @@
                         .OrderBy(variant => variant.Size)
                         .ToList();
                     var selectedVariant = variants.FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase));
+                    var itemDiscount = selectedVariant?.Discount ?? item.DiscountPercent;
+                    var itemSalePrice = selectedVariant?.Price ?? item.Price;
+                    var itemOriginalPrice = itemDiscount > 0 && itemDiscount < 100
+                        ? Math.Round(itemSalePrice / (1m - itemDiscount / 100m), 2)
+                        : itemSalePrice;
 
                     <article class="shopping-cart-item">
                         <form asp-controller="Cart" asp-action="Remove" method="post" class="shopping-cart-remove">
@@ -69,6 +74,17 @@
                             {
                                 <p class="shopping-cart-color">Color: @item.Color</p>
                             }
+                            <div class="shopping-cart-item-pricing price-display">
+                                @if (itemDiscount > 0 && itemDiscount < 100)
+                                {
+                                    <span class="price-mrp">₹@itemOriginalPrice.ToString("N2")</span>
+                                }
+                                <span class="price-sale">₹@itemSalePrice.ToString("N2") each</span>
+                                @if (itemDiscount > 0 && itemDiscount < 100)
+                                {
+                                    <span class="price-discount">-@itemDiscount.ToString("0.##")% SALE</span>
+                                }
+                            </div>
                             <div class="shopping-cart-controls">
                                 <form asp-controller="Cart" asp-action="Update" method="post" class="shopping-cart-update" data-cart-update>
                                     @Html.AntiForgeryToken()
