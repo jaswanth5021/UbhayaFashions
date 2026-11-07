@@ -8,6 +8,7 @@ public class PaymentCheckoutViewModel
     public long Amount { get; set; }
     public decimal Subtotal { get; set; }
     public decimal ShippingCharge { get; set; }
+    public List<PaymentOrderItemViewModel> Items { get; set; } = [];
     public string Currency { get; set; } = "INR";
     public string Name { get; set; } = "Ubhaya Fashions";
     public string Description { get; set; } = "";
@@ -17,6 +18,16 @@ public class PaymentCheckoutViewModel
     public bool SaveAddress { get; set; }
     public int SelectedSavedAddressId { get; set; }
     public SaveAddressViewModel Address { get; set; } = new();
+}
+
+public class PaymentOrderItemViewModel
+{
+    public string Name { get; set; } = "";
+    public string? Size { get; set; }
+    public string? Color { get; set; }
+    public int Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+    public decimal LineTotal { get; set; }
 }
 
 public class PaymentVerifyViewModel
