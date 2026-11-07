@@ -702,3 +702,69 @@ iframe {
         z-index: 2 !important;
     }
 }
+
+
+/* Global mobile viewport guard.
+   Prevent page sections and flex/grid children from extending past the
+   viewport and being clipped at the left/right edges on storefront pages. */
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+body {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+img, video, iframe, canvas, svg {
+    max-width: 100%;
+}
+
+@media (max-width: 760px) {
+    body {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    main,
+    .main-content,
+    .page-content,
+    .site-content,
+    .catalog-page,
+    .catalog-results,
+    .catalog-layout,
+    .product-details-page,
+    .checkout-page,
+    .policy-page,
+    .status-page,
+    .contact-page {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    /* Allow nested grid/flex content to shrink instead of pushing the
+       complete document wider than the phone viewport. */
+    main *,
+    .main-content *,
+    .page-content *,
+    .site-content * {
+        min-width: 0;
+    }
+
+    /* Keep full-bleed sections aligned to the actual mobile content box. */
+    .home-hero,
+    .featured-products {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
