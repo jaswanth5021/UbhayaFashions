@@ -3810,3 +3810,64 @@ body {
     color: #68142e;
     font-weight: 700;
 }
+
+
+/* Checkout: consistent discounted price display in bag and order summary. */
+.checkout-item-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    margin-top: 7px;
+}
+
+.checkout-item-price-original {
+    color: #8b817e !important;
+    font-size: 12px !important;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+.checkout-item-price .checkout-item-price-current {
+    color: #68142e;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.checkout-item-price-discount {
+    display: inline-flex;
+    align-items: center;
+    min-height: 21px;
+    padding: 2px 6px;
+    border: 1px solid #f0cbd4;
+    border-radius: 3px;
+    background: #fff1f4;
+    color: #9e2445 !important;
+    font-size: 10px !important;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.checkout-bag-info .checkout-stock-hint {
+    display: none !important;
+}
+
+.checkout-screen-products .checkout-summary-product-info {
+    min-width: 0;
+}
+
+.checkout-screen-products .checkout-summary-product-info .checkout-item-price {
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.checkout-screen-products .checkout-summary-product-info .checkout-item-price-current {
+    font-size: 13px;
+}
+
+@media (max-width: 700px) {
+    .checkout-item-price { gap: 6px; }
+    .checkout-item-price-original { font-size: 11px !important; }
+    .checkout-item-price .checkout-item-price-current { font-size: 14px; }
+    .checkout-item-price-discount { min-height: 19px; font-size: 9px !important; }
+}
