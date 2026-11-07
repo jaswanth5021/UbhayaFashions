@@ -1079,3 +1079,43 @@
         font-size: 18px !important;
     }
 }
+
+
+/* Mobile hero CTA: compact, readable and visually secondary to the banner artwork. */
+@media (max-width: 600px) {
+    .home-page .home-hero-content {
+        inset: auto auto 12px 12px !important;
+        width: auto !important;
+        max-width: calc(100% - 24px) !important;
+    }
+
+    .home-page .hero-shop-button {
+        display: inline-flex !important;
+        width: auto !important;
+        max-width: min(72vw, 280px) !important;
+        min-width: 0 !important;
+        min-height: 36px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        padding: 7px 11px !important;
+        border: 1px solid rgb(255 255 255 / 78%) !important;
+        border-radius: 5px !important;
+        background: rgb(104 20 46 / 94%) !important;
+        box-shadow: 0 3px 12px rgb(40 13 23 / 22%) !important;
+        color: #fff !important;
+        white-space: nowrap !important;
+    }
+
+    .home-page .hero-shop-button > span:first-child {
+        font-size: clamp(10px, 2.8vw, 12px) !important;
+        line-height: 1.15 !important;
+        letter-spacing: .035em !important;
+    }
+
+    .home-page .hero-shop-button .hero-arrow {
+        flex: 0 0 auto;
+        font-size: 16px !important;
+        line-height: 1 !important;
+    }
+}
