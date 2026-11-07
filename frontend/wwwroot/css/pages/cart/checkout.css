@@ -2081,3 +2081,62 @@
         gap: 14px;
     }
 }
+
+
+/* Delhivery delivery-charge breakdown on the secure payment page */
+.checkout-payment-order-summary {
+    width: min(100%, 520px);
+    margin: 22px auto 0;
+    padding: 22px 24px;
+    border: 1px solid #ead8d8;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #fff, #fff8f6);
+    color: #302522;
+    box-shadow: 0 12px 28px rgba(75, 24, 42, .06);
+}
+.checkout-payment-order-summary h2 {
+    margin: 0 0 16px;
+    color: #68142e;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 22px;
+    font-weight: 500;
+}
+.checkout-payment-order-summary > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0e5e2;
+    font-size: 15px;
+}
+.checkout-payment-order-summary > div strong {
+    color: #68142e;
+    white-space: nowrap;
+}
+.checkout-payment-order-summary .checkout-payment-order-total {
+    margin-top: 4px;
+    padding-top: 15px;
+    border-bottom: 0;
+    font-size: 17px;
+    font-weight: 700;
+}
+.checkout-payment-order-summary .checkout-payment-order-total strong {
+    font-size: 20px;
+}
+.checkout-payment-order-summary p {
+    margin: 8px 0 0;
+    color: #80645f;
+    font-size: 12px;
+    line-height: 1.5;
+}
+@media (max-width: 600px) {
+    .checkout-payment-order-summary {
+        padding: 18px;
+    }
+    .checkout-payment-order-summary h2 {
+        font-size: 20px;
+    }
+    .checkout-payment-order-summary > div {
+        font-size: 14px;
+    }
+}
