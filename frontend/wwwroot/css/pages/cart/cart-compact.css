@@ -258,3 +258,56 @@
     box-sizing: border-box;
     padding: 0 0 2px;
 }
+
+
+/* Cart drawer: keep the primary checkout action visibly inset on both sides. */
+.cart-drawer-footer {
+    box-sizing: border-box;
+    min-width: 0;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+}
+
+.cart-drawer-footer .cart-drawer-checkout {
+    box-sizing: border-box;
+    display: flex;
+    width: calc(100% - 18px) !important;
+    max-width: calc(100% - 18px);
+    min-width: 0;
+    min-height: 56px;
+    margin: 14px 18px 0 0 !important;
+    padding: 0 20px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #5b1028;
+    border-radius: 10px;
+    background: linear-gradient(110deg, #68142e 0%, #8a2647 58%, #9b3656 100%);
+    box-shadow: 0 5px 13px rgba(104, 20, 46, .18);
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: .015em;
+    text-align: center;
+    text-decoration: none;
+    white-space: normal;
+}
+
+.cart-drawer-footer .cart-drawer-checkout:hover {
+    background: linear-gradient(110deg, #571027 0%, #76203d 58%, #8a2b4b 100%);
+    box-shadow: 0 7px 16px rgba(104, 20, 46, .22);
+    transform: translateY(-1px);
+}
+
+.cart-drawer-footer .cart-drawer-checkout:focus-visible {
+    outline: 3px solid rgba(156, 54, 86, .3);
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .cart-drawer-footer .cart-drawer-checkout {
+        min-height: 54px;
+        font-size: 15px;
+    }
+}
