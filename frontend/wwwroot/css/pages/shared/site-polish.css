@@ -1942,3 +1942,12 @@ body.header-search-open {
         font-size: 11px;
     }
 }
+
+/* Global storefront typography: keep body copy and controls sans-serif on every route. */
+body,
+button,
+input,
+select,
+textarea {
+    font-family: Arial, Helvetica, sans-serif;
+}
