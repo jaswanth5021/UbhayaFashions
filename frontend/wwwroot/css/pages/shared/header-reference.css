@@ -1387,3 +1387,206 @@ svg:not([width]) {
         margin: 0 0 0 4px !important;
     }
 }
+
+
+/* =========================================================
+   MOBILE HEADER — balanced logo and uncluttered actions
+   Wishlist and cart remain available in the fixed bottom nav.
+   ========================================================= */
+@media (max-width: 600px) {
+    .header {
+        height: 66px !important;
+        min-height: 66px !important;
+        padding: 0 10px !important;
+        overflow: visible !important;
+    }
+
+    .header > .menu-button {
+        width: 38px !important;
+        height: 40px !important;
+        flex: 0 0 38px !important;
+        border: 1px solid #f0e0e4 !important;
+        border-radius: 10px !important;
+        background: #fff !important;
+        box-shadow: 0 2px 7px rgba(80, 24, 43, .07) !important;
+    }
+
+    .header > .menu-button::before {
+        left: 9px !important;
+        width: 20px !important;
+        top: 13px !important;
+        box-shadow: 0 6px 0 currentColor, 0 12px 0 currentColor !important;
+    }
+
+    .header > .brand {
+        left: 50% !important;
+        top: 50% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        width: min(164px, calc(100vw - 176px)) !important;
+        max-width: min(164px, calc(100vw - 176px)) !important;
+        height: 48px !important;
+        padding: 0 !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 1 !important;
+    }
+
+    .header > .brand .brand-mark {
+        display: grid !important;
+        flex: 0 0 38px !important;
+        width: 38px !important;
+        height: 38px !important;
+        place-items: center !important;
+        overflow: hidden !important;
+        border-radius: 7px !important;
+        background: #fbf4e8 !important;
+    }
+
+    .header > .brand .brand-mark img {
+        position: static !important;
+        display: block !important;
+        width: 38px !important;
+        height: 38px !important;
+        max-width: 38px !important;
+        max-height: 38px !important;
+        object-fit: contain !important;
+        transform: none !important;
+    }
+
+    .header > .brand .brand-wordmark {
+        display: flex !important;
+        min-width: 0 !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        color: #651434 !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    .header > .brand .brand-wordmark strong {
+        font: 600 16px/1 Georgia, "Times New Roman", serif !important;
+        letter-spacing: .025em !important;
+    }
+
+    .header > .brand .brand-wordmark small {
+        color: #ad8547 !important;
+        font: 600 7px/1 Arial, Helvetica, sans-serif !important;
+        letter-spacing: .32em !important;
+    }
+
+    .header > .header-actions {
+        display: flex !important;
+        flex: 0 0 auto !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 5px !important;
+        min-width: 0 !important;
+        width: auto !important;
+        height: 100% !important;
+        margin-left: auto !important;
+        padding: 0 !important;
+        z-index: 3 !important;
+    }
+
+    .header .header-actions > .wishlist-header-icon,
+    .header .header-actions > .cart-icon {
+        display: none !important;
+    }
+
+    .header .header-actions > .header-search-button,
+    .header .header-actions > a.header-account-icon,
+    .header .header-actions .account-menu > .account-menu-toggle {
+        display: inline-flex !important;
+        flex: 0 0 36px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        padding: 0 !important;
+        border: 1px solid #efdce2 !important;
+        border-radius: 50% !important;
+        background: #fff7f8 !important;
+        color: #68142e !important;
+        box-shadow: 0 2px 7px rgba(104, 20, 46, .07) !important;
+        box-sizing: border-box !important;
+    }
+
+    .header .header-actions > .header-search-button svg,
+    .header .header-actions > a.header-account-icon svg,
+    .header .header-actions .account-menu-toggle .account-menu-avatar svg {
+        display: block !important;
+        width: 19px !important;
+        height: 19px !important;
+        max-width: 19px !important;
+        max-height: 19px !important;
+    }
+
+    .header .header-actions .account-menu {
+        display: inline-flex !important;
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+    }
+
+    .header .header-actions .account-menu .account-menu-toggle {
+        gap: 0 !important;
+        overflow: visible !important;
+    }
+
+    .header .header-actions .account-menu .account-menu-avatar {
+        display: grid !important;
+        width: 19px !important;
+        height: 19px !important;
+        place-items: center !important;
+    }
+
+    .header .header-actions .account-menu .account-menu-name,
+    .header .header-actions .account-menu .account-menu-toggle-chevron {
+        display: none !important;
+    }
+
+    .header .header-actions > .header-search-button:focus-visible,
+    .header .header-actions .account-menu-toggle:focus-visible,
+    .header .header-actions > a.header-account-icon:focus-visible {
+        outline: 2px solid #a64b67 !important;
+        outline-offset: 2px !important;
+    }
+
+    .header .account-dropdown {
+        right: -4px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .header > .brand {
+        width: min(144px, calc(100vw - 168px)) !important;
+        max-width: min(144px, calc(100vw - 168px)) !important;
+        gap: 5px !important;
+    }
+
+    .header > .brand .brand-mark,
+    .header > .brand .brand-mark img {
+        flex-basis: 35px !important;
+        width: 35px !important;
+        height: 35px !important;
+        max-width: 35px !important;
+        max-height: 35px !important;
+    }
+
+    .header > .brand .brand-wordmark strong {
+        font-size: 14px !important;
+    }
+
+    .header > .brand .brand-wordmark small {
+        font-size: 6px !important;
+    }
+}
