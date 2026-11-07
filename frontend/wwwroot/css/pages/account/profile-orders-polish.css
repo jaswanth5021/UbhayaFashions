@@ -473,3 +473,216 @@
     .ubhaya-cancel-dialog__actions { flex-direction: column-reverse; }
     .ubhaya-cancel-dialog__actions button { width: 100%; }
 }
+
+
+/* Mobile order-history layout: keep card identity, amount and actions on separate rows. */
+@media (max-width: 600px) {
+    .profile-orders-panel {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .profile-orders-panel .orders-toolbar {
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+        grid-template-columns: minmax(0, 1fr) auto;
+        overflow: hidden;
+    }
+
+    .profile-orders-panel .orders-filter-tabs {
+        display: flex;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scroll-snap-type: x proximity;
+    }
+
+    .profile-orders-panel .orders-filter-tab {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        white-space: nowrap;
+    }
+
+    .profile-orders-panel .orders-sort {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .profile-orders-panel .orders-sort select {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .profile-orders-panel .orders-page-size {
+        justify-self: end;
+    }
+
+    .profile-orders-panel .profile-order-card {
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .profile-orders-panel .profile-order-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        gap: 12px;
+        min-height: 0;
+        padding: 15px;
+    }
+
+    .profile-orders-panel .profile-order-header > div:first-child {
+        min-width: 0;
+        gap: 6px;
+    }
+
+    .profile-orders-panel .profile-order-header > div:first-child > span {
+        font-size: 14px !important;
+    }
+
+    .profile-orders-panel .profile-order-header time {
+        font-size: 14px !important;
+        line-height: 1.45;
+    }
+
+    .profile-orders-panel .order-card-heading-right {
+        display: grid;
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: stretch;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .profile-orders-panel .order-card-heading-right .order-card-total {
+        width: 100%;
+        text-align: left;
+        font-size: 22px !important;
+        line-height: 1.2;
+    }
+
+    .profile-orders-panel .order-card-primary-actions {
+        display: grid;
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        justify-content: stretch;
+        gap: 8px;
+    }
+
+    .profile-orders-panel .order-open-details-link,
+    .profile-orders-panel .profile-cancel-order-form,
+    .profile-orders-panel .profile-cancel-order-button {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .profile-orders-panel .order-open-details-link,
+    .profile-orders-panel .profile-cancel-order-button {
+        min-height: 40px;
+        padding: 7px 8px;
+        justify-content: center;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        font-size: 12px !important;
+        line-height: 1.25;
+    }
+
+    .profile-orders-panel .order-view-toggle {
+        justify-self: start;
+        width: auto;
+        min-height: 38px;
+        padding: 0 4px;
+        font-size: 14px !important;
+    }
+
+    .profile-orders-panel .profile-order-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 11px 15px;
+    }
+
+    .profile-orders-panel .profile-order-badges .order-status-pill,
+    .profile-orders-panel .profile-order-badges .order-payment-pill {
+        max-width: 100%;
+        min-height: 34px;
+        padding: 5px 11px;
+        box-sizing: border-box;
+        font-size: 12px !important;
+        white-space: normal;
+    }
+
+    .profile-orders-panel .profile-order-items {
+        padding: 4px 14px;
+    }
+
+    .profile-orders-panel .profile-order-items > div {
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .profile-orders-panel .profile-order-item > img,
+    .profile-orders-panel .profile-order-image-placeholder {
+        width: 54px;
+        height: 66px;
+    }
+
+    .profile-orders-panel .order-item-actions {
+        grid-column: 2;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .profile-orders-panel .profile-order-footer {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 13px;
+        padding: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-orders-panel .profile-order-footer .profile-order-tracking,
+    .profile-orders-panel .profile-order-footer .profile-order-detail-action {
+        width: 100%;
+    }
+
+    .profile-orders-panel .profile-order-footer .profile-track-order-link,
+    .profile-orders-panel .profile-order-footer .profile-order-detail-link {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 380px) {
+    .profile-orders-panel .order-card-primary-actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .profile-orders-panel .orders-toolbar {
+        gap: 8px;
+        padding: 9px;
+    }
+
+    .profile-orders-panel .orders-sort select {
+        font-size: 12px !important;
+    }
+}
