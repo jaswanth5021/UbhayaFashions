@@ -367,23 +367,17 @@
                          PRICE
                          ================================ -->
 
-                    <div class="product-price">
-
-                        <span class="current-price">
-                            ₹@p.Price.ToString("N0")
-                        </span>
-
-
-                        @if (p.Discount > 0)
+                    <div class="product-price price-display">
+                        @if (p.Discount > 0 && p.Discount < 100)
                         {
-                            var originalPrice =
-                                p.Price / (1 - (p.Discount / 100));
-
-                            <span class="old-price">
-                                ₹@Math.Round(originalPrice).ToString("N0")
-                            </span>
+                            var originalPrice = p.Price / (1 - (p.Discount / 100));
+                            <span class="old-price price-mrp">₹@Math.Round(originalPrice).ToString("N0")</span>
                         }
-
+                        <span class="current-price price-sale">₹@p.Price.ToString("N0")</span>
+                        @if (p.Discount > 0 && p.Discount < 100)
+                        {
+                            <span class="price-discount">-@p.Discount.ToString("0.##")% SALE</span>
+                        }
                     </div>
 
 
