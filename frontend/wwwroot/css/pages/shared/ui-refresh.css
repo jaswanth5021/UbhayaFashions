@@ -3871,3 +3871,57 @@ body {
     .checkout-item-price .checkout-item-price-current { font-size: 14px; }
     .checkout-item-price-discount { min-height: 19px; font-size: 9px !important; }
 }
+
+
+/* Mobile checkout: keep the same price breakdown and hide stock counts. */
+@media (max-width: 700px) {
+    .checkout-screen .checkout-stock-hint,
+    .checkout-screen .checkout-bag-info .checkout-stock-hint,
+    .checkout-screen-summary .checkout-stock-hint {
+        display: none !important;
+    }
+
+    .checkout-screen .checkout-item-price,
+    .checkout-screen-summary .checkout-item-price {
+        display: flex !important;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 5px 7px;
+        width: 100%;
+        margin-top: 6px;
+    }
+
+    .checkout-screen .checkout-item-price-original,
+    .checkout-screen-summary .checkout-item-price-original {
+        display: inline-block;
+        font-size: 11px !important;
+        white-space: nowrap;
+    }
+
+    .checkout-screen .checkout-item-price .checkout-item-price-current,
+    .checkout-screen-summary .checkout-item-price .checkout-item-price-current {
+        display: inline-block;
+        font-size: 14px !important;
+        white-space: nowrap;
+    }
+
+    .checkout-screen .checkout-item-price-discount,
+    .checkout-screen-summary .checkout-item-price-discount {
+        display: inline-flex !important;
+        font-size: 10px !important;
+        white-space: nowrap;
+    }
+
+    .checkout-screen-summary .checkout-screen-products article {
+        grid-template-columns: 60px minmax(0, 1fr);
+        align-items: start;
+        gap: 8px 10px;
+    }
+
+    .checkout-screen-summary .checkout-screen-products article > b {
+        grid-column: 2;
+        justify-self: start;
+        margin-top: 2px;
+    }
+}
