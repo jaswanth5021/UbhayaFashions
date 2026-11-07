@@ -140,19 +140,13 @@
 
                     <div class="checkout-free-shipping">
                         <div>
-                            <strong>@(total >= 3000 ? "FREE SHIPPING UNLOCKED" : "Add ₹" + Math.Max(0, 3000 - total).ToString("N0") + " more to unlock FREE SHIPPING")</strong>
-                            <span>@(total >= 3000 ? "Your order qualifies for free shipping." : "Free shipping on orders of ₹3,000 or more.")</span>
+                            <strong>@(total >= 1000 ? "FREE SHIPPING UNLOCKED" : "Add ₹" + Math.Max(0, 1000 - total).ToString("N0") + " more to unlock FREE SHIPPING")</strong>
+                            <span>@(total >= 1000 ? "Your order qualifies for free shipping." : "Free shipping on orders of ₹1,000 or more.")</span>
                         </div>
                         <div class="checkout-shipping-progress">
-                            <span style="width:@Math.Min(100, (double)total / 3000 * 100)%"></span>
+                            <span style="width:@Math.Min(100, (double)total / 1000 * 100)%"></span>
                         </div>
-                        <strong>₹@total.ToString("N0") / ₹3,000</strong>
-                    </div>
-
-                    <div class="checkout-bag-totals">
-                        <div><span>Subtotal</span><strong>₹@total.ToString("N0")</strong></div>
-                        <div><span>Shipping</span><strong class="free">@(total >= 3000 ? "FREE" : "₹0 (Free)")</strong></div>
-                        <div class="grand"><span>Estimated Total</span><strong>₹@total.ToString("N0")</strong></div>
+                        <strong>₹@total.ToString("N0") / ₹1,000</strong>
                     </div>
 
                     <button type="button" class="checkout-screen-primary" data-checkout-screen-next="2">
@@ -361,14 +355,8 @@
                                 <strong>@item.Name</strong>
                                 <span>Size: @item.Size × @item.Quantity</span>
                             </div>
-                            <b>₹@((item.Price * item.Quantity).ToString("N0"))</b>
                         </article>
                     }
-                </div>
-                <div class="checkout-screen-total-lines">
-                    <div><span>Subtotal</span><strong>₹@total.ToString("N0")</strong></div>
-                    <div><span>Shipping</span><strong class="free">FREE</strong></div>
-                    <div class="grand"><span>Total</span><strong>₹@total.ToString("N0")</strong></div>
                 </div>
                 <div class="checkout-screen-trust">
                     <strong>🔒 Secure Checkout</strong>
