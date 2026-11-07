@@ -3705,3 +3705,31 @@ body {
         height: 96px;
     }
 }
+
+
+/* Payment order summary product discount presentation. */
+.checkout-payment-price-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.checkout-payment-original-price {
+    color: #8b7772;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+.checkout-payment-discount-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #fce9ed;
+    color: #9a2348;
+    font-size: 11px;
+    font-weight: 750;
+    line-height: 1.4;
+}
+.checkout-payment-discount-row strong {
+    color: #18804a;
+}
