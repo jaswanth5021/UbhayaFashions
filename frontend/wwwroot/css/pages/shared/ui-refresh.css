@@ -3518,3 +3518,44 @@ body {
         font-size: 16px;
     }
 }
+
+
+/* Checkout item remove control: compact close icon in the card's top-right corner. */
+.checkout-bag-item {
+    position: relative;
+}
+.checkout-bag-remove-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #efd5da;
+    border-radius: 50%;
+    background: #fff3f4;
+    color: #92294a;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.checkout-bag-remove-icon svg {
+    display: block;
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+.checkout-bag-remove-icon:hover {
+    transform: scale(1.06);
+    border-color: #c88a9a;
+    background: #fce4e8;
+}
+.checkout-bag-remove-icon:focus-visible {
+    outline: 2px solid #a84a61;
+    outline-offset: 3px;
+}
