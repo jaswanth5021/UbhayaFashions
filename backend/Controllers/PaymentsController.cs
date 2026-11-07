@@ -81,6 +81,63 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             });
         }
 
+        var subtotal = total;
+        decimal shippingCharge = 0m;
+        if (subtotal < 1000m)
+        {
+            var destinationPin = request.DeliveryAddress?.PostalCode?.Trim();
+            var originPin = configuration["Delhivery:SellerPin"]?.Trim();
+            if (string.IsNullOrWhiteSpace(destinationPin) || destinationPin.Length != 6 || !destinationPin.All(char.IsDigit))
+                return BadRequest("Enter a valid six-digit delivery PIN code to calculate shipping charges.");
+
+            if (string.IsNullOrWhiteSpace(originPin) || originPin.Length != 6 || !originPin.All(char.IsDigit))
+                return StatusCode(503, "Delhivery seller PIN is not configured. Please contact support to calculate delivery charges.");
+
+            try
+            {
+                var serviceability = await delhivery.CheckPincodeServiceabilityAsync(destinationPin, HttpContext.RequestAborted);
+                if (!serviceability.Prepaid)
+                    return BadRequest($"Delhivery does not support prepaid delivery to PIN code {destinationPin}. Please try another delivery address.");
+
+                // Keep the quote aligned with the 1 kg Surface parcel used when
+                // the paid order is manifested in CreatePaidOrderShipmentAsync.
+                var rate = await delhivery.CalculateShippingCostAsync(
+                    originPin, destinationPin, 1000, "Surface", "Pre-paid", "Delivered", HttpContext.RequestAborted);
+
+                if (rate.ValueKind != JsonValueKind.Array || rate.GetArrayLength() == 0 ||
+                    !rate[0].TryGetProperty("total_amount", out var amountElement))
+                    return StatusCode(502, "Delhivery did not return a usable delivery charge. Please try again.");
+
+                if (amountElement.ValueKind == JsonValueKind.Number && amountElement.TryGetDecimal(out var parsedAmount))
+                    shippingCharge = parsedAmount;
+                else if (amountElement.ValueKind == JsonValueKind.String &&
+                         decimal.TryParse(amountElement.GetString(), System.Globalization.NumberStyles.Number,
+                             System.Globalization.CultureInfo.InvariantCulture, out parsedAmount))
+                    shippingCharge = parsedAmount;
+                else
+                    return StatusCode(502, "Delhivery returned an invalid delivery charge. Please try again.");
+
+                if (shippingCharge <= 0m)
+                {
+                    var environment = configuration["Delhivery:Environment"] ?? "Staging";
+                    var detail = environment.Equals("Production", StringComparison.OrdinalIgnoreCase)
+                        ? "Delhivery returned a zero delivery charge for this PIN code. Please contact support before payment."
+                        : "Delhivery staging does not provide live shipping rates. Set Delhivery:Environment to Production with the live API token to calculate the actual delivery charge.";
+                    return StatusCode(503, detail);
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Delhivery delivery quote failed for destination PIN {DestinationPin}", destinationPin);
+                return StatusCode(502, "Unable to calculate Delhivery delivery charges right now. Please try again.");
+            }
+        }
+
+        total += shippingCharge;
         order.TotalAmount = total;
         db.Orders.Add(order);
         await db.SaveChangesAsync();
@@ -139,6 +196,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             razorpayOrderId,
             keyId,
             amount = amountInPaise,
+            subtotal,
+            shippingCharge,
             currency = "INR",
             name = "Ubhaya Fashions",
             description = $"Order #{order.Id}"
