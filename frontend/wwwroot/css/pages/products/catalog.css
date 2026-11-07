@@ -2501,3 +2501,15 @@
         flex: none !important;
     }
 }
+
+
+/* Keep the native sort menu typography consistent with its selected value. */
+.catalog-page .catalog-sort-form select,
+.catalog-page .catalog-sort-form select option,
+.catalog-page .catalog-mobile-sort select,
+.catalog-page .catalog-mobile-sort select option {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+}
