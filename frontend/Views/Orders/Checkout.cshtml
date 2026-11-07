@@ -367,18 +367,11 @@
                         </article>
                     }
                 </div>
-                <div class="checkout-screen-total-lines" aria-label="Order price breakdown">
-                    <div><span>Subtotal</span><strong>₹@total.ToString("N2")</strong></div>
-                    @if (total >= 1000m)
-                    {
-                        <div><span>Delhivery charges</span><strong class="free">FREE</strong></div>
-                        <div class="checkout-screen-total-payable"><span>Total payable</span><strong>₹@total.ToString("N2")</strong></div>
-                    }
-                    else
-                    {
-                        <div><span>Delhivery charges</span><strong class="checkout-shipping-pending">Calculated using delivery PIN</strong></div>
-                        <p class="checkout-shipping-disclaimer">Delhivery will calculate the delivery charge for your PIN code before payment. The final payable amount will be shown on the secure payment page.</p>
-                    }
+                <div class="checkout-screen-total-lines" id="checkoutPaymentPriceBreakdown" aria-label="Order price breakdown" hidden data-subtotal="@total.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                    <div><span>Subtotal</span><strong id="checkoutQuoteSubtotal">₹@total.ToString("N2")</strong></div>
+                    <div><span>Delhivery charges</span><strong id="checkoutQuoteShipping" class="@(total >= 1000m ? "free" : "")">@(total >= 1000m ? "FREE" : "Calculating…")</strong></div>
+                    <div class="checkout-screen-total-payable"><span>Total payable</span><strong id="checkoutQuoteTotal">₹@total.ToString("N2")</strong></div>
+                    <p id="checkoutQuoteMessage" class="checkout-shipping-disclaimer" role="status" aria-live="polite"></p>
                 </div>
                 <div class="checkout-screen-trust">
                     <strong>🔒 Secure Checkout</strong>
@@ -436,6 +429,65 @@
                 if (reviewAddress) reviewAddress.textContent = shipping.value;
             };
 
+            const quoteBreakdown = document.getElementById('checkoutPaymentPriceBreakdown');
+            const quoteShipping = document.getElementById('checkoutQuoteShipping');
+            const quoteTotal = document.getElementById('checkoutQuoteTotal');
+            const quoteMessage = document.getElementById('checkoutQuoteMessage');
+            const paymentReviewButton = document.querySelector('[data-checkout-screen-next="4"]');
+            let shippingQuoteReady = Number(quoteBreakdown?.dataset.subtotal || 0) >= 1000;
+
+            const updateShippingQuote = async () => {
+                if (!quoteBreakdown) return;
+                const subtotal = Number(quoteBreakdown.dataset.subtotal || 0);
+                quoteBreakdown.hidden = false;
+
+                if (subtotal >= 1000) {
+                    quoteShipping.textContent = 'FREE';
+                    quoteShipping.classList.add('free');
+                    quoteTotal.textContent = '₹' + subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    quoteMessage.textContent = 'Free delivery on orders of ₹1,000 or more.';
+                    shippingQuoteReady = true;
+                    if (paymentReviewButton) paymentReviewButton.disabled = false;
+                    return;
+                }
+
+                shippingQuoteReady = false;
+                if (paymentReviewButton) paymentReviewButton.disabled = true;
+                quoteShipping.textContent = 'Calculating…';
+                quoteShipping.classList.remove('free');
+                quoteMessage.textContent = 'Checking the delivery charge for your saved delivery PIN code…';
+
+                const pin = pincode?.value.trim() || '';
+                try {
+                    const response = await fetch('@Url.Action("DeliveryQuote", "Orders")' +
+                        '?pincode=' + encodeURIComponent(pin) +
+                        '&subtotal=' + encodeURIComponent(subtotal.toString()), {
+                            credentials: 'same-origin',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || 'Unable to calculate delivery charges.');
+                    }
+
+                    const charge = Number(result.shippingCharge || 0);
+                    const payable = Number(result.total || (subtotal + charge));
+                    quoteShipping.textContent = charge > 0
+                        ? '₹' + charge.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : 'FREE';
+                    quoteShipping.classList.toggle('free', charge <= 0);
+                    quoteTotal.textContent = '₹' + payable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    quoteMessage.textContent = 'Delivery charge calculated for PIN code ' + pin + '.';
+                    shippingQuoteReady = true;
+                    if (paymentReviewButton) paymentReviewButton.disabled = false;
+                } catch (error) {
+                    quoteShipping.textContent = 'Not available';
+                    quoteMessage.textContent = error.message || 'Unable to calculate delivery charges. Please check your PIN code and try again.';
+                    shippingQuoteReady = false;
+                    if (paymentReviewButton) paymentReviewButton.disabled = true;
+                }
+            };
+
             let showStep = step => {
                 panels.forEach(panel => {
                     const active = Number(panel.dataset.checkoutScreenStep) === step;
@@ -450,6 +502,8 @@
                 });
 
                 syncAddress();
+                if (step === 3) updateShippingQuote();
+                else if (quoteBreakdown) quoteBreakdown.hidden = true;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
@@ -528,6 +582,11 @@
 
                     if (step === 3 && !validateNewAddressForSaving())
                         return;
+
+                    if (step === 4 && !shippingQuoteReady) {
+                        alert('Please wait until the Delhivery delivery charge is calculated for your PIN code.');
+                        return;
+                    }
 
                     syncAddress();
                     showStep(step);
