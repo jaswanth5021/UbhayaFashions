@@ -1325,3 +1325,40 @@ svg:not([width]) {
         gap: 5px !important;
     }
 }
+
+/* Account dropdown: crisp, clearly defined surface on desktop and mobile.
+   Kept in the final-loaded header stylesheet to avoid older cascade overrides. */
+.header .account-menu .account-dropdown {
+    box-sizing: border-box !important;
+    border: 1.5px solid #d8aab9 !important;
+    border-radius: 14px !important;
+    background: #fffdfc !important;
+    box-shadow: 0 14px 34px rgba(69, 18, 39, .22),
+                0 2px 8px rgba(69, 18, 39, .08) !important;
+    overflow: hidden !important;
+}
+
+.header .account-menu .account-dropdown::before {
+    border-top: 1.5px solid #d8aab9 !important;
+    border-left: 1.5px solid #d8aab9 !important;
+    background: #fffdfc !important;
+}
+
+.header .account-menu .account-dropdown-greeting {
+    border-bottom: 1px solid rgba(255,255,255,.16) !important;
+}
+
+.header .account-menu .account-dropdown-links {
+    border-bottom: 1px solid #eadde1 !important;
+}
+
+.header .account-menu .account-dropdown-links a,
+.header .account-menu .account-dropdown-logout {
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+}
+
+.header .account-menu .account-dropdown-links a:hover,
+.header .account-menu .account-dropdown-logout:hover {
+    border-color: #e8c5d0 !important;
+}
