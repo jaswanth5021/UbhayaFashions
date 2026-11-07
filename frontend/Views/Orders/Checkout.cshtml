@@ -129,10 +129,7 @@
                                     }
                                     <strong>₹@item.Price.ToString("N0") each</strong>
                                 </div>
-                                <div class="checkout-bag-line-total">
-                                    ₹@((item.Price * item.Quantity).ToString("N0"))
-                                </div>
-                                <button type="submit"
+                <button type="submit"
                                         class="checkout-bag-remove-icon"
                                         form="checkout-cart-remove-@itemIndex"
                                         aria-label="Remove @item.Name from your shopping bag"
