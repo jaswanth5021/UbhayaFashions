@@ -6,6 +6,8 @@ public class PaymentCheckoutViewModel
     public string RazorpayOrderId { get; set; } = "";
     public string KeyId { get; set; } = "";
     public long Amount { get; set; }
+    public decimal Subtotal { get; set; }
+    public decimal ShippingCharge { get; set; }
     public string Currency { get; set; } = "INR";
     public string Name { get; set; } = "Ubhaya Fashions";
     public string Description { get; set; } = "";
