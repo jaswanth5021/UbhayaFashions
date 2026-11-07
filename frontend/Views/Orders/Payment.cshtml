@@ -56,7 +56,7 @@
                 }
             </div>
         }
-        <div><span>Subtotal</span><strong>₹@Model.Subtotal.ToString("N2")</strong></div>
+        <div><span>Subtotal</span><strong>₹@((Model.Subtotal + Model.TotalDiscount).ToString("N2"))</strong></div>
         @if (Model.TotalDiscount > 0)
         {
             <div class="checkout-payment-discount-row"><span>Product discount</span><strong>−₹@Model.TotalDiscount.ToString("N2")</strong></div>
