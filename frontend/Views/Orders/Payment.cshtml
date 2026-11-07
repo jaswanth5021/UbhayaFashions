@@ -18,6 +18,17 @@
         <strong>&#8377;@((Model.Amount / 100m).ToString("N2"))</strong>
     </div>
 
+    <div class="checkout-payment-order-summary" aria-label="Order amount summary">
+        <h2>Order Summary</h2>
+        <div><span>Products subtotal</span><strong>₹@Model.Subtotal.ToString("N2")</strong></div>
+        <div><span>Delivery charges</span><strong>@(Model.ShippingCharge > 0 ? "₹" + Model.ShippingCharge.ToString("N2") : "FREE")</strong></div>
+        <div class="checkout-payment-order-total"><span>Total payable</span><strong>₹@((Model.Amount / 100m).ToString("N2"))</strong></div>
+        @if (Model.ShippingCharge > 0)
+        {
+            <p>Delivery charges are estimated using Delhivery for your delivery PIN code.</p>
+        }
+    </div>
+
     <p id="payment-message" class="checkout-payment-message">Continue securely with Razorpay. Your order will be confirmed after payment verification.</p>
 
     <button id="pay-button" class="checkout-payment-pay-button" type="button">
