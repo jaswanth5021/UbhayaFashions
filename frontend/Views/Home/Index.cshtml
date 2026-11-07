@@ -39,7 +39,7 @@
             {
                 <div class="home-hero-slide @(bannerIndex == 0 ? "is-active" : string.Empty)" data-hero-slide role="group" aria-roledescription="slide" aria-label="Banner @(bannerIndex + 1) of @heroBannerUrls.Count" aria-hidden="@(bannerIndex == 0 ? "false" : "true")">
                     <img src="@ImageUrlHelper.Resolve(heroBannerUrls[bannerIndex], Configuration["ApiBaseUrl"])"
-                         alt="The Ubhaya Edit - banner @(bannerIndex + 1)"
+                         alt="Ubhaya Fashions featured collection - banner @(bannerIndex + 1)"
                          class="home-hero-image"
                          loading="@(bannerIndex == 0 ? "eager" : "lazy")"
                          decoding="async"
@@ -55,7 +55,7 @@
         {
             <div class="home-hero-slide is-active" data-hero-slide role="group" aria-roledescription="slide" aria-label="Featured collection">
                 <img src="/images/dress-banner.jpeg" asp-append-version="true"
-                     alt="The Ubhaya Edit"
+                     alt="Ubhaya Fashions featured collection"
                      class="home-hero-image"
                      loading="eager"
                      decoding="async"
@@ -69,7 +69,6 @@
     </div>
 
     <div class="home-hero-content">
-        <h1>The Ubhaya Edit</h1>
         <a asp-controller="Products" asp-action="Index" asp-route-newArrivals="true" class="hero-shop-button">
             <span>SHOP NEW ARRIVALS</span><span class="hero-arrow" aria-hidden="true">&#8594;</span>
         </a>
