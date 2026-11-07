@@ -18,6 +18,59 @@ namespace backend.Controllers;
 [Authorize]
 public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, IGa4MeasurementProtocolService ga4, ILogger<PaymentsController> logger) : ControllerBase
 {
+    [HttpGet("shipping-quote")]
+    public async Task<IActionResult> GetShippingQuote([FromQuery] string destinationPin, [FromQuery] decimal subtotal)
+    {
+        if (subtotal >= 1000m)
+            return Ok(new { subtotal, shippingCharge = 0m, total = subtotal, freeShipping = true });
+
+        destinationPin = (destinationPin ?? string.Empty).Trim();
+        if (destinationPin.Length != 6 || !destinationPin.All(char.IsDigit))
+            return BadRequest("Enter a valid six-digit delivery PIN code.");
+
+        var originPin = configuration["Delhivery:SellerPin"]?.Trim();
+        if (string.IsNullOrWhiteSpace(originPin) || originPin.Length != 6 || !originPin.All(char.IsDigit))
+            return StatusCode(503, "Delhivery seller PIN is not configured. Please contact support.");
+
+        try
+        {
+            var serviceability = await delhivery.CheckPincodeServiceabilityAsync(destinationPin, HttpContext.RequestAborted);
+            if (!serviceability.Prepaid)
+                return BadRequest($"Delhivery does not support prepaid delivery to PIN code {destinationPin}.");
+
+            var rate = await delhivery.CalculateShippingCostAsync(
+                originPin, destinationPin, 1000, "Surface", "Pre-paid", "Delivered", HttpContext.RequestAborted);
+
+            if (rate.ValueKind != JsonValueKind.Array || rate.GetArrayLength() == 0 ||
+                !rate[0].TryGetProperty("total_amount", out var amountElement))
+                return StatusCode(502, "Delhivery did not return a usable delivery charge.");
+
+            decimal shippingCharge;
+            if (amountElement.ValueKind == JsonValueKind.Number && amountElement.TryGetDecimal(out var parsedAmount))
+                shippingCharge = parsedAmount;
+            else if (amountElement.ValueKind == JsonValueKind.String &&
+                     decimal.TryParse(amountElement.GetString(), System.Globalization.NumberStyles.Number,
+                         System.Globalization.CultureInfo.InvariantCulture, out parsedAmount))
+                shippingCharge = parsedAmount;
+            else
+                return StatusCode(502, "Delhivery returned an invalid delivery charge.");
+
+            if (shippingCharge <= 0m)
+                return StatusCode(503, "Delhivery could not provide a live delivery charge for this PIN code.");
+
+            return Ok(new { subtotal, shippingCharge, total = subtotal + shippingCharge, freeShipping = false });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Delhivery delivery quote failed for destination PIN {DestinationPin}", destinationPin);
+            return StatusCode(502, "Unable to calculate Delhivery delivery charges right now. Please try again.");
+        }
+    }
+
     [HttpPost("create-order")]
     public async Task<IActionResult> CreateOrder(CreatePaymentOrderRequest request)
     {
