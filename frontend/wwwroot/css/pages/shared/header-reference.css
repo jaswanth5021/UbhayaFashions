@@ -1362,3 +1362,28 @@ svg:not([width]) {
 .header .account-menu .account-dropdown-logout:hover {
     border-color: #e8c5d0 !important;
 }
+
+/* Keep the shopping cart action visible on every storefront page and viewport.
+   The legacy mobile header rules above intentionally hid it; override them here. */
+.header .header-actions > a.cart-icon,
+.header .header-actions > a#cartDrawerOpen {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+@media (max-width: 900px) {
+    .header .header-actions > a.cart-icon,
+    .header .header-actions > a#cartDrawerOpen {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 40px !important;
+        margin: 0 0 0 4px !important;
+    }
+}
