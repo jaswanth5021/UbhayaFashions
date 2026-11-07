@@ -42,7 +42,14 @@
                                 @if (!string.IsNullOrWhiteSpace(item.Color)) { <text>@(string.IsNullOrWhiteSpace(item.Size) ? "" : " · ")Color: @item.Color</text> }
                                 <text> · Qty: @item.Quantity</text>
                             </span>
-                            <small>₹@item.UnitPrice.ToString("N2") each</small>
+                            <small class="checkout-payment-price-line">
+                                ₹@item.UnitPrice.ToString("N2") each
+                                @if (item.DiscountPercent > 0 && item.DiscountPercent < 100)
+                                {
+                                    <span class="checkout-payment-original-price">₹@item.OriginalUnitPrice.ToString("N2")</span>
+                                    <span class="checkout-payment-discount-badge">@item.DiscountPercent.ToString("0.##")% OFF</span>
+                                }
+                            </small>
                         </div>
                         <strong class="checkout-payment-product-total">₹@item.LineTotal.ToString("N2")</strong>
                     </div>
@@ -50,6 +57,10 @@
             </div>
         }
         <div><span>Subtotal</span><strong>₹@Model.Subtotal.ToString("N2")</strong></div>
+        @if (Model.TotalDiscount > 0)
+        {
+            <div class="checkout-payment-discount-row"><span>Product discount</span><strong>−₹@Model.TotalDiscount.ToString("N2")</strong></div>
+        }
         <div><span>Delivery charges</span><strong>@(Model.ShippingCharge > 0 ? "₹" + Model.ShippingCharge.ToString("N2") : "FREE")</strong></div>
         <div class="checkout-payment-order-total"><span>Total payable</span><strong>₹@((Model.Amount / 100m).ToString("N2"))</strong></div>
         @if (Model.ShippingCharge > 0)
