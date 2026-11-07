@@ -136,6 +136,25 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
     }
 
     [HttpGet]
+    public async Task<IActionResult> DeliveryQuote(string pincode, decimal subtotal)
+    {
+        if (subtotal < 0m)
+            return BadRequest(new { message = "Invalid order subtotal." });
+
+        if (subtotal >= 1000m)
+            return Json(new { success = true, subtotal, shippingCharge = 0m, total = subtotal, freeShipping = true });
+
+        if (string.IsNullOrWhiteSpace(pincode) || pincode.Trim().Length != 6 || !pincode.Trim().All(char.IsDigit))
+            return BadRequest(new { success = false, message = "Enter a valid six-digit delivery PIN code in the Address step." });
+
+        var quote = await api.GetDelhiveryShippingQuoteAsync(pincode.Trim(), subtotal);
+        if (!quote.Success)
+            return StatusCode(502, new { success = false, message = quote.Message.Trim().Trim('"') });
+
+        return Json(new { success = true, subtotal, shippingCharge = quote.ShippingCharge, total = subtotal + quote.ShippingCharge, freeShipping = false });
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Checkout()
     {
         var cart = ReadCart();
