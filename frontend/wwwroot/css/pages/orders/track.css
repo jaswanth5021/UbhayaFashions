@@ -895,3 +895,33 @@ body:has(.track-page) {
 .track-cancel-order-form{margin-top:9px}
 .track-cancel-order-button{display:inline-flex;min-height:38px;align-items:center;justify-content:center;padding:0 15px;border:1px solid #dfb9c2;border-radius:7px;background:#fff7f8;color:#92233f;font:inherit;font-size:11px;font-weight:750;cursor:pointer}
 .track-cancel-order-button:hover{border-color:#92233f;background:#92233f;color:#fff}
+
+
+/* Shipment timeline: join the six description panels without visible gaps. */
+@media (min-width: 601px) {
+    .track-timeline {
+        column-gap: 0;
+    }
+
+    .track-step p {
+        box-sizing: border-box;
+        width: calc(100% + 12px);
+        margin-left: -6px;
+        margin-right: -6px;
+        border-radius: 0;
+    }
+
+    .track-step:first-child p {
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .track-step:last-child p {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .track-step:not(:first-child) p {
+        border-left-width: 0;
+    }
+}
