@@ -1621,19 +1621,51 @@ body {
     color: #4f1025;
 }
 
+.shopping-cart-item {
+    position: relative;
+}
+
 .shopping-cart-remove {
-    margin-top: 12px;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    margin: 0;
 }
 
 .shopping-cart-remove button {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
     padding: 0;
-    border: 0;
-    background: transparent;
-    color: #8f3850;
-    font-size: 11px;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    border: 1px solid #efd5da;
+    border-radius: 50%;
+    background: #fff3f4;
+    color: #92294a;
     cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.shopping-cart-remove button svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.shopping-cart-remove button:hover {
+    transform: scale(1.06);
+    border-color: #c88a9a;
+    background: #fce4e8;
+}
+
+.shopping-cart-remove button:focus-visible {
+    outline: 2px solid #a84a61;
+    outline-offset: 3px;
 }
 
 .shopping-cart-price {
