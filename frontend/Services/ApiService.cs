@@ -751,6 +751,7 @@ public class ApiService(
             Color = item.Color,
             Quantity = item.Quantity,
             UnitPrice = item.Price,
+            DiscountPercent = item.DiscountPercent,
             LineTotal = item.Price * item.Quantity
         }).ToList();
 
