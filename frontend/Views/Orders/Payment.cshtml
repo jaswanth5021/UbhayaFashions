@@ -26,6 +26,14 @@
                 @foreach (var item in Model.Items)
                 {
                     <div class="checkout-payment-product">
+                        @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                        {
+                            <img class="checkout-payment-product-image" src="@item.ImageUrl" alt="@item.Name" loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="checkout-payment-product-image checkout-payment-product-image-placeholder" aria-hidden="true">UBHAYA</div>
+                        }
                         <div class="checkout-payment-product-info">
                             <strong>@item.Name</strong>
                             <span>
