@@ -8,6 +8,7 @@ public class PaymentCheckoutViewModel
     public long Amount { get; set; }
     public decimal Subtotal { get; set; }
     public decimal ShippingCharge { get; set; }
+    public decimal TotalDiscount => Items.Sum(item => item.DiscountAmount);
     public List<PaymentOrderItemViewModel> Items { get; set; } = [];
     public string Currency { get; set; } = "INR";
     public string Name { get; set; } = "Ubhaya Fashions";
@@ -29,6 +30,9 @@ public class PaymentOrderItemViewModel
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal LineTotal { get; set; }
+    public decimal DiscountPercent { get; set; }
+    public decimal OriginalUnitPrice => DiscountPercent > 0 && DiscountPercent < 100 ? Math.Round(UnitPrice / (1m - DiscountPercent / 100m), 2) : UnitPrice;
+    public decimal DiscountAmount => Math.Max(0m, (OriginalUnitPrice - UnitPrice) * Quantity);
 }
 
 public class PaymentVerifyViewModel
