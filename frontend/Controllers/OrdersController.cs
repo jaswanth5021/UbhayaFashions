@@ -212,6 +212,48 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         if (cart.Count == 0)
             return RedirectToAction("Index", "Cart");
 
+        foreach (var item in cart)
+        {
+            var product = await api.GetProductAsync(item.ProductId);
+            var hasColorVariants = product?.Variants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color)) == true;
+            var sizeVariants = product?.Variants
+                .Where(variant => string.Equals(variant.Size, item.Size, StringComparison.OrdinalIgnoreCase))
+                .ToList() ?? [];
+
+            var availableVariant = hasColorVariants
+                ? sizeVariants.FirstOrDefault(variant =>
+                    !string.IsNullOrWhiteSpace(item.Color) &&
+                    string.Equals(variant.Color, item.Color, StringComparison.OrdinalIgnoreCase))
+                    ?? sizeVariants.FirstOrDefault(variant => string.IsNullOrWhiteSpace(variant.Color))
+                : sizeVariants.FirstOrDefault();
+
+            if (availableVariant is null || availableVariant.Stock < 1)
+            {
+                TempData["Error"] = $"{item.Name} ({item.Size}) is no longer available. Please choose another size or remove it.";
+                return RedirectToAction(nameof(Checkout));
+            }
+
+            if (item.Quantity > availableVariant.Stock)
+            {
+                TempData["Error"] = $"Only {availableVariant.Stock} item(s) of {item.Name} in size {item.Size} are available. Please update the quantity.";
+                return RedirectToAction(nameof(Checkout));
+            }
+
+            // Refresh the cart price from the current variant before creating the payment order.
+            item.Price = availableVariant.Price;
+        }
+
+        Response.Cookies.Append(
+            "cart",
+            JsonSerializer.Serialize(cart),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddDays(30)
+            });
+
         var result = await api.CreateRazorpayOrderAsync(cart, model.ShippingAddress, model.Address);
         if (!result.Success || result.Data is null)
         {
