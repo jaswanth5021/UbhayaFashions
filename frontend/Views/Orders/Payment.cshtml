@@ -42,12 +42,15 @@
                                 @if (!string.IsNullOrWhiteSpace(item.Color)) { <text>@(string.IsNullOrWhiteSpace(item.Size) ? "" : " · ")Color: @item.Color</text> }
                                 <text> · Qty: @item.Quantity</text>
                             </span>
-                            <small class="checkout-payment-price-line">
-                                ₹@item.UnitPrice.ToString("N2") each
+                            <small class="checkout-payment-price-line price-display">
                                 @if (item.DiscountPercent > 0 && item.DiscountPercent < 100)
                                 {
-                                    <span class="checkout-payment-original-price">₹@item.OriginalUnitPrice.ToString("N2")</span>
-                                    <span class="checkout-payment-discount-badge">@item.DiscountPercent.ToString("0.##")% OFF</span>
+                                    <span class="checkout-payment-original-price price-mrp">₹@item.OriginalUnitPrice.ToString("N2")</span>
+                                }
+                                <span class="checkout-payment-sale-price price-sale">₹@item.UnitPrice.ToString("N2") each</span>
+                                @if (item.DiscountPercent > 0 && item.DiscountPercent < 100)
+                                {
+                                    <span class="checkout-payment-discount-badge price-discount">-@item.DiscountPercent.ToString("0.##")% SALE</span>
                                 }
                             </small>
                         </div>
