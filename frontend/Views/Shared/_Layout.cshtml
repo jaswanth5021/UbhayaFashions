@@ -784,6 +784,12 @@
             {
                 @foreach (var item in cartItems)
                 {
+                    var selectedCartVariant = cartVariants.GetValueOrDefault(item.ProductId, []).FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase));
+                    var drawerDiscount = selectedCartVariant?.Discount ?? item.DiscountPercent;
+                    var drawerSalePrice = selectedCartVariant?.Price ?? item.Price;
+                    var drawerOriginalPrice = drawerDiscount > 0 && drawerDiscount < 100
+                        ? Math.Round(drawerSalePrice / (1m - drawerDiscount / 100m), 2)
+                        : drawerSalePrice;
                     <article class="cart-drawer-item">
                         <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
                         <div class="cart-drawer-item-info">
@@ -792,6 +798,17 @@
                             {
                                 <p class="cart-drawer-item-color">Color: @item.Color</p>
                             }
+                            <div class="cart-drawer-item-pricing price-display">
+                                @if (drawerDiscount > 0 && drawerDiscount < 100)
+                                {
+                                    <span class="price-mrp">₹@drawerOriginalPrice.ToString("N2")</span>
+                                }
+                                <span class="price-sale">₹@drawerSalePrice.ToString("N2") each</span>
+                                @if (drawerDiscount > 0 && drawerDiscount < 100)
+                                {
+                                    <span class="price-discount">-@drawerDiscount.ToString("0.##")% SALE</span>
+                                }
+                            </div>
                             <form asp-controller="Cart" asp-action="Update" method="post" class="cart-item-update cart-drawer-update" data-cart-update>
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
@@ -804,7 +821,6 @@
                                         <option value="@variant.Size" data-stock="@variant.Stock" selected="@(string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@variant.Size</option>
                                     }
                                 </select></label>
-                                @{ var selectedCartVariant = cartVariants.GetValueOrDefault(item.ProductId, []).FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase)); }
                                 <label>Qty <select name="quantity" data-cart-quantity>
                                     @for (var qty = 1; qty <= Math.Max(1, selectedCartVariant?.Stock ?? item.Quantity); qty++)
                                     {
