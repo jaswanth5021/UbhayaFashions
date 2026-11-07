@@ -2630,3 +2630,49 @@
         overflow-wrap: anywhere;
     }
 }
+
+
+/* Product catalogue pricing: clearly distinguish the discounted price
+   from the original MRP on desktop and mobile. */
+.catalog-results .catalog-card .product-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 8px;
+    row-gap: 3px;
+    line-height: 1.4;
+}
+
+.catalog-results .catalog-card .current-price {
+    color: #68142e;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.catalog-results .catalog-card .old-price {
+    display: inline-block;
+    color: #8b858d;
+    font-size: 13px;
+    font-weight: 400;
+    text-decoration: line-through !important;
+    text-decoration-thickness: 1px;
+    text-decoration-color: #8b858d;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .catalog-results .catalog-card .product-price {
+        align-items: baseline;
+        column-gap: 6px;
+        row-gap: 2px;
+    }
+
+    .catalog-results .catalog-card .current-price {
+        font-size: 14px;
+    }
+
+    .catalog-results .catalog-card .old-price {
+        font-size: 11px;
+    }
+}
