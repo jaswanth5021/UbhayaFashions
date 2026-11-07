@@ -29,7 +29,7 @@
                         <img src="@ImageUrlHelper.Resolve(category.ImageUrl, Configuration["ApiBaseUrl"])"
                              alt="@category.Name collection"
                              loading="lazy"
-                             onerror="this.closest('.category-tile').classList.add('is-image-unavailable');" />
+                             onerror="this.hidden = true; this.closest('.category-tile').classList.add('is-image-unavailable');" />
                     }
                     <div class="category-tile-content">
                         <h3>@category.Name</h3>
