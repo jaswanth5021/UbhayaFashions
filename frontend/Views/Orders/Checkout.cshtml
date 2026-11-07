@@ -440,6 +440,7 @@
                 if (!quoteBreakdown) return;
                 const subtotal = Number(quoteBreakdown.dataset.subtotal || 0);
                 quoteBreakdown.hidden = false;
+                quoteBreakdown.style.display = '';
 
                 if (subtotal >= 1000) {
                     quoteShipping.textContent = 'FREE';
@@ -503,7 +504,10 @@
 
                 syncAddress();
                 if (step === 3) updateShippingQuote();
-                else if (quoteBreakdown) quoteBreakdown.hidden = true;
+                else if (quoteBreakdown) {
+                    quoteBreakdown.hidden = true;
+                    quoteBreakdown.style.display = 'none';
+                }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
