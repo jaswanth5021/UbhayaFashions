@@ -75,6 +75,11 @@
                         @for (var itemIndex = 0; itemIndex < Model.Count; itemIndex++)
                         {
                             var item = Model[itemIndex];
+                            var itemDiscount = item.DiscountPercent;
+                            var itemHasDiscount = itemDiscount > 0 && itemDiscount < 100 && item.Price > 0;
+                            var itemMrp = itemHasDiscount
+                                ? Math.Round(item.Price / (1 - itemDiscount / 100m), 2)
+                                : item.Price;
                             var allVariants = cartVariants.GetValueOrDefault(item.ProductId, []);
                             var hasColorVariants = allVariants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
                             var availableVariants = allVariants
@@ -123,11 +128,19 @@
                                     {
                                         <p class="checkout-stock-warning" role="alert">Only @selectedVariant.Stock left in this size. Reduce the quantity to continue.</p>
                                     }
-                                    else
-                                    {
-                                        <p class="checkout-stock-hint">@selectedVariant.Stock available</p>
                                     }
-                                    <strong>₹@item.Price.ToString("N0") each</strong>
+                                    <div class="checkout-item-price" aria-label="Product price">
+                                        @if (itemHasDiscount)
+                                        {
+                                            <span class="checkout-item-price-original">₹@itemMrp.ToString("N0")</span>
+                                            <strong class="checkout-item-price-current">₹@item.Price.ToString("N0")</strong>
+                                            <span class="checkout-item-price-discount">@itemDiscount.ToString("0.##")% OFF</span>
+                                        }
+                                        else
+                                        {
+                                            <strong class="checkout-item-price-current">₹@item.Price.ToString("N0")</strong>
+                                        }
+                                    </div>
                                 </div>
                 <button type="submit"
                                         class="checkout-bag-remove-icon"
@@ -353,12 +366,28 @@
                 <div class="checkout-screen-products">
                     @foreach (var item in Model)
                     {
+                        var summaryDiscount = item.DiscountPercent;
+                        var summaryHasDiscount = summaryDiscount > 0 && summaryDiscount < 100 && item.Price > 0;
+                        var summaryMrp = summaryHasDiscount
+                            ? Math.Round(item.Price / (1 - summaryDiscount / 100m), 2)
+                            : item.Price;
                         <article>
                             <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
-                            <div>
+                            <div class="checkout-summary-product-info">
                                 <strong>@item.Name</strong>
                                 <span>Size: @item.Size × @item.Quantity</span>
-                                <small>₹@item.Price.ToString("N2") each</small>
+                                <div class="checkout-item-price" aria-label="Product price">
+                                    @if (summaryHasDiscount)
+                                    {
+                                        <span class="checkout-item-price-original">₹@summaryMrp.ToString("N0")</span>
+                                        <strong class="checkout-item-price-current">₹@item.Price.ToString("N0")</strong>
+                                        <span class="checkout-item-price-discount">@summaryDiscount.ToString("0.##")% OFF</span>
+                                    }
+                                    else
+                                    {
+                                        <strong class="checkout-item-price-current">₹@item.Price.ToString("N0")</strong>
+                                    }
+                                </div>
                             </div>
                             <b>₹@((item.Price * item.Quantity).ToString("N2"))</b>
                         </article>
