@@ -1055,4 +1055,27 @@
     .home-page .home-hero-dots { bottom: 8px; }
 }
 
+/* Mobile hero controls: keep the banner clean and make the CTA more compact. */
+@media (max-width: 600px) {
+    .home-page .home-hero-pause {
+        display: none !important;
+    }
 
+    .home-page .hero-shop-button {
+        width: auto !important;
+        min-width: 0 !important;
+        min-height: 42px !important;
+        gap: 10px !important;
+        padding: 9px 15px !important;
+    }
+
+    .home-page .hero-shop-button > span:first-child {
+        font-size: 14px !important;
+        line-height: 1.1 !important;
+        letter-spacing: .04em !important;
+    }
+
+    .home-page .hero-shop-button .hero-arrow {
+        font-size: 18px !important;
+    }
+}
