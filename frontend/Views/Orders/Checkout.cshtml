@@ -354,8 +354,23 @@
                             <div>
                                 <strong>@item.Name</strong>
                                 <span>Size: @item.Size × @item.Quantity</span>
+                                <small>₹@item.Price.ToString("N2") each</small>
                             </div>
+                            <b>₹@((item.Price * item.Quantity).ToString("N2"))</b>
                         </article>
+                    }
+                </div>
+                <div class="checkout-screen-total-lines" aria-label="Order price breakdown">
+                    <div><span>Subtotal</span><strong>₹@total.ToString("N2")</strong></div>
+                    @if (total >= 1000m)
+                    {
+                        <div><span>Delhivery charges</span><strong class="free">FREE</strong></div>
+                        <div class="checkout-screen-total-payable"><span>Total payable</span><strong>₹@total.ToString("N2")</strong></div>
+                    }
+                    else
+                    {
+                        <div><span>Delhivery charges</span><strong class="checkout-shipping-pending">Calculated using delivery PIN</strong></div>
+                        <p class="checkout-shipping-disclaimer">Delhivery will calculate the delivery charge for your PIN code before payment. The final payable amount will be shown on the secure payment page.</p>
                     }
                 </div>
                 <div class="checkout-screen-trust">
