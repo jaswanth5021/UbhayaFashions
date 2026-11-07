@@ -159,18 +159,26 @@
         title.className = "recently-viewed-name";
         title.textContent = product.name;
         const pricing = document.createElement("div");
-        pricing.className = "recently-viewed-pricing";
+        pricing.className = "recently-viewed-pricing price-display";
         const price = document.createElement("span");
-        price.className = "recently-viewed-price";
+        price.className = "recently-viewed-price price-sale";
         price.textContent = `\u20B9${product.price.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
-        pricing.append(price);
+        
 
         if (product.discount > 0 && product.discount < 100) {
             const original = document.createElement("span");
-            original.className = "recently-viewed-original-price";
+            original.className = "recently-viewed-original-price price-mrp";
             const originalPrice = product.price / (1 - product.discount / 100);
             original.textContent = `\u20B9${Math.round(originalPrice).toLocaleString("en-IN")}`;
-            pricing.append(original);
+            pricing.prepend(original);
+        }
+
+        pricing.append(price);
+        if (product.discount > 0 && product.discount < 100) {
+            const discountLabel = document.createElement("span");
+            discountLabel.className = "price-discount";
+            discountLabel.textContent = `-${product.discount.toLocaleString("en-IN", { maximumFractionDigits: 2 })}% SALE`;
+            pricing.append(discountLabel);
         }
 
         const sizes = document.createElement("div");
