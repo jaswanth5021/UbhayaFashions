@@ -4,6 +4,7 @@
     var total = Model.Sum(x => x.Price * x.Quantity);
     var itemCount = Model.Sum(x => x.Quantity);
     var savedAddresses = ViewBag.SavedAddresses as List<SavedAddressViewModel> ?? [];
+    var cartVariants = ViewBag.CartVariants as Dictionary<int, List<ProductVariantViewModel>> ?? new();
 }
 
 <section class="checkout-screen checkout-four-step">
@@ -31,6 +32,26 @@
         </div>
     </header>
 
+    @for (var itemIndex = 0; itemIndex < Model.Count; itemIndex++)
+    {
+        var cartItem = Model[itemIndex];
+        <form id="checkout-cart-update-@itemIndex" asp-controller="Cart" asp-action="Update" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="productId" value="@cartItem.ProductId" />
+            <input type="hidden" name="currentSize" value="@cartItem.Size" />
+            <input type="hidden" name="currentColor" value="@cartItem.Color" />
+            <input type="hidden" name="color" value="@cartItem.Color" />
+            <input type="hidden" name="returnUrl" value="/Orders/Checkout" />
+        </form>
+        <form id="checkout-cart-remove-@itemIndex" asp-controller="Cart" asp-action="Remove" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="productId" value="@cartItem.ProductId" />
+            <input type="hidden" name="size" value="@cartItem.Size" />
+            <input type="hidden" name="color" value="@cartItem.Color" />
+            <input type="hidden" name="returnUrl" value="/Orders/Checkout" />
+        </form>
+    }
+
     <form asp-controller="Orders" asp-action="Checkout" method="post" id="checkoutScreenForm">
         @Html.AntiForgeryToken()
         <input type="hidden" name="ShippingAddress" id="checkoutShippingAddress" />
@@ -51,21 +72,58 @@
                     </div>
 
                     <div class="checkout-bag-items">
-                        @foreach (var item in Model)
+                        @for (var itemIndex = 0; itemIndex < Model.Count; itemIndex++)
                         {
+                            var item = Model[itemIndex];
+                            var allVariants = cartVariants.GetValueOrDefault(item.ProductId, []);
+                            var hasColorVariants = allVariants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
+                            var availableVariants = allVariants
+                                .Where(variant => variant.Stock > 0 &&
+                                    (!hasColorVariants || string.Equals(variant.Color, item.Color, StringComparison.OrdinalIgnoreCase)))
+                                .OrderBy(variant => variant.Size)
+                                .ToList();
+                            var selectedVariant = availableVariants.FirstOrDefault(variant =>
+                                string.Equals(variant.Size, item.Size, StringComparison.OrdinalIgnoreCase));
+
                             <article class="checkout-bag-item">
                                 <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" class="checkout-bag-image">
                                     <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
                                 </a>
                                 <div class="checkout-bag-info">
                                     <h2>@item.Name</h2>
-                                    <p>@(string.IsNullOrWhiteSpace(item.Size) ? "Size not selected" : $"Size: {item.Size}")</p>
-                                    <strong>₹@item.Price.ToString("N0")</strong>
-                                </div>
-                                <div class="checkout-bag-quantity">
-                                    <span>−</span>
-                                    <strong>@item.Quantity</strong>
-                                    <span>+</span>
+                                    <p>@(string.IsNullOrWhiteSpace(item.Color) ? "" : $"Color: {item.Color}")</p>
+                                    <div class="checkout-bag-edit-controls">
+                                        <label>Size
+                                            <select name="size" form="checkout-cart-update-@itemIndex" aria-label="Choose size for @item.Name" onchange="this.form.requestSubmit()">
+                                                @if (selectedVariant is null)
+                                                {
+                                                    <option value="" selected disabled>Select available size</option>
+                                                }
+                                                @foreach (var variant in availableVariants)
+                                                {
+                                                    <option value="@variant.Size" selected="@(selectedVariant?.Size == variant.Size ? "selected" : null)">@variant.Size (@variant.Stock left)</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <label>Qty
+                                            <select name="quantity" form="checkout-cart-update-@itemIndex" aria-label="Choose quantity for @item.Name" disabled="@(selectedVariant is null)" onchange="this.form.requestSubmit()">
+                                                @for (var quantity = 1; quantity <= Math.Max(1, selectedVariant?.Stock ?? item.Quantity); quantity++)
+                                                {
+                                                    <option value="@quantity" selected="@(quantity == item.Quantity ? "selected" : null)">@quantity</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <button type="submit" class="checkout-bag-remove" form="checkout-cart-remove-@itemIndex">Remove</button>
+                                    </div>
+                                    @if (selectedVariant is null)
+                                    {
+                                        <p class="checkout-stock-warning" role="alert">Your selected size is unavailable. Please choose another in-stock size or remove this item.</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="checkout-stock-hint">@selectedVariant.Stock available</p>
+                                    }
+                                    <strong>₹@item.Price.ToString("N0") each</strong>
                                 </div>
                                 <div class="checkout-bag-line-total">
                                     ₹@((item.Price * item.Quantity).ToString("N0"))
@@ -73,6 +131,8 @@
                             </article>
                         }
                     </div>
+
+                    <p class="checkout-bag-edit-note">Changes to size and quantity are saved automatically. Available sizes and quantities reflect current stock.</p>
 
                     <div class="checkout-free-shipping">
                         <div>
