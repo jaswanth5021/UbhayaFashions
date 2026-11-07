@@ -50,6 +50,15 @@
                     var selectedVariant = variants.FirstOrDefault(variant => string.Equals(item.Size, variant.Size, StringComparison.OrdinalIgnoreCase));
 
                     <article class="shopping-cart-item">
+                        <form asp-controller="Cart" asp-action="Remove" method="post" class="shopping-cart-remove">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <input type="hidden" name="size" value="@item.Size" />
+                            <input type="hidden" name="color" value="@item.Color" />
+                            <button type="submit" aria-label="Remove @item.Name from cart" title="Remove item">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                            </button>
+                        </form>
                         <a class="shopping-cart-image" asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId">
                             <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
                         </a>
@@ -92,13 +101,6 @@
                                             }
                                         </select>
                                     </label>
-                                </form>
-                                <form asp-controller="Cart" asp-action="Remove" method="post" class="shopping-cart-remove">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <input type="hidden" name="size" value="@item.Size" />
-                                    <input type="hidden" name="color" value="@item.Color" />
-                                    <button type="submit">Remove</button>
                                 </form>
                             </div>
                         </div>
