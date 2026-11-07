@@ -101,7 +101,7 @@
                                                 }
                                                 @foreach (var variant in availableVariants)
                                                 {
-                                                    <option value="@variant.Size" selected="@(selectedVariant?.Size == variant.Size ? "selected" : null)">@variant.Size (@variant.Stock left)</option>
+                                                    <option value="@variant.Size" selected="@(selectedVariant?.Size == variant.Size ? "selected" : null)">@variant.Size</option>
                                                 }
                                             </select>
                                         </label>
