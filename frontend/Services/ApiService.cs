@@ -674,6 +674,32 @@ public class ApiService(
     // RAZORPAY PAYMENT
     // =====================================================
 
+    public async Task<(bool Success, decimal ShippingCharge, string Message)> GetDelhiveryShippingQuoteAsync(string destinationPin, decimal subtotal)
+    {
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"api/payments/shipping-quote?destinationPin={Uri.EscapeDataString(destinationPin)}&subtotal={subtotal.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        AddToken(request);
+        using var response = await Client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+            return (false, 0m, body);
+
+        try
+        {
+            using var document = JsonDocument.Parse(body);
+            var root = document.RootElement;
+            var charge = root.TryGetProperty("shippingCharge", out var value) && value.TryGetDecimal(out var parsed)
+                ? parsed
+                : 0m;
+            return (true, charge, string.Empty);
+        }
+        catch (JsonException)
+        {
+            return (false, 0m, "The delivery quote service returned an invalid response.");
+        }
+    }
+
     public async Task<(bool Success, string Message, PaymentCheckoutViewModel? Data)>
         CreateRazorpayOrderAsync(List<CartItemViewModel> cart, string address, SaveAddressViewModel deliveryAddress)
     {
