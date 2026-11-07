@@ -2172,3 +2172,59 @@ textarea {
         background: #f7e5eb;
     }
 }
+
+
+/* Wishlist removal control: use a close icon at the card's top-right on all screens. */
+.wishlist-card {
+    position: relative;
+}
+
+.wishlist-remove-form {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    margin: 0;
+}
+
+.wishlist-remove {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid #f0d5dc;
+    border-radius: 50%;
+    background: rgba(255, 250, 251, .96);
+    color: #8c1739;
+    font: inherit;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(70, 20, 40, .12);
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+
+.wishlist-remove:hover,
+.wishlist-remove:focus-visible {
+    background: #8c1739;
+    color: #fff;
+    transform: scale(1.05);
+    outline: 2px solid rgba(140, 23, 57, .18);
+    outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+    .wishlist-remove-form {
+        top: 8px;
+        right: 8px;
+    }
+
+    .wishlist-remove {
+        width: 32px;
+        height: 32px;
+        font-size: 24px;
+    }
+}
