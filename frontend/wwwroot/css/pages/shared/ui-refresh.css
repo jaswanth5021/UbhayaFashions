@@ -3559,3 +3559,41 @@ body {
     outline: 2px solid #a84a61;
     outline-offset: 3px;
 }
+
+
+/* Payment summary: show each product as a clear image-led row. */
+.checkout-payment-product {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+.checkout-payment-product-image {
+    display: block;
+    width: 84px;
+    height: 108px;
+    border: 1px solid #eee1dc;
+    border-radius: 8px;
+    background: #f8f1ee;
+    object-fit: cover;
+    object-position: center;
+}
+.checkout-payment-product-image-placeholder {
+    display: grid;
+    place-items: center;
+    color: #8b5263;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    letter-spacing: .12em;
+}
+@media (max-width: 600px) {
+    .checkout-payment-product {
+        grid-template-columns: 68px minmax(0, 1fr) auto;
+        gap: 10px;
+    }
+    .checkout-payment-product-image {
+        width: 68px;
+        height: 90px;
+    }
+}
