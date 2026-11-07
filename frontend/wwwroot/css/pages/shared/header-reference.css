@@ -1363,28 +1363,15 @@ svg:not([width]) {
     border-color: #e8c5d0 !important;
 }
 
-/* Keep the shopping cart action visible on every storefront page and viewport.
-   The legacy mobile header rules above intentionally hid it; override them here. */
-.header .header-actions > a.cart-icon,
-.header .header-actions > a#cartDrawerOpen {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
+/* Wishlist and cart are provided by the fixed mobile bottom navigation.
+   Keep the top header focused on menu, brand, search and account. */
 @media (max-width: 900px) {
+    .header .header-actions > a.wishlist-header-icon,
     .header .header-actions > a.cart-icon,
     .header .header-actions > a#cartDrawerOpen {
-        display: inline-flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        align-items: center !important;
-        justify-content: center !important;
-        flex: 0 0 36px !important;
-        width: 36px !important;
-        min-width: 36px !important;
-        height: 40px !important;
-        margin: 0 0 0 4px !important;
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
 }
 
@@ -1588,5 +1575,54 @@ svg:not([width]) {
 
     .header > .brand .brand-wordmark small {
         font-size: 6px !important;
+    }
+}
+
+
+/* Final mobile balance: compact brand lockup with clear separation from actions. */
+@media (max-width: 900px) {
+    .header {
+        position: relative !important;
+        min-height: 72px !important;
+    }
+    .header > .brand {
+        width: 148px !important;
+        max-width: 148px !important;
+        gap: 5px !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+    .header > .brand .brand-mark,
+    .header > .brand .brand-mark img {
+        flex: 0 0 34px !important;
+        width: 34px !important;
+        height: 34px !important;
+        max-width: 34px !important;
+        max-height: 34px !important;
+    }
+    .header > .brand .brand-wordmark strong {
+        font-size: 15px !important;
+        letter-spacing: 0 !important;
+    }
+    .header > .brand .brand-wordmark small {
+        font-size: 6px !important;
+        letter-spacing: .28em !important;
+    }
+    .header .header-actions {
+        gap: 7px !important;
+        margin-left: auto !important;
+        padding-right: 8px !important;
+    }
+    .header .header-actions > .header-search-button,
+    .header .header-actions .account-menu > .account-menu-toggle,
+    .header .header-actions > a.header-account-icon {
+        width: 34px !important;
+        min-width: 34px !important;
+        max-width: 34px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        flex-basis: 34px !important;
+        box-shadow: none !important;
+        background: #fff !important;
     }
 }
