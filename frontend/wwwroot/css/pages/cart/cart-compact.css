@@ -171,3 +171,62 @@
         margin-top: 10px;
     }
 }
+
+
+/* Keep cart size/quantity controls and remove action on one aligned row. */
+.shopping-cart-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+.shopping-cart-controls .shopping-cart-update {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+}
+.shopping-cart-controls .shopping-cart-update label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1;
+}
+.shopping-cart-controls .shopping-cart-size-control {
+    font-size: 0;
+}
+.shopping-cart-controls .shopping-cart-update select {
+    min-height: 36px;
+    margin: 0;
+    font: inherit;
+    font-size: 14px;
+}
+.shopping-cart-controls .shopping-cart-remove {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+.shopping-cart-controls .shopping-cart-remove button {
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid #e7c6ce;
+    border-radius: 7px;
+    background: #fff;
+    color: #8b2445;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+}
+.shopping-cart-controls .shopping-cart-remove button:hover {
+    border-color: #8b2445;
+    background: #fff3f5;
+}
+@media (max-width: 700px) {
+    .shopping-cart-controls { gap: 8px; }
+    .shopping-cart-controls .shopping-cart-update { gap: 8px; }
+}
