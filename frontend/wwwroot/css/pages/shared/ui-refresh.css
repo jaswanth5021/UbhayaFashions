@@ -3281,3 +3281,60 @@ body {
         min-width: 68px;
     }
 }
+
+
+/* Checkout typography and simplified totals */
+.checkout-screen,
+.checkout-screen-summary {
+    font-size: 15px;
+}
+.checkout-screen-title-row h1 {
+    font-size: clamp(28px, 2.2vw, 34px);
+}
+.checkout-screen-summary h2 {
+    font-size: 25px;
+}
+.checkout-bag-info h2,
+.checkout-screen-products article strong {
+    font-size: 16px;
+    line-height: 1.45;
+}
+.checkout-bag-info p,
+.checkout-bag-edit-controls label,
+.checkout-stock-hint,
+.checkout-stock-warning,
+.checkout-screen-products article span {
+    font-size: 13px;
+}
+.checkout-bag-info > strong,
+.checkout-bag-line-total {
+    font-size: 16px;
+}
+.checkout-free-shipping > div:first-child strong,
+.checkout-free-shipping > strong {
+    font-size: 14px;
+}
+.checkout-free-shipping > div:first-child span {
+    font-size: 13px;
+}
+.checkout-screen-summary .checkout-screen-products article {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 12px;
+}
+.checkout-screen-summary .checkout-screen-products article img {
+    width: 54px;
+    height: 68px;
+}
+@media (max-width: 700px) {
+    .checkout-screen,
+    .checkout-screen-summary {
+        font-size: 14px;
+    }
+    .checkout-screen-summary h2 {
+        font-size: 22px;
+    }
+    .checkout-bag-info h2,
+    .checkout-screen-products article strong {
+        font-size: 15px;
+    }
+}
