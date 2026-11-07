@@ -158,7 +158,7 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Remove(int productId, string? size, string? color)
+    public IActionResult Remove(int productId, string? size, string? color, string? returnUrl = null)
     {
         var isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest";
         var cart = GetCart();
@@ -168,6 +168,10 @@ public class CartController : Controller
         SaveCart(cart);
         if (isAjax)
             return Json(new { success = true, cartCount = cart.Sum(x => x.Quantity), cartTotal = cart.Sum(x => x.Price * x.Quantity), isEmpty = cart.Count == 0 });
+
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+
         return RedirectToAction(nameof(Index));
     }
 
