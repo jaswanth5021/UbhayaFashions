@@ -712,7 +712,22 @@ public class ApiService(
             PropertyNameCaseInsensitive = true
         });
 
-        return data is null ? (false, "Invalid payment response from server.", null) : (true, "", data);
+        if (data is null)
+            return (false, "Invalid payment response from server.", null);
+
+        // Keep the line-item breakdown from the same cart used to create the payment order.
+        // The server response remains authoritative for subtotal, delivery charge and payable amount.
+        data.Items = cart.Select(item => new PaymentOrderItemViewModel
+        {
+            Name = item.Name,
+            Size = item.Size,
+            Color = item.Color,
+            Quantity = item.Quantity,
+            UnitPrice = item.Price,
+            LineTotal = item.Price * item.Quantity
+        }).ToList();
+
+        return (true, "", data);
     }
 
 
