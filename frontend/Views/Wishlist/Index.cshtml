@@ -69,17 +69,19 @@
                         }
                         <div class="wishlist-card-actions">
                             <a class="button" asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">View product</a>
-                            <form asp-controller="Wishlist" asp-action="Toggle" method="post"
-                                  toolautosubmit
-                                  toolname="remove_from_wishlist_@product.Id"
-                                  tooldescription="Remove @product.Name from the shopper's wishlist.">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@product.Id" />
-                                <input type="hidden" name="isWishlisted" value="true" />
-                                <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Wishlist")" />
-                                <button class="wishlist-remove" type="submit" aria-label="Remove @product.Name from wishlist">Remove</button>
-                            </form>
                         </div>
+                        <form class="wishlist-remove-form" asp-controller="Wishlist" asp-action="Toggle" method="post"
+                              toolautosubmit
+                              toolname="remove_from_wishlist_@product.Id"
+                              tooldescription="Remove @product.Name from the shopper's wishlist.">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <input type="hidden" name="isWishlisted" value="true" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Wishlist")" />
+                            <button class="wishlist-remove" type="submit" aria-label="Remove @product.Name from wishlist" title="Remove from wishlist">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </form>
                     </div>
                 </article>
             }
