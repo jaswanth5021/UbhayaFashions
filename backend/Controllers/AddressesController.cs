@@ -10,7 +10,7 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/addresses")]
-[Authorize]
+[Authorize(Roles = "Customer")]
 public class AddressesController(ApplicationDbContext db) : ControllerBase
 {
     private bool TryGetCustomerId(out int customerId) =>

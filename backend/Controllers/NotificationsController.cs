@@ -9,7 +9,7 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/notifications")]
-[Authorize]
+[Authorize(Roles = "Customer")]
 public sealed class NotificationsController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]

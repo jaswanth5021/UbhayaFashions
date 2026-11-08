@@ -9,7 +9,7 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/recently-viewed")]
-[Authorize]
+[Authorize(Roles = "Customer")]
 public class RecentlyViewedController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]

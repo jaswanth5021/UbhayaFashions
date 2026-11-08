@@ -701,12 +701,13 @@ public class ApiService(
     }
 
     public async Task<(bool Success, string Message, PaymentCheckoutViewModel? Data)>
-        CreateRazorpayOrderAsync(List<CartItemViewModel> cart, string address, SaveAddressViewModel deliveryAddress)
+        CreateRazorpayOrderAsync(List<CartItemViewModel> cart, string address, SaveAddressViewModel deliveryAddress, string checkoutKey)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/payments/create-order");
         AddToken(request);
         request.Content = JsonContent.Create(new
         {
+            checkoutKey,
             shippingAddress = address,
             deliveryAddress = new
             {

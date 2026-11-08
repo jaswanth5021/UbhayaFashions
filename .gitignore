@@ -20,3 +20,8 @@
 # Local package caches
 **/.nuget/
 **/packages/
+
+# Production secrets and local update backups
+*.production.env
+.env
+.production-update-backups/

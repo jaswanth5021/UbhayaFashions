@@ -3,6 +3,11 @@ namespace backend.Models;
 public class Order
 {
     public int Id { get; set; }
+    public string? CheckoutKey { get; set; }
+    public string? CheckoutFingerprint { get; set; }
+    public bool InventoryCommitted { get; set; }
+    public string FollowUpStatus { get; set; } = "Legacy";
+    public DateTime? FollowUpAttemptAtUtc { get; set; }
     public int CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;
     public decimal TotalAmount { get; set; }

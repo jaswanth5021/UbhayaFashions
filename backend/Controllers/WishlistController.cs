@@ -9,7 +9,7 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/wishlist")]
-[Authorize]
+[Authorize(Roles = "Customer")]
 public class WishlistController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]

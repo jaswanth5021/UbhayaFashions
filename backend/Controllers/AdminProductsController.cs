@@ -1,3 +1,4 @@
+using backend.Services;
 using backend.Data;
 using backend.DTOs;
 using backend.Models;
@@ -73,6 +74,8 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         var category = await db.Categories.FindAsync(request.CategoryId);
         if (category is null) return BadRequest("Choose a valid category.");
 
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        await CheckoutSafety.LockVariantsAsync(db, [id]);
         var product = await db.Products.Include(x => x.Variants).FirstOrDefaultAsync(x => x.Id == id);
         if (product is null) return NotFound();
 
@@ -101,6 +104,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
                 AddInventory(product.Id, variant.Size, "Adjustment", variant.Stock - oldStock, variant.Stock, "Variant stock edited by admin");
         }
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return Ok(await db.Products.AsNoTracking().Include(x => x.CategoryNavigation).Include(x => x.Images).Include(x => x.Videos).Include(x => x.Variants).FirstAsync(x => x.Id == id));
     }
 

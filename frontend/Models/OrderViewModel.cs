@@ -2,6 +2,7 @@ namespace LadiesDressStore.Web.Models;
 
 public class CreateOrderViewModel
 {
+    public string CheckoutKey { get; set; } = Guid.NewGuid().ToString("N");
     public string ShippingAddress { get; set; } = "";
     public bool SaveAddress { get; set; }
     public int SelectedSavedAddressId { get; set; }

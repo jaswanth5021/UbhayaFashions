@@ -94,8 +94,9 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
     [HttpPost("{id:int}/cancel")]
     public async Task<IActionResult> Cancel(int id, CancellationToken cancellationToken)
     {
-        var order = await db.Orders.Include(x => x.Items).Include(x => x.Customer).Include(x => x.DelhiveryShipment).Include(x => x.Payments)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        var order = await CheckoutSafety.LockOrderAsync(db, id, cancellationToken);
+        if (order?.FollowUpStatus == "InProgress") return Conflict("Shipment processing is in progress. Please retry shortly.");
         if (order is null) return NotFound("Order not found.");
         var alreadyCancelled = string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
         var retryRefund = alreadyCancelled && string.Equals(order.PaymentStatus, "Refund Pending", StringComparison.OrdinalIgnoreCase);
@@ -141,6 +142,7 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
         if (!alreadyCancelled)
         {
             order.Status = "Cancelled";
+            order.FollowUpStatus = "Cancelled";
             order.PaymentStatus = prepaid ? (refundInitiated ? "Refund Initiated" : "Refund Pending") : "Not Required";
             var ids = order.Items.Select(x => x.ProductId).Distinct().ToList();
             var variants = await db.ProductVariants.Where(x => ids.Contains(x.ProductId)).ToListAsync(cancellationToken);
@@ -151,6 +153,7 @@ public class AdminOrdersController(ApplicationDbContext db, IDelhiveryService de
             }
         }
         await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         await orderEmail.SendOrderCancellationAsync(order, order.Customer);
         return Ok(new { success = true, orderId = order.Id, order.Status, order.PaymentStatus, refundInitiated, refundId, refundWarning, message = refundInitiated ? "Order and Delhivery shipment cancelled; Razorpay refund request accepted." : prepaid ? "Order cancelled, but refund still requires attention." : "Order and Delhivery shipment cancelled." });
     }

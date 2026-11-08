@@ -53,6 +53,7 @@
     }
 
     <form asp-controller="Orders" asp-action="Checkout" method="post" id="checkoutScreenForm">
+        <input type="hidden" name="CheckoutKey" value="@Guid.NewGuid().ToString("N")" />
         @Html.AntiForgeryToken()
         <input type="hidden" name="ShippingAddress" id="checkoutShippingAddress" />
         <input type="hidden" name="SelectedSavedAddressId" id="checkoutSelectedSavedAddressId" value="0" />
@@ -288,7 +289,7 @@
                         <span>Your payment is processed securely by Razorpay.</span>
                     </div>
 
-                    @if (Configuration.GetValue<bool>("PaymentTesting:Enabled"))
+                    @if (Context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment() && Configuration.GetValue<bool>("PaymentTesting:Enabled"))
                     {
                         <div class="checkout-test-payment-panel">
                             <span class="checkout-test-payment-label">TEST MODE</span>

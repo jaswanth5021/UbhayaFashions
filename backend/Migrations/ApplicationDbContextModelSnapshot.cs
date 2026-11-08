@@ -321,6 +321,14 @@ namespace backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CheckoutKey").HasMaxLength(32).HasColumnType("nvarchar(32)");
+                    b.Property<string>("CheckoutFingerprint").HasMaxLength(64).HasColumnType("nvarchar(64)");
+                    b.HasIndex("CustomerId", "CheckoutKey").IsUnique().HasFilter("[CheckoutKey] IS NOT NULL");
+                    b.Property<bool>("InventoryCommitted").HasColumnType("bit");
+                    b.Property<string>("FollowUpStatus").IsRequired().HasMaxLength(30).HasColumnType("nvarchar(30)");
+                    b.Property<DateTime?>("FollowUpAttemptAtUtc").HasColumnType("datetime2");
+                    b.Property<string>("DeliveryAddressJson").HasColumnType("nvarchar(max)");
+                    b.HasIndex("FollowUpStatus");
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 

@@ -3,7 +3,8 @@ namespace backend.DTOs;
 public record CreatePaymentOrderRequest(
     string ShippingAddress,
     List<CreateOrderItem> Items,
-    PaymentDeliveryAddress? DeliveryAddress = null);
+    PaymentDeliveryAddress? DeliveryAddress = null,
+    string? CheckoutKey = null);
 
 public record PaymentDeliveryAddress(
     string Name,

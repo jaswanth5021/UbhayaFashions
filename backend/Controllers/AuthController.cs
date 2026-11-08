@@ -1,3 +1,5 @@
+using backend.Services;
+using Microsoft.AspNetCore.RateLimiting;
 ﻿using backend.Data;
 using backend.DTOs;
 using backend.Models;
@@ -30,6 +32,7 @@ public class AuthController(
     // SIGNUP
     // =====================================================
 
+    [EnableRateLimiting("auth")]
     [HttpPost("signup")]
     public async Task<IActionResult> SignUp(SignUpRequest request)
     {
@@ -71,7 +74,7 @@ public class AuthController(
         return Ok(new { success = true, message = "Account created. You can verify your email from your profile after logging in." });
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost("me/email-verification/send")]
     public async Task<IActionResult> SendMyEmailVerification()
     {
@@ -99,7 +102,7 @@ public class AuthController(
         return Ok(new { success = true, message = "Verification code sent." });
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost("me/email-verification/confirm")]
     public async Task<IActionResult> ConfirmMyEmailVerification(VerifyMyEmailRequest request)
     {
@@ -131,6 +134,7 @@ public class AuthController(
         return Ok(new { success = true, message = "Email verified successfully." });
     }
 
+    [EnableRateLimiting("auth")]
     [HttpPost("signup/resend-otp")]
     public async Task<IActionResult> ResendSignupOtp(ResendSignupOtpRequest request)
     {
@@ -155,6 +159,7 @@ public class AuthController(
         return Ok(new { success = true, message = "A new verification code has been sent." });
     }
 
+    [EnableRateLimiting("auth")]
     [HttpPost("signup/verify-email")]
     public async Task<IActionResult> VerifySignupEmail(VerifySignupEmailRequest request)
     {
@@ -205,6 +210,7 @@ public class AuthController(
     // LOGIN
     // =====================================================
 
+    [EnableRateLimiting("auth")]
     [HttpPost("login")]
     public async Task<IActionResult> Login(
         LoginRequest request)
@@ -275,7 +281,7 @@ public class AuthController(
     // GET MY PROFILE
     // =====================================================
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpGet("me")]
     public async Task<IActionResult> GetMyProfile()
     {
@@ -321,7 +327,7 @@ public class AuthController(
     // UPDATE MY PROFILE
     // =====================================================
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPut("me")]
     public async Task<IActionResult> UpdateMyProfile(
         UpdateProfileRequest request)
@@ -403,7 +409,7 @@ public class AuthController(
                 customer.EmailVerified));
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {
@@ -423,7 +429,7 @@ public class AuthController(
         return Ok(new { success = true });
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost("me/delete")]
     public async Task<IActionResult> DeleteMyAccount(DeleteMyAccountRequest request)
     {
@@ -491,6 +497,7 @@ public class AuthController(
         return Ok(new { success = true, message = "Your account has been deleted. Existing order and payment records are retained where required." });
     }
 
+    [EnableRateLimiting("auth")]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
     {
@@ -596,6 +603,7 @@ public class AuthController(
         return Ok(new { success = true, accountExists = true });
     }
 
+    [EnableRateLimiting("auth")]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
     {
@@ -1015,6 +1023,7 @@ public class AuthController(
 
         var claims = new[]
         {
+            new Claim("auth_version", AuthenticationVersion.Create(customer.PasswordHash, config["Jwt:Key"]!)),
         new Claim(
             ClaimTypes.NameIdentifier,
             customer.Id.ToString()),
@@ -1069,3 +1078,4 @@ public class AuthController(
 
 
 public sealed record DeleteMyAccountRequest(string? CurrentPassword, string? Confirmation);
+

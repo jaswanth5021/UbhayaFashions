@@ -97,6 +97,8 @@ public class AdminAccountsController(ApplicationDbContext db) : ControllerBase
         if ((requirePassword || !string.IsNullOrWhiteSpace(request.Password))
             && string.IsNullOrWhiteSpace(request.Password))
             return "Password is required when creating an admin account.";
+        if (!string.IsNullOrWhiteSpace(request.Password) && (request.Password.Length < 12 || request.Password.Length > 64))
+            return "Use an admin password between 12 and 64 characters.";
         return null;
     }
 }

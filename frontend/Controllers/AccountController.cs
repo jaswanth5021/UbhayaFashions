@@ -524,7 +524,7 @@ public class AccountController(ApiService api) : Controller
             HttpOnly = true,
 
             // Frontend is running on HTTP localhost:5001
-            Secure = Request.IsHttps,
+            Secure = !HttpContext.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment() || Request.IsHttps,
 
             SameSite = SameSiteMode.Lax,
 

@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using backend.Data;
 using backend.Configuration;
 using backend.Middleware;
@@ -11,6 +14,37 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+var migrateOnly = args.Contains("--migrate-only");
+if (builder.Environment.IsProduction() && builder.Configuration.GetValue<bool>("PaymentTesting:Enabled"))
+    throw new InvalidOperationException("Test payments must be disabled in production.");
+if (builder.Environment.IsProduction() && !migrateOnly)
+{
+    if (Encoding.UTF8.GetByteCount(builder.Configuration["Jwt:Key"] ?? "") < 32)
+        throw new InvalidOperationException("Production JWT signing key must contain at least 32 bytes.");
+    if (!(builder.Configuration["Razorpay:KeyId"] ?? "").StartsWith("rzp_live_", StringComparison.Ordinal) ||
+        string.IsNullOrWhiteSpace(builder.Configuration["Razorpay:KeySecret"]) ||
+        string.IsNullOrWhiteSpace(builder.Configuration["Razorpay:WebhookSecret"]))
+        throw new InvalidOperationException("Production requires live Razorpay keys and a webhook secret.");
+    if (!Uri.TryCreate(builder.Configuration["FrontendUrl"], UriKind.Absolute, out var storeUri) || storeUri.Scheme != "https")
+        throw new InvalidOperationException("Production FrontendUrl must use HTTPS.");
+    if (string.IsNullOrWhiteSpace(builder.Configuration["UploadsPath"]))
+        throw new InvalidOperationException("Production UploadsPath must point to durable storage.");
+}
+builder.Services.AddHostedService<PaidOrderWorker>();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    foreach (var proxy in builder.Configuration.GetSection("ReverseProxy:KnownProxies").Get<string[]>() ?? [])
+        options.KnownProxies.Add(System.Net.IPAddress.Parse(proxy));
+});
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+});
+builder.Services.AddHealthChecks();
 
 // =====================================================
 // CONTROLLERS
@@ -200,7 +234,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .AllowAnyOrigin()
+            .WithOrigins(builder.Configuration["FrontendUrl"]?.TrimEnd('/') ?? "http://localhost:5001")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -224,6 +258,7 @@ if (app.Environment.IsDevelopment())
 // MIDDLEWARE
 // =====================================================
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
@@ -237,6 +272,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseCors("AllowFrontend");
 
 app.UseRouting();
+app.UseRateLimiter();
 
 
 // =====================================================
@@ -261,6 +297,12 @@ app.UseAuthorization();
 // =====================================================
 
 app.MapControllers();
+app.MapHealthChecks("/health/live");
+app.MapGet("/health/ready", async (ApplicationDbContext db, CancellationToken ct) =>
+{
+    try { return await db.Database.CanConnectAsync(ct) ? Results.Ok() : Results.StatusCode(503); }
+    catch { return Results.StatusCode(503); }
+});
 
 
 // =====================================================
@@ -273,6 +315,13 @@ await using (var scope = app.Services.CreateAsyncScope())
         scope.ServiceProvider
             .GetRequiredService<ApplicationDbContext>();
 
+    if (!migrateOnly && !app.Environment.IsDevelopment())
+    {
+        if ((await db.Database.GetPendingMigrationsAsync()).Any())
+            throw new InvalidOperationException("Database upgrade required. Back up the database and run the application with --migrate-only before serving traffic.");
+    }
+    else
+    {
     await db.Database.MigrateAsync();
 
     // Add the GA4 idempotency flag to existing payment tables without an EF migration.
@@ -424,6 +473,7 @@ await using (var scope = app.Services.CreateAsyncScope())
         """);
 
    
+    }
     // If you are using EF migrations:
     //
     // db.Database.Migrate();
@@ -437,4 +487,5 @@ await using (var scope = app.Services.CreateAsyncScope())
 // RUN
 // =====================================================
 
+if (migrateOnly) return;
 app.Run();

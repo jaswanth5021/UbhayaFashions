@@ -1,0 +1,17 @@
+name: Production checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore LadiesDressStore.sln
+      - run: dotnet build LadiesDressStore.sln --no-restore --configuration Release
+      - run: dotnet test tests/UbhayaFashions.Tests/UbhayaFashions.Tests.csproj --no-build --configuration Release
+      - run: dotnet run --project tests/CheckoutSafety.SmokeTests/CheckoutSafety.SmokeTests.csproj --configuration Release
+      - run: dotnet list LadiesDressStore.sln package --vulnerable --include-transitive

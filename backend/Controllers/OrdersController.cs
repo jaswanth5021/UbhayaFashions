@@ -11,7 +11,7 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/orders")]
-[Authorize]
+[Authorize(Roles = "Customer")]
 public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, ILogger<OrdersController> logger) : ControllerBase
 {
     [HttpPost]
@@ -23,7 +23,9 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
         if (request.Items is null || request.Items.Count == 0) return BadRequest("Cart is empty.");
         if (request.Items.Any(item => item.Quantity <= 0 || string.IsNullOrWhiteSpace(item.Size))) return BadRequest("Choose a size and a valid quantity for each item.");
 
+        await using var transaction = await db.Database.BeginTransactionAsync();
         var ids = request.Items.Select(item => item.ProductId).Distinct().ToList();
+        await CheckoutSafety.LockVariantsAsync(db, ids);
         var products = await db.Products.Include(product => product.Variants).Where(product => ids.Contains(product.Id)).ToListAsync();
         if (products.Count != ids.Count) return BadRequest("One or more products no longer exist.");
 
@@ -63,11 +65,14 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
             });
         }
 
+        order.InventoryCommitted = true;
         order.TotalAmount = total;
         db.Orders.Add(order);
         db.InventoryTransactions.AddRange(inventoryTransactions);
         await db.SaveChangesAsync();
-        await orderEmail.SendOrderConfirmationAsync(order, customer);
+        await transaction.CommitAsync();
+        try { await orderEmail.SendOrderConfirmationAsync(order, customer); }
+        catch (Exception ex) { logger.LogError(ex, "COD confirmation failed for order {OrderId}", order.Id); }
         return Ok(order);
     }
 
@@ -80,11 +85,9 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
         await using var transaction = await db.Database.BeginTransactionAsync(
             System.Data.IsolationLevel.Serializable, cancellationToken);
 
-        var order = await db.Orders
-            .Include(x => x.Items)
-            .Include(x => x.Customer)
-            .Include(x => x.DelhiveryShipment)
-            .FirstOrDefaultAsync(x => x.Id == id && x.CustomerId == customerId, cancellationToken);
+        var order = await CheckoutSafety.LockOrderAsync(db, id, cancellationToken);
+        if (order is not null && order.CustomerId != customerId) return NotFound("Order not found.");
+        if (order?.FollowUpStatus == "InProgress") return Conflict("Shipment processing is in progress. Please try again shortly.");
 
         if (order is null) return NotFound("Order not found.");
 
@@ -117,69 +120,13 @@ public class OrdersController(ApplicationDbContext db, IOrderConfirmationEmailSe
             shipment.UpdatedAtUtc = DateTime.UtcNow;
         }
 
-        // Validate every stock variant before changing any inventory.
-        // Match using the saved size/color rather than the variant row ID because
-        // admin product edits may recreate variant rows while old orders still exist.
-        var productIds = order.Items.Select(item => item.ProductId).Distinct().ToList();
-        var currentVariants = await db.ProductVariants
-            .Where(variant => productIds.Contains(variant.ProductId))
-            .ToListAsync(cancellationToken);
-
-        static string NormalizeVariantValue(string? value) =>
-            (value ?? string.Empty).Trim();
-
-        var stockRestorations = new List<(ProductVariant Variant, OrderItem Item)>();
-        foreach (var item in order.Items)
+        if (order.InventoryCommitted)
         {
-            var sizeMatches = currentVariants
-                .Where(variant => variant.ProductId == item.ProductId &&
-                    string.Equals(NormalizeVariantValue(variant.Size),
-                        NormalizeVariantValue(item.Size), StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            var savedColor = NormalizeVariantValue(item.Color);
-            var exactMatches = sizeMatches
-                .Where(variant => string.Equals(NormalizeVariantValue(variant.Color),
-                    savedColor, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            ProductVariant? variant = exactMatches.Count == 1 ? exactMatches[0] : null;
-
-            // Older orders may not have saved a color. If only one current variant
-            // exists for that product/size, it is safe to restore to that variant.
-            // Never guess when multiple colors share the same size.
-            if (variant is null && sizeMatches.Count == 1)
-                variant = sizeMatches[0];
-
-            if (variant is null)
-            {
-                logger.LogWarning(
-                    "Inventory restoration could not resolve a unique variant. OrderId={OrderId}, ProductId={ProductId}, ProductName={ProductName}, Size={Size}, SavedColor={Color}, MatchingVariants={MatchingVariants}",
-                    order.Id, item.ProductId, item.ProductName, item.Size, item.Color, sizeMatches.Count);
-
-                var reason = sizeMatches.Count == 0
-                    ? "the product no longer has this size"
-                    : "the saved color does not uniquely match a current variant";
-                return Conflict($"Unable to restore inventory for {item.ProductName} ({item.Size}) because {reason}. Please contact support.");
-            }
-
-            stockRestorations.Add((variant, item));
+            var variants = await CheckoutSafety.LockVariantsAsync(db, order.Items.Select(x => x.ProductId), cancellationToken);
+            try { CheckoutSafety.ApplyStock(db, order, CheckoutSafety.PlanStock(order.Items, variants), true); }
+            catch (InvalidOperationException) { return Conflict("The ordered variant is unavailable. Please contact support to cancel."); }
         }
-
-        foreach (var (variant, item) in stockRestorations)
-        {
-            variant.Stock += item.Quantity;
-            db.InventoryTransactions.Add(new InventoryTransaction
-            {
-                ProductId = item.ProductId,
-                Size = item.Size,
-                Type = "Cancellation",
-                Quantity = item.Quantity,
-                StockAfter = variant.Stock,
-                Note = $"Customer cancelled order #{order.Id} before shipment creation"
-            });
-        }
-
+        order.FollowUpStatus = "Cancelled";
         order.Status = "Cancelled";
         if (string.Equals(order.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase))
             order.PaymentStatus = "Refund Pending";

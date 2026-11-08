@@ -147,7 +147,7 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
         });
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost("~/api/products/reviews/{reviewId:int}/vote")]
     public async Task<IActionResult> Vote(int reviewId, [FromBody] ProductReviewVoteRequest request)
     {
@@ -184,7 +184,7 @@ public class ProductReviewsController(ApplicationDbContext db, IConfiguration co
         return Ok(new { helpfulCount, notHelpfulCount, currentUserVote = request.VoteType });
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost]
     [RequestSizeLimit(27_000_000)]
     public async Task<IActionResult> Create(

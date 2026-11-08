@@ -18,9 +18,6 @@ namespace backend.Controllers;
 public sealed class RazorpayWebhookController(
     ApplicationDbContext db,
     IConfiguration configuration,
-    IDelhiveryService delhivery,
-    IOrderConfirmationEmailService orderEmail,
-    IGa4MeasurementProtocolService ga4,
     ILogger<RazorpayWebhookController> logger) : ControllerBase
 {
     [HttpPost("webhook")]
@@ -93,11 +90,6 @@ public sealed class RazorpayWebhookController(
         if (string.IsNullOrWhiteSpace(razorpayPaymentId) || string.IsNullOrWhiteSpace(razorpayOrderId))
             return BadRequest("Payment or order reference is missing.");
 
-        Order? paidOrderForFollowUp = null;
-        PaymentDeliveryAddress? deliveryAddress = null;
-        var shouldSendConfirmation = false;
-        int? paidPaymentIdForGa4 = null;
-
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         var webhookEvent = new RazorpayWebhookEvent
         {
@@ -114,17 +106,15 @@ public sealed class RazorpayWebhookController(
             // The unique EventId index makes repeated Razorpay deliveries safe.
             await db.SaveChangesAsync(cancellationToken);
 
-            var payment = await db.Payments
-                .FromSqlInterpolated($"SELECT * FROM dbo.Payments WITH (UPDLOCK, ROWLOCK) WHERE RazorpayOrderId = {razorpayOrderId}")
-                .Include(x => x.Order).ThenInclude(x => x.Items)
-                .Include(x => x.Order).ThenInclude(x => x.Customer)
-                .Include(x => x.Order).ThenInclude(x => x.DelhiveryShipment)
-                .SingleOrDefaultAsync(cancellationToken);
+            var orderId = await db.Payments.AsNoTracking().Where(x => x.RazorpayOrderId == razorpayOrderId)
+                .Select(x => (int?)x.OrderId).SingleOrDefaultAsync(cancellationToken);
+            var lockedOrder = orderId.HasValue ? await CheckoutSafety.LockOrderAsync(db, orderId.Value, cancellationToken) : null;
+            var payment = lockedOrder?.Payments.SingleOrDefault(x => x.RazorpayOrderId == razorpayOrderId);
 
             if (payment is null || payment.Order is null)
             {
-                webhookEvent.ProcessingStatus = "Ignored";
-                webhookEvent.ErrorMessage = "No matching local payment/order was found.";
+                await transaction.RollbackAsync(cancellationToken);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
             else if (eventType == "payment.captured")
             {
@@ -140,85 +130,22 @@ public sealed class RazorpayWebhookController(
                     webhookEvent.ErrorMessage = "Captured payment status, amount, currency or order reference did not match the local order.";
                     logger.LogError("Razorpay captured event did not match local order {OrderId}.", order.Id);
                 }
-                else if (order.PaymentStatus == "Paid" || payment.Status == "Captured")
+                else if (payment.RazorpayPaymentId is not null && payment.RazorpayPaymentId != razorpayPaymentId)
                 {
-                    webhookEvent.ProcessingStatus = "Processed";
-                    paidPaymentIdForGa4 = payment.Id;
+                    webhookEvent.ProcessingStatus = "NeedsReview";
+                    webhookEvent.ErrorMessage = "A different payment was already captured for this order.";
                 }
                 else
                 {
-                    var productIds = order.Items.Select(x => x.ProductId).Distinct().ToList();
-                    var products = await db.Products
-                        .Include(x => x.Variants)
-                        .Where(x => productIds.Contains(x.Id))
-                        .ToListAsync(cancellationToken);
-
-                    var unavailableItem = order.Items.FirstOrDefault(item =>
-                    {
-                        var product = products.SingleOrDefault(x => x.Id == item.ProductId);
-                        var hasColorVariants = product?.Variants.Any(x => !string.IsNullOrWhiteSpace(x.Color)) == true;
-                        var variant = product?.Variants.FirstOrDefault(x =>
-                            x.Size == item.Size &&
-                            (!hasColorVariants || string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase)));
-                        return variant is null || variant.Stock < item.Quantity;
-                    });
-
-                    if (unavailableItem is not null)
-                    {
-                        webhookEvent.ProcessingStatus = "NeedsReview";
-                        webhookEvent.ErrorMessage = $"Payment was captured, but stock is unavailable for {unavailableItem.ProductName} ({unavailableItem.Size}). Manual refund/order review is required.";
-                        logger.LogCritical("Captured Razorpay payment for order {OrderId}, but inventory is unavailable for {ProductName} ({Size}).",
-                            order.Id, unavailableItem.ProductName, unavailableItem.Size);
-                    }
-                    else
-                    {
-                        foreach (var item in order.Items)
-                        {
-                            var product = products.Single(x => x.Id == item.ProductId);
-                            var hasColorVariants = product.Variants.Any(x => !string.IsNullOrWhiteSpace(x.Color));
-                            var variant = product.Variants.First(x =>
-                                x.Size == item.Size &&
-                                (!hasColorVariants || string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase)));
-                            variant.Stock -= item.Quantity;
-                            db.InventoryTransactions.Add(new InventoryTransaction
-                            {
-                                ProductId = product.Id,
-                                Size = variant.Size,
-                                Type = "Sale",
-                                Quantity = -item.Quantity,
-                                StockAfter = variant.Stock,
-                                Note = $"Razorpay webhook payment for order #{order.Id}"
-                            });
-                        }
-
-                        order.PaymentStatus = "Paid";
-                        order.Status = "Processing";
-                        payment.Status = "Captured";
-                        payment.RazorpayPaymentId = razorpayPaymentId;
-                        payment.PaidDate = DateTime.UtcNow;
-                        webhookEvent.ProcessingStatus = "Processed";
-                        paidOrderForFollowUp = order;
-                        paidPaymentIdForGa4 = payment.Id;
-                        shouldSendConfirmation = true;
-
-                        if (!string.IsNullOrWhiteSpace(order.DeliveryAddressJson))
-                        {
-                            try
-                            {
-                                deliveryAddress = JsonSerializer.Deserialize<PaymentDeliveryAddress>(order.DeliveryAddressJson);
-                            }
-                            catch (JsonException ex)
-                            {
-                                logger.LogError(ex, "Saved delivery address could not be read for order {OrderId}.", order.Id);
-                            }
-                        }
-                    }
+                    await CheckoutSafety.ApplyCaptureAsync(db, order, payment, razorpayPaymentId!, cancellationToken);
+                    webhookEvent.ProcessingStatus = order.PaymentStatus == "Paid" ? "Processed" : "NeedsReview";
+                    if (order.PaymentStatus != "Paid") webhookEvent.ErrorMessage = "Captured payment requires refund/stock review.";
                 }
             }
             else
             {
                 var order = payment?.Order;
-                if (payment is not null && order is not null && order.PaymentStatus != "Paid" && payment.Status != "Captured")
+                if (payment is not null && order is not null && !payment.PaidDate.HasValue && !CheckoutSafety.IsCancelled(order))
                 {
                     payment.Status = "Failed";
                     order.PaymentStatus = "Failed";
@@ -250,44 +177,6 @@ public sealed class RazorpayWebhookController(
             await transaction.RollbackAsync(cancellationToken);
             logger.LogError(ex, "Failed to process Razorpay webhook event {EventId}.", eventId);
             return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        if (paidPaymentIdForGa4.HasValue)
-        {
-            // Tracking failure is isolated from Razorpay payment processing.
-            await ga4.TrackPurchaseAsync(paidPaymentIdForGa4.Value, cancellationToken);
-        }
-
-        if (paidOrderForFollowUp is not null)
-        {
-            if (deliveryAddress is not null)
-            {
-                try
-                {
-                    await PaymentsController.CreatePaidOrderShipmentAsync(
-                        paidOrderForFollowUp, deliveryAddress, delhivery, db, configuration, logger);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Order {OrderId} is paid, but webhook shipment creation failed.", paidOrderForFollowUp.Id);
-                }
-            }
-            else
-            {
-                logger.LogWarning("Order {OrderId} is paid by webhook, but no structured delivery address was saved; shipment creation was skipped.", paidOrderForFollowUp.Id);
-            }
-
-            if (shouldSendConfirmation)
-            {
-                try
-                {
-                    await orderEmail.SendOrderConfirmationAsync(paidOrderForFollowUp, paidOrderForFollowUp.Customer);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Order {OrderId} is paid, but confirmation email could not be sent.", paidOrderForFollowUp.Id);
-                }
-            }
         }
 
         return Ok(new { received = true });

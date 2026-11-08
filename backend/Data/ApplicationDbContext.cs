@@ -32,6 +32,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Order>().Property(x => x.CheckoutKey).HasMaxLength(32);
+        modelBuilder.Entity<Order>().Property(x => x.CheckoutFingerprint).HasMaxLength(64);
+        modelBuilder.Entity<Order>().HasIndex(x => new { x.CustomerId, x.CheckoutKey }).IsUnique().HasFilter("[CheckoutKey] IS NOT NULL");
+        modelBuilder.Entity<Order>().Property(x => x.FollowUpStatus).HasMaxLength(30);
+        modelBuilder.Entity<Order>().HasIndex(x => x.FollowUpStatus);
         modelBuilder.Entity<ExternalLogin>().HasIndex(x => new { x.Provider, x.ProviderUserId }).IsUnique();
         modelBuilder.Entity<PendingSignup>().HasIndex(x => x.Email).IsUnique();
         modelBuilder.Entity<PendingSignup>().Property(x => x.Email).HasMaxLength(320).IsRequired();

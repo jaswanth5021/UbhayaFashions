@@ -1,3 +1,4 @@
+using backend.Services;
 ﻿using backend.Data;
 using backend.DTOs;
 using backend.Models;
@@ -38,8 +39,10 @@ public class AdminInventoryController(ApplicationDbContext db) : ControllerBase
     [HttpPost("{productId:int}/adjust")]
     public async Task<IActionResult> Adjust(int productId, InventoryAdjustmentRequest request)
     {
-        var variant = await db.ProductVariants.FirstOrDefaultAsync(item =>
-            item.ProductId == productId && item.Size == request.Size && string.Equals(item.Color, request.Color, StringComparison.OrdinalIgnoreCase));
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        var variants = await CheckoutSafety.LockVariantsAsync(db, [productId]);
+        var variant = variants.FirstOrDefault(item => CheckoutSafety.Normalize(item.Size) == CheckoutSafety.Normalize(request.Size)
+            && CheckoutSafety.Normalize(item.Color) == CheckoutSafety.Normalize(request.Color));
         if (variant is null) return NotFound("Product size variant not found.");
 
         var newStock = variant.Stock + request.Quantity;
@@ -55,6 +58,7 @@ public class AdminInventoryController(ApplicationDbContext db) : ControllerBase
             Note = request.Note
         });
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return Ok(new { variant.ProductId, variant.Color, variant.Size, variant.Stock });
     }
 }

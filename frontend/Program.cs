@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection;
 using LadiesDressStore.Web;
 using LadiesDressStore.Web.Middleware;
 using LadiesDressStore.Web.Services;
@@ -7,6 +9,17 @@ using Microsoft.Extensions.FileProviders;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    foreach (var proxy in builder.Configuration.GetSection("ReverseProxy:KnownProxies").Get<string[]>() ?? [])
+        options.KnownProxies.Add(System.Net.IPAddress.Parse(proxy));
+});
+var keyPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(keyPath))
+    builder.Services.AddDataProtection().SetApplicationName("UbhayaStorefront")
+        .PersistKeysToFileSystem(new DirectoryInfo(keyPath));
+builder.Services.AddHealthChecks();
 
 // =====================================================
 // MVC
@@ -26,6 +39,7 @@ builder.Services.AddResponseCompression(options =>
 // =====================================================
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<ApiForwardedHeadersHandler>();
 
 // =====================================================
 // API HTTP CLIENT
@@ -46,6 +60,7 @@ builder.Services
             client.Timeout =
                 TimeSpan.FromSeconds(60);
         })
+    .AddHttpMessageHandler<ApiForwardedHeadersHandler>()
     .ConfigurePrimaryHttpMessageHandler(
         () =>
         {
@@ -114,7 +129,7 @@ builder.Services
             // Required for the current HTTP-only EC2 test setup.
             // When HTTPS is configured later, change this to Always.
             options.Cookie.SecurePolicy =
-                CookieSecurePolicy.SameAsRequest;
+                builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
 
             options.ExpireTimeSpan =
                 TimeSpan.FromHours(2);
@@ -129,7 +144,7 @@ builder.Services
         options.AccessDeniedPath = "/Admin/Login";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
         options.SlidingExpiration = true;
     });
@@ -145,6 +160,12 @@ builder.Services.AddAuthorization();
 // =====================================================
 
 var app = builder.Build();
+app.UseForwardedHeaders();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
 
 // =====================================================
 // PIPELINE
@@ -275,4 +296,5 @@ app.MapControllerRoute(
 // RUN
 // =====================================================
 
+app.MapHealthChecks("/health/live");
 app.Run();

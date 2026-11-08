@@ -161,7 +161,10 @@ public sealed class AdminDelhiveryController(
         if (request.WeightGrams < 1 || request.WeightGrams > 100000)
             return BadRequest(new { error = "WeightGrams must be between 1 and 100000." });
 
-        var order = await db.Orders.Include(x => x.Items).FirstOrDefaultAsync(x => x.Id == orderId, cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        var order = await CheckoutSafety.LockOrderAsync(db, orderId, cancellationToken);
+        if (order?.FollowUpStatus is "Pending" or "InProgress")
+            return Conflict(new { error = "Automatic shipment processing is pending or active." });
         if (order is null) return NotFound(new { error = "Order not found." });
         if (string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
             return Conflict(new { error = "A cancelled order cannot be submitted to Delhivery." });
@@ -223,7 +226,10 @@ public sealed class AdminDelhiveryController(
         shipment.LastError = null;
         shipment.AttemptCount++;
         shipment.UpdatedAtUtc = DateTime.UtcNow;
+        order.FollowUpStatus = "InProgress";
+        order.FollowUpAttemptAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         try
         {
@@ -231,6 +237,8 @@ public sealed class AdminDelhiveryController(
             shipment.Waybill = created.Waybill;
             shipment.LabelUrl = created.LabelUrl;
             shipment.ShipmentStatus = "Shipment Created";
+            order.FollowUpStatus = order.PaymentStatus == "Paid" ? "EmailRetry" : "Complete";
+            order.FollowUpAttemptAtUtc = DateTime.UtcNow.AddMinutes(-6);
             shipment.LastError = null;
             shipment.UpdatedAtUtc = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
@@ -248,6 +256,7 @@ public sealed class AdminDelhiveryController(
         {
             logger.LogError(ex, "Delhivery shipment creation failed for order {OrderId}", orderId);
             shipment.ShipmentStatus = "Creation Failed";
+            order.FollowUpStatus = "Review";
             shipment.LastError = ex.Message.Length > 1900 ? ex.Message[..1900] : ex.Message;
             shipment.UpdatedAtUtc = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);

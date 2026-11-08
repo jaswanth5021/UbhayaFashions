@@ -168,7 +168,7 @@ public sealed class OrderConfirmationEmailService(
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from))
         {
             logger.LogWarning("Order {OrderId} was placed, but confirmation email was skipped because SMTP is not configured.", order.Id);
-            return;
+            throw new InvalidOperationException("Order confirmation SMTP is not configured.");
         }
 
         var currency = CultureInfo.GetCultureInfo("en-IN");
@@ -367,6 +367,7 @@ public sealed class OrderConfirmationEmailService(
         {
             // A mail delivery issue must never undo a committed order or payment.
             logger.LogError(exception, "Order {OrderId} was placed, but its confirmation email could not be sent.", order.Id);
+            throw;
         }
     }
 }

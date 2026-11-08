@@ -7,7 +7,7 @@ namespace backend.Middleware;
 
 public class ValidateLoginUserMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, ApplicationDbContext db, IErrorLog errorLog)
+    public async Task InvokeAsync(HttpContext context, ApplicationDbContext db, IErrorLog errorLog, IConfiguration configuration)
     {
         if (HttpMethods.IsOptions(context.Request.Method))
         {
@@ -37,7 +37,7 @@ public class ValidateLoginUserMiddleware(RequestDelegate next)
             return;
         }
 
-        if (!TryGetUserId(user, out var userId) || !await IsActiveAccountAsync(db, user, userId))
+        if (!TryGetUserId(user, out var userId) || !await IsActiveAccountAsync(db, user, userId, configuration["Jwt:Key"]!))
         {
             await WriteError(context, errorLog, StatusCodes.Status401Unauthorized, "Login user is not valid.");
             return;
@@ -65,12 +65,16 @@ public class ValidateLoginUserMiddleware(RequestDelegate next)
             && !request.Path.StartsWithSegments("/api/admin/auth/reset-password");
     }
 
-    private static async Task<bool> IsActiveAccountAsync(ApplicationDbContext db, ClaimsPrincipal user, int userId)
+    private static async Task<bool> IsActiveAccountAsync(ApplicationDbContext db, ClaimsPrincipal user, int userId, string key)
     {
+        var supplied = user.FindFirstValue("auth_version");
         if (IsAdmin(user))
-            return await db.AdminUsers.AsNoTracking().AnyAsync(account => account.Id == userId && account.IsActive);
-
-        return await db.Customers.AsNoTracking().AnyAsync(customer => customer.Id == userId);
+        {
+            var account = await db.AdminUsers.AsNoTracking().SingleOrDefaultAsync(x => x.Id == userId && x.IsActive);
+            return account is not null && AuthenticationVersion.Matches(supplied, account.PasswordHash, key);
+        }
+        var customer = await db.Customers.AsNoTracking().SingleOrDefaultAsync(x => x.Id == userId);
+        return customer is not null && AuthenticationVersion.Matches(supplied, customer.PasswordHash, key);
     }
 
     private static bool IsAdmin(ClaimsPrincipal user) =>

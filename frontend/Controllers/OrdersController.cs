@@ -274,7 +274,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });
 
-        var result = await api.CreateRazorpayOrderAsync(cart, model.ShippingAddress, model.Address);
+        var result = await api.CreateRazorpayOrderAsync(cart, model.ShippingAddress, model.Address, model.CheckoutKey);
         if (!result.Success || result.Data is null)
         {
             TempData["Error"] = result.Message;
@@ -328,6 +328,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TestPaymentSuccess(CreateOrderViewModel model)
     {
+        if (!HttpContext.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment()) return NotFound();
         var cart = ReadCart();
         if (cart.Count == 0)
             return Json(new { success = false, message = "Your cart is empty." });

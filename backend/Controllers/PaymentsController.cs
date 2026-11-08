@@ -15,14 +15,13 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/payments")]
-[Authorize]
-public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, IGa4MeasurementProtocolService ga4, ILogger<PaymentsController> logger) : ControllerBase
+[Authorize(Roles = "Customer")]
+public class PaymentsController(ApplicationDbContext db, IConfiguration configuration, IHttpClientFactory httpClientFactory, IOrderConfirmationEmailService orderEmail, IDelhiveryService delhivery, ILogger<PaymentsController> logger, IHostEnvironment environment) : ControllerBase
 {
     [HttpGet("shipping-quote")]
     public async Task<IActionResult> GetShippingQuote([FromQuery] string destinationPin, [FromQuery] decimal subtotal)
     {
-        if (subtotal >= 1000m)
-            return Ok(new { subtotal, shippingCharge = 0m, total = subtotal, freeShipping = true });
+        if (subtotal < 0m) return BadRequest("Invalid subtotal.");
 
         destinationPin = (destinationPin ?? string.Empty).Trim();
         if (destinationPin.Length != 6 || !destinationPin.All(char.IsDigit))
@@ -38,6 +37,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             if (!serviceability.Prepaid)
                 return BadRequest($"Delhivery does not support prepaid delivery to PIN code {destinationPin}.");
 
+            if (subtotal >= 1000m)
+                return Ok(new { subtotal, shippingCharge = 0m, total = subtotal, freeShipping = true });
             var rate = await delhivery.CalculateShippingCostAsync(
                 originPin, destinationPin, 1000, "Surface", "Pre-paid", "Delivered", HttpContext.RequestAborted);
 
@@ -77,6 +78,28 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
             return Unauthorized();
 
+        if (!Guid.TryParseExact(request.CheckoutKey, "N", out var checkoutKey))
+            return BadRequest("A valid checkout attempt key is required. Refresh checkout and try again.");
+        var attemptKey = checkoutKey.ToString("N");
+        var fingerprint = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(
+            JsonSerializer.Serialize(request with { CheckoutKey = null }))));
+        await using var checkoutTransaction = await db.Database.BeginTransactionAsync();
+        // SQL Server's transaction-owned application lock serializes only retries of this attempt.
+        var lockName = $"checkout:{customerId}:{attemptKey}";
+        await db.Database.ExecuteSqlInterpolatedAsync($"DECLARE @r int; EXEC @r = sp_getapplock @Resource={lockName}, @LockMode='Exclusive', @LockOwner='Transaction', @LockTimeout=10000; IF @r < 0 THROW 50001, 'Checkout is already in progress. Retry shortly.', 1;");
+        var existing = await db.Orders.Include(x => x.Items)
+            .SingleOrDefaultAsync(x => x.CustomerId == customerId && x.CheckoutKey == attemptKey);
+        if (existing is not null)
+        {
+            if (existing.CheckoutFingerprint != fingerprint) return Conflict("This checkout attempt was already used for different details. Refresh checkout.");
+            if (existing.Status != "Pending" || existing.PaymentStatus != "Pending" || string.IsNullOrWhiteSpace(existing.RazorpayOrderId))
+                return Conflict("This checkout attempt is no longer pending. Check My Orders before starting again.");
+            var savedSubtotal = existing.Items.Sum(x => x.Price * x.Quantity);
+            return Ok(new { orderId = existing.Id, razorpayOrderId = existing.RazorpayOrderId,
+                keyId = configuration["Razorpay:KeyId"], amount = checked((long)Math.Round(existing.TotalAmount * 100m, MidpointRounding.AwayFromZero)),
+                subtotal = savedSubtotal, shippingCharge = existing.TotalAmount - savedSubtotal,
+                currency = "INR", name = "Ubhaya Fashions", description = $"Order #{existing.Id}" });
+        }
         if (string.IsNullOrWhiteSpace(request.ShippingAddress))
             return BadRequest("Delivery address is required.");
 
@@ -86,6 +109,20 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         if (request.Items.Any(x => x.Quantity <= 0 || string.IsNullOrWhiteSpace(x.Size)))
             return BadRequest("Choose a size and a valid quantity for each item.");
 
+        var addressError = CheckoutSafety.ValidateAddress(request.DeliveryAddress);
+        if (addressError is not null) return BadRequest(addressError);
+        if (request.Items.Count > 100 || request.Items.Any(x => x.Quantity > 100))
+            return BadRequest("The cart exceeds the allowed quantity.");
+        try
+        {
+            var serviceability = await delhivery.CheckPincodeServiceabilityAsync(request.DeliveryAddress!.PostalCode, HttpContext.RequestAborted);
+            if (!serviceability.Prepaid) return BadRequest("Prepaid delivery is unavailable for this PIN code.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Delivery validation failed.");
+            return StatusCode(503, "Unable to validate delivery. Please try again.");
+        }
         var ids = request.Items.Select(x => x.ProductId).Distinct().ToList();
         var products = await db.Products
             .Include(x => x.Variants)
@@ -99,6 +136,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         var order = new Order
         {
             CustomerId = customerId,
+            CheckoutKey = attemptKey,
+            CheckoutFingerprint = fingerprint,
             ShippingAddress = request.ShippingAddress,
             Status = "Pending",
             PaymentStatus = "Pending",
@@ -130,10 +169,17 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
                 Price = variant.Price,
                 Quantity = item.Quantity,
                 Size = variant.Size,
-                Color = item.Color
+                Color = variant.Color
             });
         }
 
+        try
+        {
+            var plan = CheckoutSafety.PlanStock(order.Items, products.SelectMany(x => x.Variants).ToList());
+            if (plan.Any(x => x.Quantity > x.Variant.Stock)) return Conflict("The combined quantity exceeds available stock.");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or OverflowException)
+        { return BadRequest("Invalid size, colour or quantity."); }
         var subtotal = total;
         decimal shippingCharge = 0m;
         if (subtotal < 1000m)
@@ -224,7 +270,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         {
             db.Orders.Remove(order);
             await db.SaveChangesAsync();
-            return StatusCode((int)razorpayResponse.StatusCode, "Razorpay order creation failed: " + responseBody);
+            logger.LogWarning("Razorpay order creation failed with HTTP {Status}", (int)razorpayResponse.StatusCode);
+            return StatusCode(502, "Payment order could not be created. Please try again.");
         }
 
         using var razorpayJson = JsonDocument.Parse(responseBody);
@@ -243,6 +290,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         });
         await db.SaveChangesAsync();
 
+        await checkoutTransaction.CommitAsync();
         return Ok(new
         {
             orderId = order.Id,
@@ -263,7 +311,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
     [HttpPost("test-success")]
     public async Task<IActionResult> TestSuccess(CreatePaymentOrderRequest request)
     {
-        if (!configuration.GetValue<bool>("PaymentTesting:Enabled"))
+        if (!CheckoutSafety.TestPaymentsAllowed(environment, configuration))
             return NotFound();
 
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
@@ -295,6 +343,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
                 ShippingAddress = request.ShippingAddress,
                 Status = "Processing",
                 PaymentStatus = "Paid",
+                InventoryCommitted = true,
                 PaymentMethod = "Prepaid"
             };
 
@@ -355,7 +404,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
             return Unauthorized();
 
-        var order = await db.Orders
+        var order = await db.Orders.AsNoTracking()
             .Include(x => x.Items)
             .Include(x => x.Payments)
             .Include(x => x.Customer)
@@ -382,17 +431,10 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
         var expected = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(payload))).ToLowerInvariant();
 
-        if (!CryptographicOperations.FixedTimeEquals(
+        if (string.IsNullOrWhiteSpace(request.RazorpaySignature) || !CryptographicOperations.FixedTimeEquals(
                 Encoding.UTF8.GetBytes(expected),
                 Encoding.UTF8.GetBytes(request.RazorpaySignature)))
             return BadRequest("Invalid Razorpay payment signature.");
-
-        // Idempotent retry: do not reduce stock twice.
-        if (order.PaymentStatus == "Paid" || payment.Status == "Captured")
-        {
-            await ga4.TrackPurchaseAsync(payment.Id);
-            return Ok(new { success = true, orderId = order.Id, status = "Paid" });
-        }
 
         // Verify the payment with Razorpay before changing our order state.
         var keyId = configuration["Razorpay:KeyId"];
@@ -416,96 +458,24 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         if (!string.Equals(razorpayStatus, "captured", StringComparison.OrdinalIgnoreCase))
             return BadRequest($"Payment is not captured. Razorpay status: {razorpayStatus ?? "unknown"}.");
 
-        if (!string.Equals(razorpayOrderId, order.RazorpayOrderId, StringComparison.Ordinal) || razorpayAmount != expectedAmount)
+        var currency = root.TryGetProperty("currency", out var currencyElement) ? currencyElement.GetString() : null;
+        if (!string.Equals(currency, payment.Currency, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(razorpayOrderId, order.RazorpayOrderId, StringComparison.Ordinal) || razorpayAmount != expectedAmount)
             return BadRequest("Razorpay payment amount or order does not match our order.");
 
         await using var transaction = await db.Database.BeginTransactionAsync();
-        try
-        {
-            // Serialize payment finalization for this payment row. If the webhook
-            // committed first, this lock/read observes Captured and prevents a second stock deduction.
-            var currentPayment = await db.Payments
-                .FromSqlInterpolated($"SELECT * FROM dbo.Payments WITH (UPDLOCK, ROWLOCK) WHERE Id = {payment.Id}")
-                .AsNoTracking()
-                .SingleAsync();
-
-            if (currentPayment.Status == "Captured")
-            {
-                await transaction.CommitAsync();
-                await ga4.TrackPurchaseAsync(payment.Id);
-                return Ok(new { success = true, orderId = order.Id, status = "Paid" });
-            }
-
-            // Re-check stock inside the transaction immediately before committing it.
-            var productIds = order.Items.Select(x => x.ProductId).Distinct().ToList();
-            var products = await db.Products
-                .Include(x => x.Variants)
-                .Where(x => productIds.Contains(x.Id))
-                .ToListAsync();
-
-            foreach (var item in order.Items)
-            {
-                var product = products.Single(x => x.Id == item.ProductId);
-                var variant = product.Variants.FirstOrDefault(x => x.Size == item.Size);
-                if (variant is null || variant.Stock < item.Quantity)
-                {
-                    // The payment has already been captured. In this rare race condition,
-                    // leave the payment/order pending for manual refund handling rather than
-                    // silently marking an order as paid without inventory.
-                    return Conflict($"Payment captured, but stock is no longer available for {item.ProductName} ({item.Size}). Please contact support for a refund.");
-                }
-
-                variant.Stock -= item.Quantity;
-                db.InventoryTransactions.Add(new InventoryTransaction
-                {
-                    ProductId = product.Id,
-                    Size = variant.Size,
-                    Type = "Sale",
-                    Quantity = -item.Quantity,
-                    StockAfter = variant.Stock,
-                    Note = $"Razorpay payment for order #{order.Id}"
-                });
-            }
-
-            order.PaymentStatus = "Paid";
-            order.Status = "Processing";
-            payment.Status = "Captured";
-            payment.RazorpayPaymentId = request.RazorpayPaymentId;
-            payment.Signature = request.RazorpaySignature;
-            payment.PaidDate = DateTime.UtcNow;
-
-            await db.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            // GA4 tracking is best-effort and must never undo a verified payment.
-            await ga4.TrackPurchaseAsync(payment.Id);
-
-            // Payment is already committed. Courier failures must not reverse a successful payment.
-            try
-            {
-                await CreatePaidOrderShipmentAsync(order, request.DeliveryAddress, delhivery, db, configuration, logger);
-            }
-            catch (Exception shipmentException)
-            {
-                logger.LogError(shipmentException, "Order {OrderId} is paid, but automatic shipment processing could not complete. Admin retry is required.", order.Id);
-            }
-
-            await orderEmail.SendOrderConfirmationAsync(order, order.Customer);
-
-            return Ok(new
-            {
-                success = true,
-                orderId = order.Id,
-                status = "Paid",
-                waybill = order.DelhiveryShipment?.Waybill,
-                shipmentStatus = order.DelhiveryShipment?.ShipmentStatus ?? "Creation Failed"
-            });
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+        var lockedOrder = await CheckoutSafety.LockOrderAsync(db, order.Id);
+        if (lockedOrder is null || lockedOrder.CustomerId != customerId) return NotFound();
+        var lockedPayment = lockedOrder.Payments.Single(x => x.Id == payment.Id);
+        if (lockedPayment.RazorpayPaymentId is not null && lockedPayment.RazorpayPaymentId != request.RazorpayPaymentId)
+            return Conflict("A different captured payment is already recorded for this order.");
+        await CheckoutSafety.ApplyCaptureAsync(db, lockedOrder, lockedPayment, request.RazorpayPaymentId);
+        lockedPayment.Signature = request.RazorpaySignature;
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
+        if (lockedOrder.PaymentStatus != "Paid" || CheckoutSafety.IsCancelled(lockedOrder))
+            return Conflict("Payment received; the order requires refund or stock review. Please contact support.");
+        return Ok(new { success = true, orderId = lockedOrder.Id, status = "Paid", shipmentStatus = "Pending" });
     }
     internal static async Task CreatePaidOrderShipmentAsync(
         Order order,

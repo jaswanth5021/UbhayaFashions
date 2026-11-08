@@ -1,3 +1,5 @@
+using backend.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using backend.Data;
 using backend.DTOs;
 using backend.Models;
@@ -23,6 +25,7 @@ public class AdminAuthController(
     IConfiguration config,
     ILogger<AdminAuthController> logger) : ControllerBase
 {
+    [EnableRateLimiting("auth")]
     [HttpPost("login")]
     public async Task<IActionResult> Login(AdminLoginRequest request)
     {
@@ -67,8 +70,8 @@ public class AdminAuthController(
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword(AdminChangePasswordRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.NewPassword))
-            return BadRequest("New password is required.");
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 12 || request.NewPassword.Length > 64)
+            return BadRequest("Use an admin password between 12 and 64 characters.");
         if (string.IsNullOrWhiteSpace(request.CurrentPassword))
             return BadRequest("Current password is required.");
         var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -83,6 +86,7 @@ public class AdminAuthController(
         return Ok(new { success = true });
     }
 
+    [EnableRateLimiting("auth")]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(AdminForgotPasswordRequest request)
     {
@@ -150,11 +154,12 @@ public class AdminAuthController(
         return Ok(new { message = messageText });
     }
 
+    [EnableRateLimiting("auth")]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(AdminResetPasswordRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.NewPassword))
-            return BadRequest("New password is required.");
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 12 || request.NewPassword.Length > 64)
+            return BadRequest("Use an admin password between 12 and 64 characters.");
         var email = request.Email?.Trim().ToLowerInvariant();
         var admin = await db.AdminUsers.FirstOrDefaultAsync(x => x.Email == email && x.IsActive);
         var tokenHash = HashResetToken(request.Token ?? "");
@@ -185,6 +190,7 @@ public class AdminAuthController(
 
         var claims = new[]
         {
+            new Claim("auth_version", AuthenticationVersion.Create(admin.PasswordHash, config["Jwt:Key"]!)),
             new Claim(
                 ClaimTypes.NameIdentifier,
                 admin.Id.ToString()
@@ -228,3 +234,4 @@ public class AdminAuthController(
             .WriteToken(token);
     }
 }
+

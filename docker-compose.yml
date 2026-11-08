@@ -3,41 +3,44 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "ChangeThisStrongPassword123!"
-    ports:
-      - "1433:1433"
+      MSSQL_SA_PASSWORD: "${SQL_SA_PASSWORD:?Set SQL_SA_PASSWORD}"
     volumes:
       - sql-data:/var/opt/mssql
-
+    restart: unless-stopped
   api:
     build: ./backend
+    env_file: backend.production.env
     environment:
+      ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5000
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=LadiesDressStore;User Id=sa;Password=ChangeThisStrongPassword123!;TrustServerCertificate=True;Encrypt=False"
-      Jwt__Key: "ChangeThisToALongRandomProductionSecretAtLeast32Chars"
-      Jwt__Issuer: "LadiesDressStore"
-      Jwt__Audience: "LadiesDressStoreWeb"
-      FrontendUrl: "${FRONTEND_URL:?Set FRONTEND_URL in your .env file}"
+      PaymentTesting__Enabled: "false"
       UploadsPath: /data/uploads
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     volumes:
       - store-uploads:/data/uploads
     depends_on:
       - db
-
+    restart: unless-stopped
   web:
     build: ./frontend
+    env_file: frontend.production.env
     environment:
-      ApiBaseUrl: "http://api:5000/"
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ApiBaseUrl: http://api:5000/
       UploadsPath: /data/uploads
+      DataProtection__KeysPath: /data/keys
+      PaymentTesting__Enabled: "false"
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:8080"
     volumes:
       - store-uploads:/data/uploads
+      - storefront-keys:/data/keys
     depends_on:
       - api
-
+    restart: unless-stopped
 volumes:
   sql-data:
   store-uploads:
+  storefront-keys:
