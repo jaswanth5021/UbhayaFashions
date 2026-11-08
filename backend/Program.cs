@@ -259,7 +259,11 @@ if (app.Environment.IsDevelopment())
 // =====================================================
 
 app.UseForwardedHeaders();
-app.UseHttpsRedirection();
+// Production TLS terminates at the reverse proxy. The API is reached over
+// HTTP on the private container network, so redirecting internal API calls
+// would send the storefront HttpClient to an HTTPS endpoint the API does not serve.
+if (!app.Environment.IsProduction())
+    app.UseHttpsRedirection();
 app.UseStaticFiles();
 var uploadsPath = builder.Configuration["UploadsPath"] ?? @"C:\UbhayaFashions\Uploads";
 Directory.CreateDirectory(uploadsPath);

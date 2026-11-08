@@ -128,8 +128,15 @@
             <aside class="shopping-cart-summary">
                 <p class="shopping-cart-eyebrow">ORDER SUMMARY</p>
                 <div><span>Subtotal</span><strong>&#8377;@total.ToString("N0")</strong></div>
-                <div><span>Shipping</span><strong class="shopping-cart-free">Free</strong></div>
-                <div class="shopping-cart-summary-total"><span>Estimated total</span><strong>&#8377;@total.ToString("N0")</strong></div>
+                @if (total >= 1000m)
+                {
+                    <div><span>Shipping</span><strong class="shopping-cart-free">Free</strong></div>
+                }
+                else
+                {
+                    <div><span>Shipping</span><strong class="shopping-cart-calculated">Calculated at checkout</strong></div>
+                }
+                <div class="shopping-cart-summary-total"><span>Estimated total before delivery</span><strong>&#8377;@total.ToString("N0")</strong></div>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a class="shopping-cart-checkout" asp-controller="Orders" asp-action="Checkout">Continue to checkout <span aria-hidden="true">&rarr;</span></a>
@@ -138,7 +145,7 @@
                 {
                     <a class="shopping-cart-checkout" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Orders/Checkout">Log in to checkout <span aria-hidden="true">&rarr;</span></a>
                 }
-                <p class="shopping-cart-note">Taxes and shipping are calculated at checkout.</p>
+                <p class="shopping-cart-note">@(total >= 1000m ? "Your order qualifies for free shipping." : "Delivery charges are shown at checkout. Free shipping on orders of ₹1,000 or more.")</p>
             </aside>
         </div>
     }

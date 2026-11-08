@@ -311,3 +311,10 @@
         font-size: 15px;
     }
 }
+.shopping-cart-summary .shopping-cart-calculated {
+    max-width: 160px;
+    color: #756762;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: right;
+}

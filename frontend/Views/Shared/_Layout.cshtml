@@ -1,4 +1,4 @@
-﻿@using System.Text.Json
+@using System.Text.Json
 @using Microsoft.Extensions.Caching.Memory
 @inject LadiesDressStore.Web.Services.ApiService Api
 @inject IMemoryCache ProductCache
@@ -263,7 +263,7 @@
             {
                 ["@type"] = "ShippingService",
                 ["name"] = "Standard shipping across serviceable Indian PIN codes",
-                ["description"] = "Free shipping on orders of INR 999 or more. Orders below INR 999 may incur a shipping charge shown at checkout. Orders are generally processed within 1–2 days and delivered within 3–7 business days after dispatch.",
+                ["description"] = "Free shipping on orders of INR 1,000 or more. Orders below INR 1,000 may incur a shipping charge shown at checkout. Orders are generally processed within 1–2 days and delivered within 3–7 business days after dispatch.",
                 ["handlingTime"] = new Dictionary<string, object?>
                 {
                     ["@type"] = "ServicePeriod",
@@ -476,7 +476,7 @@
     <div class="announcement-bar">
         <span class="announcement-benefit">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
-            FREE SHIPPING ACROSS INDIA
+            FREE SHIPPING ON ORDERS ₹1,000+
         </span>
         <i aria-hidden="true">|</i>
         <span class="announcement-benefit">
@@ -710,15 +710,15 @@
             <nav class="desktop-primary-nav" aria-label="Main navigation">
                 <a class="@(isHomePage ? "is-active" : "")" aria-current="@(isHomePage ? "page" : null)" asp-controller="Home" asp-action="Index">Home</a>
                 @foreach (var category in navCategories)
-                {
+                        {
                     <a class="@(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "is-active" : "")"
                        aria-current="@(string.Equals(category.Name, activeCategory, StringComparison.OrdinalIgnoreCase) ? "page" : null)"
                        asp-controller="Products" asp-action="Index" asp-route-category="@category.Name">@category.Name</a>
-                }
+                        }
                 @if (navCategories.Count == 0)
-                {
+                        {
                     <a asp-controller="Products" asp-action="Categories">Categories</a>
-                }
+                        }
                 <a class="@(isNewArrivalsNavActive ? "is-active" : "")" aria-current="@(isNewArrivalsNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-newArrivals="true">New Arrivals</a>
                 <a class="@(isOffersNavActive ? "is-active" : "")" aria-current="@(isOffersNavActive ? "page" : null)" asp-controller="Products" asp-action="Index" asp-route-sort="discount">Offers</a>
             </nav>
