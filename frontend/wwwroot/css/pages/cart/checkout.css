@@ -2153,3 +2153,147 @@
         font-size: 12px;
     }
 }
+
+
+/* Mobile checkout refinement: keep the progress compact and show the
+   shopping bag before the order summary. Desktop layout remains unchanged. */
+@media (max-width: 600px) {
+    .checkout-screen {
+        padding: 10px 12px 92px;
+    }
+
+    .checkout-screen-header {
+        margin: 0 0 12px;
+        padding: 0;
+    }
+
+    .checkout-four-step .checkout-screen-steps {
+        grid-template-columns: minmax(0, 1fr) minmax(8px, .28fr) minmax(0, 1fr) minmax(8px, .28fr) minmax(0, 1fr) minmax(8px, .28fr) minmax(0, 1fr) !important;
+        gap: 4px !important;
+        min-height: 0;
+        padding: 12px 8px;
+        border: 1px solid #eadbd7;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #fff, #fcf4f2);
+    }
+
+    .checkout-four-step .checkout-screen-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 4px;
+        min-width: 0 !important;
+        text-align: center;
+    }
+
+    .checkout-four-step .checkout-screen-step span {
+        width: 27px;
+        height: 27px;
+        flex: 0 0 27px;
+        font-size: 10px;
+    }
+
+    .checkout-four-step .checkout-screen-step-icon {
+        display: block;
+        width: 23px;
+        height: 23px;
+        margin: 0;
+    }
+
+    .checkout-four-step .checkout-screen-step strong {
+        display: block;
+        max-width: 100%;
+        overflow: visible;
+        font-size: 9px !important;
+        line-height: 1.15;
+        text-overflow: clip;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .checkout-four-step .checkout-screen-steps > i {
+        align-self: center;
+        width: 100%;
+        margin-top: -22px;
+    }
+
+    .checkout-screen-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .checkout-screen-main {
+        order: 1;
+    }
+
+    .checkout-screen-summary {
+        order: 2 !important;
+        margin: 0;
+    }
+
+    .checkout-four-step .checkout-screen-panel {
+        padding: 16px 14px 18px;
+    }
+
+    .checkout-screen-summary {
+        padding: 16px 14px;
+    }
+
+    .checkout-screen-summary h2 {
+        margin-bottom: 12px;
+        font-size: 21px;
+    }
+
+    .checkout-mobile-sticky-bar {
+        min-height: 66px;
+        gap: 10px;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .checkout-mobile-sticky-total {
+        min-width: 76px;
+    }
+
+    .checkout-mobile-sticky-total strong {
+        font-size: 16px;
+    }
+
+    .checkout-mobile-sticky-button {
+        min-height: 46px;
+        font-size: 10px;
+        letter-spacing: .3px;
+    }
+}
+
+@media (max-width: 380px) {
+    .checkout-four-step .checkout-screen-steps {
+        padding: 10px 5px;
+        gap: 2px !important;
+    }
+
+    .checkout-four-step .checkout-screen-step strong {
+        font-size: 8px !important;
+    }
+
+    .checkout-four-step .checkout-screen-step-icon {
+        width: 21px;
+        height: 21px;
+    }
+
+    .checkout-mobile-sticky-bar {
+        gap: 7px;
+        padding-right: 9px;
+        padding-left: 9px;
+    }
+
+    .checkout-mobile-sticky-total {
+        min-width: 68px;
+    }
+
+    .checkout-mobile-sticky-button {
+        gap: 6px;
+        font-size: 9px;
+    }
+}
