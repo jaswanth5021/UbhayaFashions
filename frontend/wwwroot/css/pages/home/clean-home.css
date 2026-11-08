@@ -1236,3 +1236,14 @@
         line-height: 1.35;
     }
 }
+
+
+/* Final mobile hero CTA override.
+   clean-home.css is loaded after home/index.css, so keep this rule here. */
+@media screen and (max-width: 700px) {
+    body.home-page .home-hero-content > .hero-shop-button {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+}
