@@ -1,5 +1,6 @@
 using backend.Data;
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -308,6 +309,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         return products;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create(Product product)
     {
@@ -325,6 +327,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, Product input)
     {
@@ -348,6 +351,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         return Ok(product);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
