@@ -61,27 +61,32 @@
                 </tbody>
             </table>
         </div>
-        <footer class="coupon-table-footer">
-            @if (pageCount > 1)
-            {
-                <nav class="coupon-pagination" aria-label="Coupon pages">
-                    @if (currentPage > 1) { <a asp-action="Coupons" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize">← Previous</a> } else { <span class="is-disabled">← Previous</span> }
-                    <div class="coupon-page-numbers">
-                        @for (var number = 1; number <= pageCount; number++)
-                        {
-                            if (number == currentPage) { <span class="is-current" aria-current="page">@number</span> }
-                            else { <a asp-action="Coupons" asp-route-page="@number" asp-route-pageSize="@pageSize">@number</a> }
-                        }
-                    </div>
-                    @if (currentPage < pageCount) { <a asp-action="Coupons" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize">Next →</a> } else { <span class="is-disabled">Next →</span> }
-                </nav>
-            }
-            <form asp-action="Coupons" method="get" class="coupon-page-size">
-                <label for="coupon-page-size">Rows per page</label>
-                <select id="coupon-page-size" name="pageSize" onchange="this.form.submit()">
-                    <option value="5" selected="@(pageSize == 5)">5</option><option value="10" selected="@(pageSize == 10)">10</option><option value="15" selected="@(pageSize == 15)">15</option><option value="50" selected="@(pageSize == 50)">50</option><option value="100" selected="@(pageSize == 100)">100</option><option value="0" selected="@(pageSize == 0)">All</option>
-                </select>
-            </form>
-        </footer>
+    </div>
+    <div class="admin-grid-footer coupon-grid-footer">
+        <nav class="admin-pagination" aria-label="Coupon pages">
+            @if (currentPage > 1) { <a asp-action="Coupons" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize" aria-label="Previous page">← Previous</a> }
+            else { <span class="is-disabled" aria-disabled="true">← Previous</span> }
+            <div class="admin-page-numbers">
+                @for (var number = 1; number <= pageCount; number++)
+                {
+                    if (number == currentPage) { <span class="is-current" aria-current="page">@number</span> }
+                    else { <a asp-action="Coupons" asp-route-page="@number" asp-route-pageSize="@pageSize" aria-label="Page @number">@number</a> }
+                }
+            </div>
+            @if (currentPage < pageCount) { <a asp-action="Coupons" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize" aria-label="Next page">Next →</a> }
+            else { <span class="is-disabled" aria-disabled="true">Next →</span> }
+        </nav>
+        <form class="admin-page-size coupon-page-size" asp-action="Coupons" method="get">
+            <label for="coupon-page-size">Rows per page</label>
+            <select id="coupon-page-size" name="pageSize" onchange="this.form.submit()">
+                <option value="5" selected="@(pageSize == 5)">5</option>
+                <option value="10" selected="@(pageSize == 10)">10</option>
+                <option value="15" selected="@(pageSize == 15)">15</option>
+                <option value="50" selected="@(pageSize == 50)">50</option>
+                <option value="100" selected="@(pageSize == 100)">100</option>
+                <option value="0" selected="@(pageSize == 0)">All</option>
+            </select>
+        </form>
+    </div>
     </div>
 </section>
