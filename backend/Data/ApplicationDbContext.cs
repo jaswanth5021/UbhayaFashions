@@ -52,6 +52,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ProductVariant>().HasIndex(x => new { x.ProductId, x.Color, x.Size }).IsUnique();
         modelBuilder.Entity<Order>().Property(x => x.TotalAmount).HasPrecision(18, 2);
         modelBuilder.Entity<Order>().Property(x => x.DiscountAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Order>().Property(x => x.CouponCode).HasMaxLength(40);
+        modelBuilder.Entity<Order>().HasOne<Coupon>().WithMany().HasForeignKey(x => x.CouponId).OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<Coupon>(entity =>
         {
             entity.Property(x => x.Code).HasMaxLength(40).IsRequired();
@@ -69,6 +71,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(x => x.Coupon).WithMany().HasForeignKey(x => x.CouponId).OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(x => new { x.CouponId, x.CustomerId, x.OrderId }).IsUnique();
             entity.HasIndex(x => new { x.CustomerId, x.CouponId });
+            entity.HasOne<Customer>().WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<Order>().WithMany().HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<Order>().Property(x => x.PaymentMethod).HasMaxLength(20).HasDefaultValue("COD");
         modelBuilder.Entity<DelhiveryShipment>(entity =>
