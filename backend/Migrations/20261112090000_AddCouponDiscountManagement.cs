@@ -8,7 +8,7 @@ public partial class AddCouponDiscountManagement : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.AddColumn<decimal>("DiscountAmount", "Orders", type: "decimal(18,2)", precision: 18,2, nullable: false, defaultValue: 0m);
+        migrationBuilder.AddColumn<decimal>("DiscountAmount", "Orders", type: "decimal(18,2)", precision: 18, scale: 2, nullable: false, defaultValue: 0m);
         migrationBuilder.AddColumn<string>("CouponCode", "Orders", type: "nvarchar(40)", maxLength: 40, nullable: true);
         migrationBuilder.AddColumn<int>("CouponId", "Orders", type: "int", nullable: true);
 
