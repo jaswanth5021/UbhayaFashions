@@ -186,7 +186,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         var nowUtc = DateTime.UtcNow;
         var normalizedCouponCode = request.CouponCode?.Trim().ToUpperInvariant() ?? string.Empty;
         var candidates = await db.Coupons.Where(c => c.IsActive &&
-            (c.IsAutomatic || c.Code == normalizedCouponCode) &&
+            (string.IsNullOrWhiteSpace(normalizedCouponCode) ? c.IsAutomatic : c.Code == normalizedCouponCode) &&
             (!c.StartsAtUtc.HasValue || c.StartsAtUtc <= nowUtc) &&
             (!c.EndsAtUtc.HasValue || c.EndsAtUtc >= nowUtc) &&
             (!c.MaximumUses.HasValue || c.UsageCount < c.MaximumUses)).ToListAsync();
