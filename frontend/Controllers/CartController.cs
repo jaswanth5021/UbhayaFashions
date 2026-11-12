@@ -19,6 +19,13 @@ public class CartController : Controller
         this.productCache = productCache;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> CheckDeliveryServiceability(string postalCode)
+    {
+        var result = await api.CheckDelhiveryPincodeAsync(postalCode?.Trim() ?? string.Empty);
+        return Json(new { success = result.Success, serviceable = result.Serviceable, message = result.Message });
+    }
+
     public async Task<IActionResult> Index()
     {
         var cart = GetCart();
@@ -43,9 +50,20 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Add(int productId, string? size, string? color, int quantity = 1, bool buyNow = false)
+    public async Task<IActionResult> Add(int productId, string? size, string? color, string? deliveryPincode, int quantity = 1, bool buyNow = false)
     {
         var isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest";
+        var normalizedPincode = deliveryPincode?.Trim() ?? string.Empty;
+        var deliveryCheck = await api.CheckDelhiveryPincodeAsync(normalizedPincode);
+        if (!deliveryCheck.Success || !deliveryCheck.Serviceable)
+        {
+            var message = string.IsNullOrWhiteSpace(deliveryCheck.Message)
+                ? "Please check delivery availability for your PIN code before purchasing."
+                : deliveryCheck.Message;
+            if (isAjax) return BadRequest(new { success = false, message });
+            TempData["CartError"] = message;
+            return RedirectToAction("Details", "Products", new { id = productId });
+        }
         var product = await api.GetProductAsync(productId);
         if (product is null) return isAjax ? NotFound(new { success = false, message = "Product not found." }) : NotFound();
         var normalizedSize = size?.Trim();
