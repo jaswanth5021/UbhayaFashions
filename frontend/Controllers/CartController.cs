@@ -53,16 +53,21 @@ public class CartController : Controller
     public async Task<IActionResult> Add(int productId, string? size, string? color, string? deliveryPincode, int quantity = 1, bool buyNow = false)
     {
         var isAjax = Request.Headers.XRequestedWith == "XMLHttpRequest";
-        var normalizedPincode = deliveryPincode?.Trim() ?? string.Empty;
-        var deliveryCheck = await api.CheckDelhiveryPincodeAsync(normalizedPincode);
-        if (!deliveryCheck.Success || !deliveryCheck.Serviceable)
+        // Adding to the cart does not require a PIN. Buy It Now must have a
+        // successful Delhivery prepaid-serviceability check before proceeding.
+        if (buyNow)
         {
-            var message = string.IsNullOrWhiteSpace(deliveryCheck.Message)
-                ? "Please check delivery availability for your PIN code before purchasing."
-                : deliveryCheck.Message;
-            if (isAjax) return BadRequest(new { success = false, message });
-            TempData["CartError"] = message;
-            return RedirectToAction("Details", "Products", new { id = productId });
+            var normalizedPincode = deliveryPincode?.Trim() ?? string.Empty;
+            var deliveryCheck = await api.CheckDelhiveryPincodeAsync(normalizedPincode);
+            if (!deliveryCheck.Success || !deliveryCheck.Serviceable)
+            {
+                var message = string.IsNullOrWhiteSpace(deliveryCheck.Message)
+                    ? "Please enter your PIN code and verify delivery availability before using Buy It Now."
+                    : deliveryCheck.Message;
+                if (isAjax) return BadRequest(new { success = false, message });
+                TempData["CartError"] = message;
+                return RedirectToAction("Details", "Products", new { id = productId });
+            }
         }
         var product = await api.GetProductAsync(productId);
         if (product is null) return isAjax ? NotFound(new { success = false, message = "Product not found." }) : NotFound();
