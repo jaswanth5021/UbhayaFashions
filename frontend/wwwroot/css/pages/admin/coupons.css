@@ -102,3 +102,46 @@
 .coupon-help>div strong { color:#68142e; font-size:12px; }
 .coupon-help>div p { margin:6px 0; color:#685b57; font-size:11px; line-height:1.45; }
 .coupon-help>div small { color:#8b7e79; font-size:10px; line-height:1.4; }
+
+
+/* Coupon list: explicit table rendering and richer storefront palette */
+.coupon-table-card { display:block !important; visibility:visible !important; }
+.coupon-table-scroll { display:block !important; min-height:120px; background:#fff; }
+.coupon-table { display:table !important; visibility:visible !important; width:100% !important; min-width:1120px !important; table-layout:auto; border-collapse:separate !important; border-spacing:0; }
+.coupon-table thead { display:table-header-group !important; }
+.coupon-table tbody { display:table-row-group !important; }
+.coupon-table tr { display:table-row !important; }
+.coupon-table th,.coupon-table td { display:table-cell !important; }
+.coupon-table thead th { padding:16px 15px !important; background:linear-gradient(120deg,#68142e,#9d2452) !important; color:#fff !important; border:0 !important; font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+.coupon-table thead th:first-child { border-radius:0 0 0 0; }
+.coupon-table thead th:last-child { text-align:center; }
+.coupon-table tbody tr { background:#fff; transition:background .18s ease, box-shadow .18s ease; }
+.coupon-table tbody tr:nth-child(even) { background:#fff9fb; }
+.coupon-table tbody tr:hover { background:#f9eaf0 !important; box-shadow:inset 4px 0 #a52a59; }
+.coupon-table tbody td { padding:17px 15px !important; border-bottom:1px solid #f0e1e7 !important; border-top:0 !important; color:#514047; font-size:12px; }
+.coupon-table tbody tr:last-child td { border-bottom:0 !important; }
+.coupon-table .coupon-offer-name { display:grid; gap:5px; }
+.coupon-table .coupon-offer-name strong { color:#451328; font-size:13px; }
+.coupon-table .coupon-code { border-color:#d9a9ba; background:#fff0f5; color:#811b42; box-shadow:inset 0 0 0 1px #fff; }
+.coupon-table .coupon-code-auto { display:inline-flex; padding:6px 9px; border-radius:5px; background:#eaf3ff; color:#285c9a; }
+.coupon-table .coupon-discount-value { display:inline-block; padding:6px 9px; border-radius:5px; background:#fff2d9; color:#87500b; font-size:13px; }
+.coupon-table .coupon-status.is-active { background:#e3f6e9; color:#18723b; box-shadow:inset 0 0 0 1px #c6e9d1; }
+.coupon-table .coupon-status.is-inactive { background:#f1edf0; color:#766873; box-shadow:inset 0 0 0 1px #e3dce1; }
+.coupon-table .coupon-row-actions a,.coupon-table .coupon-row-actions button { min-height:32px; border-radius:6px; font-size:11px; font-weight:700; transition:all .15s ease; }
+.coupon-table .coupon-row-actions .coupon-action-edit { border-color:#c9dafa; background:#eff5ff; color:#285b9b; }
+.coupon-table .coupon-row-actions .coupon-action-edit:hover { background:#dceaff; }
+.coupon-table .coupon-row-actions .coupon-action-toggle { border-color:#c4e6d0; background:#effaf2; color:#237343; }
+.coupon-table .coupon-row-actions .coupon-action-delete { border-color:#f0cbd0; background:#fff2f3; color:#a1263b; }
+.coupon-table-footer { background:linear-gradient(110deg,#fff9fb,#f8f2f4); }
+.coupon-pagination a,.coupon-page-numbers a { border-color:#e5cbd4; background:#fff; color:#76203f; font-weight:700; box-shadow:0 2px 5px rgb(74 20 42 / 5%); }
+.coupon-pagination a:hover,.coupon-page-numbers a:hover { border-color:#9d4262; background:#faeaf0; }
+.coupon-pagination .is-current,.coupon-page-numbers .is-current { border-color:#68142e; background:linear-gradient(135deg,#68142e,#a12b57); color:#fff; box-shadow:0 3px 8px rgb(104 20 46 / 20%); }
+.coupon-empty-state { min-height:180px; background:linear-gradient(135deg,#fff8fb,#f8f1f4); }
+.coupon-empty-state strong { color:#68142e; }
+.coupon-table-heading { background:linear-gradient(100deg,#fff,#fff7fa); }
+.coupon-total-pill { background:#f8e5ec; color:#761b3c; box-shadow:inset 0 0 0 1px #efd2dc; }
+@media (max-width:640px) {
+ .coupon-table { min-width:1120px !important; }
+ .coupon-table thead th,.coupon-table tbody td { padding:13px 12px !important; }
+ .coupon-table-footer { background:#fff8fb; }
+}
