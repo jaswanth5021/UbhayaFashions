@@ -17,22 +17,52 @@
             <h2>Offer details</h2>
             <p>Basic information customers and administrators use to identify this offer.</p>
             <div class="coupon-form-grid">
-                <label class="coupon-field"><span>Offer name <em>*</em></span><span class="coupon-input-help"><input asp-for="Name" required maxlength="120" placeholder="Diwali Special" /><details><summary aria-label="Offer name help">i</summary><div><strong>Offer name</strong><p>Internal name to identify this offer in the admin panel.</p><small>Example: Diwali Special 2026</small></div></details></span></label>
-                <label class="coupon-field"><span>Coupon code</span><span class="coupon-input-help"><input asp-for="Code" maxlength="40" placeholder="DIWALI20" disabled="@Model.IsAutomatic" /><details><summary aria-label="Coupon code help">i</summary><div><strong>Coupon code</strong><p>Customers enter this code at checkout. Leave blank only for an automatic offer.</p><small>Example: DIWALI20</small></div></details></span></label>
-                <label class="coupon-field"><span>Discount type <em>*</em></span><span class="coupon-input-help"><select asp-for="DiscountType"><option value="Percentage">Percentage</option><option value="Fixed">Fixed amount (₹)</option></select><details><summary aria-label="Discount type help">i</summary><div><strong>Discount type</strong><p>Choose a percentage discount or a fixed rupee amount.</p><small>Example: 20% or ₹200</small></div></details></span></label>
-                <label class="coupon-field"><span>Discount value <em>*</em></span><span class="coupon-input-help"><input asp-for="DiscountValue" type="number" min="0.01" step="0.01" required placeholder="20" /><details><summary aria-label="Discount value help">i</summary><div><strong>Discount value</strong><p>Enter the percentage or rupee amount based on the discount type.</p><small>Example: 20 for 20% or 200 for ₹200</small></div></details></span></label>
-                <label class="coupon-field"><span>Maximum discount (₹)</span><span class="coupon-input-help"><input asp-for="MaximumDiscount" type="number" min="0" step="0.01" placeholder="500" /><details><summary aria-label="Maximum discount help">i</summary><div><strong>Maximum discount</strong><p>Optional upper limit for a percentage discount. Leave empty for no cap.</p><small>Example: 500 means discount cannot exceed ₹500</small></div></details></span></label>
-                <label class="coupon-field"><span>Minimum order amount (₹)</span><span class="coupon-input-help"><input asp-for="MinimumOrderAmount" type="number" min="0" step="0.01" /><details><summary aria-label="Minimum order help">i</summary><div><strong>Minimum order</strong><p>Minimum eligible cart value required before this offer can be used.</p><small>Example: 999 means cart total must be at least ₹999</small></div></details></span></label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Offer name <em>*</em><details class="coupon-help"><summary aria-label="Offer name help">i</summary><div><strong>Offer name</strong><p>Internal name to identify this offer in the admin panel.</p><small>Example: Diwali Special 2026</small></div></details></span>
+                    <input asp-for="Name" required maxlength="120" placeholder="Diwali Special" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Coupon code<details class="coupon-help"><summary aria-label="Coupon code help">i</summary><div><strong>Coupon code</strong><p>Customers enter this code at checkout. Leave blank only for an automatic offer.</p><small>Example: DIWALI20</small></div></details></span>
+                    <input asp-for="Code" maxlength="40" placeholder="DIWALI20" disabled="@Model.IsAutomatic" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Discount type <em>*</em><details class="coupon-help"><summary aria-label="Discount type help">i</summary><div><strong>Discount type</strong><p>Choose a percentage discount or a fixed rupee amount.</p><small>Example: 20% or ₹200</small></div></details></span>
+                    <select asp-for="DiscountType"><option value="Percentage">Percentage</option><option value="Fixed">Fixed amount (₹)</option></select>
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Discount value <em>*</em><details class="coupon-help"><summary aria-label="Discount value help">i</summary><div><strong>Discount value</strong><p>Enter the percentage or rupee amount based on the discount type.</p><small>Example: 20 for 20% or 200 for ₹200</small></div></details></span>
+                    <input asp-for="DiscountValue" type="number" min="0.01" step="0.01" required placeholder="20" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Maximum discount (₹)<details class="coupon-help"><summary aria-label="Maximum discount help">i</summary><div><strong>Maximum discount</strong><p>Optional upper limit for a percentage discount. Leave empty for no cap.</p><small>Example: 500 means discount cannot exceed ₹500</small></div></details></span>
+                    <input asp-for="MaximumDiscount" type="number" min="0" step="0.01" placeholder="500" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Minimum order amount (₹)<details class="coupon-help"><summary aria-label="Minimum order help">i</summary><div><strong>Minimum order</strong><p>Minimum eligible cart value required before this offer can be used.</p><small>Example: 999 means cart total must be at least ₹999</small></div></details></span>
+                    <input asp-for="MinimumOrderAmount" type="number" min="0" step="0.01" />
+                </label>
             </div>
         </div>
         <div class="coupon-form-section">
             <h2>Usage &amp; eligibility</h2>
             <p>Control how often the offer can be redeemed and which products qualify.</p>
             <div class="coupon-form-grid">
-                <label class="coupon-field"><span>Maximum total uses</span><span class="coupon-input-help"><input asp-for="MaximumUses" type="number" min="1" placeholder="100" /><details><summary aria-label="Maximum uses help">i</summary><div><strong>Maximum total uses</strong><p>Total number of successful redemptions allowed. Leave empty for unlimited use.</p><small>Example: 100 customers can use this offer</small></div></details></span></label>
-                <label class="coupon-field"><span>Uses per customer</span><span class="coupon-input-help"><input asp-for="PerCustomerLimit" type="number" min="1" placeholder="1" /><details><summary aria-label="Per customer limit help">i</summary><div><strong>Uses per customer</strong><p>Maximum successful redemptions allowed for one customer.</p><small>Example: 1 means each customer can redeem once</small></div></details></span></label>
-                <label class="coupon-field"><span>Product ID (optional)</span><span class="coupon-input-help"><input asp-for="ProductId" type="number" min="1" placeholder="e.g. 125" /><details><summary aria-label="Product ID help">i</summary><div><strong>Product ID</strong><p>Restrict this offer to one product. Use either Product ID or Category ID, not both.</p><small>Example: 125 applies only to product #125</small></div></details></span></label>
-                <label class="coupon-field"><span>Category ID (optional)</span><span class="coupon-input-help"><input asp-for="CategoryId" type="number" min="1" placeholder="e.g. 8" /><details><summary aria-label="Category ID help">i</summary><div><strong>Category ID</strong><p>Restrict this offer to a product category. Use either Category ID or Product ID, not both.</p><small>Example: 8 applies to category #8</small></div></details></span></label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Maximum total uses<details class="coupon-help"><summary aria-label="Maximum uses help">i</summary><div><strong>Maximum total uses</strong><p>Total number of successful redemptions allowed. Leave empty for unlimited use.</p><small>Example: 100 customers can use this offer</small></div></details></span>
+                    <input asp-for="MaximumUses" type="number" min="1" placeholder="100" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Uses per customer<details class="coupon-help"><summary aria-label="Per customer limit help">i</summary><div><strong>Uses per customer</strong><p>Maximum successful redemptions allowed for one customer.</p><small>Example: 1 means each customer can redeem once</small></div></details></span>
+                    <input asp-for="PerCustomerLimit" type="number" min="1" placeholder="1" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Product ID (optional)<details class="coupon-help"><summary aria-label="Product ID help">i</summary><div><strong>Product ID</strong><p>Restrict this offer to one product. Use either Product ID or Category ID, not both.</p><small>Example: 125 applies only to product #125</small></div></details></span>
+                    <input asp-for="ProductId" type="number" min="1" placeholder="e.g. 125" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Category ID (optional)<details class="coupon-help"><summary aria-label="Category ID help">i</summary><div><strong>Category ID</strong><p>Restrict this offer to a product category. Use either Category ID or Product ID, not both.</p><small>Example: 8 applies to category #8</small></div></details></span>
+                    <input asp-for="CategoryId" type="number" min="1" placeholder="e.g. 8" />
+                </label>
             </div>
             <div class="coupon-check-options">
                 <label><input asp-for="IsAutomatic" /> <span><strong>Apply automatically</strong><small>Apply this offer when the cart meets its conditions; no code is required.</small></span></label>
@@ -44,11 +74,30 @@
             <h2>Offer validity</h2>
             <p>Set an optional start and end date for festival and limited-time offers.</p>
             <div class="coupon-form-grid">
-                <label class="coupon-field"><span>Starts at (UTC)</span><span class="coupon-input-help"><input asp-for="StartsAtUtc" type="datetime-local" value="@Model.StartsAtUtc?.ToString("yyyy-MM-ddTHH:mm")" /><details><summary aria-label="Start date help">i</summary><div><strong>Starts at</strong><p>Offer becomes eligible from this date and time. Leave empty to start immediately.</p><small>Example: 2026-10-18 09:00</small></div></details></span></label>
-                <label class="coupon-field"><span>Ends at (UTC)</span><span class="coupon-input-help"><input asp-for="EndsAtUtc" type="datetime-local" value="@Model.EndsAtUtc?.ToString("yyyy-MM-ddTHH:mm")" /><details><summary aria-label="End date help">i</summary><div><strong>Ends at</strong><p>Offer stops being eligible after this date and time. Leave empty for no expiry.</p><small>Example: 2026-10-25 23:59</small></div></details></span></label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Starts at (UTC)<details class="coupon-help"><summary aria-label="Start date help">i</summary><div><strong>Starts at</strong><p>Offer becomes eligible from this date and time. Leave empty to start immediately.</p><small>Example: 2026-10-18 09:00</small></div></details></span>
+                    <input asp-for="StartsAtUtc" type="datetime-local" value="@Model.StartsAtUtc?.ToString("yyyy-MM-ddTHH:mm")" />
+                </label>
+                <label class="coupon-field">
+                    <span class="coupon-field-head">Ends at (UTC)<details class="coupon-help"><summary aria-label="End date help">i</summary><div><strong>Ends at</strong><p>Offer stops being eligible after this date and time. Leave empty for no expiry.</p><small>Example: 2026-10-25 23:59</small></div></details></span>
+                    <input asp-for="EndsAtUtc" type="datetime-local" value="@Model.EndsAtUtc?.ToString("yyyy-MM-ddTHH:mm")" />
+                </label>
             </div>
         </div>
         <div class="coupon-form-actions"><button type="submit" class="coupon-primary-button">@(isEdit ? "Save changes" : "Create coupon")</button><a asp-action="Coupons" class="coupon-secondary-button">Cancel</a></div>
         <p class="coupon-form-footnote">Tip: Automatic offers do not require a coupon code. Use either Product ID or Category ID, not both.</p>
     </form>
 </section>
+<script>
+(() => {
+    const helpItems = document.querySelectorAll('.coupon-help');
+    document.addEventListener('click', event => {
+        helpItems.forEach(item => {
+            if (item.open && !item.contains(event.target)) item.open = false;
+        });
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') helpItems.forEach(item => item.open = false);
+    });
+})();
+</script>
