@@ -8,6 +8,8 @@ public class PaymentCheckoutViewModel
     public long Amount { get; set; }
     public decimal Subtotal { get; set; }
     public decimal ShippingCharge { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public string? CouponCode { get; set; }
     public decimal TotalDiscount => Items.Sum(item => item.DiscountAmount);
     public List<PaymentOrderItemViewModel> Items { get; set; } = [];
     public string Currency { get; set; } = "INR";
