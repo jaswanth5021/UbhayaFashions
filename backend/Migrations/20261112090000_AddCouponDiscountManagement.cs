@@ -61,7 +61,7 @@ public partial class AddCouponDiscountManagement : Migration
                 table.PrimaryKey("PK_CouponRedemptions", x => x.Id);
                 table.ForeignKey("FK_CouponRedemptions_Coupons_CouponId", x => x.CouponId, "Coupons", "Id", onDelete: ReferentialAction.Restrict);
                 table.ForeignKey("FK_CouponRedemptions_Customers_CustomerId", x => x.CustomerId, "Customers", "Id", onDelete: ReferentialAction.Cascade);
-                table.ForeignKey("FK_CouponRedemptions_Orders_OrderId", x => x.OrderId, "Orders", "Id", onDelete: ReferentialAction.Cascade);
+                table.ForeignKey("FK_CouponRedemptions_Orders_OrderId", x => x.OrderId, "Orders", "Id", onDelete: ReferentialAction.Restrict);
             });
 
         migrationBuilder.CreateIndex("IX_Coupons_Code", "Coupons", "Code", unique: true);
