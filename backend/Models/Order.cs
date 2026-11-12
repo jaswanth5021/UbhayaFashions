@@ -11,6 +11,9 @@ public class Order
     public int CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;
     public decimal TotalAmount { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public string? CouponCode { get; set; }
+    public int? CouponId { get; set; }
     public string Status { get; set; } = "Pending";
     public string PaymentStatus { get; set; } = "Pending";
     public string PaymentMethod { get; set; } = "COD";
