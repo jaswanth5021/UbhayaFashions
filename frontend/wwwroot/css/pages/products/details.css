@@ -4192,3 +4192,130 @@
     .product-coupon-card { padding: 13px 13px 13px 16px; }
     .product-coupon-description { min-height: 0; margin-bottom: 10px; }
 }
+
+
+/* Delivery PIN checker — clean, compact Ubhaya treatment */
+.product-delivery-check {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 20px 0 22px;
+    padding: 18px 20px 15px;
+    border: 1px solid #eadfe0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fff 0%, #fcf8f7 100%);
+    box-shadow: 0 4px 14px rgb(68 34 45 / 4%);
+}
+.product-delivery-check h3 {
+    margin: 0 0 4px;
+    color: #33252a;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -.2px;
+}
+.product-delivery-check > p:not(.product-delivery-message) {
+    margin: 0 0 12px;
+    color: #786c70;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.product-delivery-input-row {
+    display: flex;
+    align-items: stretch;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 510px;
+    min-height: 48px;
+    padding: 3px;
+    overflow: hidden;
+    border: 1px solid #dfcbd1;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: inset 0 1px 2px rgb(45 20 28 / 3%);
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+.product-delivery-input-row:focus-within {
+    border-color: #8e1748;
+    box-shadow: 0 0 0 3px rgb(142 23 72 / 10%);
+}
+.product-delivery-input-row input,
+.product-delivery-input-row input:focus,
+.product-delivery-input-row input:focus-visible {
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    width: 1%;
+    min-width: 0;
+    min-height: 40px;
+    margin: 0 !important;
+    padding: 0 13px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #33252a;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.3;
+}
+.product-delivery-input-row input::placeholder {
+    color: #a3979b;
+    opacity: 1;
+}
+.product-delivery-input-row button {
+    flex: 0 0 auto;
+    min-width: 86px;
+    min-height: 40px;
+    margin: 0;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 6px;
+    background: #8e1748;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .55px;
+    cursor: pointer;
+    transition: background .18s ease, transform .18s ease;
+}
+.product-delivery-input-row button:hover:not(:disabled) {
+    background: #681238;
+}
+.product-delivery-input-row button:active:not(:disabled) {
+    transform: scale(.98);
+}
+.product-delivery-input-row button:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+.product-delivery-message {
+    min-height: 17px;
+    margin: 9px 0 0;
+    color: #817378;
+    font-size: 12px;
+    line-height: 1.45;
+}
+.product-delivery-message.is-success { color: #16723c; font-weight: 650; }
+.product-delivery-message.is-error { color: #b42335; font-weight: 650; }
+.product-delivery-message.is-checking { color: #76536a; }
+@media (max-width: 600px) {
+    .product-delivery-check {
+        margin: 15px 0 18px;
+        padding: 14px;
+        border-radius: 10px;
+    }
+    .product-delivery-check h3 { font-size: 16px; }
+    .product-delivery-input-row { max-width: none; min-height: 46px; }
+    .product-delivery-input-row input,
+    .product-delivery-input-row input:focus,
+    .product-delivery-input-row input:focus-visible {
+        min-height: 38px;
+        padding: 0 10px !important;
+        font-size: 13px;
+    }
+    .product-delivery-input-row button {
+        min-width: 76px;
+        min-height: 38px;
+        padding: 0 12px;
+        font-size: 11px;
+    }
+}
