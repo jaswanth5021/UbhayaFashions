@@ -72,7 +72,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(x => new { x.CouponId, x.CustomerId, x.OrderId }).IsUnique();
             entity.HasIndex(x => new { x.CustomerId, x.CouponId });
             entity.HasOne<Customer>().WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne<Order>().WithMany().HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<Order>().WithMany().HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<Order>().Property(x => x.PaymentMethod).HasMaxLength(20).HasDefaultValue("COD");
         modelBuilder.Entity<DelhiveryShipment>(entity =>
