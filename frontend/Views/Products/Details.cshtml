@@ -428,23 +428,35 @@
                                     T&amp;C <span aria-hidden="true">›</span>
                                 </button>
                             </div>
-                            <p class="product-coupon-description">
-                                @offer.DiscountText
-                                @if (offer.FirstOrderOnly) { <span> · First order</span> }
-                                @if (offer.IsAutomatic) { <span> · Auto applied</span> }
-                            </p>
-                            <div class="product-coupon-card-actions">
-                                @if (!string.IsNullOrWhiteSpace(offer.Code))
-                                {
-                                    <button type="button" class="product-coupon-code" data-coupon-copy="@offer.Code"
-                                            aria-label="Copy coupon code @offer.Code">
-                                        <span>@offer.Code</span><span aria-hidden="true">▢</span>
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span class="product-coupon-auto-label">AUTO APPLIED</span>
-                                }
+                            <div class="product-coupon-card-main">
+                                <div class="product-coupon-card-value">
+                                    <span class="product-coupon-kicker">SPECIAL OFFER</span>
+                                    <p class="product-coupon-description">
+                                        @offer.DiscountText
+                                    </p>
+                                    @if (offer.FirstOrderOnly || offer.IsAutomatic)
+                                    {
+                                        <span class="product-coupon-condition">
+                                            @(offer.FirstOrderOnly ? "First order" : "All eligible orders")
+                                            @if (offer.IsAutomatic) { <text> · Auto applied</text> }
+                                        </span>
+                                    }
+                                </div>
+                                <div class="product-coupon-card-actions">
+                                    @if (!string.IsNullOrWhiteSpace(offer.Code))
+                                    {
+                                        <button type="button" class="product-coupon-code" data-coupon-copy="@offer.Code"
+                                                aria-label="Copy coupon code @offer.Code">
+                                            <span class="product-coupon-code-label">USE CODE</span>
+                                            <span class="product-coupon-code-value">@offer.Code</span>
+                                            <span class="product-coupon-copy-icon" aria-hidden="true">▢</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="product-coupon-auto-label">AUTO APPLIED</span>
+                                    }
+                                </div>
                             </div>
                             <div class="product-coupon-terms" id="couponTerms-@offer.Id" hidden>
                                 <strong>Offer details</strong>
