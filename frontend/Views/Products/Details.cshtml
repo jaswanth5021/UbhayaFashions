@@ -422,7 +422,6 @@
                     {
                         <article class="product-coupon-card">
                             <div class="product-coupon-card-heading">
-                                <span class="product-coupon-spark" aria-hidden="true">✦</span>
                                 <strong title="@offer.Name">@offer.Name</strong>
                                 <button type="button" class="product-coupon-terms-toggle"
                                         aria-expanded="false" aria-controls="couponTerms-@offer.Id">
@@ -446,9 +445,6 @@
                                 {
                                     <span class="product-coupon-auto-label">AUTO APPLIED</span>
                                 }
-                                <button type="button" class="product-coupon-share" data-coupon-share
-                                        data-coupon-name="@offer.Name" data-coupon-code="@offer.Code"
-                                        aria-label="Share offer @offer.Name">↗</button>
                             </div>
                             <div class="product-coupon-terms" id="couponTerms-@offer.Id" hidden>
                                 <strong>Offer details</strong>
@@ -1359,21 +1355,7 @@
             });
         });
 
-        offerSection.querySelectorAll("[data-coupon-share]").forEach(button => {
-            button.addEventListener("click", async () => {
-                const code = button.dataset.couponCode || "";
-                const text = (button.dataset.couponName || "Offer") + (code ? " — use code " + code : "") + " at Ubhaya Fashions.";
-                try {
-                    if (navigator.share) await navigator.share({ title: "Ubhaya Fashions offer", text, url: window.location.href });
-                    else if (navigator.clipboard) {
-                        await navigator.clipboard.writeText(text + " " + window.location.href);
-                        feedback.textContent = "Offer link copied.";
-                    } else feedback.textContent = text;
-                } catch (error) {
-                    if (error.name !== "AbortError") feedback.textContent = "Unable to share this offer right now.";
-                }
-            });
-        });
+
     })();
 
     /* =========================================================
