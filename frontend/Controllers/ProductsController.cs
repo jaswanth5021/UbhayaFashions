@@ -141,7 +141,12 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
 
         try
         {
-            ViewBag.ProductCouponOffers = await api.GetProductCouponOffersAsync(id);
+            var productOffers = await api.GetProductCouponOffersAsync(id);
+            ViewBag.ProductCouponOffers = productOffers;
+            logger.LogInformation(
+                "Loaded {OfferCount} eligible coupon offers for product {ProductId}",
+                productOffers.Count,
+                id);
         }
         catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException)
         {
