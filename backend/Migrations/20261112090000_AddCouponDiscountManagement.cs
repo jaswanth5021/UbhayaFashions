@@ -1,9 +1,13 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using backend.Data;
 
 #nullable disable
 
 namespace backend.Migrations;
 
+[DbContext(typeof(ApplicationDbContext))]
+[Migration("20261112090000_AddCouponDiscountManagement")]
 public partial class AddCouponDiscountManagement : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
