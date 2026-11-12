@@ -72,6 +72,11 @@
                         <a class="checkout-continue-shopping" asp-controller="Products" asp-action="Index">Continue Shopping</a>
                     </div>
 
+                    <div class="checkout-coupon-entry">
+                        <label for="checkoutCouponCode">Coupon code</label>
+                        <input id="checkoutCouponCode" name="CouponCode" type="text" maxlength="40" autocomplete="off" placeholder="Enter coupon code" />
+                        <small>Automatic offers and eligible first-order discounts are applied at checkout.</small>
+                    </div>
                     <div class="checkout-bag-items">
                         @for (var itemIndex = 0; itemIndex < Model.Count; itemIndex++)
                         {
