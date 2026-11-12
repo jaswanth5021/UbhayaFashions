@@ -184,8 +184,9 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         decimal discountAmount = 0m;
         backend.Models.Coupon? appliedCoupon = null;
         var nowUtc = DateTime.UtcNow;
+        var normalizedCouponCode = request.CouponCode?.Trim().ToUpperInvariant() ?? string.Empty;
         var candidates = await db.Coupons.Where(c => c.IsActive &&
-            (c.IsAutomatic || (!string.IsNullOrWhiteSpace(request.CouponCode) && c.Code == request.CouponCode.Trim().ToUpper())) &&
+            (c.IsAutomatic || c.Code == normalizedCouponCode) &&
             (!c.StartsAtUtc.HasValue || c.StartsAtUtc <= nowUtc) &&
             (!c.EndsAtUtc.HasValue || c.EndsAtUtc >= nowUtc) &&
             (!c.MaximumUses.HasValue || c.UsageCount < c.MaximumUses)).ToListAsync();
