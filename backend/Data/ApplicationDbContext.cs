@@ -6,6 +6,8 @@ namespace backend.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Coupon> Coupons => Set<Coupon>();
+    public DbSet<CouponRedemption> CouponRedemptions => Set<CouponRedemption>();
     public DbSet<PendingSignup> PendingSignups => Set<PendingSignup>();
     public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
     public DbSet<Product> Products => Set<Product>();
@@ -49,6 +51,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Product>().HasMany(x => x.Variants).WithOne(x => x.Product).HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductVariant>().HasIndex(x => new { x.ProductId, x.Color, x.Size }).IsUnique();
         modelBuilder.Entity<Order>().Property(x => x.TotalAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Order>().Property(x => x.DiscountAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.Property(x => x.Code).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.DiscountType).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.DiscountValue).HasPrecision(18, 2);
+            entity.Property(x => x.MaximumDiscount).HasPrecision(18, 2);
+            entity.Property(x => x.MinimumOrderAmount).HasPrecision(18, 2);
+            entity.HasIndex(x => x.Code).IsUnique();
+            entity.HasOne<Product>().WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne<Category>().WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.SetNull);
+        });
+        modelBuilder.Entity<CouponRedemption>(entity =>
+        {
+            entity.HasOne(x => x.Coupon).WithMany().HasForeignKey(x => x.CouponId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(x => new { x.CouponId, x.CustomerId, x.OrderId }).IsUnique();
+            entity.HasIndex(x => new { x.CustomerId, x.CouponId });
+        });
         modelBuilder.Entity<Order>().Property(x => x.PaymentMethod).HasMaxLength(20).HasDefaultValue("COD");
         modelBuilder.Entity<DelhiveryShipment>(entity =>
         {
