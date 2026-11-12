@@ -1,5 +1,6 @@
 @{
     var title = ViewData["Title"]?.ToString() ?? "Admin";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var adminName = string.IsNullOrWhiteSpace(Context.Request.Cookies["admin_name"])
         ? "Administrator"
         : Context.Request.Cookies["admin_name"]!;
@@ -15,6 +16,7 @@
     <link rel="stylesheet" href="~/css/pages/admin/base.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/admin/management.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/admin/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/admin/coupons.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/notifications.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/shared/api-loader.css" asp-append-version="true" />
 </head>
@@ -29,7 +31,7 @@
                 <a asp-action="Dashboard">Dashboard</a>
                 <a asp-action="Products">Products</a>
                 <a asp-action="Categories">Categories</a>
-                <a asp-action="Coupons">Coupons & offers</a>
+                <a asp-action="Coupons" aria-current="@(currentAction == "Coupons" || currentAction == "CreateCoupon" || currentAction == "EditCoupon" ? "page" : null)">Coupons &amp; offers</a>
                 <a asp-action="StorefrontBanner">Homepage banner</a>
                 <a asp-action="Inventory">Inventory</a>
                 <a asp-action="Orders">Orders</a>
