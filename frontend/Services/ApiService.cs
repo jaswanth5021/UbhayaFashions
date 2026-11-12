@@ -134,6 +134,23 @@ public class ApiService(
         => (await GetStorefrontBannerUrlsAsync()).FirstOrDefault();
 
 
+    public async Task<List<ProductCouponOfferViewModel>> GetProductCouponOffersAsync(int productId)
+    {
+        try
+        {
+            return await Client.GetFromJsonAsync<List<ProductCouponOfferViewModel>>(
+                $"api/coupons/product/{productId}/offers") ?? [];
+        }
+        catch (HttpRequestException)
+        {
+            return [];
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
+
     public async Task<ProductViewModel?>
         GetProductAsync(int id)
     {
