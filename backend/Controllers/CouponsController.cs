@@ -19,8 +19,9 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
         if (request.Subtotal < 0 || request.ProductIds is null || request.ProductIds.Count == 0)
             return BadRequest("A valid cart is required.");
         var now = DateTime.UtcNow;
+        var normalizedCode = request.Code?.Trim().ToUpperInvariant() ?? string.Empty;
         var coupons = await db.Coupons.AsNoTracking()
-            .Where(x => x.IsActive && (x.IsAutomatic || x.Code == request.Code!.Trim().ToUpper()))
+            .Where(x => x.IsActive && (x.IsAutomatic || x.Code == normalizedCode))
             .Where(x => (!x.StartsAtUtc.HasValue || x.StartsAtUtc <= now) && (!x.EndsAtUtc.HasValue || x.EndsAtUtc >= now))
             .Where(x => !x.MaximumUses.HasValue || x.UsageCount < x.MaximumUses)
             .ToListAsync();
