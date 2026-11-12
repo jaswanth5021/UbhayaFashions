@@ -1,49 +1,87 @@
 @model List<LadiesDressStore.Web.Models.CouponAdminViewModel>
 @{
     ViewData["Title"] = "Coupons & Offers";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var totalCount = (int)(ViewBag.CouponCount ?? Model.Count);
+    var currentPage = (int)(ViewBag.CurrentPage ?? 1);
+    var pageCount = (int)(ViewBag.PageCount ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 10);
 }
-<section class="admin-page">
-    <header class="admin-page-header"><div><p class="admin-eyebrow">PROMOTIONS</p><h1>Coupons & Offers</h1><p>Create coupon codes, automatic offers, first-order and festival discounts.</p></div></header>
-    @if (ViewBag.Error is string error) { <div class="admin-alert admin-alert-error">@error</div> }
-    <form asp-action="SaveCoupon" method="post" class="admin-form">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="Id" value="0" />
-        <div class="admin-form-grid">
-            <label>Offer name<input name="Name" required maxlength="120" placeholder="Diwali Special" /></label>
-            <label>Coupon code<input name="Code" maxlength="40" placeholder="DIWALI20" /></label>
-            <label>Discount type<select name="DiscountType"><option value="Percentage">Percentage</option><option value="Fixed">Fixed amount (₹)</option></select></label>
-            <label>Discount value<input name="DiscountValue" type="number" min="0.01" step="0.01" required /></label>
-            <label>Maximum discount (₹)<input name="MaximumDiscount" type="number" min="0" step="0.01" /></label>
-            <label>Minimum order (₹)<input name="MinimumOrderAmount" type="number" min="0" step="0.01" value="0" /></label>
-            <label>Maximum uses<input name="MaximumUses" type="number" min="1" /></label>
-            <label>Uses per customer<input name="PerCustomerLimit" type="number" min="1" /></label>
-            <label>Starts (UTC)<input name="StartsAtUtc" type="datetime-local" /></label>
-            <label>Ends (UTC)<input name="EndsAtUtc" type="datetime-local" /></label>
-            <label>Product ID (optional)<input name="ProductId" type="number" min="1" /></label>
-            <label>Category ID (optional)<input name="CategoryId" type="number" min="1" /></label>
+<section class="coupon-admin-page">
+    <header class="coupon-page-head">
+        <div>
+            <span class="coupon-eyebrow">PROMOTIONS</span>
+            <h1>Coupons &amp; Offers</h1>
+            <p>Manage coupon codes, automatic offers, first-order discounts and festival campaigns.</p>
+            <div class="coupon-page-meta">@totalCount offer@(totalCount == 1 ? "" : "s") · Page @currentPage of @pageCount</div>
         </div>
-        <div class="admin-form-options">
-            <label><input type="checkbox" name="IsActive" value="true" checked /> Active</label>
-            <label><input type="checkbox" name="IsAutomatic" value="true" /> Apply automatically</label>
-            <label><input type="checkbox" name="FirstOrderOnly" value="true" /> First order only</label>
+        <a asp-action="CreateCoupon" class="coupon-primary-button">＋ Add coupon</a>
+    </header>
+
+    @if (TempData["AdminSuccess"] is string success) { <div class="coupon-message coupon-message-success" role="status">@success</div> }
+    @if (TempData["AdminError"] is string error) { <div class="coupon-message coupon-message-error" role="alert">@error</div> }
+    @if (ViewBag.Error is string loadError) { <div class="coupon-message coupon-message-error" role="alert">@loadError</div> }
+
+    <div class="coupon-table-card">
+        <div class="coupon-table-heading">
+            <div><h2>Available coupons</h2><p>Offers currently configured in your store</p></div>
+            <span class="coupon-total-pill">@totalCount total</span>
         </div>
-        <button type="submit" class="admin-button">Create offer</button>
-        <p class="admin-form-hint">Use either Product ID or Category ID, not both. Automatic offers do not require a coupon code.</p>
-    </form>
-    <div class="admin-table-wrap"><table class="admin-table">
-        <thead><tr><th>Offer</th><th>Code</th><th>Discount</th><th>Target</th><th>Usage</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-        @foreach (var coupon in Model)
-        {
-            <tr><td><strong>@coupon.Name</strong><small>@(coupon.FirstOrderOnly ? "First order" : "All customers")</small></td>
-                <td>@(coupon.IsAutomatic ? "Automatic" : coupon.Code)</td>
-                <td>@(coupon.DiscountType == "Percentage" ? coupon.DiscountValue.ToString("0.##") + "%" : "₹" + coupon.DiscountValue.ToString("N2"))</td>
-                <td>@(coupon.ProductId.HasValue ? "Product #" + coupon.ProductId : coupon.CategoryId.HasValue ? "Category #" + coupon.CategoryId : "All products")</td>
-                <td>@coupon.UsageCount / @(coupon.MaximumUses?.ToString() ?? "∞")</td>
-                <td>@(coupon.IsActive ? "Active" : "Inactive")</td>
-                <td><a asp-action="EditCoupon" asp-route-id="@coupon.Id">Edit</a> <form asp-action="DeleteCoupon" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@coupon.Id" /><button type="submit" class="admin-button admin-button-secondary">@(coupon.IsActive ? "Deactivate / Delete" : "Delete")</button></form></td></tr>
-        }
-        @if (Model.Count == 0) { <tr><td colspan="7">No offers created yet.</td></tr> }
-        </tbody>
-    </table></div>
+        <div class="coupon-table-scroll">
+            <table class="coupon-table">
+                <thead><tr><th>Offer</th><th>Coupon code</th><th>Discount</th><th>Applies to</th><th>Usage</th><th>Validity</th><th>Status</th><th class="coupon-actions-heading">Actions</th></tr></thead>
+                <tbody>
+                @foreach (var coupon in Model)
+                {
+                    <tr>
+                        <td><div class="coupon-offer-name"><strong>@coupon.Name</strong><small>#@coupon.Id · @(coupon.FirstOrderOnly ? "First order only" : "All eligible customers")</small></div></td>
+                        <td>@if (coupon.IsAutomatic) { <span class="coupon-code-auto">Automatic</span> } else { <code class="coupon-code">@coupon.Code</code> }</td>
+                        <td><strong class="coupon-discount-value">@(coupon.DiscountType == "Percentage" ? coupon.DiscountValue.ToString("0.##") + "%" : "₹" + coupon.DiscountValue.ToString("N2"))</strong>@if (coupon.MaximumDiscount.HasValue) { <small>Up to ₹@coupon.MaximumDiscount.Value.ToString("N2")</small> }</td>
+                        <td>@(coupon.ProductId.HasValue ? "Product #" + coupon.ProductId : coupon.CategoryId.HasValue ? "Category #" + coupon.CategoryId : "All products")<small>Min. order ₹@coupon.MinimumOrderAmount.ToString("N2")</small></td>
+                        <td>@coupon.UsageCount / @(coupon.MaximumUses?.ToString() ?? "Unlimited")</td>
+                        <td><span>@(coupon.StartsAtUtc?.ToLocalTime().ToString("dd MMM yyyy") ?? "No start")</span><small>to @(coupon.EndsAtUtc?.ToLocalTime().ToString("dd MMM yyyy") ?? "No expiry")</small></td>
+                        <td><span class="coupon-status @(coupon.IsActive ? "is-active" : "is-inactive")">@(coupon.IsActive ? "Active" : "Inactive")</span></td>
+                        <td class="coupon-row-actions">
+                            <a asp-action="EditCoupon" asp-route-id="@coupon.Id" class="coupon-action-edit">Edit</a>
+                            <form asp-action="SetCouponActive" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@coupon.Id" />
+                                <input type="hidden" name="isActive" value="@(!coupon.IsActive)" />
+                                <button type="submit" class="coupon-action-toggle">@(coupon.IsActive ? "Deactivate" : "Activate")</button>
+                            </form>
+                            <form asp-action="DeleteCoupon" method="post" onsubmit="return confirm('Delete this coupon? If it has already been used, the system may retain it as inactive.');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@coupon.Id" />
+                                <button type="submit" class="coupon-action-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count == 0) { <tr><td colspan="8"><div class="coupon-empty-state"><strong>No coupons yet</strong><span>Create your first coupon or automatic offer to get started.</span><a asp-action="CreateCoupon" class="coupon-primary-button">＋ Create coupon</a></div></td></tr> }
+                </tbody>
+            </table>
+        </div>
+        <footer class="coupon-table-footer">
+            @if (pageCount > 1)
+            {
+                <nav class="coupon-pagination" aria-label="Coupon pages">
+                    @if (currentPage > 1) { <a asp-action="Coupons" asp-route-page="@(currentPage - 1)" asp-route-pageSize="@pageSize">← Previous</a> } else { <span class="is-disabled">← Previous</span> }
+                    <div class="coupon-page-numbers">
+                        @for (var number = 1; number <= pageCount; number++)
+                        {
+                            if (number == currentPage) { <span class="is-current" aria-current="page">@number</span> }
+                            else { <a asp-action="Coupons" asp-route-page="@number" asp-route-pageSize="@pageSize">@number</a> }
+                        }
+                    </div>
+                    @if (currentPage < pageCount) { <a asp-action="Coupons" asp-route-page="@(currentPage + 1)" asp-route-pageSize="@pageSize">Next →</a> } else { <span class="is-disabled">Next →</span> }
+                </nav>
+            }
+            <form asp-action="Coupons" method="get" class="coupon-page-size">
+                <label for="coupon-page-size">Rows per page</label>
+                <select id="coupon-page-size" name="pageSize" onchange="this.form.submit()">
+                    <option value="5" selected="@(pageSize == 5)">5</option><option value="10" selected="@(pageSize == 10)">10</option><option value="15" selected="@(pageSize == 15)">15</option><option value="50" selected="@(pageSize == 50)">50</option><option value="100" selected="@(pageSize == 100)">100</option><option value="0" selected="@(pageSize == 0)">All</option>
+                </select>
+            </form>
+        </footer>
+    </div>
 </section>
