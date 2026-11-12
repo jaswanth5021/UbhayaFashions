@@ -97,7 +97,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             var savedSubtotal = existing.Items.Sum(x => x.Price * x.Quantity);
             return Ok(new { orderId = existing.Id, razorpayOrderId = existing.RazorpayOrderId,
                 keyId = configuration["Razorpay:KeyId"], amount = checked((long)Math.Round(existing.TotalAmount * 100m, MidpointRounding.AwayFromZero)),
-                subtotal = savedSubtotal, shippingCharge = existing.TotalAmount - savedSubtotal,
+                subtotal = savedSubtotal, discountAmount = existing.DiscountAmount, couponCode = existing.CouponCode, shippingCharge = existing.TotalAmount - savedSubtotal + existing.DiscountAmount,
                 currency = "INR", name = "Ubhaya Fashions", description = $"Order #{existing.Id}" });
         }
         if (string.IsNullOrWhiteSpace(request.ShippingAddress))
@@ -181,6 +181,43 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         catch (Exception ex) when (ex is InvalidOperationException or OverflowException)
         { return BadRequest("Invalid size, colour or quantity."); }
         var subtotal = total;
+        decimal discountAmount = 0m;
+        backend.Models.Coupon? appliedCoupon = null;
+        var nowUtc = DateTime.UtcNow;
+        var candidates = await db.Coupons.Where(c => c.IsActive &&
+            (c.IsAutomatic || (!string.IsNullOrWhiteSpace(request.CouponCode) && c.Code == request.CouponCode.Trim().ToUpper())) &&
+            (!c.StartsAtUtc.HasValue || c.StartsAtUtc <= nowUtc) &&
+            (!c.EndsAtUtc.HasValue || c.EndsAtUtc >= nowUtc) &&
+            (!c.MaximumUses.HasValue || c.UsageCount < c.MaximumUses)).ToListAsync();
+        var hasPreviousOrder = await db.Orders.AnyAsync(o => o.CustomerId == customerId &&
+            (o.PaymentStatus == "Paid" || o.Status == "Processing" || o.Status == "Shipped" || o.Status == "Delivered"));
+        var redeemedCouponIds = await db.CouponRedemptions.Where(r => r.CustomerId == customerId).Select(r => r.CouponId).ToListAsync();
+        var eligibleCoupons = candidates.Select(c =>
+        {
+            var eligibleProductIds = products.Where(p =>
+                (!c.ProductId.HasValue || p.Id == c.ProductId.Value) &&
+                (!c.CategoryId.HasValue || p.CategoryId == c.CategoryId.Value)).Select(p => p.Id).ToHashSet();
+            var eligibleSubtotal = order.Items.Where(i => eligibleProductIds.Contains(i.ProductId)).Sum(i => i.Price * i.Quantity);
+            var usageAllowed = !c.PerCustomerLimit.HasValue || redeemedCouponIds.Count(id => id == c.Id) < c.PerCustomerLimit.Value;
+            var firstOrderAllowed = !c.FirstOrderOnly || !hasPreviousOrder;
+            var amount = c.DiscountType == "Percentage" ? eligibleSubtotal * c.DiscountValue / 100m : c.DiscountValue;
+            if (c.MaximumDiscount.HasValue) amount = Math.Min(amount, c.MaximumDiscount.Value);
+            amount = Math.Round(Math.Clamp(amount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
+            return new { Coupon = c, EligibleSubtotal = eligibleSubtotal, UsageAllowed = usageAllowed, FirstOrderAllowed = firstOrderAllowed, Amount = amount };
+        }).Where(x => x.EligibleSubtotal >= x.Coupon.MinimumOrderAmount && x.UsageAllowed && x.FirstOrderAllowed && x.Amount > 0m &&
+            (x.Coupon.IsAutomatic || string.Equals(x.Coupon.Code, request.CouponCode?.Trim(), StringComparison.OrdinalIgnoreCase)))
+          .OrderByDescending(x => x.Amount).ToList();
+        if (!string.IsNullOrWhiteSpace(request.CouponCode) && eligibleCoupons.All(x => !string.Equals(x.Coupon.Code, request.CouponCode.Trim(), StringComparison.OrdinalIgnoreCase)))
+            return BadRequest("This coupon is invalid or does not apply to your cart.");
+        if (eligibleCoupons.Count > 0)
+        {
+            var selected = eligibleCoupons[0];
+            appliedCoupon = selected.Coupon;
+            discountAmount = selected.Amount;
+            order.CouponId = appliedCoupon.Id;
+            order.CouponCode = appliedCoupon.IsAutomatic ? null : appliedCoupon.Code;
+            order.DiscountAmount = discountAmount;
+        }
         decimal shippingCharge = 0m;
         if (subtotal < 1000m)
         {
@@ -236,7 +273,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             }
         }
 
-        total += shippingCharge;
+        total = Math.Max(0m, subtotal - discountAmount) + shippingCharge;
         order.TotalAmount = total;
         db.Orders.Add(order);
         await db.SaveChangesAsync();
@@ -298,6 +335,8 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             keyId,
             amount = amountInPaise,
             subtotal,
+            discountAmount,
+            couponCode = order.CouponCode,
             shippingCharge,
             currency = "INR",
             name = "Ubhaya Fashions",
