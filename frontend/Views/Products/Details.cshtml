@@ -1280,17 +1280,13 @@
         const checkButton = document.getElementById("checkProductDelivery");
         const message = document.getElementById("productDeliveryMessage");
         const hiddenPin = document.getElementById("verifiedDeliveryPincode");
-        const buyNowButton = document.querySelector('.product-buy-button[name="buyNow"][value="true"]');
         if (!panel || !input || !checkButton || !message || !hiddenPin) return;
 
         let verifiedPin = "";
-        const setBuyNowEnabled = enabled => { if (buyNowButton) buyNowButton.disabled = !enabled; };
-        // Adding an item to the bag is allowed without a PIN. A PIN is required only for Buy It Now.
-        setBuyNowEnabled(false);
+        // Keep both actions clickable. The submit handler warns and blocks Buy It Now until a PIN is verified.
         const resetVerification = () => {
             verifiedPin = "";
             hiddenPin.value = "";
-            setBuyNowEnabled(false);
             message.textContent = "Enter your PIN code to check delivery before using Buy It Now. You can still add this item to your cart.";
             message.className = "product-delivery-message";
         };
@@ -1326,7 +1322,6 @@
                 }
                 verifiedPin = pin;
                 hiddenPin.value = pin;
-                setBuyNowEnabled(true);
                 message.textContent = result.message || "Delivery is available to this PIN code.";
                 message.className = "product-delivery-message is-success";
             } catch {
