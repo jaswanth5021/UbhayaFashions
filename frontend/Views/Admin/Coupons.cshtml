@@ -1,0 +1,49 @@
+@model List<LadiesDressStore.Web.Models.CouponAdminViewModel>
+@{
+    ViewData["Title"] = "Coupons & Offers";
+}
+<section class="admin-page">
+    <header class="admin-page-header"><div><p class="admin-eyebrow">PROMOTIONS</p><h1>Coupons & Offers</h1><p>Create coupon codes, automatic offers, first-order and festival discounts.</p></div></header>
+    @if (ViewBag.Error is string error) { <div class="admin-alert admin-alert-error">@error</div> }
+    <form asp-action="SaveCoupon" method="post" class="admin-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="0" />
+        <div class="admin-form-grid">
+            <label>Offer name<input name="Name" required maxlength="120" placeholder="Diwali Special" /></label>
+            <label>Coupon code<input name="Code" maxlength="40" placeholder="DIWALI20" /></label>
+            <label>Discount type<select name="DiscountType"><option value="Percentage">Percentage</option><option value="Fixed">Fixed amount (₹)</option></select></label>
+            <label>Discount value<input name="DiscountValue" type="number" min="0.01" step="0.01" required /></label>
+            <label>Maximum discount (₹)<input name="MaximumDiscount" type="number" min="0" step="0.01" /></label>
+            <label>Minimum order (₹)<input name="MinimumOrderAmount" type="number" min="0" step="0.01" value="0" /></label>
+            <label>Maximum uses<input name="MaximumUses" type="number" min="1" /></label>
+            <label>Uses per customer<input name="PerCustomerLimit" type="number" min="1" /></label>
+            <label>Starts (UTC)<input name="StartsAtUtc" type="datetime-local" /></label>
+            <label>Ends (UTC)<input name="EndsAtUtc" type="datetime-local" /></label>
+            <label>Product ID (optional)<input name="ProductId" type="number" min="1" /></label>
+            <label>Category ID (optional)<input name="CategoryId" type="number" min="1" /></label>
+        </div>
+        <div class="admin-form-options">
+            <label><input type="checkbox" name="IsActive" value="true" checked /> Active</label>
+            <label><input type="checkbox" name="IsAutomatic" value="true" /> Apply automatically</label>
+            <label><input type="checkbox" name="FirstOrderOnly" value="true" /> First order only</label>
+        </div>
+        <button type="submit" class="admin-button">Create offer</button>
+        <p class="admin-form-hint">Use either Product ID or Category ID, not both. Automatic offers do not require a coupon code.</p>
+    </form>
+    <div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th>Offer</th><th>Code</th><th>Discount</th><th>Target</th><th>Usage</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var coupon in Model)
+        {
+            <tr><td><strong>@coupon.Name</strong><small>@(coupon.FirstOrderOnly ? "First order" : "All customers")</small></td>
+                <td>@(coupon.IsAutomatic ? "Automatic" : coupon.Code)</td>
+                <td>@(coupon.DiscountType == "Percentage" ? coupon.DiscountValue.ToString("0.##") + "%" : "₹" + coupon.DiscountValue.ToString("N2"))</td>
+                <td>@(coupon.ProductId.HasValue ? "Product #" + coupon.ProductId : coupon.CategoryId.HasValue ? "Category #" + coupon.CategoryId : "All products")</td>
+                <td>@coupon.UsageCount / @(coupon.MaximumUses?.ToString() ?? "∞")</td>
+                <td>@(coupon.IsActive ? "Active" : "Inactive")</td>
+                <td><form asp-action="DeleteCoupon" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@coupon.Id" /><button type="submit" class="admin-button admin-button-secondary">@(coupon.IsActive ? "Deactivate / Delete" : "Delete")</button></form></td></tr>
+        }
+        @if (Model.Count == 0) { <tr><td colspan="7">No offers created yet.</td></tr> }
+        </tbody>
+    </table></div>
+</section>
