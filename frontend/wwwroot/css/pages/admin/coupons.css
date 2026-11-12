@@ -145,3 +145,29 @@
  .coupon-table thead th,.coupon-table tbody td { padding:13px 12px !important; }
  .coupon-table-footer { background:#fff8fb; }
 }
+
+
+/* Final coupon list polish: neutral card, solid header and product-style pagination */
+.coupon-table-card { background:#fff !important; border-color:#e8e1de; box-shadow:0 3px 14px rgb(47 31 35 / 5%); }
+.coupon-table-heading { background:#fff !important; }
+.coupon-table thead th { background:#761b3b !important; color:#fff !important; border-right:1px solid rgb(255 255 255 / 13%) !important; }
+.coupon-table thead th:last-child { border-right:0 !important; }
+.coupon-table tbody tr:nth-child(even) { background:#fbf8f7 !important; }
+.coupon-table tbody tr:hover { background:#f7edf0 !important; }
+.coupon-table-footer { background:#fff !important; }
+.coupon-grid-footer { margin:18px 0 0 !important; padding:0 4px; justify-content:center; }
+.coupon-grid-footer .admin-pagination { gap:8px; }
+.coupon-grid-footer .admin-page-numbers { gap:8px; }
+.coupon-grid-footer .admin-pagination > a,
+.coupon-grid-footer .admin-pagination > span,
+.coupon-grid-footer .admin-page-numbers a,
+.coupon-grid-footer .admin-page-numbers span { min-width:38px; min-height:38px; border:1px solid #eadde1; border-radius:5px; background:#fff; color:#68142e; font-size:13px; text-decoration:none; }
+.coupon-grid-footer .admin-pagination > a:hover,
+.coupon-grid-footer .admin-page-numbers a:hover,
+.coupon-grid-footer .admin-page-numbers .is-current { border-color:#68142e; background:#68142e; color:#fff; }
+.coupon-grid-footer .admin-pagination .is-disabled { color:#a99a96; background:#faf8f7; }
+.coupon-grid-footer .admin-page-size { margin:0; }
+@media (max-width:760px) {
+ .coupon-grid-footer { flex-direction:column; gap:12px; }
+ .coupon-grid-footer .admin-pagination { flex-wrap:wrap; }
+}
