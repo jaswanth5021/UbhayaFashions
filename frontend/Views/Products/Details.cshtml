@@ -409,6 +409,63 @@
 
 
 
+        @{
+            var productCouponOffers = ViewBag.ProductCouponOffers as List<LadiesDressStore.Web.Models.ProductCouponOfferViewModel>
+                ?? new List<LadiesDressStore.Web.Models.ProductCouponOfferViewModel>();
+        }
+        @if (productCouponOffers.Count > 0)
+        {
+            <section class="product-coupon-offers" aria-labelledby="productCouponOffersTitle">
+                <h2 id="productCouponOffersTitle">Offers and Discounts</h2>
+                <div class="product-coupon-offers-grid">
+                    @foreach (var offer in productCouponOffers)
+                    {
+                        <article class="product-coupon-card">
+                            <div class="product-coupon-card-heading">
+                                <span class="product-coupon-spark" aria-hidden="true">✦</span>
+                                <strong title="@offer.Name">@offer.Name</strong>
+                                <button type="button" class="product-coupon-terms-toggle"
+                                        aria-expanded="false" aria-controls="couponTerms-@offer.Id">
+                                    T&amp;C <span aria-hidden="true">›</span>
+                                </button>
+                            </div>
+                            <p class="product-coupon-description">
+                                @offer.DiscountText
+                                @if (offer.FirstOrderOnly) { <span> · First order</span> }
+                                @if (offer.IsAutomatic) { <span> · Auto applied</span> }
+                            </p>
+                            <div class="product-coupon-card-actions">
+                                @if (!string.IsNullOrWhiteSpace(offer.Code))
+                                {
+                                    <button type="button" class="product-coupon-code" data-coupon-copy="@offer.Code"
+                                            aria-label="Copy coupon code @offer.Code">
+                                        <span>@offer.Code</span><span aria-hidden="true">▢</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="product-coupon-auto-label">AUTO APPLIED</span>
+                                }
+                                <button type="button" class="product-coupon-share" data-coupon-share
+                                        data-coupon-name="@offer.Name" data-coupon-code="@offer.Code"
+                                        aria-label="Share offer @offer.Name">↗</button>
+                            </div>
+                            <div class="product-coupon-terms" id="couponTerms-@offer.Id" hidden>
+                                <strong>Offer details</strong>
+                                <p>@offer.AppliesTo</p>
+                                @if (!string.IsNullOrWhiteSpace(offer.Terms)) { <p>@offer.Terms</p> }
+                                @if (offer.EndsAtUtc.HasValue)
+                                {
+                                    <p>Valid until @offer.EndsAtUtc.Value.ToLocalTime().ToString("dd MMM yyyy")</p>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+                <p class="product-coupon-feedback" role="status" aria-live="polite"></p>
+            </section>
+        }
+
         <p class="product-details-description">
             @Model.Description
         </p>
@@ -1270,6 +1327,54 @@
 
 
 <script>
+
+    /* =========================================================
+       PRODUCT COUPON OFFER CARDS
+       ========================================================= */
+    (() => {
+        const offerSection = document.querySelector(".product-coupon-offers");
+        if (!offerSection) return;
+        const feedback = offerSection.querySelector(".product-coupon-feedback");
+
+        offerSection.querySelectorAll(".product-coupon-terms-toggle").forEach(button => {
+            button.addEventListener("click", () => {
+                const panel = document.getElementById(button.getAttribute("aria-controls"));
+                if (!panel) return;
+                const opening = panel.hidden;
+                panel.hidden = !opening;
+                button.setAttribute("aria-expanded", String(opening));
+                button.innerHTML = opening ? "T&amp;C <span aria-hidden=\"true\">⌄</span>" : "T&amp;C <span aria-hidden=\"true\">›</span>";
+            });
+        });
+
+        offerSection.querySelectorAll("[data-coupon-copy]").forEach(button => {
+            button.addEventListener("click", async () => {
+                const code = button.dataset.couponCopy || "";
+                try {
+                    await navigator.clipboard.writeText(code);
+                    feedback.textContent = "Coupon code " + code + " copied. Apply it at checkout.";
+                } catch {
+                    feedback.textContent = "Coupon code: " + code;
+                }
+            });
+        });
+
+        offerSection.querySelectorAll("[data-coupon-share]").forEach(button => {
+            button.addEventListener("click", async () => {
+                const code = button.dataset.couponCode || "";
+                const text = (button.dataset.couponName || "Offer") + (code ? " — use code " + code : "") + " at Ubhaya Fashions.";
+                try {
+                    if (navigator.share) await navigator.share({ title: "Ubhaya Fashions offer", text, url: window.location.href });
+                    else if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(text + " " + window.location.href);
+                        feedback.textContent = "Offer link copied.";
+                    } else feedback.textContent = text;
+                } catch (error) {
+                    if (error.name !== "AbortError") feedback.textContent = "Unable to share this offer right now.";
+                }
+            });
+        });
+    })();
 
     /* =========================================================
        DELIVERY PIN CODE SERVICEABILITY
