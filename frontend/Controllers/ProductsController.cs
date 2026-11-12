@@ -139,6 +139,16 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
         var product = await api.GetProductAsync(id);
         if (product is null) return NotFound();
 
+        try
+        {
+            ViewBag.ProductCouponOffers = await api.GetProductCouponOffersAsync(id);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            logger.LogWarning(ex, "Product coupon offers could not be loaded for product {ProductId}", id);
+            ViewBag.ProductCouponOffers = new List<ProductCouponOfferViewModel>();
+        }
+
         ViewBag.RecentlyViewedProducts = new List<RelatedProductViewModel>();
         if (User.Identity?.IsAuthenticated == true)
         {
