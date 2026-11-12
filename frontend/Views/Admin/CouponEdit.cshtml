@@ -1,0 +1,32 @@
+@model LadiesDressStore.Web.Models.CouponAdminViewModel
+@{
+    ViewData["Title"] = "Edit offer";
+}
+<section class="admin-page">
+    <header class="admin-page-header"><div><p class="admin-eyebrow">PROMOTIONS</p><h1>Edit offer</h1></div></header>
+    <form asp-action="SaveCoupon" method="post" class="admin-form">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+        <div class="admin-form-grid">
+            <label>Offer name<input asp-for="Name" required maxlength="120" /></label>
+            <label>Coupon code<input asp-for="Code" maxlength="40" disabled="@Model.IsAutomatic" /></label>
+            <label>Discount type<select asp-for="DiscountType"><option value="Percentage">Percentage</option><option value="Fixed">Fixed amount (₹)</option></select></label>
+            <label>Discount value<input asp-for="DiscountValue" type="number" min="0.01" step="0.01" required /></label>
+            <label>Maximum discount (₹)<input asp-for="MaximumDiscount" type="number" min="0" step="0.01" /></label>
+            <label>Minimum order (₹)<input asp-for="MinimumOrderAmount" type="number" min="0" step="0.01" /></label>
+            <label>Maximum uses<input asp-for="MaximumUses" type="number" min="1" /></label>
+            <label>Uses per customer<input asp-for="PerCustomerLimit" type="number" min="1" /></label>
+            <label>Starts (UTC)<input asp-for="StartsAtUtc" type="datetime-local" /></label>
+            <label>Ends (UTC)<input asp-for="EndsAtUtc" type="datetime-local" /></label>
+            <label>Product ID<input asp-for="ProductId" type="number" min="1" /></label>
+            <label>Category ID<input asp-for="CategoryId" type="number" min="1" /></label>
+        </div>
+        <div class="admin-form-options">
+            <label><input asp-for="IsActive" /> Active</label>
+            <label><input asp-for="IsAutomatic" /> Apply automatically</label>
+            <label><input asp-for="FirstOrderOnly" /> First order only</label>
+        </div>
+        <button type="submit" class="admin-button">Save changes</button>
+        <a asp-action="Coupons">Cancel</a>
+    </form>
+</section>
