@@ -136,19 +136,11 @@ public class ApiService(
 
     public async Task<List<ProductCouponOfferViewModel>> GetProductCouponOffersAsync(int productId)
     {
-        try
-        {
-            return await Client.GetFromJsonAsync<List<ProductCouponOfferViewModel>>(
-                $"api/coupons/product/{productId}/offers") ?? [];
-        }
-        catch (HttpRequestException)
-        {
-            return [];
-        }
-        catch (JsonException)
-        {
-            return [];
-        }
+        using var response = await Client.GetAsync($"api/coupons/product/{productId}/offers");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<ProductCouponOfferViewModel>>()
+            ?? new List<ProductCouponOfferViewModel>();
     }
 
     public async Task<ProductViewModel?>
