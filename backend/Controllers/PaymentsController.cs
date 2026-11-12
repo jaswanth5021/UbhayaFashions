@@ -510,6 +510,22 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             return Conflict("A different captured payment is already recorded for this order.");
         await CheckoutSafety.ApplyCaptureAsync(db, lockedOrder, lockedPayment, request.RazorpayPaymentId);
         lockedPayment.Signature = request.RazorpaySignature;
+        if (lockedOrder.PaymentStatus == "Paid" && lockedOrder.CouponId.HasValue &&
+            !await db.CouponRedemptions.AnyAsync(x => x.OrderId == lockedOrder.Id))
+        {
+            var redeemedCoupon = await db.Coupons.SingleOrDefaultAsync(x => x.Id == lockedOrder.CouponId.Value);
+            if (redeemedCoupon is not null)
+            {
+                redeemedCoupon.UsageCount++;
+                db.CouponRedemptions.Add(new CouponRedemption
+                {
+                    CouponId = redeemedCoupon.Id,
+                    CustomerId = lockedOrder.CustomerId,
+                    OrderId = lockedOrder.Id,
+                    RedeemedAtUtc = DateTime.UtcNow
+                });
+            }
+        }
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
         if (lockedOrder.PaymentStatus != "Paid" || CheckoutSafety.IsCancelled(lockedOrder))
