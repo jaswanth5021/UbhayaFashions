@@ -61,7 +61,7 @@ public class AdminCouponsController(ApplicationDbContext db) : ControllerBase
         if (!r.IsAutomatic && (string.IsNullOrWhiteSpace(r.Code) || r.Code.Length > 40)) return "Enter a valid coupon code.";
         if (r.DiscountType is not ("Percentage" or "Fixed")) return "Discount type must be Percentage or Fixed.";
         if (r.DiscountValue <= 0 || (r.DiscountType == "Percentage" && r.DiscountValue > 100)) return "Enter a valid discount value.";
-        if (r.MaximumDiscount < 0 || r.MinimumOrderAmount < 0 || r.MaximumUses < 1 || r.PerCustomerLimit < 1) return "Discount limits must be positive.";
+        if ((r.MaximumDiscount.HasValue && r.MaximumDiscount.Value < 0) || r.MinimumOrderAmount < 0 || (r.MaximumUses.HasValue && r.MaximumUses.Value < 1) || (r.PerCustomerLimit.HasValue && r.PerCustomerLimit.Value < 1)) return "Discount limits must be positive.";
         if (r.StartsAtUtc.HasValue && r.EndsAtUtc.HasValue && r.EndsAtUtc <= r.StartsAtUtc) return "End date must be after start date.";
         if (r.ProductId.HasValue && !await db.Products.AnyAsync(x => x.Id == r.ProductId)) return "Selected product was not found.";
         if (r.CategoryId.HasValue && !await db.Categories.AnyAsync(x => x.Id == r.CategoryId)) return "Selected category was not found.";
