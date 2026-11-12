@@ -4,7 +4,8 @@ public record CreatePaymentOrderRequest(
     string ShippingAddress,
     List<CreateOrderItem> Items,
     PaymentDeliveryAddress? DeliveryAddress = null,
-    string? CheckoutKey = null);
+    string? CheckoutKey = null,
+    string? CouponCode = null);
 
 public record PaymentDeliveryAddress(
     string Name,
