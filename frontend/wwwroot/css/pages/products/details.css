@@ -4369,3 +4369,190 @@
         margin: 14px 0 10px;
     }
 }
+
+
+/* Premium Ubhaya coupon card refinement */
+.product-coupon-offers {
+    margin: 20px 0 24px;
+}
+.product-coupon-offers > h2 {
+    margin-bottom: 12px;
+    color: #35252b;
+    font-size: 18px;
+    font-weight: 700;
+}
+.product-coupon-offers > h2::after {
+    background: linear-gradient(90deg, #d9b8c3 0%, rgb(217 184 195 / 12%) 100%);
+}
+.product-coupon-offers-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr));
+    gap: 12px;
+}
+.product-coupon-card {
+    isolation: isolate;
+    min-height: 146px;
+    padding: 16px 17px 15px;
+    border: 1px solid #ead7dc;
+    border-radius: 13px;
+    background:
+        radial-gradient(circle at 100% 0%, rgb(142 23 72 / 7%), transparent 42%),
+        linear-gradient(135deg, #fff 0%, #fffaf9 100%);
+    box-shadow: 0 5px 18px rgb(70 30 45 / 6%);
+}
+.product-coupon-card::after {
+    position: absolute;
+    z-index: -1;
+    right: -27px;
+    bottom: -44px;
+    width: 112px;
+    height: 112px;
+    border: 1px solid rgb(142 23 72 / 8%);
+    border-radius: 50%;
+    content: "";
+    box-shadow: 0 0 0 11px rgb(142 23 72 / 3%), 0 0 0 22px rgb(142 23 72 / 2%);
+    pointer-events: none;
+}
+.product-coupon-card:hover {
+    border-color: #d5aeba;
+    box-shadow: 0 9px 24px rgb(70 30 45 / 10%);
+    transform: translateY(-2px);
+}
+.product-coupon-card-heading {
+    position: relative;
+    z-index: 1;
+    gap: 10px;
+}
+.product-coupon-card-heading strong {
+    color: #39272e;
+    font-size: 14px;
+    font-weight: 750;
+}
+.product-coupon-terms-toggle {
+    padding: 4px 7px;
+    border: 1px solid #ead4dc;
+    border-radius: 20px;
+    background: #fff;
+    color: #861744;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+.product-coupon-terms-toggle:hover {
+    border-color: #b86a86;
+    background: #fff7fa;
+    text-decoration: none;
+}
+.product-coupon-card-main {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 13px;
+}
+.product-coupon-card-value {
+    min-width: 0;
+}
+.product-coupon-kicker {
+    display: block;
+    margin-bottom: 3px;
+    color: #927b83;
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 1.15px;
+}
+.product-coupon-description {
+    min-height: 0;
+    margin: 0;
+    color: #941b4d;
+    font-size: clamp(21px, 2vw, 25px);
+    font-weight: 800;
+    letter-spacing: -.8px;
+    line-height: 1.1;
+    display: block;
+}
+.product-coupon-condition {
+    display: block;
+    margin-top: 6px;
+    color: #79676e;
+    font-size: 10px;
+    line-height: 1.35;
+}
+.product-coupon-card-actions {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+.product-coupon-code,
+.product-coupon-auto-label {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3px;
+    min-width: 116px;
+    min-height: 52px;
+    padding: 7px 31px 7px 11px;
+    border: 1px solid #851640;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #941b4d, #741238);
+    color: #fff;
+    box-shadow: 0 3px 8px rgb(116 18 56 / 16%);
+    letter-spacing: 0;
+}
+.product-coupon-code:hover {
+    border-color: #5d0d2b;
+    background: linear-gradient(135deg, #7e153f, #5d0d2b);
+}
+.product-coupon-code-label {
+    color: rgb(255 255 255 / 78%);
+    font-size: 8px;
+    font-weight: 750;
+    letter-spacing: 1px;
+}
+.product-coupon-code-value {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .45px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.product-coupon-copy-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    font-size: 16px;
+    transform: translateY(-50%);
+}
+.product-coupon-auto-label {
+    align-items: center;
+    min-width: 116px;
+    padding: 0 12px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 750;
+}
+.product-coupon-terms {
+    position: relative;
+    z-index: 2;
+    border-color: #ead7dc;
+    box-shadow: 0 5px 14px rgb(70 30 45 / 5%);
+}
+@media (max-width: 600px) {
+    .product-coupon-offers { margin: 17px 0 20px; }
+    .product-coupon-offers > h2 { font-size: 17px; }
+    .product-coupon-offers-grid { grid-template-columns: 1fr; }
+    .product-coupon-card { min-height: 138px; padding: 14px; }
+    .product-coupon-card-main { gap: 8px; }
+    .product-coupon-description { font-size: 22px; }
+    .product-coupon-code,
+    .product-coupon-auto-label { min-width: 108px; }
+}
+@media (max-width: 360px) {
+    .product-coupon-card-main { align-items: stretch; flex-direction: column; }
+    .product-coupon-card-actions { margin-left: 0; }
+    .product-coupon-code { width: 100%; }
+}
