@@ -13,6 +13,9 @@ public class AdminApiService(IHttpClientFactory factory,IHttpContextAccessor acc
  public async Task<List<AdminProductInput>> Products()=>await Send<List<AdminProductInput>>(Request(HttpMethod.Get,"api/admin/products"))??[];
  public async Task<List<CategoryViewModel>> Categories()=>await Send<List<CategoryViewModel>>(Request(HttpMethod.Get,"api/admin/categories"))??[];
  public async Task<CategoryViewModel> SaveCategory(CategoryViewModel category){var r=Request(category.Id==0?HttpMethod.Post:HttpMethod.Put,category.Id==0?"api/admin/categories":$"api/admin/categories/{category.Id}");r.Content=JsonContent.Create(category);var x=await Client.SendAsync(r);if(!x.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(x.Content));return await x.Content.ReadFromJsonAsync<CategoryViewModel>()??throw new InvalidOperationException("The backend did not return the saved category.");}
+ public async Task<List<CouponAdminViewModel>> Coupons()=>await Send<List<CouponAdminViewModel>>(Request(HttpMethod.Get,"api/admin/coupons"))??[];
+ public async Task SaveCoupon(CouponAdminViewModel coupon){var method=coupon.Id==0?HttpMethod.Post:HttpMethod.Put;var url=coupon.Id==0?"api/admin/coupons":$"api/admin/coupons/{coupon.Id}";var request=Request(method,url);request.Content=JsonContent.Create(coupon);var response=await Client.SendAsync(request);if(!response.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(response.Content));}
+ public async Task DeleteCoupon(int id){var response=await Client.SendAsync(Request(HttpMethod.Delete,$"api/admin/coupons/{id}"));if(!response.IsSuccessStatusCode)throw new InvalidOperationException(await ReadError(response.Content));}
  public async Task<List<StorefrontBannerViewModel>> StorefrontBanners()
  {
   var result = await Send<List<StorefrontBannerViewModel>>(Request(HttpMethod.Get,"api/admin/storefront-banner"));
