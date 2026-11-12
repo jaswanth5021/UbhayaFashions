@@ -427,6 +427,22 @@
             </div>
 
 
+            <section class="product-delivery-check" id="productDeliveryCheck"
+                     data-check-url="@Url.Action("CheckDeliveryServiceability", "Cart")"
+                     aria-labelledby="productDeliveryTitle">
+                <h3 id="productDeliveryTitle">Delivery To</h3>
+                <p>Enter your PIN code to check delivery availability</p>
+                <div class="product-delivery-input-row">
+                    <label class="visually-hidden" for="productDeliveryPincode">Delivery PIN code</label>
+                    <input id="productDeliveryPincode" type="text" inputmode="numeric" autocomplete="postal-code"
+                           maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit PIN code" />
+                    <button type="button" id="checkProductDelivery">CHECK</button>
+                </div>
+                <p id="productDeliveryMessage" class="product-delivery-message" role="status" aria-live="polite">
+                    Check your PIN code before adding this product to your bag.
+                </p>
+            </section>
+
             <form asp-controller="Cart"
                   asp-action="Add"
                   method="post"
@@ -441,6 +457,7 @@
                 <input type="hidden"
                        name="productId"
                        value="@Model.Id" />
+                <input type="hidden" name="deliveryPincode" id="verifiedDeliveryPincode" value="" />
                 <div id="productVariantData" data-variants="@System.Text.Json.JsonSerializer.Serialize(allVariants)" hidden></div>
 
 
@@ -620,6 +637,8 @@
 
                     <button class="button product-add-button"
                             type="submit"
+                            disabled
+                            data-delivery-gated
                             name="buyNow"
                             value="false">
 
@@ -630,6 +649,8 @@
 
                     <button class="button product-buy-button"
                             type="submit"
+                            disabled
+                            data-delivery-gated
                             name="buyNow"
                             value="true">
 
@@ -670,7 +691,7 @@
         <span>&#8377;<span data-sticky-price>@Model.Price.ToString("N0")</span></span>
         
     </div>
-    <button type="button" class="product-mobile-sticky-button" data-sticky-add>ADD TO BAG</button>
+    <button type="button" class="product-mobile-sticky-button" data-sticky-add disabled>ADD TO BAG</button>
 </div>
 
 <dialog class="product-size-guide" id="productSizeGuide" aria-labelledby="productSizeGuideTitle">
@@ -1253,6 +1274,72 @@
 
 
 <script>
+
+    /* =========================================================
+       DELIVERY PIN CODE SERVICEABILITY
+       ========================================================= */
+    (() => {
+        const panel = document.getElementById("productDeliveryCheck");
+        const input = document.getElementById("productDeliveryPincode");
+        const checkButton = document.getElementById("checkProductDelivery");
+        const message = document.getElementById("productDeliveryMessage");
+        const hiddenPin = document.getElementById("verifiedDeliveryPincode");
+        const purchaseButtons = document.querySelectorAll("[data-delivery-gated], [data-sticky-add]");
+        if (!panel || !input || !checkButton || !message || !hiddenPin) return;
+
+        let verifiedPin = "";
+        const setPurchaseEnabled = enabled => purchaseButtons.forEach(button => button.disabled = !enabled);
+        const resetVerification = () => {
+            verifiedPin = "";
+            hiddenPin.value = "";
+            setPurchaseEnabled(false);
+            message.textContent = "Check your PIN code before adding this product to your bag.";
+            message.className = "product-delivery-message";
+        };
+        input.addEventListener("input", () => {
+            input.value = input.value.replace(/\\D/g, "").slice(0, 6);
+            if (input.value !== verifiedPin) resetVerification();
+        });
+        checkButton.addEventListener("click", async () => {
+            const pin = input.value.trim();
+            if (!/^[0-9]{6}$/.test(pin)) {
+                resetVerification();
+                message.textContent = "Please enter a valid six-digit PIN code.";
+                message.classList.add("is-error");
+                input.focus();
+                return;
+            }
+            checkButton.disabled = true;
+            checkButton.textContent = "CHECKING...";
+            resetVerification();
+            message.textContent = "Checking delivery availability...";
+            message.classList.add("is-checking");
+            try {
+                const response = await fetch(panel.dataset.checkUrl + "?postalCode=" + encodeURIComponent(pin), {
+                    method: "GET",
+                    headers: { "Accept": "application/json" },
+                    cache: "no-store"
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success || !result.serviceable) {
+                    message.textContent = result.message || "Delivery is not available for this PIN code.";
+                    message.className = "product-delivery-message is-error";
+                    return;
+                }
+                verifiedPin = pin;
+                hiddenPin.value = pin;
+                setPurchaseEnabled(true);
+                message.textContent = result.message || "Delivery is available to this PIN code.";
+                message.className = "product-delivery-message is-success";
+            } catch {
+                message.textContent = "We couldn't verify delivery right now. Please try again in a few minutes.";
+                message.className = "product-delivery-message is-error";
+            } finally {
+                checkButton.disabled = false;
+                checkButton.textContent = "CHECK";
+            }
+        });
+    })();
 
     /* =========================================================
        PRODUCT DETAIL GALLERY
@@ -2294,6 +2381,16 @@
         ?.addEventListener(
             "submit",
             event => {
+
+                const verifiedPin = document.getElementById("verifiedDeliveryPincode")?.value;
+                if (!verifiedPin || verifiedPin !== document.getElementById("productDeliveryPincode")?.value.trim()) {
+                    event.preventDefault();
+                    const deliveryMessage = document.getElementById("productDeliveryMessage");
+                    deliveryMessage.textContent = "Please check a serviceable delivery PIN code before purchasing.";
+                    deliveryMessage.className = "product-delivery-message is-error";
+                    document.getElementById("productDeliveryCheck")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    return;
+                }
 
                 const sizeFieldset =
                     document.querySelector(
