@@ -679,21 +679,32 @@ public class ApiService(
         if (string.IsNullOrWhiteSpace(postalCode) || postalCode.Length != 6 || !postalCode.All(char.IsDigit))
             return (false, false, "Enter a valid six-digit PIN code.");
 
-        using var response = await Client.GetAsync($"api/delivery/serviceability/{Uri.EscapeDataString(postalCode)}");
-        var body = await response.Content.ReadAsStringAsync();
         try
         {
-            using var document = JsonDocument.Parse(body);
-            var root = document.RootElement;
-            var serviceable = root.TryGetProperty("serviceable", out var value) && value.ValueKind == JsonValueKind.True;
-            var message = root.TryGetProperty("message", out var messageValue)
-                ? messageValue.GetString() ?? "Delivery availability could not be confirmed."
-                : "Delivery availability could not be confirmed.";
-            return (response.IsSuccessStatusCode, serviceable, message);
+            using var response = await Client.GetAsync($"api/delivery/serviceability/{Uri.EscapeDataString(postalCode)}");
+            var body = await response.Content.ReadAsStringAsync();
+            try
+            {
+                using var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+                var serviceable = root.TryGetProperty("serviceable", out var value) && value.ValueKind == JsonValueKind.True;
+                var message = root.TryGetProperty("message", out var messageValue)
+                    ? messageValue.GetString() ?? "Delivery availability could not be confirmed."
+                    : "Delivery availability could not be confirmed.";
+                return (response.IsSuccessStatusCode, serviceable, message);
+            }
+            catch (JsonException)
+            {
+                return (false, false, "We couldn't verify delivery availability right now. Please try again in a few minutes.");
+            }
         }
-        catch (JsonException)
+        catch (HttpRequestException)
         {
-            return (false, false, "We couldn't verify delivery availability right now. Please try again in a few minutes.");
+            return (false, false, "We couldn't connect to the delivery service. Please try again in a few minutes.");
+        }
+        catch (TaskCanceledException)
+        {
+            return (false, false, "The delivery check timed out. Please try again.");
         }
     }
 
