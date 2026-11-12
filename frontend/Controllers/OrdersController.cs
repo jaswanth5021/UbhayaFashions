@@ -274,7 +274,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });
 
-        var result = await api.CreateRazorpayOrderAsync(cart, model.ShippingAddress, model.Address, model.CheckoutKey);
+        var result = await api.CreateRazorpayOrderAsync(cart, model.ShippingAddress, model.Address, model.CheckoutKey, model.CouponCode);
         if (!result.Success || result.Data is null)
         {
             TempData["Error"] = result.Message;
