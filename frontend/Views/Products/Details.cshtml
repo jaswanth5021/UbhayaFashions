@@ -637,8 +637,6 @@
 
                     <button class="button product-add-button"
                             type="submit"
-                            disabled
-                            data-delivery-gated
                             name="buyNow"
                             value="false">
 
@@ -649,8 +647,6 @@
 
                     <button class="button product-buy-button"
                             type="submit"
-                            disabled
-                            data-delivery-gated
                             name="buyNow"
                             value="true">
 
@@ -691,7 +687,7 @@
         <span>&#8377;<span data-sticky-price>@Model.Price.ToString("N0")</span></span>
         
     </div>
-    <button type="button" class="product-mobile-sticky-button" data-sticky-add disabled>ADD TO BAG</button>
+    <button type="button" class="product-mobile-sticky-button" data-sticky-add>ADD TO BAG</button>
 </div>
 
 <dialog class="product-size-guide" id="productSizeGuide" aria-labelledby="productSizeGuideTitle">
@@ -1284,16 +1280,18 @@
         const checkButton = document.getElementById("checkProductDelivery");
         const message = document.getElementById("productDeliveryMessage");
         const hiddenPin = document.getElementById("verifiedDeliveryPincode");
-        const purchaseButtons = document.querySelectorAll("[data-delivery-gated], [data-sticky-add]");
+        const buyNowButton = document.querySelector('.product-buy-button[name="buyNow"][value="true"]');
         if (!panel || !input || !checkButton || !message || !hiddenPin) return;
 
         let verifiedPin = "";
-        const setPurchaseEnabled = enabled => purchaseButtons.forEach(button => button.disabled = !enabled);
+        const setBuyNowEnabled = enabled => { if (buyNowButton) buyNowButton.disabled = !enabled; };
+        // Adding an item to the bag is allowed without a PIN. A PIN is required only for Buy It Now.
+        setBuyNowEnabled(false);
         const resetVerification = () => {
             verifiedPin = "";
             hiddenPin.value = "";
-            setPurchaseEnabled(false);
-            message.textContent = "Check your PIN code before adding this product to your bag.";
+            setBuyNowEnabled(false);
+            message.textContent = "Enter your PIN code to check delivery before using Buy It Now. You can still add this item to your cart.";
             message.className = "product-delivery-message";
         };
         input.addEventListener("input", () => {
@@ -1328,7 +1326,7 @@
                 }
                 verifiedPin = pin;
                 hiddenPin.value = pin;
-                setPurchaseEnabled(true);
+                setBuyNowEnabled(true);
                 message.textContent = result.message || "Delivery is available to this PIN code.";
                 message.className = "product-delivery-message is-success";
             } catch {
@@ -2382,13 +2380,17 @@
             "submit",
             event => {
 
+                const submitter = event.submitter;
+                const isBuyNow = submitter?.name === "buyNow" && submitter.value === "true";
                 const verifiedPin = document.getElementById("verifiedDeliveryPincode")?.value;
-                if (!verifiedPin || verifiedPin !== document.getElementById("productDeliveryPincode")?.value.trim()) {
+                const currentPin = document.getElementById("productDeliveryPincode")?.value.trim();
+                if (isBuyNow && (!verifiedPin || verifiedPin !== currentPin)) {
                     event.preventDefault();
                     const deliveryMessage = document.getElementById("productDeliveryMessage");
-                    deliveryMessage.textContent = "Please check a serviceable delivery PIN code before purchasing.";
+                    deliveryMessage.textContent = "Please enter your PIN code and check delivery availability before using Buy It Now. You can still add this product to your cart.";
                     deliveryMessage.className = "product-delivery-message is-error";
                     document.getElementById("productDeliveryCheck")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    document.getElementById("productDeliveryPincode")?.focus();
                     return;
                 }
 
