@@ -12,6 +12,8 @@ public class CheckoutCouponOfferViewModel
     public decimal MinimumOrderAmount { get; set; }
     public bool IsAutomatic { get; set; }
     public bool FirstOrderOnly { get; set; }
+    public int? ProductId { get; set; }
+    public int? CategoryId { get; set; }
     public string AppliesTo { get; set; } = "";
     public DateTime? EndsAtUtc { get; set; }
     public string Terms { get; set; } = "";
