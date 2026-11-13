@@ -390,7 +390,12 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             foreach (var item in request.Items)
             {
                 var product = products.Single(x => x.Id == item.ProductId);
-                var variant = product.Variants.FirstOrDefault(x => x.Size == item.Size);
+                var hasColorVariants = product.Variants.Any(x => !string.IsNullOrWhiteSpace(x.Color));
+                var variant = hasColorVariants
+                    ? product.Variants.FirstOrDefault(x => x.Size == item.Size &&
+                        string.Equals(x.Color, item.Color, StringComparison.OrdinalIgnoreCase))
+                        ?? product.Variants.FirstOrDefault(x => x.Size == item.Size && string.IsNullOrWhiteSpace(x.Color))
+                    : product.Variants.FirstOrDefault(x => x.Size == item.Size);
 
                 if (variant is null)
                     return BadRequest($"{product.Name} does not have size {item.Size}.");
@@ -421,9 +426,67 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
                 });
             }
 
+            var normalizedCouponCode = request.CouponCode?.Trim().ToUpperInvariant() ?? string.Empty;
+            var nowUtc = DateTime.UtcNow;
+            var candidates = await db.Coupons.Where(coupon => coupon.IsActive &&
+                (string.IsNullOrWhiteSpace(normalizedCouponCode) ? coupon.IsAutomatic : coupon.Code == normalizedCouponCode) &&
+                (!coupon.StartsAtUtc.HasValue || coupon.StartsAtUtc <= nowUtc) &&
+                (!coupon.EndsAtUtc.HasValue || coupon.EndsAtUtc >= nowUtc) &&
+                (!coupon.MaximumUses.HasValue || coupon.UsageCount < coupon.MaximumUses)).ToListAsync();
+            var hasPreviousOrder = await db.Orders.AnyAsync(existingOrder => existingOrder.CustomerId == customerId &&
+                (existingOrder.PaymentStatus == "Paid" || existingOrder.Status == "Processing" ||
+                 existingOrder.Status == "Shipped" || existingOrder.Status == "Delivered"));
+            var redeemedCouponIds = await db.CouponRedemptions.Where(redemption => redemption.CustomerId == customerId)
+                .Select(redemption => redemption.CouponId).ToListAsync();
+            var eligibleCoupons = candidates.Select(coupon =>
+            {
+                var eligibleProductIds = products.Where(product =>
+                    (!coupon.ProductId.HasValue || product.Id == coupon.ProductId.Value) &&
+                    (!coupon.CategoryId.HasValue || product.CategoryId == coupon.CategoryId.Value))
+                    .Select(product => product.Id).ToHashSet();
+                var eligibleSubtotal = order.Items.Where(item => eligibleProductIds.Contains(item.ProductId))
+                    .Sum(item => item.Price * item.Quantity);
+                var usageAllowed = !coupon.PerCustomerLimit.HasValue ||
+                    redeemedCouponIds.Count(id => id == coupon.Id) < coupon.PerCustomerLimit.Value;
+                var firstOrderAllowed = !coupon.FirstOrderOnly || !hasPreviousOrder;
+                var amount = coupon.DiscountType == "Percentage"
+                    ? eligibleSubtotal * coupon.DiscountValue / 100m
+                    : coupon.DiscountValue;
+                if (coupon.MaximumDiscount.HasValue) amount = Math.Min(amount, coupon.MaximumDiscount.Value);
+                amount = Math.Round(Math.Clamp(amount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
+                return new { Coupon = coupon, EligibleSubtotal = eligibleSubtotal, UsageAllowed, FirstOrderAllowed, Amount = amount };
+            }).Where(offer => offer.EligibleSubtotal >= offer.Coupon.MinimumOrderAmount && offer.UsageAllowed &&
+                offer.FirstOrderAllowed && offer.Amount > 0m &&
+                (offer.Coupon.IsAutomatic || string.Equals(offer.Coupon.Code, normalizedCouponCode, StringComparison.OrdinalIgnoreCase)))
+                .OrderByDescending(offer => offer.Amount).ToList();
+            if (!string.IsNullOrWhiteSpace(normalizedCouponCode) && eligibleCoupons.All(offer =>
+                    !string.Equals(offer.Coupon.Code, normalizedCouponCode, StringComparison.OrdinalIgnoreCase)))
+                return BadRequest("This coupon is invalid or does not apply to your cart.");
+
+            if (eligibleCoupons.Count > 0)
+            {
+                var selectedCoupon = eligibleCoupons[0];
+                order.CouponId = selectedCoupon.Coupon.Id;
+                order.CouponCode = selectedCoupon.Coupon.IsAutomatic ? null : selectedCoupon.Coupon.Code;
+                order.DiscountAmount = selectedCoupon.Amount;
+                total = Math.Max(0m, total - selectedCoupon.Amount);
+            }
+
             order.TotalAmount = total;
             db.Orders.Add(order);
             await db.SaveChangesAsync();
+            if (order.CouponId.HasValue)
+            {
+                var redeemedCoupon = candidates.Single(coupon => coupon.Id == order.CouponId.Value);
+                redeemedCoupon.UsageCount++;
+                db.CouponRedemptions.Add(new CouponRedemption
+                {
+                    CouponId = redeemedCoupon.Id,
+                    CustomerId = customerId,
+                    OrderId = order.Id
+                });
+                await db.SaveChangesAsync();
+            }
             await transaction.CommitAsync();
 
             await db.Entry(order).Reference(x => x.Customer).LoadAsync();

@@ -187,6 +187,20 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
 
         ViewBag.SavedAddresses = savedAddresses;
         ViewBag.CartVariants = cartVariants;
+        try
+        {
+            ViewBag.CheckoutCouponOffers = await api.GetCheckoutCouponOffersAsync(cart);
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogWarning(ex, "Unable to load eligible coupon offers for checkout.");
+            ViewBag.CheckoutCouponOffers = new List<CheckoutCouponOfferViewModel>();
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(ex, "Unable to read eligible coupon offers for checkout.");
+            ViewBag.CheckoutCouponOffers = new List<CheckoutCouponOfferViewModel>();
+        }
         return View(cart);
     }
 
@@ -337,7 +351,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         if (string.IsNullOrWhiteSpace(address))
             return Json(new { success = false, message = "Delivery address is required." });
 
-        var result = await api.CreateTestSuccessfulPaymentAsync(cart, address);
+        var result = await api.CreateTestSuccessfulPaymentAsync(cart, address, model.CouponCode);
         if (!result.Success)
             return Json(new { success = false, message = result.Message });
 

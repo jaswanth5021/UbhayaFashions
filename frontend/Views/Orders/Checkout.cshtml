@@ -5,6 +5,7 @@
     var itemCount = Model.Sum(x => x.Quantity);
     var savedAddresses = ViewBag.SavedAddresses as List<SavedAddressViewModel> ?? [];
     var cartVariants = ViewBag.CartVariants as Dictionary<int, List<ProductVariantViewModel>> ?? new();
+    var checkoutCouponOffers = ViewBag.CheckoutCouponOffers as List<CheckoutCouponOfferViewModel> ?? [];
 }
 
 <section class="checkout-screen checkout-four-step">
@@ -72,11 +73,6 @@
                         <a class="checkout-continue-shopping" asp-controller="Products" asp-action="Index">Continue Shopping</a>
                     </div>
 
-                    <div class="checkout-coupon-entry">
-                        <label for="checkoutCouponCode">Coupon code</label>
-                        <input id="checkoutCouponCode" name="CouponCode" type="text" maxlength="40" autocomplete="off" placeholder="Enter coupon code" />
-                        <small>Automatic offers and eligible first-order discounts are applied at checkout.</small>
-                    </div>
                     <div class="checkout-bag-items">
                         @for (var itemIndex = 0; itemIndex < Model.Count; itemIndex++)
                         {
@@ -289,6 +285,92 @@
                         </label>
                     </div>
 
+                    <section class="checkout-coupon-panel" aria-labelledby="checkoutCouponTitle">
+                        <div class="checkout-coupon-heading">
+                            <div>
+                                <strong id="checkoutCouponTitle">Apply a coupon</strong>
+                                <span>Choose an offer available for your cart or enter its code.</span>
+                            </div>
+                        </div>
+                        <div class="checkout-coupon-entry">
+                            <label for="checkoutCouponCode">Coupon code</label>
+                            <div class="checkout-coupon-input-row">
+                                <input id="checkoutCouponCode" type="text" maxlength="40" autocomplete="off" placeholder="Enter coupon code" />
+                                <input id="checkoutCouponCodeValue" type="hidden" name="CouponCode" value="" />
+                                <button id="checkoutApplyCoupon" type="button">Apply</button>
+                            </div>
+                        </div>
+                        <p id="checkoutCouponMessage" class="checkout-coupon-message" role="status" aria-live="polite"></p>
+                        <div class="checkout-coupon-offers">
+                            <h2>Active offers for your cart</h2>
+                            @if (checkoutCouponOffers.Count > 0)
+                            {
+                                <div class="checkout-coupon-offer-list">
+                                    @foreach (var offer in checkoutCouponOffers)
+                                    {
+                                        <article class="checkout-coupon-offer"
+                                                 data-checkout-coupon-offer
+                                                 data-coupon-code="@(offer.Code ?? "")"
+                                                 data-coupon-name="@offer.Name"
+                                                 data-coupon-discount="@offer.DiscountAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                 data-coupon-can-apply="@(offer.CanApply ? "true" : "false")"
+                                                 data-coupon-automatic="@(offer.IsAutomatic ? "true" : "false")">
+                                            <div class="checkout-coupon-offer-heading">
+                                                <strong title="@offer.Name">@offer.Name</strong>
+                                                <details class="checkout-coupon-terms">
+                                                    <summary>T&amp;C <span aria-hidden="true">›</span></summary>
+                                                    <div>
+                                                        <strong>Offer details</strong>
+                                                        <p>@offer.AppliesTo</p>
+                                                        @if (!string.IsNullOrWhiteSpace(offer.Terms)) { <p>@offer.Terms</p> }
+                                                        @if (offer.EndsAtUtc.HasValue) { <p>Valid until @offer.EndsAtUtc.Value.ToLocalTime().ToString("dd MMM yyyy")</p> }
+                                                    </div>
+                                                </details>
+                                            </div>
+                                            <div class="checkout-coupon-offer-main">
+                                                <div class="checkout-coupon-offer-value">
+                                                    <span class="checkout-coupon-kicker">SPECIAL OFFER</span>
+                                                    <strong class="checkout-coupon-discount-text">@offer.DiscountText</strong>
+                                                    <span class="checkout-coupon-condition">
+                                                        @(offer.FirstOrderOnly ? "First order" : "All eligible orders")
+                                                        @if (offer.IsAutomatic) { <text> · Auto applied</text> }
+                                                    </span>
+                                                </div>
+                                                <div class="checkout-coupon-card-actions">
+                                                    @if (!string.IsNullOrWhiteSpace(offer.Code) && offer.CanApply)
+                                                    {
+                                                        <button type="button" class="checkout-coupon-use" data-checkout-coupon-use aria-label="Use coupon code @offer.Code">
+                                                            <span>USE CODE</span><b>@offer.Code</b>
+                                                            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="14" height="14" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                                                        </button>
+                                                    }
+                                                    else if (!string.IsNullOrWhiteSpace(offer.Code))
+                                                    {
+                                                        <div class="checkout-coupon-use is-unavailable" title="@offer.EligibilityMessage">
+                                                            <span>ACTIVE CODE</span><b>@offer.Code</b>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="checkout-coupon-auto-label" data-checkout-coupon-auto-label>@(offer.CanApply ? "AUTO APPLIED" : "NOT ELIGIBLE")</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            @if (!offer.CanApply && !string.IsNullOrWhiteSpace(offer.EligibilityMessage))
+                                            {
+                                                <p class="checkout-coupon-ineligible">@offer.EligibilityMessage</p>
+                                            }
+                                        </article>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="checkout-coupon-empty">There are no active coupons available for this cart right now.</p>
+                            }
+                        </div>
+                    </section>
+
                     <div class="checkout-secure-note">
                         <strong>🔒 Secure Checkout</strong>
                         <span>Your payment is processed securely by Razorpay.</span>
@@ -355,8 +437,8 @@
                     </div>
 
                     <div class="checkout-review-total">
-                        <span>Total Payable</span>
-                        <strong>₹@total.ToString("N0")</strong>
+                        <div id="checkoutReviewCouponDiscount" hidden><span id="checkoutReviewCouponLabel">Coupon discount</span><strong id="checkoutReviewCouponAmount"></strong></div>
+                        <div><span>Total Payable</span><strong id="checkoutReviewTotal">₹@total.ToString("N0")</strong></div>
                     </div>
 
                     <div class="checkout-screen-actions">
@@ -400,6 +482,7 @@
                 </div>
                 <div class="checkout-screen-total-lines" id="checkoutPaymentPriceBreakdown" aria-label="Order price breakdown" hidden data-subtotal="@total.ToString(System.Globalization.CultureInfo.InvariantCulture)">
                     <div><span>Subtotal</span><strong id="checkoutQuoteSubtotal">₹@total.ToString("N2")</strong></div>
+                    <div id="checkoutQuoteCouponDiscount" class="checkout-screen-coupon-line" hidden><span id="checkoutQuoteCouponLabel">Coupon discount</span><strong id="checkoutQuoteCouponAmount"></strong></div>
                     <div><span>Delhivery charges</span><strong id="checkoutQuoteShipping" class="@(total >= 1000m ? "free" : "")">@(total >= 1000m ? "FREE" : "Calculating…")</strong></div>
                     <div class="checkout-screen-total-payable"><span>Total payable</span><strong id="checkoutQuoteTotal">₹@total.ToString("N2")</strong></div>
                     <p id="checkoutQuoteMessage" class="checkout-shipping-disclaimer" role="status" aria-live="polite"></p>
@@ -464,8 +547,150 @@
             const quoteShipping = document.getElementById('checkoutQuoteShipping');
             const quoteTotal = document.getElementById('checkoutQuoteTotal');
             const quoteMessage = document.getElementById('checkoutQuoteMessage');
+            const couponInput = document.getElementById('checkoutCouponCode');
+            const couponCodeValue = document.getElementById('checkoutCouponCodeValue');
+            const couponMessage = document.getElementById('checkoutCouponMessage');
+            const couponDiscountLine = document.getElementById('checkoutQuoteCouponDiscount');
+            const couponDiscountLabel = document.getElementById('checkoutQuoteCouponLabel');
+            const couponDiscountAmount = document.getElementById('checkoutQuoteCouponAmount');
+            const reviewCouponDiscount = document.getElementById('checkoutReviewCouponDiscount');
+            const reviewCouponLabel = document.getElementById('checkoutReviewCouponLabel');
+            const reviewCouponAmount = document.getElementById('checkoutReviewCouponAmount');
+            const reviewTotal = document.getElementById('checkoutReviewTotal');
+            const mobileTotal = document.querySelector('.checkout-mobile-sticky-total strong');
+            const reviewPayButton = document.querySelector('#checkoutScreenForm button[type="submit"].checkout-screen-primary');
+            const couponOffers = [...document.querySelectorAll('[data-checkout-coupon-offer]')];
             const paymentReviewButton = document.querySelector('[data-checkout-screen-next="4"]');
             let shippingQuoteReady = Number(quoteBreakdown?.dataset.subtotal || 0) >= 1000;
+
+            const automaticCoupon = couponOffers.find(offer => offer.dataset.couponAutomatic === 'true' &&
+                offer.dataset.couponCanApply === 'true') || null;
+            let appliedCoupon = automaticCoupon;
+
+            const formatMoney = amount => '\u20B9' + Number(amount || 0).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            const updateCheckoutTotals = () => {
+                const subtotal = Number(quoteBreakdown?.dataset.subtotal || 0);
+                const shippingCharge = Number(quoteBreakdown?.dataset.shippingCharge || 0);
+                const discount = Number(appliedCoupon?.dataset.couponDiscount || 0);
+                const payable = Math.max(0, subtotal - discount) + shippingCharge;
+                const couponName = appliedCoupon?.dataset.couponName || '';
+                const couponCode = appliedCoupon?.dataset.couponCode || '';
+                const discountLabel = couponCode ? 'Coupon (' + couponCode + ')' : 'Automatic offer';
+
+                if (couponDiscountLine) couponDiscountLine.hidden = discount <= 0;
+                if (couponDiscountLabel) couponDiscountLabel.textContent = discountLabel;
+                if (couponDiscountAmount) couponDiscountAmount.textContent = '\u2212' + formatMoney(discount);
+                if (reviewCouponDiscount) reviewCouponDiscount.hidden = discount <= 0;
+                if (reviewCouponLabel) reviewCouponLabel.textContent = discountLabel;
+                if (reviewCouponAmount) reviewCouponAmount.textContent = '\u2212' + formatMoney(discount);
+                if (quoteTotal) quoteTotal.textContent = formatMoney(payable);
+                if (reviewTotal) reviewTotal.textContent = formatMoney(payable);
+                if (mobileTotal) mobileTotal.textContent = formatMoney(payable).replace(/\.00$/, '');
+                if (reviewPayButton) reviewPayButton.textContent = 'PAY ' + formatMoney(payable).replace(/\.00$/, '') + ' WITH RAZORPAY';
+                if (couponCodeValue) couponCodeValue.value = couponCode;
+                couponOffers.forEach(offer => {
+                    offer.classList.toggle('is-applied', offer === appliedCoupon);
+                    const autoLabel = offer.querySelector('[data-checkout-coupon-auto-label]');
+                    if (autoLabel) autoLabel.textContent = offer === appliedCoupon
+                        ? 'AUTO APPLIED'
+                        : offer.dataset.couponCanApply === 'true' ? 'AUTO OFFER' : 'NOT ELIGIBLE';
+                    const useButton = offer.querySelector('[data-checkout-coupon-use]');
+                    const useButtonLabel = useButton?.querySelector('span');
+                    if (useButtonLabel) useButtonLabel.textContent = offer === appliedCoupon ? 'APPLIED' : 'USE CODE';
+                });
+
+                if (discount > 0 && couponMessage && !couponMessage.dataset.keepMessage) {
+                    couponMessage.textContent = couponCode
+                        ? 'Coupon ' + couponCode + ' applied. You save ' + formatMoney(discount) + '.'
+                        : couponName + ' is applied. You save ' + formatMoney(discount) + '.';
+                    couponMessage.classList.add('is-success');
+                }
+            };
+
+            const applyCoupon = () => {
+                const code = couponInput?.value.trim().toUpperCase() || '';
+                if (!code) {
+                    appliedCoupon = automaticCoupon;
+                    if (couponMessage) {
+                        couponMessage.textContent = automaticCoupon
+                            ? 'The best eligible automatic offer is applied.'
+                            : 'Enter a coupon code or choose an offer below.';
+                        couponMessage.classList.toggle('is-success', Boolean(automaticCoupon));
+                        delete couponMessage.dataset.keepMessage;
+                    }
+                    updateCheckoutTotals();
+                    return Boolean(automaticCoupon);
+                }
+
+                const match = couponOffers.find(offer => offer.dataset.couponAutomatic !== 'true' &&
+                    (offer.dataset.couponCode || '').toUpperCase() === code);
+                if (!match) {
+                    if (couponMessage) {
+                        couponMessage.textContent = 'That code is not active or eligible for this cart.';
+                        couponMessage.classList.remove('is-success');
+                        couponMessage.dataset.keepMessage = 'true';
+                    }
+                    return false;
+                }
+                if (match.dataset.couponCanApply !== 'true') {
+                    if (couponMessage) {
+                        couponMessage.textContent = match.querySelector('.checkout-coupon-ineligible')?.textContent.trim() ||
+                            'This active coupon is not eligible for your current cart.';
+                        couponMessage.classList.remove('is-success');
+                        couponMessage.dataset.keepMessage = 'true';
+                    }
+                    return false;
+                }
+
+                appliedCoupon = match;
+                if (couponInput) couponInput.value = match.dataset.couponCode || code;
+                if (couponMessage) {
+                    couponMessage.textContent = 'Coupon ' + (match.dataset.couponCode || code) + ' applied. You save ' + formatMoney(match.dataset.couponDiscount) + '.';
+                    couponMessage.classList.add('is-success');
+                    delete couponMessage.dataset.keepMessage;
+                }
+                updateCheckoutTotals();
+                return true;
+            };
+
+            document.getElementById('checkoutApplyCoupon')?.addEventListener('click', applyCoupon);
+            document.querySelectorAll('[data-checkout-coupon-use]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const offer = button.closest('[data-checkout-coupon-offer]');
+                    if (!offer || !couponInput) return;
+                    couponInput.value = offer.dataset.couponCode || '';
+                    applyCoupon();
+                });
+            });
+            couponInput?.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    applyCoupon();
+                }
+            });
+            couponInput?.addEventListener('input', () => {
+                const currentCode = couponInput.value.trim().toUpperCase();
+                if (appliedCoupon && appliedCoupon.dataset.couponAutomatic !== 'true' &&
+                    currentCode !== (appliedCoupon.dataset.couponCode || '').toUpperCase()) {
+                    appliedCoupon = automaticCoupon;
+                    if (couponMessage) {
+                        couponMessage.textContent = '';
+                        couponMessage.classList.remove('is-success');
+                        delete couponMessage.dataset.keepMessage;
+                    }
+                    updateCheckoutTotals();
+                }
+            });
+
+            if (automaticCoupon && couponMessage) {
+                couponMessage.textContent = automaticCoupon.dataset.couponName + ' is applied automatically.';
+                couponMessage.classList.add('is-success');
+            }
+            updateCheckoutTotals();
 
             const updateShippingQuote = async () => {
                 if (!quoteBreakdown) return;
@@ -474,16 +699,21 @@
                 quoteBreakdown.style.display = '';
 
                 if (subtotal >= 1000) {
+                    quoteBreakdown.dataset.shippingCharge = '0';
                     quoteShipping.textContent = 'FREE';
                     quoteShipping.classList.add('free');
+                    updateCheckoutTotals();
                     quoteTotal.textContent = '₹' + subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                     quoteMessage.textContent = 'Free delivery on orders of ₹1,000 or more.';
+                    updateCheckoutTotals();
                     shippingQuoteReady = true;
                     if (paymentReviewButton) paymentReviewButton.disabled = false;
                     return;
                 }
 
                 shippingQuoteReady = false;
+                quoteBreakdown.dataset.shippingCharge = '0';
+                updateCheckoutTotals();
                 if (paymentReviewButton) paymentReviewButton.disabled = true;
                 quoteShipping.textContent = 'Calculating…';
                 quoteShipping.classList.remove('free');
@@ -503,12 +733,15 @@
                     }
 
                     const charge = Number(result.shippingCharge || 0);
+                    quoteBreakdown.dataset.shippingCharge = charge.toString();
                     const payable = Number(result.total || (subtotal + charge));
                     quoteShipping.textContent = charge > 0
                         ? '₹' + charge.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                         : 'FREE';
                     quoteShipping.classList.toggle('free', charge <= 0);
+                    updateCheckoutTotals();
                     quoteTotal.textContent = '₹' + payable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    updateCheckoutTotals();
                     quoteMessage.textContent = 'Delivery charge calculated for PIN code ' + pin + '.';
                     shippingQuoteReady = true;
                     if (paymentReviewButton) paymentReviewButton.disabled = false;
@@ -668,7 +901,7 @@
                         ? 'Continue to Payment'
                         : step === 3
                             ? 'Review Order'
-                            : 'Pay ₹@total.ToString("N0")';
+                            : 'Pay ' + (reviewTotal?.textContent || '').replace(/\.00$/, '');
             };
 
             const originalShowStep = showStep;
@@ -691,6 +924,15 @@
 
                     if (!validateNewAddressForSaving())
                         return;
+
+                    const enteredCoupon = couponInput?.value.trim().toUpperCase() || '';
+                    if (enteredCoupon && enteredCoupon !== (couponCodeValue?.value.trim().toUpperCase() || '')) {
+                        if (applyCoupon())
+                            alert('Coupon applied. Review the updated total, then simulate payment again.');
+                        else
+                            couponInput?.focus();
+                        return;
+                    }
 
                     const form = document.getElementById('checkoutScreenForm');
                     const token = form?.querySelector('input[name="__RequestVerificationToken"]')?.value;
@@ -733,6 +975,16 @@
             });
 
             document.getElementById('checkoutScreenForm')?.addEventListener('submit', event => {
+                const enteredCoupon = couponInput?.value.trim().toUpperCase() || '';
+                if (enteredCoupon && enteredCoupon !== (couponCodeValue?.value.trim().toUpperCase() || '')) {
+                    event.preventDefault();
+                    if (applyCoupon())
+                        alert('Coupon applied. Review the updated total, then continue to payment.');
+                    else
+                        couponInput?.focus();
+                    return;
+                }
+
                 syncAddress();
                 if (!shipping?.value.trim()) {
                     event.preventDefault();

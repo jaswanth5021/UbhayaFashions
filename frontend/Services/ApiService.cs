@@ -143,6 +143,26 @@ public class ApiService(
             ?? new List<ProductCouponOfferViewModel>();
     }
 
+    public async Task<List<CheckoutCouponOfferViewModel>> GetCheckoutCouponOffersAsync(List<CartItemViewModel> cart)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/coupons/checkout-offers");
+        AddToken(request);
+        request.Content = JsonContent.Create(new
+        {
+            items = cart.Select(item => new
+            {
+                productId = item.ProductId,
+                quantity = item.Quantity,
+                size = item.Size,
+                color = item.Color
+            })
+        });
+
+        using var response = await Client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<CheckoutCouponOfferViewModel>>() ?? [];
+    }
+
     public async Task<ProductViewModel?>
         GetProductAsync(int id)
     {
@@ -807,13 +827,15 @@ public class ApiService(
     public async Task<(bool Success, string Message, int OrderId)>
         CreateTestSuccessfulPaymentAsync(
             List<CartItemViewModel> cart,
-            string address)
+            string address,
+            string? couponCode = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/payments/test-success");
         AddToken(request);
         request.Content = JsonContent.Create(new
         {
             shippingAddress = address,
+            couponCode,
             items = cart.Select(x => new
             {
                 productId = x.ProductId,

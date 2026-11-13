@@ -12,6 +12,118 @@ namespace backend.Controllers;
 [Authorize(Roles = "Customer")]
 public class CouponsController(ApplicationDbContext db) : ControllerBase
 {
+    [HttpPost("checkout-offers")]
+    public async Task<IActionResult> CheckoutOffers(CheckoutCouponOffersRequest request)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var customerId))
+            return Unauthorized();
+        if (request.Items is null || request.Items.Count == 0 || request.Items.Count > 100 ||
+            request.Items.Any(item => item.Quantity <= 0 || item.Quantity > 100 || string.IsNullOrWhiteSpace(item.Size)))
+            return BadRequest("A valid cart is required.");
+
+        var productIds = request.Items.Select(item => item.ProductId).Distinct().ToList();
+        var products = await db.Products.AsNoTracking()
+            .Include(product => product.Variants)
+            .Where(product => productIds.Contains(product.Id))
+            .ToListAsync();
+        if (products.Count != productIds.Count)
+            return BadRequest("One or more products in your cart are no longer available.");
+
+        var cartLines = new List<(int ProductId, int CategoryId, decimal Amount)>();
+        foreach (var item in request.Items)
+        {
+            var product = products.Single(product => product.Id == item.ProductId);
+            var hasColorVariants = product.Variants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
+            var variant = hasColorVariants
+                ? product.Variants.FirstOrDefault(candidate => candidate.Size == item.Size &&
+                    string.Equals(candidate.Color, item.Color, StringComparison.OrdinalIgnoreCase))
+                : product.Variants.FirstOrDefault(candidate => candidate.Size == item.Size);
+            if (variant is null || variant.Stock < item.Quantity)
+                return BadRequest($"{product.Name} ({item.Size}) is no longer available in that quantity.");
+
+            cartLines.Add((product.Id, product.CategoryId, variant.Price * item.Quantity));
+        }
+
+        var subtotal = cartLines.Sum(line => line.Amount);
+        var now = DateTime.UtcNow;
+        var coupons = await db.Coupons.AsNoTracking()
+            .Where(coupon => coupon.IsActive &&
+                (!coupon.StartsAtUtc.HasValue || coupon.StartsAtUtc <= now) &&
+                (!coupon.EndsAtUtc.HasValue || coupon.EndsAtUtc >= now) &&
+                (!coupon.MaximumUses.HasValue || coupon.UsageCount < coupon.MaximumUses))
+            .ToListAsync();
+        var hasPreviousOrder = await db.Orders.AnyAsync(order => order.CustomerId == customerId &&
+            (order.PaymentStatus == "Paid" || order.Status == "Processing" ||
+             order.Status == "Shipped" || order.Status == "Delivered"));
+        var redeemedCouponIds = await db.CouponRedemptions
+            .Where(redemption => redemption.CustomerId == customerId)
+            .Select(redemption => redemption.CouponId)
+            .ToListAsync();
+
+        var offers = coupons.Select(coupon =>
+        {
+            var eligibleSubtotal = cartLines
+                .Where(line => (!coupon.ProductId.HasValue || line.ProductId == coupon.ProductId.Value) &&
+                               (!coupon.CategoryId.HasValue || line.CategoryId == coupon.CategoryId.Value))
+                .Sum(line => line.Amount);
+            var usageAllowed = !coupon.PerCustomerLimit.HasValue ||
+                redeemedCouponIds.Count(id => id == coupon.Id) < coupon.PerCustomerLimit.Value;
+            var firstOrderAllowed = !coupon.FirstOrderOnly || !hasPreviousOrder;
+            var discount = coupon.DiscountType == "Percentage"
+                ? eligibleSubtotal * coupon.DiscountValue / 100m
+                : coupon.DiscountValue;
+            if (coupon.MaximumDiscount.HasValue) discount = Math.Min(discount, coupon.MaximumDiscount.Value);
+            discount = Math.Round(Math.Clamp(discount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
+
+            var minimumOrderMet = eligibleSubtotal >= coupon.MinimumOrderAmount;
+            var canApply = eligibleSubtotal > 0m && minimumOrderMet && usageAllowed && firstOrderAllowed && discount > 0m;
+            var eligibilityMessage = !minimumOrderMet
+                ? $"Add ₹{Math.Max(0m, coupon.MinimumOrderAmount - eligibleSubtotal):0.##} more in eligible items to use this offer."
+                : !usageAllowed
+                    ? "You have already used this offer."
+                    : !firstOrderAllowed
+                        ? "This offer is for your first order only."
+                        : discount <= 0m
+                            ? "This offer does not add a discount to your current cart."
+                            : string.Empty;
+
+            return new { Coupon = coupon, EligibleSubtotal = eligibleSubtotal, UsageAllowed, FirstOrderAllowed,
+                Discount = discount, CanApply = canApply, EligibilityMessage = eligibilityMessage };
+        })
+        .Where(offer => offer.EligibleSubtotal > 0m)
+        .OrderByDescending(offer => offer.Discount)
+        .ThenBy(offer => offer.Coupon.Name)
+        .Take(8)
+        .Select(offer => new
+        {
+            offer.Coupon.Id,
+            code = offer.Coupon.IsAutomatic ? null : offer.Coupon.Code,
+            offer.Coupon.Name,
+            discountText = offer.Coupon.DiscountType == "Percentage"
+                ? $"{offer.Coupon.DiscountValue:0.##}% OFF" + (offer.Coupon.MaximumDiscount.HasValue ? $" up to ₹{offer.Coupon.MaximumDiscount.Value:0.##}" : "")
+                : $"₹{offer.Coupon.DiscountValue:0.##} OFF",
+            discountAmount = offer.CanApply ? offer.Discount : 0m,
+            canApply = offer.CanApply,
+            eligibilityMessage = offer.EligibilityMessage,
+            offer.Coupon.MinimumOrderAmount,
+            offer.Coupon.IsAutomatic,
+            offer.Coupon.FirstOrderOnly,
+            appliesTo = offer.Coupon.ProductId.HasValue ? "Selected product" :
+                        offer.Coupon.CategoryId.HasValue ? "Selected category" : "All products",
+            offer.Coupon.EndsAtUtc,
+            terms = string.Join(" · ", new[]
+            {
+                offer.Coupon.MinimumOrderAmount > 0 ? $"Minimum order ₹{offer.Coupon.MinimumOrderAmount:0.##}" : null,
+                offer.Coupon.MaximumDiscount.HasValue && offer.Coupon.DiscountType == "Percentage" ? $"Maximum discount ₹{offer.Coupon.MaximumDiscount.Value:0.##}" : null,
+                offer.Coupon.FirstOrderOnly ? "First order only" : null,
+                offer.Coupon.IsAutomatic ? "Applied automatically at checkout" : "Enter the code to apply"
+            }.Where(value => value is not null))
+        })
+        .ToList();
+
+        return Ok(offers);
+    }
+
     [AllowAnonymous]
     [HttpGet("product/{productId:int}/offers")]
     public async Task<IActionResult> ProductOffers(int productId)
