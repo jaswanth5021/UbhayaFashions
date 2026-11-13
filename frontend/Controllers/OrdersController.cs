@@ -217,11 +217,11 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                         if (discountValue <= 0m)
                         {
                             var percentageMatch = Regex.Match(offer.DiscountText ?? string.Empty,
-                                @"(?<value>\\d+(?:\\.\\d+)?)\\s*%\\s*OFF", RegexOptions.IgnoreCase);
+                                @"(?<value>\d+(?:\.\d+)?)\s*%\s*OFF", RegexOptions.IgnoreCase);
                             var fixedMatch = Regex.Match(offer.DiscountText ?? string.Empty,
-                                @"₹\\s*(?<value>[\\d,]+(?:\\.\\d+)?)\\s*OFF", RegexOptions.IgnoreCase);
+                                @"₹\s*(?<value>[\d,]+(?:\.\d+)?)\s*OFF", RegexOptions.IgnoreCase);
                             var capMatch = Regex.Match(offer.DiscountText ?? string.Empty,
-                                @"up to\\s*₹?\\s*(?<value>[\\d,]+(?:\\.\\d+)?)", RegexOptions.IgnoreCase);
+                                @"up to\s*₹?\s*(?<value>[\d,]+(?:\.\d+)?)", RegexOptions.IgnoreCase);
 
                             if (percentageMatch.Success &&
                                 decimal.TryParse(percentageMatch.Groups["value"].Value, NumberStyles.Number,
