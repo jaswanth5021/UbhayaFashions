@@ -193,98 +193,23 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         ViewBag.SavedAddresses = savedAddresses;
         ViewBag.CartVariants = cartVariants;
         ViewBag.CartCategoryIds = cartCategoryIds;
-        // The public offer endpoint supplies scope and discount metadata; validate
-        // every cart line again here for an accurate checkout preview.
-        var checkoutOffers = new Dictionary<int, CheckoutCouponOfferViewModel>();
-        foreach (var productId in cart.Select(item => item.ProductId).Distinct())
+        // Use the authenticated checkout endpoint so customer-specific rules,
+        // including first-order eligibility, are included in the preview.
+        var checkoutOffers = new List<CheckoutCouponOfferViewModel>();
+        try
         {
-            try
-            {
-                var productOffers = await api.GetProductCouponOffersAsync(productId);
-                foreach (var offer in productOffers)
-                {
-                    if (!checkoutOffers.ContainsKey(offer.Id))
-                    {
-                        var scopeDataAvailable = offer.ScopeDataAvailable;
-                        var productScopeMatches = !offer.ProductId.HasValue ||
-                            cart.All(item => item.ProductId == offer.ProductId.Value);
-                        var categoryScopeMatches = !offer.CategoryId.HasValue || cart.All(item =>
-                            cartCategoryIds.TryGetValue(item.ProductId, out var categoryId) &&
-                            categoryId.HasValue && categoryId.Value == offer.CategoryId.Value);
-                        var eligibleSubtotal = cart
-                            .Where(item => (!offer.ProductId.HasValue || item.ProductId == offer.ProductId.Value) &&
-                                (!offer.CategoryId.HasValue ||
-                                 (cartCategoryIds.TryGetValue(item.ProductId, out var categoryId) &&
-                                  categoryId.HasValue && categoryId.Value == offer.CategoryId.Value)))
-                            .Sum(item => item.Price * item.Quantity);
-                        var discountType = offer.DiscountDataAvailable ? offer.DiscountType : string.Empty;
-                        var discountValue = offer.DiscountDataAvailable ? offer.DiscountValue : 0m;
-                        var maximumDiscount = offer.MaximumDiscount;
-                        var discountDataAvailable = offer.DiscountDataAvailable &&
-                            (string.Equals(discountType, "Percentage", StringComparison.OrdinalIgnoreCase) ||
-                             string.Equals(discountType, "Fixed", StringComparison.OrdinalIgnoreCase)) &&
-                            discountValue > 0m && (!maximumDiscount.HasValue || maximumDiscount.Value >= 0m);
-                        var calculatedDiscount = !discountDataAvailable
-                            ? 0m
-                            : string.Equals(discountType, "Percentage", StringComparison.OrdinalIgnoreCase)
-                                ? eligibleSubtotal * discountValue / 100m
-                                : discountValue;
-                        if (maximumDiscount.HasValue)
-                            calculatedDiscount = Math.Min(calculatedDiscount, maximumDiscount.Value);
-                        calculatedDiscount = Math.Round(Math.Clamp(calculatedDiscount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
-                        var scopeMatches = scopeDataAvailable && discountDataAvailable && productScopeMatches && categoryScopeMatches;
-                        var scopedProductName = offer.ProductId.HasValue
-                            ? cart.FirstOrDefault(item => item.ProductId == offer.ProductId.Value)?.Name
-                            : null;
-                        var eligibilityMessage = !scopeDataAvailable || !discountDataAvailable
-                            ? "Coupon details are out of date at checkout, so we can't verify its product/category eligibility or discount. Refresh checkout; if it continues, contact support."
-                            : !productScopeMatches
-                                ? $"This coupon applies only to {scopedProductName ?? "the eligible product"}. Remove other products from your cart to use this coupon."
-                                : !categoryScopeMatches
-                                    ? "This coupon applies only to products in the eligible category. Remove products from other categories to use this coupon."
-                                    : eligibleSubtotal < offer.MinimumOrderAmount
-                                        ? $"Minimum order value {offer.MinimumOrderAmount:0.##} is required for eligible items."
-                                        : calculatedDiscount <= 0m
-                                            ? "This offer does not add a discount to your current cart."
-                                            : string.Empty;
-                        var canApply = scopeMatches && eligibleSubtotal >= offer.MinimumOrderAmount && calculatedDiscount > 0m;
-                        checkoutOffers[offer.Id] = new CheckoutCouponOfferViewModel
-                        {
-                            Id = offer.Id,
-                            Code = offer.Code,
-                            Name = offer.Name,
-                            DiscountText = offer.DiscountText,
-                            DiscountDataAvailable = discountDataAvailable,
-                            DiscountType = discountType,
-                            DiscountValue = discountValue,
-                            MaximumDiscount = maximumDiscount,
-                            DiscountAmount = canApply ? calculatedDiscount : 0m,
-                            MinimumOrderAmount = offer.MinimumOrderAmount,
-                            IsAutomatic = offer.IsAutomatic,
-                            FirstOrderOnly = offer.FirstOrderOnly,
-                            ProductId = offer.ProductId,
-                            CategoryId = offer.CategoryId,
-                            ScopeDataAvailable = scopeDataAvailable,
-                            AppliesTo = offer.AppliesTo,
-                            EndsAtUtc = offer.EndsAtUtc,
-                            Terms = offer.Terms,
-                            CanApply = canApply,
-                            EligibilityMessage = eligibilityMessage
-                        };
-                    }
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                logger.LogWarning(ex, "Unable to load product coupon offers for checkout product {ProductId}", productId);
-            }
-            catch (JsonException ex)
-            {
-                logger.LogWarning(ex, "Unable to read product coupon offers for checkout product {ProductId}", productId);
-            }
+            checkoutOffers = await api.GetCheckoutCouponOffersAsync(cart);
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogWarning(ex, "Unable to load customer-specific coupon offers for checkout");
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(ex, "Unable to read customer-specific coupon offers for checkout");
         }
 
-        ViewBag.CheckoutCouponOffers = checkoutOffers.Values
+        ViewBag.CheckoutCouponOffers = checkoutOffers
             .OrderByDescending(offer => offer.CanApply)
             .ThenBy(offer => offer.Name)
             .Take(8)

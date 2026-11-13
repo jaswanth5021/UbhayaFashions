@@ -456,9 +456,7 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             ? couponsQuery.Where(coupon => coupon.IsAutomatic)
             : couponsQuery.Where(coupon => coupon.Code == normalizedCode);
         var coupons = await couponsQuery.ToListAsync();
-        var hasPreviousOrder = await db.Orders.AnyAsync(order => order.CustomerId == customerId &&
-            (order.PaymentStatus == "Paid" || order.Status == "Processing" ||
-             order.Status == "Shipped" || order.Status == "Delivered"));
+        var hasPreviousOrder = await CouponCustomerHistory.HasPreviousOrderAsync(db, customerId);
         var redemptionCounts = await db.CouponRedemptions
             .Where(redemption => redemption.CustomerId == customerId)
             .GroupBy(redemption => redemption.CouponId)

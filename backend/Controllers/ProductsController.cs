@@ -179,42 +179,51 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     {
         var product = await db.Products.AsNoTracking()
             .Where(item => item.Id == id)
-            .Select(item => new { item.CategoryId, item.Colors })
+            .Select(item => new RelatedProductSource(
+                item.CategoryId,
+                item.Name,
+                item.Colors,
+                item.Variants.Where(variant => variant.Stock > 0)
+                    .OrderBy(variant => variant.Price)
+                    .Select(variant => (decimal?)variant.Price)
+                    .FirstOrDefault()
+                    ?? item.Variants.OrderBy(variant => variant.Price)
+                        .Select(variant => (decimal?)variant.Price)
+                        .FirstOrDefault()
+                    ?? 0m))
             .FirstOrDefaultAsync();
 
         if (product is null) return NotFound();
 
-        var categoryProducts = await db.Products.AsNoTracking()
-            .Where(item => item.Id != id && item.CategoryId == product.CategoryId
-                && item.Variants.Any(variant => variant.Stock > 0))
-            .OrderByDescending(item => item.IsBestSeller)
-            .ThenByDescending(item => item.Id)
+        var candidates = await db.Products.AsNoTracking()
+            .Where(item => item.Id != id && item.Variants.Any(variant => variant.Stock > 0))
+            .OrderByDescending(item => item.CategoryId == product.CategoryId)
+            .ThenByDescending(item => item.IsBestSeller)
+            .ThenByDescending(item => item.CreatedDate)
+            .Take(100)
             .Select(item => new RelatedProductResponse(
-                item.Id, item.Name, item.CategoryNavigation.Name, item.ImageUrl,
-                item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Price).FirstOrDefault() ?? 0,
-                item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Discount).FirstOrDefault() ?? 0,
-                item.IsBestSeller, item.Colors))
-            .Take(6)
+                item.Id, item.Name, item.CategoryId, item.CategoryNavigation.Name, item.ImageUrl,
+                item.Variants.Where(variant => variant.Stock > 0).OrderBy(variant => variant.Price)
+                    .Select(variant => (decimal?)variant.Price).FirstOrDefault() ?? 0m,
+                item.Variants.Where(variant => variant.Stock > 0).OrderBy(variant => variant.Price)
+                    .Select(variant => (decimal?)variant.Discount).FirstOrDefault() ?? 0m,
+                item.IsBestSeller, item.Colors, item.CreatedDate))
             .ToListAsync();
 
-        var results = categoryProducts.ToList();
-        if (results.Count < 4)
-        {
-            var existingIds = results.Select(item => item.Id).Append(id).ToList();
-            var fallback = await db.Products.AsNoTracking()
-                .Where(item => !existingIds.Contains(item.Id) && item.Variants.Any(variant => variant.Stock > 0))
-                .OrderByDescending(item => item.IsBestSeller)
-                .ThenByDescending(item => item.Id)
-                .Select(item => new RelatedProductResponse(
-                    item.Id, item.Name, item.CategoryNavigation.Name, item.ImageUrl,
-                    item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Price).FirstOrDefault() ?? 0,
-                    item.Variants.OrderBy(variant => variant.Price).Select(variant => (decimal?)variant.Discount).FirstOrDefault() ?? 0,
-                    item.IsBestSeller, item.Colors))
-                .Take(6 - results.Count)
-                .ToListAsync();
-
-            results.AddRange(fallback);
-        }
+        var productColors = SplitProductColors(product.Colors);
+        var productNameTokens = GetProductNameTokens(product.Name);
+        var results = candidates
+            .Select(candidate => new
+            {
+                Product = candidate,
+                Score = ScoreRelatedProduct(product, productColors, productNameTokens, candidate)
+            })
+            .OrderByDescending(item => item.Score)
+            .ThenByDescending(item => item.Product.IsBestSeller)
+            .ThenByDescending(item => item.Product.CreatedDate)
+            .Take(6)
+            .Select(item => item.Product)
+            .ToList();
 
         var cardDetails = await GetCardDetailsAsync(results.Select(item => item.Id).Distinct().ToArray());
 
@@ -226,6 +235,45 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             ReviewCount = cardDetails[item.Id].ReviewCount,
             Sizes = cardDetails[item.Id].Sizes
         }));
+    }
+
+    private static decimal ScoreRelatedProduct(
+        RelatedProductSource current,
+        HashSet<string> currentColors,
+        HashSet<string> currentNameTokens,
+        RelatedProductResponse candidate)
+    {
+        var score = candidate.CategoryId == current.CategoryId ? 100m : 0m;
+        var matchingColors = currentColors.Intersect(SplitProductColors(candidate.Colors)).Count();
+        score += Math.Min(2, matchingColors) * 20m;
+
+        var matchingNameTokens = currentNameTokens.Intersect(GetProductNameTokens(candidate.Name)).Count();
+        score += Math.Min(3, matchingNameTokens) * 8m;
+
+        if (current.Price > 0m && candidate.Price > 0m)
+        {
+            var largestPrice = Math.Max(current.Price, candidate.Price);
+            var priceSimilarity = Math.Max(0m, 1m - Math.Abs(current.Price - candidate.Price) / largestPrice);
+            score += priceSimilarity * 20m;
+        }
+
+        if (candidate.IsBestSeller) score += 5m;
+        return score;
+    }
+
+    private static HashSet<string> SplitProductColors(string? colors) =>
+        (colors ?? string.Empty)
+            .Split(new[] { ',', '|', '/' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    private static HashSet<string> GetProductNameTokens(string? name)
+    {
+        var normalized = new string((name ?? string.Empty).ToLowerInvariant()
+            .Select(character => char.IsLetterOrDigit(character) ? character : ' ')
+            .ToArray());
+        return normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(token => token.Length >= 3 && token is not ("the" or "for" or "and" or "with" or "women" or "ladies"))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
     private async Task<Dictionary<int, ProductCardDetails>> GetCardDetailsAsync(int[] productIds)
@@ -260,9 +308,11 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
 
     private sealed record ProductCardDetails(List<string> Sizes, decimal AverageRating, int ReviewCount);
 
+    private sealed record RelatedProductSource(int CategoryId, string Name, string Colors, decimal Price);
+
     private sealed record RelatedProductResponse(
-        int Id, string Name, string Category, string ImageUrl, decimal Price,
-        decimal Discount, bool IsBestSeller, string Colors);
+        int Id, string Name, int CategoryId, string Category, string ImageUrl, decimal Price,
+        decimal Discount, bool IsBestSeller, string Colors, DateTime CreatedDate);
 
     [HttpGet("GetNewarrivals")]
     public async Task<IActionResult> GetNewarrivals()

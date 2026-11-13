@@ -96,7 +96,7 @@
         toggle.setAttribute('aria-expanded', String(open));
         menu.classList.toggle('is-open', open);
         panel.hidden = !open;
-        if (open) await loadRecent();
+        if (open) await loadRecent(true);
     });
 
     document.addEventListener('click', event => {
@@ -145,5 +145,4 @@
     });
 
     loadRecent();
-    window.setInterval(() => loadRecent(true), 60000);
 })();

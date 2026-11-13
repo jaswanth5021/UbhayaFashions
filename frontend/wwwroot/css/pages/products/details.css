@@ -686,6 +686,14 @@
    QUANTITY
    ========================================================= */
 
+.product-quantity-section {
+    display: contents;
+}
+
+.product-quantity-section[hidden] {
+    display: none !important;
+}
+
 .product-quantity-control {
     width: 106px;
     height: 40px;
@@ -1930,6 +1938,30 @@
     display: flex;
     flex-wrap: wrap;
     gap: 9px;
+}
+
+.product-color-readonly {
+    margin-bottom: 12px;
+}
+
+.product-color-readonly-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.product-color-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid #e0d5d1;
+    border-radius: 999px;
+    background: #fff;
+    color: #68142e;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 .product-color-option {
@@ -4071,12 +4103,25 @@
     min-width: 0;
 }
 .product-coupon-card-heading strong {
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    width: fit-content;
+    max-width: calc(100% - 48px);
     min-width: 0;
+    min-height: 30px;
+    padding: 5px 10px;
     overflow: hidden;
-    color: #402b32;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: .05px;
+    border: 1px solid #efd5de;
+    border-left: 3px solid #941b4d;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #fff5f8, #fbedf2);
+    box-shadow: 0 2px 7px rgb(116 18 56 / 7%);
+    color: #741238;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .15px;
+    line-height: 1.2;
     text-overflow: ellipsis;
     white-space: nowrap;
 }

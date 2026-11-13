@@ -57,7 +57,12 @@
 
     var allVariants = Model.Variants.OrderBy(variant => variant.Size).ToList();
     var hasColorVariants = allVariants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
-    var initialColor = productColors.FirstOrDefault() ?? "";
+    var initialColor = productColors.FirstOrDefault()
+        ?? allVariants.FirstOrDefault(variant => !string.IsNullOrWhiteSpace(variant.Color))?.Color
+        ?? "";
+    var displayColors = productColors.Count > 0
+        ? productColors
+        : string.IsNullOrWhiteSpace(initialColor) ? new List<string>() : new List<string> { initialColor };
     // Variants without a color are shared across every product color.
     // Prefer an exact-color variant over a shared fallback when both exist for the same size.
     var variants = allVariants
@@ -614,16 +619,13 @@
                 }
 
 
-                <!-- =================================================
-                     COLOR
-                     ================================================= -->
-
+                @* TEMPORARILY DISABLED: restore this block to let customers choose a color.
                 @if (productColors.Count > 0)
                 {
                     <fieldset class="product-color-fieldset">
                         <legend>
                             Color
-                            <span id="selectedColorLabel">@productColors[0]</span>
+                            <span id="selectedColorLabel">@initialColor</span>
                         </legend>
 
                         <div class="product-color-options" role="group" aria-label="Choose color">
@@ -632,10 +634,10 @@
                                 var knownColor = ProductColorCatalog.All.FirstOrDefault(item => item.Name.Equals(color, StringComparison.OrdinalIgnoreCase));
                                 var colorHex = knownColor.Name is null ? "#c8b7b0" : knownColor.Hex;
                                 <button type="button"
-                                        class="product-color-option @(color.Equals(productColors[0], StringComparison.OrdinalIgnoreCase) ? "selected" : "")"
+                                        class="product-color-option @(color.Equals(initialColor, StringComparison.OrdinalIgnoreCase) ? "selected" : "")"
                                         data-color="@color"
                                         aria-label="@color"
-                                        aria-pressed="@(color.Equals(productColors[0], StringComparison.OrdinalIgnoreCase) ? "true" : "false")">
+                                        aria-pressed="@(color.Equals(initialColor, StringComparison.OrdinalIgnoreCase) ? "true" : "false")">
                                     <span class="product-color-swatch"
                                           data-color-name="@color"
                                           style="background:@colorHex"
@@ -645,7 +647,31 @@
                             }
                         </div>
                     </fieldset>
-                    <input type="hidden" name="color" id="selectedProductColor" value="@productColors[0]" toolparamdescription="The selected product color." />
+                }
+                *@
+                @if (displayColors.Count > 0)
+                {
+                    <fieldset class="product-color-fieldset product-color-readonly">
+                        <legend>Color</legend>
+                        <div class="product-color-readonly-options" role="list" aria-label="Available product colors">
+                            @foreach (var color in displayColors)
+                            {
+                                var colorDefinition = ProductColorCatalog.All.FirstOrDefault(item =>
+                                    item.Name.Equals(color, StringComparison.OrdinalIgnoreCase));
+                                var colorHex = colorDefinition.Name is null ? "#c8b7b0" : colorDefinition.Hex;
+                                <span class="product-color-value"
+                                      role="listitem"
+                                      title="@color">
+                                    <span class="product-color-swatch" style="background:@colorHex" aria-hidden="true"></span>
+                                    <span class="product-color-name">@color</span>
+                                </span>
+                            }
+                        </div>
+                    </fieldset>
+                }
+                @if (hasColorVariants && !string.IsNullOrWhiteSpace(initialColor))
+                {
+                    <input type="hidden" name="color" id="selectedProductColor" value="@initialColor" toolparamdescription="The product's default color while color selection is temporarily disabled." />
                 }
 
 
@@ -653,6 +679,7 @@
                      QUANTITY
                      ================================================= -->
 
+                <div class="product-quantity-section" id="productQuantitySection" hidden="@(variants.Count > 0)">
                 <label for="productQuantity">
                     Quantity
                 </label>
@@ -695,6 +722,7 @@
                       id="productQuantityError"
                       role="alert">
                 </span>
+                </div>
 
 
                 <!-- =================================================
@@ -1445,18 +1473,23 @@
         if (!gallery) return;
         const thumbnails = Array.from(document.querySelectorAll(".product-gallery-thumbnail"));
         const counter = gallery.querySelector("[data-gallery-counter]");
-        let currentIndex = 0;
+        const gallerySection = gallery.closest(".product-gallery") || gallery;
         let touchStartX = 0;
 
         const render = index => {
             if (!thumbnails.length) return;
-            currentIndex = (index + thumbnails.length) % thumbnails.length;
-            thumbnails[currentIndex].click();
-            if (counter) counter.textContent = (currentIndex + 1) + "/" + thumbnails.length;
+            const targetIndex = (index + thumbnails.length) % thumbnails.length;
+            thumbnails[targetIndex].click();
+            if (counter) counter.textContent = (targetIndex + 1) + "/" + thumbnails.length;
         };
 
-        gallery.querySelector("[data-gallery-prev]")?.addEventListener("click", () => render(currentIndex - 1));
-        gallery.querySelector("[data-gallery-next]")?.addEventListener("click", () => render(currentIndex + 1));
+        const stepFromActiveThumbnail = direction => {
+            const activeIndex = thumbnails.findIndex(thumbnail => thumbnail.classList.contains("active"));
+            render((activeIndex < 0 ? 0 : activeIndex) + direction);
+        };
+
+        gallery.querySelector("[data-gallery-prev]")?.addEventListener("click", () => stepFromActiveThumbnail(-1));
+        gallery.querySelector("[data-gallery-next]")?.addEventListener("click", () => stepFromActiveThumbnail(1));
 
         gallery.addEventListener("touchstart", event => {
             touchStartX = event.changedTouches[0]?.screenX ?? 0;
@@ -1466,8 +1499,51 @@
             const endX = event.changedTouches[0]?.screenX ?? 0;
             const delta = endX - touchStartX;
             if (Math.abs(delta) < 45) return;
-            render(currentIndex + (delta < 0 ? 1 : -1));
+            stepFromActiveThumbnail(delta < 0 ? 1 : -1);
         }, { passive: true });
+
+        const imageThumbnails = thumbnails.filter(thumbnail => thumbnail.dataset.galleryType !== "video");
+        const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+        if (imageThumbnails.length > 1 && !prefersReducedMotion) {
+            let autoplayPaused = false;
+            let resumeTimer;
+            const pauseAutoplay = () => {
+                autoplayPaused = true;
+                window.clearTimeout(resumeTimer);
+            };
+            const resumeAutoplay = () => {
+                autoplayPaused = false;
+                window.clearTimeout(resumeTimer);
+            };
+            const resumeAutoplayIfIdle = () => {
+                if (gallerySection.matches(":hover") || gallerySection.contains(document.activeElement)) return;
+                resumeAutoplay();
+            };
+
+            gallerySection.addEventListener("mouseenter", pauseAutoplay);
+            gallerySection.addEventListener("mouseleave", resumeAutoplayIfIdle);
+            gallerySection.addEventListener("focusin", pauseAutoplay);
+            gallerySection.addEventListener("focusout", event => {
+                if (!event.relatedTarget || !gallerySection.contains(event.relatedTarget)) resumeAutoplayIfIdle();
+            });
+            gallerySection.addEventListener("touchstart", pauseAutoplay, { passive: true });
+            gallerySection.addEventListener("touchend", () => {
+                window.clearTimeout(resumeTimer);
+                resumeTimer = window.setTimeout(resumeAutoplayIfIdle, 5000);
+            }, { passive: true });
+
+            window.setInterval(() => {
+                if (autoplayPaused || document.hidden || gallery.querySelector("#productMainVideo")) return;
+                const activeIndex = thumbnails.findIndex(thumbnail => thumbnail.classList.contains("active"));
+                for (let offset = 1; offset <= thumbnails.length; offset++) {
+                    const nextIndex = ((activeIndex < 0 ? 0 : activeIndex) + offset) % thumbnails.length;
+                    if (thumbnails[nextIndex].dataset.galleryType !== "video") {
+                        thumbnails[nextIndex].click();
+                        break;
+                    }
+                }
+            }, 5000);
+        }
 
         gallery.querySelector("[data-gallery-expand]")?.addEventListener("click", () => {
             document.querySelector(".product-gallery-main img")?.click();
@@ -1867,16 +1943,15 @@
                             thumbnail.dataset
                                 .galleryMedia;
 
+                        const currentMedia = galleryMain.querySelector("#productMainImage, #productMainVideo");
+                        currentMedia?.remove();
+
 
                         if (
                             thumbnail.dataset
                                 .galleryType ===
                             "video"
                         ) {
-
-                            galleryMain.innerHTML =
-                                "";
-
 
                             const video =
                                 document.createElement(
@@ -1914,16 +1989,10 @@
                             );
 
 
-                            galleryMain.appendChild(
-                                video
-                            );
+                            galleryMain.insertBefore(video, galleryMain.firstChild);
 
                         }
                         else {
-
-                            galleryMain.innerHTML =
-                                "";
-
 
                             const image =
                                 document.createElement(
@@ -1942,10 +2011,15 @@
                                     .galleryAlt;
 
 
-                            galleryMain.appendChild(
-                                image
-                            );
+                            galleryMain.insertBefore(image, galleryMain.firstChild);
 
+                        }
+
+                        const thumbnails = Array.from(document.querySelectorAll(".product-gallery-thumbnail"));
+                        const counter = galleryMain.querySelector("[data-gallery-counter]");
+                        const currentIndex = thumbnails.indexOf(thumbnail);
+                        if (counter && currentIndex >= 0) {
+                            counter.textContent = (currentIndex + 1) + "/" + thumbnails.length;
                         }
 
 
@@ -2054,6 +2128,8 @@
                 const selectedSizeLabel = document.getElementById("selectedSizeLabel");
                 if (selectedSizeInput) selectedSizeInput.value = "";
                 if (selectedSizeLabel) selectedSizeLabel.textContent = "Select a size";
+                const quantitySection = document.getElementById("productQuantitySection");
+                if (quantitySection) quantitySection.hidden = true;
                 const stockMessage = document.getElementById("productStockMessage");
                 if (stockMessage) stockMessage.textContent = matchingVariants.some(item => Number(item.stock ?? item.Stock ?? 0) > 0)
                     ? "Select a size to see availability" : "This color is currently out of stock";
@@ -2172,6 +2248,9 @@
                             "selectedSizeLabel"
                         ).textContent =
                             option.dataset.size;
+
+                        const quantitySection = document.getElementById("productQuantitySection");
+                        if (quantitySection) quantitySection.hidden = false;
 
 
                         document.getElementById(
@@ -2401,19 +2480,22 @@
         document.getElementById(
             "productQuantity"
         );
+    const quantityError = document.getElementById("productQuantityError");
 
+    const updateQuantityLimitMessage = () => {
+        if (!quantityInput || !quantityError) return;
+        const quantity = Number(quantityInput.value);
+        const maximum = Number(quantityInput.max);
+        quantityError.textContent = Number.isFinite(quantity) && Number.isFinite(maximum) &&
+            maximum > 0 && quantity >= maximum
+            ? `You've reached the maximum quantity available in this size (${maximum}).`
+            : "";
+    };
 
     quantityInput
         ?.addEventListener(
             "input",
-            () => {
-
-                document.getElementById(
-                    "productQuantityError"
-                ).textContent =
-                    "";
-
-            });
+            updateQuantityLimitMessage);
 
 
     document
@@ -2451,14 +2533,8 @@
                             );
 
 
-                        quantityInput.value =
-                            Math.max(
-                                minimum,
-                                Math.min(
-                                    maximum,
-                                    next
-                                )
-                            );
+                        quantityInput.value = String(Math.max(minimum, Math.min(maximum, next)));
+                        updateQuantityLimitMessage();
 
                     });
 

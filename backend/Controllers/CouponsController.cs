@@ -32,9 +32,7 @@ public class CouponsController(ApplicationDbContext db, ILogger<CouponsControlle
                 (!coupon.EndsAtUtc.HasValue || coupon.EndsAtUtc >= now) &&
                 (!coupon.MaximumUses.HasValue || coupon.UsageCount < coupon.MaximumUses))
             .ToListAsync();
-        var hasPreviousOrder = await db.Orders.AnyAsync(order => order.CustomerId == customerId &&
-            (order.PaymentStatus == "Paid" || order.Status == "Processing" ||
-             order.Status == "Shipped" || order.Status == "Delivered"));
+        var hasPreviousOrder = await CouponCustomerHistory.HasPreviousOrderAsync(db, customerId);
         var redeemedCouponIds = await db.CouponRedemptions
             .Where(redemption => redemption.CustomerId == customerId)
             .Select(redemption => redemption.CouponId)
@@ -175,9 +173,7 @@ public class CouponsController(ApplicationDbContext db, ILogger<CouponsControlle
         var coupons = string.IsNullOrWhiteSpace(normalizedCode)
             ? await db.Coupons.AsNoTracking().Where(coupon => coupon.IsAutomatic).ToListAsync()
             : await db.Coupons.AsNoTracking().Where(coupon => coupon.Code == normalizedCode).ToListAsync();
-        var hasPreviousOrder = await db.Orders.AnyAsync(order => order.CustomerId == customerId &&
-            (order.PaymentStatus == "Paid" || order.Status == "Processing" ||
-             order.Status == "Shipped" || order.Status == "Delivered"));
+        var hasPreviousOrder = await CouponCustomerHistory.HasPreviousOrderAsync(db, customerId);
         var redemptionCounts = await db.CouponRedemptions
             .Where(redemption => redemption.CustomerId == customerId)
             .GroupBy(redemption => redemption.CouponId)
