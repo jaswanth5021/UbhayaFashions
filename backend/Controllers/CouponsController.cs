@@ -34,10 +34,18 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
         {
             var product = products.Single(product => product.Id == item.ProductId);
             var hasColorVariants = product.Variants.Any(variant => !string.IsNullOrWhiteSpace(variant.Color));
+            var sizeVariants = product.Variants
+                .Where(candidate => string.Equals(candidate.Size, item.Size, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            // Match the storefront cart's variant resolution: prefer the selected
+            // colour, but allow a shared (colour-neutral) size variant as fallback.
             var variant = hasColorVariants
-                ? product.Variants.FirstOrDefault(candidate => candidate.Size == item.Size &&
+                ? sizeVariants.FirstOrDefault(candidate =>
+                    !string.IsNullOrWhiteSpace(item.Color) &&
                     string.Equals(candidate.Color, item.Color, StringComparison.OrdinalIgnoreCase))
-                : product.Variants.FirstOrDefault(candidate => candidate.Size == item.Size);
+                    ?? sizeVariants.FirstOrDefault(candidate => string.IsNullOrWhiteSpace(candidate.Color))
+                : sizeVariants.FirstOrDefault();
             if (variant is null || variant.Stock < item.Quantity)
                 return BadRequest($"{product.Name} ({item.Size}) is no longer available in that quantity.");
 
