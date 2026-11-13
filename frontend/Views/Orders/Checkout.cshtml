@@ -285,6 +285,8 @@
                         </label>
                     </div>
 
+                    @if (checkoutCouponOffers.Count > 0)
+                    {
                     <section class="checkout-coupon-panel" aria-labelledby="checkoutCouponTitle">
                         <div class="checkout-coupon-heading">
                             <div>
@@ -303,11 +305,9 @@
                         <p id="checkoutCouponMessage" class="checkout-coupon-message" role="status" aria-live="polite"></p>
                         <div class="checkout-coupon-offers">
                             <h2>Active offers for your cart</h2>
-                            @if (checkoutCouponOffers.Count > 0)
-                            {
-                                <div class="checkout-coupon-offer-list">
-                                    @foreach (var offer in checkoutCouponOffers)
-                                    {
+                            <div class="checkout-coupon-offer-list">
+                                @foreach (var offer in checkoutCouponOffers)
+                                {
                                         <article class="checkout-coupon-offer"
                                                  data-checkout-coupon-offer
                                                  data-coupon-id="@offer.Id"
@@ -371,15 +371,11 @@
                                                 <p class="checkout-coupon-ineligible">@offer.EligibilityMessage</p>
                                             }
                                         </article>
-                                    }
-                                </div>
-                            }
-                            else
-                            {
-                                <p class="checkout-coupon-empty">There are no active coupons available for this cart right now.</p>
-                            }
+                                }
+                            </div>
                         </div>
                     </section>
+                    }
 
                     <div class="checkout-secure-note">
                         <strong>🔒 Secure Checkout</strong>
