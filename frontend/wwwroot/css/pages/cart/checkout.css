@@ -2856,3 +2856,41 @@
         max-width: 80px;
     }
 }
+
+
+/* Keep the copy icon in its own reserved space; never let it cover the code. */
+.checkout-coupon-card-actions .checkout-coupon-use {
+    width: 164px;
+    min-width: 164px;
+    max-width: 164px;
+    min-height: 58px;
+    padding: 8px 38px 8px 12px;
+    box-sizing: border-box;
+}
+
+.checkout-coupon-card-actions .checkout-coupon-use > b {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-right: 22px;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.checkout-coupon-card-actions .checkout-coupon-use > svg {
+    right: 10px;
+    width: 17px;
+    height: 17px;
+}
+
+@media (max-width: 600px) {
+    .checkout-coupon-card-actions .checkout-coupon-use {
+        width: 148px;
+        min-width: 148px;
+        max-width: 148px;
+        padding-right: 35px;
+    }
+}
