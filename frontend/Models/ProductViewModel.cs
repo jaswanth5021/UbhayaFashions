@@ -24,6 +24,8 @@ public class ProductViewModel
 
     public int Stock => Variants.Sum(variant => variant.Stock);
 
+    public int? CategoryId { get; set; }
+
     public string Category { get; set; } = string.Empty;
 
     public string Sizes => string.Join(",", Variants.Select(variant => variant.Size));
