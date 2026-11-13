@@ -270,7 +270,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                             Terms = offer.Terms,
                             CanApply = cartMatchesProductScope && eligibleSubtotal >= offer.MinimumOrderAmount && calculatedDiscount > 0m,
                             EligibilityMessage = !cartMatchesProductScope
-                                ? "This coupon is valid only when the cart contains the eligible product."
+                                ? $"This coupon applies only to product ID {offer.ProductId}. Remove other products from your cart to use this coupon."
                                 : eligibleSubtotal < offer.MinimumOrderAmount
                                     ? $"Minimum order ₹{offer.MinimumOrderAmount:0.##} is required for eligible items."
                                     : calculatedDiscount <= 0m
