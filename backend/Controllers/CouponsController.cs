@@ -90,9 +90,11 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
             var cartMatchesScope = cartMatchesProductScope && cartMatchesCategoryScope;
             var minimumOrderMet = eligibleSubtotal >= coupon.MinimumOrderAmount;
             var canApply = cartMatchesScope && eligibleSubtotal > 0m && minimumOrderMet && usageAllowed && firstOrderAllowed && discount > 0m;
-            var eligibilityMessage = !cartMatchesScope
-                ? "This coupon is valid only when the cart contains products from its eligible product or category."
-                : !minimumOrderMet
+            var eligibilityMessage = !cartMatchesProductScope
+                ? $"This coupon applies only to product ID {coupon.ProductId}. Remove other products from your cart to use this coupon."
+                : !cartMatchesCategoryScope
+                    ? "This coupon applies only to products in the eligible category. Remove products from other categories to use it."
+                    : !minimumOrderMet
                     ? $"Add ₹{Math.Max(0m, coupon.MinimumOrderAmount - eligibleSubtotal):0.##} more in eligible items to use this offer."
                     : !usageAllowed
                     ? "You have already used this offer."
