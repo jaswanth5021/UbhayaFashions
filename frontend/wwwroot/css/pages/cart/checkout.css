@@ -2894,3 +2894,35 @@
         padding-right: 35px;
     }
 }
+
+
+/* Product links in the checkout Order Summary */
+.checkout-screen-summary .checkout-summary-product-image-link {
+    display: block;
+    flex: 0 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.checkout-screen-summary .checkout-summary-product-image-link img {
+    display: block;
+    transition: transform .2s ease;
+}
+
+.checkout-screen-summary .checkout-summary-product-image-link:hover img {
+    transform: scale(1.04);
+}
+
+.checkout-screen-summary .checkout-summary-product-name {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color .2s ease;
+}
+
+.checkout-screen-summary .checkout-summary-product-name:hover {
+    color: var(--brand-primary, #8f1748);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
