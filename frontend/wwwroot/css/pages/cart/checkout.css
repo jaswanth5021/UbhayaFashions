@@ -2734,3 +2734,55 @@
         min-width: 108px;
     }
 }
+
+
+/* Coupon checkout controls: keep Apply aligned with the input and make
+   currently-ineligible codes selectable so customers can see the requirement. */
+.checkout-coupon-input-row {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.checkout-coupon-input-row button {
+    width: 72px;
+    min-width: 72px;
+    height: 42px;
+    min-height: 42px;
+    align-self: stretch;
+    margin: 0;
+    padding: 0 10px;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.checkout-coupon-use.is-unavailable {
+    opacity: .82;
+    cursor: pointer;
+}
+
+.checkout-coupon-use.is-unavailable:hover {
+    opacity: 1;
+    border-color: #68142e;
+    background: #80183a;
+}
+
+.checkout-coupon-offer {
+    cursor: pointer;
+}
+
+.checkout-coupon-terms,
+.checkout-coupon-terms * {
+    cursor: auto;
+}
+
+@media (max-width: 600px) {
+    .checkout-coupon-input-row {
+        grid-template-columns: minmax(0, 1fr) 72px;
+    }
+
+    .checkout-coupon-input-row button {
+        width: 72px;
+        min-width: 72px;
+    }
+}
