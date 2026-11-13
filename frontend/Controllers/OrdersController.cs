@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using LadiesDressStore.Web.Models;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -205,11 +207,50 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                             .Sum(item => item.Price * item.Quantity);
                         // Category-scoped offers are already returned only for products
                         // in the matching category by the product-offers endpoint.
-                        var calculatedDiscount = offer.DiscountType == "Percentage"
-                            ? eligibleSubtotal * offer.DiscountValue / 100m
-                            : offer.DiscountValue;
-                        if (offer.MaximumDiscount.HasValue)
-                            calculatedDiscount = Math.Min(calculatedDiscount, offer.MaximumDiscount.Value);
+                        // Some deployed API instances may still return only DiscountText
+                        // (for example, "10% OFF") without the numeric calculation fields.
+                        // Fall back to the display text so valid coupons are not rejected
+                        // with a zero discount while the API deployment is being aligned.
+                        var discountType = offer.DiscountType;
+                        var discountValue = offer.DiscountValue;
+                        var maximumDiscount = offer.MaximumDiscount;
+                        if (discountValue <= 0m)
+                        {
+                            var percentageMatch = Regex.Match(offer.DiscountText ?? string.Empty,
+                                @"(?<value>\\d+(?:\\.\\d+)?)\\s*%\\s*OFF", RegexOptions.IgnoreCase);
+                            var fixedMatch = Regex.Match(offer.DiscountText ?? string.Empty,
+                                @"₹\\s*(?<value>[\\d,]+(?:\\.\\d+)?)\\s*OFF", RegexOptions.IgnoreCase);
+                            var capMatch = Regex.Match(offer.DiscountText ?? string.Empty,
+                                @"up to\\s*₹?\\s*(?<value>[\\d,]+(?:\\.\\d+)?)", RegexOptions.IgnoreCase);
+
+                            if (percentageMatch.Success &&
+                                decimal.TryParse(percentageMatch.Groups["value"].Value, NumberStyles.Number,
+                                    CultureInfo.InvariantCulture, out var parsedPercentage))
+                            {
+                                discountType = "Percentage";
+                                discountValue = parsedPercentage;
+                            }
+                            else if (fixedMatch.Success &&
+                                decimal.TryParse(fixedMatch.Groups["value"].Value.Replace(",", string.Empty),
+                                    NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedFixed))
+                            {
+                                discountType = "Fixed";
+                                discountValue = parsedFixed;
+                            }
+
+                            if (!maximumDiscount.HasValue && capMatch.Success &&
+                                decimal.TryParse(capMatch.Groups["value"].Value.Replace(",", string.Empty),
+                                    NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedCap))
+                            {
+                                maximumDiscount = parsedCap;
+                            }
+                        }
+
+                        var calculatedDiscount = string.Equals(discountType, "Percentage", StringComparison.OrdinalIgnoreCase)
+                            ? eligibleSubtotal * discountValue / 100m
+                            : discountValue;
+                        if (maximumDiscount.HasValue)
+                            calculatedDiscount = Math.Min(calculatedDiscount, maximumDiscount.Value);
                         calculatedDiscount = Math.Round(Math.Clamp(calculatedDiscount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
                         checkoutOffers[offer.Id] = new CheckoutCouponOfferViewModel
                         {
