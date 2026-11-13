@@ -456,10 +456,17 @@
                         var summaryMrp = summaryHasDiscount
                             ? Math.Round(item.Price / (1 - summaryDiscount / 100m), 2)
                             : item.Price;
-                        <article>
-                            <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
+                        <article class="checkout-summary-product">
+                            <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId"
+                               class="checkout-summary-product-image-link"
+                               aria-label="View @item.Name">
+                                <img src="@ImageUrlHelper.Resolve(item.ImageUrl, Configuration["ApiBaseUrl"])" alt="@item.Name" />
+                            </a>
                             <div class="checkout-summary-product-info">
-                                <strong>@item.Name</strong>
+                                <strong>
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId"
+                                       class="checkout-summary-product-name">@item.Name</a>
+                                </strong>
                                 <span>Size: @item.Size × @item.Quantity</span>
                                 <div class="checkout-item-price" aria-label="Product price">
                                     @if (summaryHasDiscount)
