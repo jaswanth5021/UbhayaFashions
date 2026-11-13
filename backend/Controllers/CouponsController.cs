@@ -90,8 +90,11 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
             var cartMatchesScope = cartMatchesProductScope && cartMatchesCategoryScope;
             var minimumOrderMet = eligibleSubtotal >= coupon.MinimumOrderAmount;
             var canApply = cartMatchesScope && eligibleSubtotal > 0m && minimumOrderMet && usageAllowed && firstOrderAllowed && discount > 0m;
+            var eligibleProductName = coupon.ProductId.HasValue
+                ? products.FirstOrDefault(product => product.Id == coupon.ProductId.Value)?.Name
+                : null;
             var eligibilityMessage = !cartMatchesProductScope
-                ? $"This coupon applies only to product ID {coupon.ProductId}. Remove other products from your cart to use this coupon."
+                ? $"This coupon applies only to {eligibleProductName ?? "the eligible product"}. Remove other products from your cart to use this coupon."
                 : !cartMatchesCategoryScope
                     ? "This coupon applies only to products in the eligible category. Remove products from other categories to use it."
                     : !minimumOrderMet
