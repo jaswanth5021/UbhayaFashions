@@ -2786,3 +2786,73 @@
         min-width: 72px;
     }
 }
+
+
+/* Checkout coupon field: fixed, compact Apply action beside the input. */
+.checkout-coupon-entry .checkout-coupon-input-row {
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100%;
+}
+
+.checkout-coupon-entry .checkout-coupon-input-row > #checkoutCouponCode {
+    display: block;
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+    height: 46px;
+    min-height: 46px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.checkout-coupon-entry .checkout-coupon-input-row > #checkoutApplyCoupon {
+    display: inline-flex !important;
+    flex: 0 0 88px;
+    width: 88px !important;
+    min-width: 88px;
+    max-width: 88px;
+    height: 46px !important;
+    min-height: 46px !important;
+    align-self: stretch;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    box-sizing: border-box;
+    border: 1px solid #68142e;
+    border-radius: 5px;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.checkout-coupon-offer {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.checkout-coupon-offer :not(.checkout-coupon-terms):not(.checkout-coupon-terms *) {
+    pointer-events: auto;
+}
+
+.checkout-coupon-offer::after {
+    pointer-events: none;
+}
+
+.checkout-coupon-offer-heading,
+.checkout-coupon-offer-main,
+.checkout-coupon-offer-value,
+.checkout-coupon-card-actions {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 600px) {
+    .checkout-coupon-entry .checkout-coupon-input-row > #checkoutApplyCoupon {
+        flex-basis: 80px;
+        width: 80px !important;
+        min-width: 80px;
+        max-width: 80px;
+    }
+}
