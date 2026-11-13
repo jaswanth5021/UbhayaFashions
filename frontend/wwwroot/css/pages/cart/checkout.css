@@ -2928,18 +2928,47 @@
 }
 
 
-/* Coupon gallery: keep cards readable as the number of offers grows. */
+/* Horizontal coupon carousel: handles a small or large number of offers cleanly. */
 .checkout-coupon-offer-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
     gap: 14px;
     align-items: stretch;
+    max-width: 100%;
+    padding: 3px 2px 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 2px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #b66b87 #f4e8ec;
+}
+
+.checkout-coupon-offer-list::-webkit-scrollbar {
+    height: 8px;
+}
+
+.checkout-coupon-offer-list::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background: #f4e8ec;
+}
+
+.checkout-coupon-offer-list::-webkit-scrollbar-thumb {
+    border: 2px solid #f4e8ec;
+    border-radius: 10px;
+    background: #b66b87;
 }
 
 .checkout-coupon-offer {
     display: flex;
+    flex: 0 0 clamp(285px, 42%, 370px);
     flex-direction: column;
+    min-width: 0;
     min-height: 158px;
     padding: 16px 18px;
+    scroll-snap-align: start;
 }
 
 .checkout-coupon-offer-heading {
@@ -2972,11 +3001,11 @@
 }
 
 .checkout-coupon-card-actions .checkout-coupon-use {
-    width: 136px;
-    min-width: 136px;
-    max-width: 136px;
-    min-height: 54px;
-    padding: 7px 32px 7px 10px;
+    width: 148px;
+    min-width: 148px;
+    max-width: 148px;
+    min-height: 56px;
+    padding: 7px 34px 7px 10px;
 }
 
 .checkout-coupon-card-actions .checkout-coupon-use > b {
@@ -2995,13 +3024,9 @@
 }
 
 @media (max-width: 760px) {
-    .checkout-coupon-offer-list {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 11px;
-    }
-
     .checkout-coupon-offer {
-        min-height: 142px;
+        flex-basis: min(84vw, 340px);
+        min-height: 148px;
     }
 
     .checkout-coupon-discount-text {
@@ -3011,16 +3036,19 @@
 
 @media (max-width: 420px) {
     .checkout-coupon-offer {
+        flex-basis: calc(100vw - 72px);
         padding: 14px;
     }
 
     .checkout-coupon-offer-main {
-        grid-template-columns: minmax(0, 1fr);
-        align-items: start;
-        gap: 10px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 8px;
     }
 
-    .checkout-coupon-card-actions {
-        justify-self: start;
+    .checkout-coupon-card-actions .checkout-coupon-use {
+        width: 132px;
+        min-width: 132px;
+        max-width: 132px;
     }
 }
