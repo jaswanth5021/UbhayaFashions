@@ -179,6 +179,11 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
                 ? $"{x.DiscountValue:0.##}% OFF" + (x.MaximumDiscount.HasValue ? $" up to ₹{x.MaximumDiscount.Value:0.##}" : "")
                 : $"₹{x.DiscountValue:0.##} OFF",
             x.MinimumOrderAmount,
+            discountType = x.DiscountType,
+            discountValue = x.DiscountValue,
+            maximumDiscount = x.MaximumDiscount,
+            productId = x.ProductId,
+            categoryId = x.CategoryId,
             x.IsAutomatic,
             x.FirstOrderOnly,
             appliesTo = x.ProductId.HasValue ? "This product" :
