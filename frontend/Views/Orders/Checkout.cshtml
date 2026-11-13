@@ -551,6 +551,7 @@
             const quoteBreakdown = document.getElementById('checkoutPaymentPriceBreakdown');
             const quoteShipping = document.getElementById('checkoutQuoteShipping');
             const quoteTotal = document.getElementById('checkoutQuoteTotal');
+            const quoteSubtotal = document.getElementById('checkoutQuoteSubtotal');
             const quoteMessage = document.getElementById('checkoutQuoteMessage');
             const couponInput = document.getElementById('checkoutCouponCode');
             const couponCodeValue = document.getElementById('checkoutCouponCodeValue');
@@ -580,8 +581,17 @@
             const updateCheckoutTotals = () => {
                 const subtotal = Number(quoteBreakdown?.dataset.subtotal || 0);
                 const shippingCharge = Number(quoteBreakdown?.dataset.shippingCharge || 0);
-                const discount = Number(appliedCoupon?.dataset.couponDiscount || 0);
+                const requestedDiscount = Number(appliedCoupon?.dataset.couponDiscount || 0);
+                const discount = Math.min(subtotal, Math.max(0, Number.isFinite(requestedDiscount) ? requestedDiscount : 0));
                 const payable = Math.max(0, subtotal - discount) + shippingCharge;
+
+                // Keep the order breakdown visible when a coupon is applied so
+                // customers can immediately see the saving and revised payable.
+                if (appliedCoupon && quoteBreakdown) {
+                    quoteBreakdown.hidden = false;
+                    quoteBreakdown.style.display = '';
+                }
+                if (quoteSubtotal) quoteSubtotal.textContent = formatMoney(subtotal);
                 const couponName = appliedCoupon?.dataset.couponName || '';
                 const couponCode = appliedCoupon?.dataset.couponCode || '';
                 const discountLabel = couponCode ? 'Coupon (' + couponCode + ')' : 'Automatic offer';
