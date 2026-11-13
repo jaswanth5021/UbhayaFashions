@@ -459,7 +459,7 @@
                         var summaryMrp = summaryHasDiscount
                             ? Math.Round(item.Price / (1 - summaryDiscount / 100m), 2)
                             : item.Price;
-                        <article class="checkout-summary-product">
+                        <article class="checkout-summary-product" data-cart-product-id="@item.ProductId" data-cart-category-id="@(((Dictionary<int, int?>)ViewBag.CartCategoryIds).GetValueOrDefault(item.ProductId)?.ToString() ?? "")">
                             <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId"
                                class="checkout-summary-product-image-link"
                                aria-label="View @item.Name">
@@ -670,6 +670,32 @@
                     }
                     return false;
                 }
+                const cartProducts = [...document.querySelectorAll('[data-cart-product-id]')];
+                const scopedProductId = Number(match.dataset.couponProductId || 0);
+                const scopedCategoryId = Number(match.dataset.couponCategoryId || 0);
+                const productScopeMismatch = scopedProductId > 0 &&
+                    cartProducts.some(item => Number(item.dataset.cartProductId) !== scopedProductId);
+                const categoryScopeMismatch = scopedCategoryId > 0 &&
+                    cartProducts.some(item => !item.dataset.cartCategoryId ||
+                        Number(item.dataset.cartCategoryId) !== scopedCategoryId);
+
+                if (productScopeMismatch || categoryScopeMismatch) {
+                    const eligibleProduct = scopedProductId > 0
+                        ? cartProducts.find(item => Number(item.dataset.cartProductId) === scopedProductId)
+                            ?.querySelector('.checkout-summary-product-name')?.textContent.trim()
+                        : null;
+                    if (couponMessage) {
+                        couponMessage.textContent = productScopeMismatch
+                            ? 'This coupon applies only to ' + (eligibleProduct || 'the eligible product') + '. Remove other products from your cart to use this coupon.'
+                            : 'This coupon applies only to products in the eligible category. Remove products from other categories to use it.';
+                        couponMessage.classList.remove('is-success');
+                        couponMessage.dataset.keepMessage = 'true';
+                    }
+                    appliedCoupon = automaticCoupon;
+                    updateCheckoutTotals();
+                    return false;
+                }
+
                 if (match.dataset.couponCanApply !== 'true') {
                     if (couponMessage) {
                         couponMessage.textContent = match.querySelector('.checkout-coupon-ineligible')?.textContent.trim() ||
