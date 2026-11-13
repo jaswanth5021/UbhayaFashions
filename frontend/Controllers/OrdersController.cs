@@ -1,6 +1,4 @@
-using System.Globalization;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using LadiesDressStore.Web.Models;
 using LadiesDressStore.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -195,9 +193,8 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         ViewBag.SavedAddresses = savedAddresses;
         ViewBag.CartVariants = cartVariants;
         ViewBag.CartCategoryIds = cartCategoryIds;
-        // Use the same public product-offers API as the product detail page.
-        // The checkout-offers endpoint requires a customer JWT and was returning
-        // an empty list when the server-side storefront request had no usable token.
+        // The public offer endpoint supplies scope and discount metadata; validate
+        // every cart line again here for an accurate checkout preview.
         var checkoutOffers = new Dictionary<int, CheckoutCouponOfferViewModel>();
         foreach (var productId in cart.Select(item => item.ProductId).Distinct())
         {
@@ -208,82 +205,71 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                 {
                     if (!checkoutOffers.ContainsKey(offer.Id))
                     {
-                        var eligibleSubtotal = cart
-                            .Where(item => (!offer.ProductId.HasValue || item.ProductId == offer.ProductId.Value))
-                            .Sum(item => item.Price * item.Quantity);
-                        // A product-specific coupon must not be used with a mixed-product cart.
-                        var cartMatchesProductScope = !offer.ProductId.HasValue ||
+                        var scopeDataAvailable = offer.ScopeDataAvailable;
+                        var productScopeMatches = !offer.ProductId.HasValue ||
                             cart.All(item => item.ProductId == offer.ProductId.Value);
-                        // Category-scoped offers are already returned only for products
-                        // in the matching category by the product-offers endpoint.
-                        // Some deployed API instances may still return only DiscountText
-                        // (for example, "10% OFF") without the numeric calculation fields.
-                        // Fall back to the display text so valid coupons are not rejected
-                        // with a zero discount while the API deployment is being aligned.
-                        var discountType = offer.DiscountType;
-                        var discountValue = offer.DiscountValue;
+                        var categoryScopeMatches = !offer.CategoryId.HasValue || cart.All(item =>
+                            cartCategoryIds.TryGetValue(item.ProductId, out var categoryId) &&
+                            categoryId.HasValue && categoryId.Value == offer.CategoryId.Value);
+                        var eligibleSubtotal = cart
+                            .Where(item => (!offer.ProductId.HasValue || item.ProductId == offer.ProductId.Value) &&
+                                (!offer.CategoryId.HasValue ||
+                                 (cartCategoryIds.TryGetValue(item.ProductId, out var categoryId) &&
+                                  categoryId.HasValue && categoryId.Value == offer.CategoryId.Value)))
+                            .Sum(item => item.Price * item.Quantity);
+                        var discountType = offer.DiscountDataAvailable ? offer.DiscountType : string.Empty;
+                        var discountValue = offer.DiscountDataAvailable ? offer.DiscountValue : 0m;
                         var maximumDiscount = offer.MaximumDiscount;
-                        if (discountValue <= 0m)
-                        {
-                            var percentageMatch = Regex.Match(offer.DiscountText ?? string.Empty,
-                                @"(?<value>\d+(?:\.\d+)?)\s*%\s*OFF", RegexOptions.IgnoreCase);
-                            var fixedMatch = Regex.Match(offer.DiscountText ?? string.Empty,
-                                @"₹\s*(?<value>[\d,]+(?:\.\d+)?)\s*OFF", RegexOptions.IgnoreCase);
-                            var capMatch = Regex.Match(offer.DiscountText ?? string.Empty,
-                                @"up to\s*₹?\s*(?<value>[\d,]+(?:\.\d+)?)", RegexOptions.IgnoreCase);
-
-                            if (percentageMatch.Success &&
-                                decimal.TryParse(percentageMatch.Groups["value"].Value, NumberStyles.Number,
-                                    CultureInfo.InvariantCulture, out var parsedPercentage))
-                            {
-                                discountType = "Percentage";
-                                discountValue = parsedPercentage;
-                            }
-                            else if (fixedMatch.Success &&
-                                decimal.TryParse(fixedMatch.Groups["value"].Value.Replace(",", string.Empty),
-                                    NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedFixed))
-                            {
-                                discountType = "Fixed";
-                                discountValue = parsedFixed;
-                            }
-
-                            if (!maximumDiscount.HasValue && capMatch.Success &&
-                                decimal.TryParse(capMatch.Groups["value"].Value.Replace(",", string.Empty),
-                                    NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedCap))
-                            {
-                                maximumDiscount = parsedCap;
-                            }
-                        }
-
-                        var calculatedDiscount = string.Equals(discountType, "Percentage", StringComparison.OrdinalIgnoreCase)
-                            ? eligibleSubtotal * discountValue / 100m
-                            : discountValue;
+                        var discountDataAvailable = offer.DiscountDataAvailable &&
+                            (string.Equals(discountType, "Percentage", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(discountType, "Fixed", StringComparison.OrdinalIgnoreCase)) &&
+                            discountValue > 0m && (!maximumDiscount.HasValue || maximumDiscount.Value >= 0m);
+                        var calculatedDiscount = !discountDataAvailable
+                            ? 0m
+                            : string.Equals(discountType, "Percentage", StringComparison.OrdinalIgnoreCase)
+                                ? eligibleSubtotal * discountValue / 100m
+                                : discountValue;
                         if (maximumDiscount.HasValue)
                             calculatedDiscount = Math.Min(calculatedDiscount, maximumDiscount.Value);
                         calculatedDiscount = Math.Round(Math.Clamp(calculatedDiscount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
+                        var scopeMatches = scopeDataAvailable && discountDataAvailable && productScopeMatches && categoryScopeMatches;
+                        var scopedProductName = offer.ProductId.HasValue
+                            ? cart.FirstOrDefault(item => item.ProductId == offer.ProductId.Value)?.Name
+                            : null;
+                        var eligibilityMessage = !scopeDataAvailable || !discountDataAvailable
+                            ? "Coupon eligibility could not be verified. Refresh checkout and try again."
+                            : !productScopeMatches
+                                ? $"This coupon applies only to {scopedProductName ?? "the eligible product"}. Remove other products from your cart to use this coupon."
+                                : !categoryScopeMatches
+                                    ? "This coupon applies only to products in the eligible category. Remove products from other categories to use this coupon."
+                                    : eligibleSubtotal < offer.MinimumOrderAmount
+                                        ? $"Minimum order value {offer.MinimumOrderAmount:0.##} is required for eligible items."
+                                        : calculatedDiscount <= 0m
+                                            ? "This offer does not add a discount to your current cart."
+                                            : string.Empty;
+                        var canApply = scopeMatches && eligibleSubtotal >= offer.MinimumOrderAmount && calculatedDiscount > 0m;
                         checkoutOffers[offer.Id] = new CheckoutCouponOfferViewModel
                         {
                             Id = offer.Id,
                             Code = offer.Code,
                             Name = offer.Name,
                             DiscountText = offer.DiscountText,
-                            DiscountAmount = calculatedDiscount,
+                            DiscountDataAvailable = discountDataAvailable,
+                            DiscountType = discountType,
+                            DiscountValue = discountValue,
+                            MaximumDiscount = maximumDiscount,
+                            DiscountAmount = canApply ? calculatedDiscount : 0m,
                             MinimumOrderAmount = offer.MinimumOrderAmount,
                             IsAutomatic = offer.IsAutomatic,
                             FirstOrderOnly = offer.FirstOrderOnly,
                             ProductId = offer.ProductId,
                             CategoryId = offer.CategoryId,
+                            ScopeDataAvailable = scopeDataAvailable,
                             AppliesTo = offer.AppliesTo,
                             EndsAtUtc = offer.EndsAtUtc,
                             Terms = offer.Terms,
-                            CanApply = cartMatchesProductScope && eligibleSubtotal >= offer.MinimumOrderAmount && calculatedDiscount > 0m,
-                            EligibilityMessage = !cartMatchesProductScope
-                                ? $"This coupon applies only to {cart.FirstOrDefault(item => item.ProductId == offer.ProductId)?.Name ?? "the eligible product"}. Remove other products from your cart to use this coupon."
-                                : eligibleSubtotal < offer.MinimumOrderAmount
-                                    ? $"Minimum order ₹{offer.MinimumOrderAmount:0.##} is required for eligible items."
-                                    : calculatedDiscount <= 0m
-                                        ? "This offer does not add a discount to your current cart."
-                                        : string.Empty
+                            CanApply = canApply,
+                            EligibilityMessage = eligibilityMessage
                         };
                     }
                 }
@@ -394,7 +380,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         if (!result.Success || result.Data is null)
         {
             TempData["Error"] = result.Message;
-            return RedirectToAction("Index", "Cart");
+            return RedirectToAction(nameof(Checkout));
         }
 
         result.Data.SaveAddress = model.SaveAddress;

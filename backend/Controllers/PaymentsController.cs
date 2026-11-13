@@ -181,42 +181,19 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
         catch (Exception ex) when (ex is InvalidOperationException or OverflowException)
         { return BadRequest("Invalid size, colour or quantity."); }
         var subtotal = total;
-        decimal discountAmount = 0m;
-        backend.Models.Coupon? appliedCoupon = null;
-        var nowUtc = DateTime.UtcNow;
-        var normalizedCouponCode = request.CouponCode?.Trim().ToUpperInvariant() ?? string.Empty;
-        var candidates = await db.Coupons.Where(c => c.IsActive &&
-            (string.IsNullOrWhiteSpace(normalizedCouponCode) ? c.IsAutomatic : c.Code == normalizedCouponCode) &&
-            (!c.StartsAtUtc.HasValue || c.StartsAtUtc <= nowUtc) &&
-            (!c.EndsAtUtc.HasValue || c.EndsAtUtc >= nowUtc) &&
-            (!c.MaximumUses.HasValue || c.UsageCount < c.MaximumUses)).ToListAsync();
-        var hasPreviousOrder = await db.Orders.AnyAsync(o => o.CustomerId == customerId &&
-            (o.PaymentStatus == "Paid" || o.Status == "Processing" || o.Status == "Shipped" || o.Status == "Delivered"));
-        var redeemedCouponIds = await db.CouponRedemptions.Where(r => r.CustomerId == customerId).Select(r => r.CouponId).ToListAsync();
-        var eligibleCoupons = candidates.Select(c =>
+        var couponLines = order.Items.Select(item =>
         {
-            var eligibleProductIds = products.Where(p =>
-                (!c.ProductId.HasValue || p.Id == c.ProductId.Value) &&
-                (!c.CategoryId.HasValue || p.CategoryId == c.CategoryId.Value)).Select(p => p.Id).ToHashSet();
-            var eligibleSubtotal = order.Items.Where(i => eligibleProductIds.Contains(i.ProductId)).Sum(i => i.Price * i.Quantity);
-            var usageAllowed = !c.PerCustomerLimit.HasValue || redeemedCouponIds.Count(id => id == c.Id) < c.PerCustomerLimit.Value;
-            var firstOrderAllowed = !c.FirstOrderOnly || !hasPreviousOrder;
-            var amount = c.DiscountType == "Percentage" ? eligibleSubtotal * c.DiscountValue / 100m : c.DiscountValue;
-            if (c.MaximumDiscount.HasValue) amount = Math.Min(amount, c.MaximumDiscount.Value);
-            amount = Math.Round(Math.Clamp(amount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
-            return new { Coupon = c, EligibleSubtotal = eligibleSubtotal, UsageAllowed = usageAllowed, FirstOrderAllowed = firstOrderAllowed, Amount = amount };
-        }).Where(x => x.EligibleSubtotal >= x.Coupon.MinimumOrderAmount && x.UsageAllowed && x.FirstOrderAllowed && x.Amount > 0m &&
-            (x.Coupon.IsAutomatic || string.Equals(x.Coupon.Code, request.CouponCode?.Trim(), StringComparison.OrdinalIgnoreCase)))
-          .OrderByDescending(x => x.Amount).ToList();
-        if (!string.IsNullOrWhiteSpace(request.CouponCode) && eligibleCoupons.All(x => !string.Equals(x.Coupon.Code, request.CouponCode.Trim(), StringComparison.OrdinalIgnoreCase)))
-            return BadRequest("This coupon is invalid or does not apply to your cart.");
-        if (eligibleCoupons.Count > 0)
+            var product = products.Single(product => product.Id == item.ProductId);
+            return new CouponCartLine(product.Id, product.CategoryId, product.Name, item.Price * item.Quantity);
+        }).ToList();
+        var couponResult = await EvaluateCouponAsync(customerId, couponLines, request.CouponCode);
+        if (couponResult.Error is not null) return BadRequest(new { message = couponResult.Error });
+
+        var discountAmount = couponResult.Evaluation?.DiscountAmount ?? 0m;
+        if (couponResult.Coupon is not null)
         {
-            var selected = eligibleCoupons[0];
-            appliedCoupon = selected.Coupon;
-            discountAmount = selected.Amount;
-            order.CouponId = appliedCoupon.Id;
-            order.CouponCode = appliedCoupon.IsAutomatic ? null : appliedCoupon.Code;
+            order.CouponId = couponResult.Coupon.Id;
+            order.CouponCode = couponResult.Coupon.IsAutomatic ? null : couponResult.Coupon.Code;
             order.DiscountAmount = discountAmount;
         }
         decimal shippingCharge = 0m;
@@ -426,62 +403,31 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
                 });
             }
 
-            var normalizedCouponCode = request.CouponCode?.Trim().ToUpperInvariant() ?? string.Empty;
-            var nowUtc = DateTime.UtcNow;
-            var candidates = await db.Coupons.Where(coupon => coupon.IsActive &&
-                (string.IsNullOrWhiteSpace(normalizedCouponCode) ? coupon.IsAutomatic : coupon.Code == normalizedCouponCode) &&
-                (!coupon.StartsAtUtc.HasValue || coupon.StartsAtUtc <= nowUtc) &&
-                (!coupon.EndsAtUtc.HasValue || coupon.EndsAtUtc >= nowUtc) &&
-                (!coupon.MaximumUses.HasValue || coupon.UsageCount < coupon.MaximumUses)).ToListAsync();
-            var hasPreviousOrder = await db.Orders.AnyAsync(existingOrder => existingOrder.CustomerId == customerId &&
-                (existingOrder.PaymentStatus == "Paid" || existingOrder.Status == "Processing" ||
-                 existingOrder.Status == "Shipped" || existingOrder.Status == "Delivered"));
-            var redeemedCouponIds = await db.CouponRedemptions.Where(redemption => redemption.CustomerId == customerId)
-                .Select(redemption => redemption.CouponId).ToListAsync();
-            var eligibleCoupons = candidates.Select(coupon =>
+            var couponLines = order.Items.Select(item =>
             {
-                var eligibleProductIds = products.Where(product =>
-                    (!coupon.ProductId.HasValue || product.Id == coupon.ProductId.Value) &&
-                    (!coupon.CategoryId.HasValue || product.CategoryId == coupon.CategoryId.Value))
-                    .Select(product => product.Id).ToHashSet();
-                var eligibleSubtotal = order.Items.Where(item => eligibleProductIds.Contains(item.ProductId))
-                    .Sum(item => item.Price * item.Quantity);
-                var usageAllowed = !coupon.PerCustomerLimit.HasValue ||
-                    redeemedCouponIds.Count(id => id == coupon.Id) < coupon.PerCustomerLimit.Value;
-                var firstOrderAllowed = !coupon.FirstOrderOnly || !hasPreviousOrder;
-                var amount = coupon.DiscountType == "Percentage"
-                    ? eligibleSubtotal * coupon.DiscountValue / 100m
-                    : coupon.DiscountValue;
-                if (coupon.MaximumDiscount.HasValue) amount = Math.Min(amount, coupon.MaximumDiscount.Value);
-                amount = Math.Round(Math.Clamp(amount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
-                return new { Coupon = coupon, EligibleSubtotal = eligibleSubtotal, UsageAllowed, FirstOrderAllowed, Amount = amount };
-            }).Where(offer => offer.EligibleSubtotal >= offer.Coupon.MinimumOrderAmount && offer.UsageAllowed &&
-                offer.FirstOrderAllowed && offer.Amount > 0m &&
-                (offer.Coupon.IsAutomatic || string.Equals(offer.Coupon.Code, normalizedCouponCode, StringComparison.OrdinalIgnoreCase)))
-                .OrderByDescending(offer => offer.Amount).ToList();
-            if (!string.IsNullOrWhiteSpace(normalizedCouponCode) && eligibleCoupons.All(offer =>
-                    !string.Equals(offer.Coupon.Code, normalizedCouponCode, StringComparison.OrdinalIgnoreCase)))
-                return BadRequest("This coupon is invalid or does not apply to your cart.");
-
-            if (eligibleCoupons.Count > 0)
+                var product = products.Single(product => product.Id == item.ProductId);
+                return new CouponCartLine(product.Id, product.CategoryId, product.Name, item.Price * item.Quantity);
+            }).ToList();
+            var couponResult = await EvaluateCouponAsync(customerId, couponLines, request.CouponCode);
+            if (couponResult.Error is not null) return BadRequest(new { message = couponResult.Error });
+            var appliedCoupon = couponResult.Coupon;
+            if (appliedCoupon is not null)
             {
-                var selectedCoupon = eligibleCoupons[0];
-                order.CouponId = selectedCoupon.Coupon.Id;
-                order.CouponCode = selectedCoupon.Coupon.IsAutomatic ? null : selectedCoupon.Coupon.Code;
-                order.DiscountAmount = selectedCoupon.Amount;
-                total = Math.Max(0m, total - selectedCoupon.Amount);
+                order.CouponId = appliedCoupon.Id;
+                order.CouponCode = appliedCoupon.IsAutomatic ? null : appliedCoupon.Code;
+                order.DiscountAmount = couponResult.Evaluation!.DiscountAmount;
+                total = Math.Max(0m, total - couponResult.Evaluation.DiscountAmount);
             }
 
             order.TotalAmount = total;
             db.Orders.Add(order);
             await db.SaveChangesAsync();
-            if (order.CouponId.HasValue)
+            if (appliedCoupon is not null)
             {
-                var redeemedCoupon = candidates.Single(coupon => coupon.Id == order.CouponId.Value);
-                redeemedCoupon.UsageCount++;
+                appliedCoupon.UsageCount++;
                 db.CouponRedemptions.Add(new CouponRedemption
                 {
-                    CouponId = redeemedCoupon.Id,
+                    CouponId = appliedCoupon.Id,
                     CustomerId = customerId,
                     OrderId = order.Id
                 });
@@ -499,6 +445,62 @@ public class PaymentsController(ApplicationDbContext db, IConfiguration configur
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    private async Task<(Coupon? Coupon, CouponEvaluation? Evaluation, string? Error)> EvaluateCouponAsync(
+        int customerId, IReadOnlyCollection<CouponCartLine> cartLines, string? requestedCode)
+    {
+        var normalizedCode = requestedCode?.Trim().ToUpperInvariant() ?? string.Empty;
+        var couponsQuery = db.Coupons.AsQueryable();
+        couponsQuery = string.IsNullOrWhiteSpace(normalizedCode)
+            ? couponsQuery.Where(coupon => coupon.IsAutomatic)
+            : couponsQuery.Where(coupon => coupon.Code == normalizedCode);
+        var coupons = await couponsQuery.ToListAsync();
+        var hasPreviousOrder = await db.Orders.AnyAsync(order => order.CustomerId == customerId &&
+            (order.PaymentStatus == "Paid" || order.Status == "Processing" ||
+             order.Status == "Shipped" || order.Status == "Delivered"));
+        var redemptionCounts = await db.CouponRedemptions
+            .Where(redemption => redemption.CustomerId == customerId)
+            .GroupBy(redemption => redemption.CouponId)
+            .Select(group => new { CouponId = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(item => item.CouponId, item => item.Count);
+        var now = DateTime.UtcNow;
+
+        var evaluations = coupons.Select(coupon =>
+        {
+            var evaluation = CouponEligibility.Evaluate(coupon, cartLines, now, hasPreviousOrder,
+                redemptionCounts.GetValueOrDefault(coupon.Id));
+            logger.LogInformation(
+                "Coupon {CouponCode} evaluated before payment order creation. Coupon product {CouponProductId}, coupon category {CouponCategoryId}, cart products {CartProductIds}, cart categories {CartCategoryIds}, eligible {EligibilityResult}, rejection {RejectionReason}, eligible subtotal {EligibleSubtotal}, calculated discount {CalculatedDiscount}",
+                coupon.Code, coupon.ProductId, coupon.CategoryId,
+                cartLines.Select(line => line.ProductId).ToArray(), cartLines.Select(line => line.CategoryId).ToArray(),
+                evaluation.IsEligible, evaluation.RejectionReason, evaluation.EligibleSubtotal, evaluation.DiscountAmount);
+            return (Coupon: coupon, Evaluation: evaluation);
+        }).ToList();
+
+        if (!string.IsNullOrWhiteSpace(normalizedCode))
+        {
+            var match = evaluations.FirstOrDefault(item =>
+                string.Equals(item.Coupon.Code, normalizedCode, StringComparison.OrdinalIgnoreCase));
+            if (match.Coupon is null)
+            {
+                logger.LogInformation(
+                    "Coupon {CouponCode} rejected before payment order creation. Coupon was not found; cart products {CartProductIds}, cart categories {CartCategoryIds}, eligible subtotal {EligibleSubtotal}, calculated discount {CalculatedDiscount}",
+                    normalizedCode, cartLines.Select(line => line.ProductId).ToArray(),
+                    cartLines.Select(line => line.CategoryId).ToArray(), cartLines.Sum(line => line.Amount), 0m);
+                return (null, null, "This coupon is invalid or does not apply to your cart.");
+            }
+            return match.Evaluation.IsEligible
+                ? (match.Coupon, match.Evaluation, null)
+                : (null, match.Evaluation, match.Evaluation.RejectionReason);
+        }
+
+        var automatic = evaluations.Where(item => item.Coupon.IsAutomatic && item.Evaluation.IsEligible)
+            .OrderByDescending(item => item.Evaluation.DiscountAmount)
+            .FirstOrDefault();
+        return automatic.Coupon is null
+            ? (null, null, null)
+            : (automatic.Coupon, automatic.Evaluation, null);
     }
 
     [HttpPost("verify")]

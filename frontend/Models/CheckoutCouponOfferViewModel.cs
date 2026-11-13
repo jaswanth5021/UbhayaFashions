@@ -6,6 +6,10 @@ public class CheckoutCouponOfferViewModel
     public string? Code { get; set; }
     public string Name { get; set; } = "";
     public string DiscountText { get; set; } = "";
+    public string DiscountType { get; set; } = "";
+    public decimal DiscountValue { get; set; }
+    public decimal? MaximumDiscount { get; set; }
+    public bool DiscountDataAvailable { get; set; }
     public decimal DiscountAmount { get; set; }
     public bool CanApply { get; set; }
     public string EligibilityMessage { get; set; } = "";
@@ -14,6 +18,7 @@ public class CheckoutCouponOfferViewModel
     public bool FirstOrderOnly { get; set; }
     public int? ProductId { get; set; }
     public int? CategoryId { get; set; }
+    public bool ScopeDataAvailable { get; set; }
     public string AppliesTo { get; set; } = "";
     public DateTime? EndsAtUtc { get; set; }
     public string Terms { get; set; } = "";

@@ -40,6 +40,25 @@ public class ApiService(
     }
 }
 
+    private static string GetApiErrorMessage(string content)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            var root = document.RootElement;
+            if (root.ValueKind == JsonValueKind.String)
+                return root.GetString() ?? "The request could not be completed.";
+            if (root.ValueKind == JsonValueKind.Object &&
+                root.TryGetProperty("message", out var message) && message.ValueKind == JsonValueKind.String)
+                return message.GetString() ?? "The request could not be completed.";
+        }
+        catch (JsonException) { }
+
+        return string.IsNullOrWhiteSpace(content)
+            ? "The request could not be completed."
+            : content.Trim().Trim('"');
+    }
+
 
     // =====================================================
     // PRODUCTS
@@ -796,7 +815,7 @@ public class ApiService(
         var response = await Client.SendAsync(request);
         var content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
-            return (false, content, null);
+            return (false, GetApiErrorMessage(content), null);
 
         var data = JsonSerializer.Deserialize<PaymentCheckoutViewModel>(content, new JsonSerializerOptions
         {
@@ -849,7 +868,7 @@ public class ApiService(
         var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            return (false, content, 0);
+            return (false, GetApiErrorMessage(content), 0);
 
         var data = JsonSerializer.Deserialize<JsonElement>(
             content,
@@ -892,7 +911,7 @@ public class ApiService(
         var response = await Client.SendAsync(request);
         var content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
-            return (false, content, model.OrderId);
+            return (false, GetApiErrorMessage(content), model.OrderId);
 
         return (true, "", model.OrderId);
     }

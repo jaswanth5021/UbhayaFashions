@@ -63,8 +63,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(x => x.MaximumDiscount).HasPrecision(18, 2);
             entity.Property(x => x.MinimumOrderAmount).HasPrecision(18, 2);
             entity.HasIndex(x => x.Code).IsUnique();
-            entity.HasOne<Product>().WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.SetNull);
-            entity.HasOne<Category>().WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne<Product>().WithMany().HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<Category>().WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<CouponRedemption>(entity =>
         {

@@ -56,11 +56,11 @@
                     <input asp-for="PerCustomerLimit" type="number" min="1" placeholder="1" />
                 </label>
                 <label class="coupon-field">
-                    <span class="coupon-field-head">Product ID (optional)<details class="coupon-help"><summary aria-label="Product ID help">i</summary><div><strong>Product ID</strong><p>Restrict this offer to one product. Use either Product ID or Category ID, not both.</p><small>Example: 125 applies only to product #125</small></div></details></span>
+                    <span class="coupon-field-head">Product ID (optional)<details class="coupon-help"><summary aria-label="Product ID help">i</summary><div><strong>Product ID</strong><p>Restrict this offer to one product. If a category is also selected, both restrictions apply.</p><small>Example: 125 applies only to product #125</small></div></details></span>
                     <input asp-for="ProductId" type="number" min="1" placeholder="e.g. 125" />
                 </label>
                 <label class="coupon-field">
-                    <span class="coupon-field-head">Category ID (optional)<details class="coupon-help"><summary aria-label="Category ID help">i</summary><div><strong>Category ID</strong><p>Restrict this offer to a product category. Use either Category ID or Product ID, not both.</p><small>Example: 8 applies to category #8</small></div></details></span>
+                    <span class="coupon-field-head">Category ID (optional)<details class="coupon-help"><summary aria-label="Category ID help">i</summary><div><strong>Category ID</strong><p>Restrict this offer to a product category. If a product is also selected, both restrictions apply.</p><small>Example: 8 applies to category #8</small></div></details></span>
                     <input asp-for="CategoryId" type="number" min="1" placeholder="e.g. 8" />
                 </label>
             </div>
@@ -85,7 +85,7 @@
             </div>
         </div>
         <div class="coupon-form-actions"><button type="submit" class="coupon-primary-button">@(isEdit ? "Save changes" : "Create coupon")</button><a asp-action="Coupons" class="coupon-secondary-button">Cancel</a></div>
-        <p class="coupon-form-footnote">Tip: Automatic offers do not require a coupon code. Use either Product ID or Category ID, not both.</p>
+        <p class="coupon-form-footnote">Tip: Automatic offers do not require a coupon code. Product and category restrictions can be combined.</p>
     </form>
 </section>
 <script>

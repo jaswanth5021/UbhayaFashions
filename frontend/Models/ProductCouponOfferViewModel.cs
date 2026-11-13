@@ -10,8 +10,10 @@ public class ProductCouponOfferViewModel
     public string DiscountType { get; set; } = "Percentage";
     public decimal DiscountValue { get; set; }
     public decimal? MaximumDiscount { get; set; }
+    public bool DiscountDataAvailable { get; set; }
     public int? ProductId { get; set; }
     public int? CategoryId { get; set; }
+    public bool ScopeDataAvailable { get; set; }
     public bool IsAutomatic { get; set; }
     public bool FirstOrderOnly { get; set; }
     public string AppliesTo { get; set; } = "";

@@ -17,6 +17,6 @@ public record CouponRequest(
     int? ProductId,
     int? CategoryId);
 
-public record CouponApplyRequest(string? Code, decimal Subtotal, List<int> ProductIds);
+public record CouponApplyRequest(string? Code, List<CreateOrderItem> Items);
 
 public record CheckoutCouponOffersRequest(List<CreateOrderItem> Items);

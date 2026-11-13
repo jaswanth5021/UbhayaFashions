@@ -310,11 +310,18 @@
                                     {
                                         <article class="checkout-coupon-offer"
                                                  data-checkout-coupon-offer
+                                                 data-coupon-id="@offer.Id"
                                                  data-coupon-code="@(offer.Code ?? "")"
                                                  data-coupon-product-id="@(offer.ProductId?.ToString() ?? "")"
                                                  data-coupon-category-id="@(offer.CategoryId?.ToString() ?? "")"
                                                  data-coupon-name="@offer.Name"
                                                  data-coupon-discount="@offer.DiscountAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                 data-coupon-discount-type="@offer.DiscountType"
+                                                 data-coupon-discount-value="@offer.DiscountValue.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                 data-coupon-maximum-discount="@(offer.MaximumDiscount?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                                                 data-coupon-minimum-order="@offer.MinimumOrderAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                 data-coupon-scope-data-available="@(offer.ScopeDataAvailable ? "true" : "false")"
+                                                 data-coupon-discount-data-available="@(offer.DiscountDataAvailable ? "true" : "false")"
                                                  data-coupon-can-apply="@(offer.CanApply ? "true" : "false")"
                                                  data-coupon-automatic="@(offer.IsAutomatic ? "true" : "false")">
                                             <div class="checkout-coupon-offer-heading">
@@ -665,14 +672,18 @@
                 const match = couponOffers.find(offer => offer.dataset.couponAutomatic !== 'true' &&
                     (offer.dataset.couponCode || '').toUpperCase() === code);
                 if (!match) {
+                    appliedCoupon = null;
                     if (couponMessage) {
                         couponMessage.textContent = 'That code is not active or eligible for this cart.';
                         couponMessage.classList.remove('is-success');
                         couponMessage.dataset.keepMessage = 'true';
                     }
+                    updateCheckoutTotals();
                     return false;
                 }
                 const cartProducts = [...document.querySelectorAll('[data-cart-product-id]')];
+                const scopeDataAvailable = match.dataset.couponScopeDataAvailable === 'true' &&
+                    match.dataset.couponDiscountDataAvailable === 'true';
                 const scopedProductId = Number(match.dataset.couponProductId || 0);
                 const scopedCategoryId = Number(match.dataset.couponCategoryId || 0);
                 const productScopeMismatch = scopedProductId > 0 &&
@@ -681,30 +692,34 @@
                     cartProducts.some(item => !item.dataset.cartCategoryId ||
                         Number(item.dataset.cartCategoryId) !== scopedCategoryId);
 
-                if (productScopeMismatch || categoryScopeMismatch) {
+                if (!scopeDataAvailable || productScopeMismatch || categoryScopeMismatch) {
                     const eligibleProduct = scopedProductId > 0
                         ? cartProducts.find(item => Number(item.dataset.cartProductId) === scopedProductId)
                             ?.querySelector('.checkout-summary-product-name')?.textContent.trim()
                         : null;
                     if (couponMessage) {
-                        couponMessage.textContent = productScopeMismatch
+                        couponMessage.textContent = !scopeDataAvailable
+                            ? 'Coupon eligibility could not be verified. Refresh checkout and try again.'
+                            : productScopeMismatch
                             ? 'This coupon applies only to ' + (eligibleProduct || 'the eligible product') + '. Remove other products from your cart to use this coupon.'
                             : 'This coupon applies only to products in the eligible category. Remove products from other categories to use it.';
                         couponMessage.classList.remove('is-success');
                         couponMessage.dataset.keepMessage = 'true';
                     }
-                    appliedCoupon = automaticCoupon;
+                    appliedCoupon = null;
                     updateCheckoutTotals();
                     return false;
                 }
 
                 if (match.dataset.couponCanApply !== 'true') {
+                    appliedCoupon = null;
                     if (couponMessage) {
                         couponMessage.textContent = match.querySelector('.checkout-coupon-ineligible')?.textContent.trim() ||
                             'This active coupon is not eligible for your current cart.';
                         couponMessage.classList.remove('is-success');
                         couponMessage.dataset.keepMessage = 'true';
                     }
+                    updateCheckoutTotals();
                     return false;
                 }
 
@@ -759,9 +774,8 @@
             });
             couponInput?.addEventListener('input', () => {
                 const currentCode = couponInput.value.trim().toUpperCase();
-                if (appliedCoupon && appliedCoupon.dataset.couponAutomatic !== 'true' &&
-                    currentCode !== (appliedCoupon.dataset.couponCode || '').toUpperCase()) {
-                    appliedCoupon = automaticCoupon;
+                if (appliedCoupon && currentCode !== (appliedCoupon.dataset.couponCode || '').toUpperCase()) {
+                    appliedCoupon = null;
                     if (couponMessage) {
                         couponMessage.textContent = '';
                         couponMessage.classList.remove('is-success');
@@ -769,7 +783,16 @@
                     }
                     updateCheckoutTotals();
                 }
+                if (currentCode && couponOffers.some(offer =>
+                    offer.dataset.couponAutomatic !== 'true' &&
+                    (offer.dataset.couponCode || '').toUpperCase() === currentCode)) {
+                    applyCoupon();
+                }
             });
+            couponInput?.addEventListener('paste', () => {
+                window.setTimeout(applyCoupon, 0);
+            });
+            couponInput?.addEventListener('change', applyCoupon);
 
             if (automaticCoupon && couponMessage) {
                 couponMessage.textContent = automaticCoupon.dataset.couponName + ' is applied automatically.';

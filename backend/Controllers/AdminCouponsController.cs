@@ -65,7 +65,6 @@ public class AdminCouponsController(ApplicationDbContext db) : ControllerBase
         if (r.StartsAtUtc.HasValue && r.EndsAtUtc.HasValue && r.EndsAtUtc <= r.StartsAtUtc) return "End date must be after start date.";
         if (r.ProductId.HasValue && !await db.Products.AnyAsync(x => x.Id == r.ProductId)) return "Selected product was not found.";
         if (r.CategoryId.HasValue && !await db.Categories.AnyAsync(x => x.Id == r.CategoryId)) return "Selected category was not found.";
-        if (r.ProductId.HasValue && r.CategoryId.HasValue) return "Choose either a product or a category target, not both.";
         return null;
     }
 
