@@ -337,18 +337,16 @@
                                                     </span>
                                                 </div>
                                                 <div class="checkout-coupon-card-actions">
-                                                    @if (!string.IsNullOrWhiteSpace(offer.Code) && offer.CanApply)
+                                                    @if (!string.IsNullOrWhiteSpace(offer.Code))
                                                     {
-                                                        <button type="button" class="checkout-coupon-use" data-checkout-coupon-use aria-label="Use coupon code @offer.Code">
-                                                            <span>USE CODE</span><b>@offer.Code</b>
+                                                        <button type="button"
+                                                                class="checkout-coupon-use @(offer.CanApply ? "" : "is-unavailable")"
+                                                                data-checkout-coupon-use
+                                                                aria-label="@(offer.CanApply ? "Use" : "Enter") coupon code @offer.Code"
+                                                                title="@(offer.CanApply ? "Select this coupon" : offer.EligibilityMessage)">
+                                                            <span>@(offer.CanApply ? "USE CODE" : "ADD CODE")</span><b>@offer.Code</b>
                                                             <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="14" height="14" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
                                                         </button>
-                                                    }
-                                                    else if (!string.IsNullOrWhiteSpace(offer.Code))
-                                                    {
-                                                        <div class="checkout-coupon-use is-unavailable" title="@offer.EligibilityMessage">
-                                                            <span>ACTIVE CODE</span><b>@offer.Code</b>
-                                                        </div>
                                                     }
                                                     else
                                                     {
@@ -658,12 +656,20 @@
             };
 
             document.getElementById('checkoutApplyCoupon')?.addEventListener('click', applyCoupon);
-            document.querySelectorAll('[data-checkout-coupon-use]').forEach(button => {
-                button.addEventListener('click', () => {
-                    const offer = button.closest('[data-checkout-coupon-offer]');
-                    if (!offer || !couponInput) return;
-                    couponInput.value = offer.dataset.couponCode || '';
-                    applyCoupon();
+            const selectCheckoutOffer = offer => {
+                if (!offer || !couponInput) return;
+                const code = offer.dataset.couponCode || '';
+                if (!code) return;
+                couponInput.value = code;
+                couponInput.focus();
+                applyCoupon();
+            };
+
+            // Select a coupon by clicking its code button or the card surface.
+            document.querySelectorAll('[data-checkout-coupon-offer]').forEach(offer => {
+                offer.addEventListener('click', event => {
+                    if (event.target.closest('.checkout-coupon-terms')) return;
+                    selectCheckoutOffer(offer);
                 });
             });
             couponInput?.addEventListener('keydown', event => {
