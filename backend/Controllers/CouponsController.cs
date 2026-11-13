@@ -83,11 +83,18 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
             if (coupon.MaximumDiscount.HasValue) discount = Math.Min(discount, coupon.MaximumDiscount.Value);
             discount = Math.Round(Math.Clamp(discount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
 
+            var cartMatchesProductScope = !coupon.ProductId.HasValue ||
+                cartLines.All(line => line.ProductId == coupon.ProductId.Value);
+            var cartMatchesCategoryScope = !coupon.CategoryId.HasValue ||
+                cartLines.All(line => line.CategoryId == coupon.CategoryId.Value);
+            var cartMatchesScope = cartMatchesProductScope && cartMatchesCategoryScope;
             var minimumOrderMet = eligibleSubtotal >= coupon.MinimumOrderAmount;
-            var canApply = eligibleSubtotal > 0m && minimumOrderMet && usageAllowed && firstOrderAllowed && discount > 0m;
-            var eligibilityMessage = !minimumOrderMet
-                ? $"Add ₹{Math.Max(0m, coupon.MinimumOrderAmount - eligibleSubtotal):0.##} more in eligible items to use this offer."
-                : !usageAllowed
+            var canApply = cartMatchesScope && eligibleSubtotal > 0m && minimumOrderMet && usageAllowed && firstOrderAllowed && discount > 0m;
+            var eligibilityMessage = !cartMatchesScope
+                ? "This coupon is valid only when the cart contains products from its eligible product or category."
+                : !minimumOrderMet
+                    ? $"Add ₹{Math.Max(0m, coupon.MinimumOrderAmount - eligibleSubtotal):0.##} more in eligible items to use this offer."
+                    : !usageAllowed
                     ? "You have already used this offer."
                     : !firstOrderAllowed
                         ? "This offer is for your first order only."
@@ -222,8 +229,8 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
         var eligible = coupons.Where(c => request.Subtotal >= c.MinimumOrderAmount &&
             (!c.FirstOrderOnly || isFirstOrder) &&
             (!c.PerCustomerLimit.HasValue || usedIds.Count(id => id == c.Id) < c.PerCustomerLimit) &&
-            (!c.ProductId.HasValue || productData.Any(p => p.Id == c.ProductId)) &&
-            (!c.CategoryId.HasValue || productData.Any(p => p.CategoryId == c.CategoryId)) &&
+            (!c.ProductId.HasValue || productData.All(p => p.Id == c.ProductId.Value)) &&
+            (!c.CategoryId.HasValue || productData.All(p => p.CategoryId == c.CategoryId.Value)) &&
             (c.IsAutomatic || string.Equals(c.Code, request.Code?.Trim(), StringComparison.OrdinalIgnoreCase)))
             .Select(c => new { Coupon = c, EligibleSubtotal = request.Subtotal })
             .ToList();
