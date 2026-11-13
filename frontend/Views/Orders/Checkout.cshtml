@@ -311,6 +311,8 @@
                                         <article class="checkout-coupon-offer"
                                                  data-checkout-coupon-offer
                                                  data-coupon-code="@(offer.Code ?? "")"
+                                                 data-coupon-product-id="@(offer.ProductId?.ToString() ?? "")"
+                                                 data-coupon-category-id="@(offer.CategoryId?.ToString() ?? "")"
                                                  data-coupon-name="@offer.Name"
                                                  data-coupon-discount="@offer.DiscountAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                                                  data-coupon-can-apply="@(offer.CanApply ? "true" : "false")"
