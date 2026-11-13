@@ -187,20 +187,54 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
 
         ViewBag.SavedAddresses = savedAddresses;
         ViewBag.CartVariants = cartVariants;
-        try
+        // Use the same public product-offers API as the product detail page.
+        // The checkout-offers endpoint requires a customer JWT and was returning
+        // an empty list when the server-side storefront request had no usable token.
+        var checkoutOffers = new Dictionary<int, CheckoutCouponOfferViewModel>();
+        foreach (var productId in cart.Select(item => item.ProductId).Distinct())
         {
-            ViewBag.CheckoutCouponOffers = await api.GetCheckoutCouponOffersAsync(cart);
+            try
+            {
+                var productOffers = await api.GetProductCouponOffersAsync(productId);
+                foreach (var offer in productOffers)
+                {
+                    if (!checkoutOffers.ContainsKey(offer.Id))
+                    {
+                        checkoutOffers[offer.Id] = new CheckoutCouponOfferViewModel
+                        {
+                            Id = offer.Id,
+                            Code = offer.Code,
+                            Name = offer.Name,
+                            DiscountText = offer.DiscountText,
+                            MinimumOrderAmount = offer.MinimumOrderAmount,
+                            IsAutomatic = offer.IsAutomatic,
+                            FirstOrderOnly = offer.FirstOrderOnly,
+                            AppliesTo = offer.AppliesTo,
+                            EndsAtUtc = offer.EndsAtUtc,
+                            Terms = offer.Terms,
+                            CanApply = cart.Sum(item => item.Price * item.Quantity) >= offer.MinimumOrderAmount,
+                            EligibilityMessage = cart.Sum(item => item.Price * item.Quantity) < offer.MinimumOrderAmount
+                                ? $"Minimum order ₹{offer.MinimumOrderAmount:0.##} is required."
+                                : string.Empty
+                        };
+                    }
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.LogWarning(ex, "Unable to load product coupon offers for checkout product {ProductId}", productId);
+            }
+            catch (JsonException ex)
+            {
+                logger.LogWarning(ex, "Unable to read product coupon offers for checkout product {ProductId}", productId);
+            }
         }
-        catch (HttpRequestException ex)
-        {
-            logger.LogWarning(ex, "Unable to load eligible coupon offers for checkout.");
-            ViewBag.CheckoutCouponOffers = new List<CheckoutCouponOfferViewModel>();
-        }
-        catch (JsonException ex)
-        {
-            logger.LogWarning(ex, "Unable to read eligible coupon offers for checkout.");
-            ViewBag.CheckoutCouponOffers = new List<CheckoutCouponOfferViewModel>();
-        }
+
+        ViewBag.CheckoutCouponOffers = checkoutOffers.Values
+            .OrderByDescending(offer => offer.CanApply)
+            .ThenBy(offer => offer.Name)
+            .Take(8)
+            .ToList();
         return View(cart);
     }
 
