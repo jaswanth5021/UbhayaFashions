@@ -317,15 +317,18 @@
                                                  data-coupon-automatic="@(offer.IsAutomatic ? "true" : "false")">
                                             <div class="checkout-coupon-offer-heading">
                                                 <strong title="@offer.Name">@offer.Name</strong>
-                                                <details class="checkout-coupon-terms">
-                                                    <summary>T&amp;C <span aria-hidden="true">›</span></summary>
-                                                    <div>
+                                                <button type="button" class="checkout-coupon-terms-trigger" data-coupon-terms-open aria-haspopup="dialog">
+                                                    T&amp;C <span aria-hidden="true">›</span>
+                                                </button>
+                                                <dialog class="checkout-coupon-terms-dialog" aria-label="Coupon terms and conditions">
+                                                    <div class="checkout-coupon-terms-dialog-heading">
                                                         <strong>Offer details</strong>
-                                                        <p>@offer.AppliesTo</p>
-                                                        @if (!string.IsNullOrWhiteSpace(offer.Terms)) { <p>@offer.Terms</p> }
-                                                        @if (offer.EndsAtUtc.HasValue) { <p>Valid until @offer.EndsAtUtc.Value.ToLocalTime().ToString("dd MMM yyyy")</p> }
+                                                        <button type="button" data-coupon-terms-close aria-label="Close offer details">×</button>
                                                     </div>
-                                                </details>
+                                                    <p>@offer.AppliesTo</p>
+                                                    @if (!string.IsNullOrWhiteSpace(offer.Terms)) { <p>@offer.Terms</p> }
+                                                    @if (offer.EndsAtUtc.HasValue) { <p>Valid until @offer.EndsAtUtc.Value.ToLocalTime().ToString("dd MMM yyyy")</p> }
+                                                </dialog>
                                             </div>
                                             <div class="checkout-coupon-offer-main">
                                                 <div class="checkout-coupon-offer-value">
@@ -566,6 +569,22 @@
             const mobileTotal = document.querySelector('.checkout-mobile-sticky-total strong');
             const reviewPayButton = document.querySelector('#checkoutScreenForm button[type="submit"].checkout-screen-primary');
             const couponOffers = [...document.querySelectorAll('[data-checkout-coupon-offer]')];
+            // Native modal dialogs render in the browser top layer, outside coupon-card
+            // and horizontal-scroller clipping, so the terms remain fully visible.
+            document.querySelectorAll('[data-coupon-terms-open]').forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const dialog = trigger.parentElement?.querySelector('.checkout-coupon-terms-dialog');
+                    if (dialog && !dialog.open) dialog.showModal();
+                });
+            });
+            document.querySelectorAll('[data-coupon-terms-close]').forEach(button => {
+                button.addEventListener('click', () => button.closest('dialog')?.close());
+            });
+            document.querySelectorAll('.checkout-coupon-terms-dialog').forEach(dialog => {
+                dialog.addEventListener('click', event => {
+                    if (event.target === dialog) dialog.close();
+                });
+            });
             const paymentReviewButton = document.querySelector('[data-checkout-screen-next="4"]');
             let shippingQuoteReady = Number(quoteBreakdown?.dataset.subtotal || 0) >= 1000;
 
