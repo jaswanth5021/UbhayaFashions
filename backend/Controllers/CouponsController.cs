@@ -102,7 +102,18 @@ public class CouponsController(ApplicationDbContext db) : ControllerBase
             (c.IsAutomatic || string.Equals(c.Code, request.Code?.Trim(), StringComparison.OrdinalIgnoreCase)))
             .Select(c => new { Coupon = c, EligibleSubtotal = request.Subtotal })
             .ToList();
-        if (eligible.Count == 0) return BadRequest(new { message = "This coupon is invalid or does not apply to your cart." });
+        if (eligible.Count == 0)
+        {
+            var matchingCoupon = coupons.FirstOrDefault(c =>
+                !c.IsAutomatic && string.Equals(c.Code, request.Code?.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (matchingCoupon is not null && request.Subtotal < matchingCoupon.MinimumOrderAmount)
+                return BadRequest(new
+                {
+                    message = $"This coupon requires a minimum order value of ₹{matchingCoupon.MinimumOrderAmount:0.##}. Your current order subtotal is ₹{request.Subtotal:0.##}."
+                });
+
+            return BadRequest(new { message = "This coupon is invalid or does not apply to your cart." });
+        }
         var chosen = eligible.OrderByDescending(x => Calculate(x.Coupon, x.EligibleSubtotal)).First();
         var discount = Calculate(chosen.Coupon, chosen.EligibleSubtotal);
         return Ok(new { code = chosen.Coupon.IsAutomatic ? (string?)null : chosen.Coupon.Code,
