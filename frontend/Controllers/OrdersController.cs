@@ -205,6 +205,9 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                         var eligibleSubtotal = cart
                             .Where(item => (!offer.ProductId.HasValue || item.ProductId == offer.ProductId.Value))
                             .Sum(item => item.Price * item.Quantity);
+                        // A product-specific coupon must not be used with a mixed-product cart.
+                        var cartMatchesProductScope = !offer.ProductId.HasValue ||
+                            cart.All(item => item.ProductId == offer.ProductId.Value);
                         // Category-scoped offers are already returned only for products
                         // in the matching category by the product-offers endpoint.
                         // Some deployed API instances may still return only DiscountText
@@ -265,12 +268,14 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                             AppliesTo = offer.AppliesTo,
                             EndsAtUtc = offer.EndsAtUtc,
                             Terms = offer.Terms,
-                            CanApply = eligibleSubtotal >= offer.MinimumOrderAmount && calculatedDiscount > 0m,
-                            EligibilityMessage = eligibleSubtotal < offer.MinimumOrderAmount
-                                ? $"Minimum order ₹{offer.MinimumOrderAmount:0.##} is required for eligible items."
-                                : calculatedDiscount <= 0m
-                                    ? "This offer does not add a discount to your current cart."
-                                    : string.Empty
+                            CanApply = cartMatchesProductScope && eligibleSubtotal >= offer.MinimumOrderAmount && calculatedDiscount > 0m,
+                            EligibilityMessage = !cartMatchesProductScope
+                                ? "This coupon is valid only when the cart contains the eligible product."
+                                : eligibleSubtotal < offer.MinimumOrderAmount
+                                    ? $"Minimum order ₹{offer.MinimumOrderAmount:0.##} is required for eligible items."
+                                    : calculatedDiscount <= 0m
+                                        ? "This offer does not add a discount to your current cart."
+                                        : string.Empty
                         };
                     }
                 }
