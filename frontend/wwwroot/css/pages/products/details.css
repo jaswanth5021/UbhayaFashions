@@ -4524,8 +4524,14 @@
     position: absolute;
     top: 50%;
     right: 10px;
-    font-size: 16px;
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: #fff;
+    stroke: currentColor;
     transform: translateY(-50%);
+    pointer-events: none;
 }
 .product-coupon-auto-label {
     align-items: center;
