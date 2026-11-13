@@ -237,7 +237,7 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                             ? cart.FirstOrDefault(item => item.ProductId == offer.ProductId.Value)?.Name
                             : null;
                         var eligibilityMessage = !scopeDataAvailable || !discountDataAvailable
-                            ? "Coupon eligibility could not be verified. Refresh checkout and try again."
+                            ? "Coupon details are out of date at checkout, so we can't verify its product/category eligibility or discount. Refresh checkout; if it continues, contact support."
                             : !productScopeMatches
                                 ? $"This coupon applies only to {scopedProductName ?? "the eligible product"}. Remove other products from your cart to use this coupon."
                                 : !categoryScopeMatches

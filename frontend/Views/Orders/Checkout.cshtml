@@ -699,7 +699,7 @@
                         : null;
                     if (couponMessage) {
                         couponMessage.textContent = !scopeDataAvailable
-                            ? 'Coupon eligibility could not be verified. Refresh checkout and try again.'
+                            ? 'Coupon details are out of date at checkout, so we can’t verify its product/category eligibility or discount. Refresh checkout; if it continues, contact support.'
                             : productScopeMismatch
                             ? 'This coupon applies only to ' + (eligibleProduct || 'the eligible product') + '. Remove other products from your cart to use this coupon.'
                             : 'This coupon applies only to products in the eligible category. Remove products from other categories to use it.';
