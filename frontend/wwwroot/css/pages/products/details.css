@@ -4556,3 +4556,47 @@
     .product-coupon-card-actions { margin-left: 0; }
     .product-coupon-code { width: 100%; }
 }
+
+
+/* Keep the product gallery in view while shoppers scroll through the
+   longer product options panel. This prevents the left column becoming
+   an empty area on desktop and mid-size laptop screens. */
+@media (min-width: 901px) {
+    .product-details-page {
+        align-items: start;
+    }
+
+    .product-details-page > .product-gallery {
+        position: sticky;
+        top: 104px;
+        align-self: start;
+        height: max-content;
+        max-height: calc(100vh - 124px);
+    }
+
+    .product-details-page > .product-gallery .product-gallery-main {
+        height: min(680px, calc(100vh - 150px));
+        min-height: 0;
+        max-height: calc(100vh - 124px);
+    }
+
+    .product-details-page > .product-gallery .product-gallery-thumbnails {
+        max-height: calc(100vh - 150px);
+    }
+}
+
+@media (min-width: 901px) and (max-height: 760px) {
+    .product-details-page > .product-gallery {
+        top: 82px;
+        max-height: calc(100vh - 96px);
+    }
+
+    .product-details-page > .product-gallery .product-gallery-main {
+        height: calc(100vh - 112px);
+        max-height: calc(100vh - 112px);
+    }
+
+    .product-details-page > .product-gallery .product-gallery-thumbnails {
+        max-height: calc(100vh - 128px);
+    }
+}
