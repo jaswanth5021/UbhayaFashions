@@ -38,7 +38,7 @@
                     <input asp-for="MaximumDiscount" type="number" min="0" step="0.01" placeholder="500" />
                 </label>
                 <label class="coupon-field">
-                    <span class="coupon-field-head">Minimum order amount (₹)<details class="coupon-help"><summary aria-label="Minimum order help">i</summary><div><strong>Minimum order</strong><p>Minimum eligible cart value required before this offer can be used.</p><small>Example: 999 means cart total must be at least ₹999</small></div></details></span>
+                    <span class="coupon-field-head">Minimum order value (₹)<details class="coupon-help"><summary aria-label="Minimum order help">i</summary><div><strong>Minimum order</strong><p>Set the minimum cart item total required to use this coupon. The coupon will not apply below this value.</p><small>Example: 1000 means the eligible order subtotal must be ₹1,000 or more (before shipping).</small></div></details></span>
                     <input asp-for="MinimumOrderAmount" type="number" min="0" step="0.01" />
                 </label>
             </div>
