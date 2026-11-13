@@ -265,6 +265,8 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                             MinimumOrderAmount = offer.MinimumOrderAmount,
                             IsAutomatic = offer.IsAutomatic,
                             FirstOrderOnly = offer.FirstOrderOnly,
+                            ProductId = offer.ProductId,
+                            CategoryId = offer.CategoryId,
                             AppliesTo = offer.AppliesTo,
                             EndsAtUtc = offer.EndsAtUtc,
                             Terms = offer.Terms,
