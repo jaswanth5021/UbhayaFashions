@@ -2926,3 +2926,101 @@
     text-decoration: underline;
     text-underline-offset: 3px;
 }
+
+
+/* Coupon gallery: keep cards readable as the number of offers grows. */
+.checkout-coupon-offer-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: stretch;
+}
+
+.checkout-coupon-offer {
+    display: flex;
+    flex-direction: column;
+    min-height: 158px;
+    padding: 16px 18px;
+}
+
+.checkout-coupon-offer-heading {
+    flex: 0 0 auto;
+}
+
+.checkout-coupon-offer-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 14px;
+}
+
+.checkout-coupon-offer-value {
+    min-width: 0;
+}
+
+.checkout-coupon-discount-text {
+    max-width: 100%;
+    font-size: clamp(20px, 1.65vw, 25px);
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+}
+
+.checkout-coupon-card-actions {
+    justify-self: end;
+    margin: 0;
+}
+
+.checkout-coupon-card-actions .checkout-coupon-use {
+    width: 136px;
+    min-width: 136px;
+    max-width: 136px;
+    min-height: 54px;
+    padding: 7px 32px 7px 10px;
+}
+
+.checkout-coupon-card-actions .checkout-coupon-use > b {
+    padding-right: 0;
+    font-size: 11px;
+}
+
+.checkout-coupon-card-actions .checkout-coupon-use > svg {
+    right: 9px;
+    width: 16px;
+    height: 16px;
+}
+
+.checkout-coupon-ineligible {
+    margin-top: 8px;
+}
+
+@media (max-width: 760px) {
+    .checkout-coupon-offer-list {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 11px;
+    }
+
+    .checkout-coupon-offer {
+        min-height: 142px;
+    }
+
+    .checkout-coupon-discount-text {
+        font-size: clamp(20px, 5vw, 24px);
+    }
+}
+
+@media (max-width: 420px) {
+    .checkout-coupon-offer {
+        padding: 14px;
+    }
+
+    .checkout-coupon-offer-main {
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        gap: 10px;
+    }
+
+    .checkout-coupon-card-actions {
+        justify-self: start;
+    }
+}
