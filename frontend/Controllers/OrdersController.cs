@@ -200,22 +200,36 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
                 {
                     if (!checkoutOffers.ContainsKey(offer.Id))
                     {
+                        var eligibleSubtotal = cart
+                            .Where(item => (!offer.ProductId.HasValue || item.ProductId == offer.ProductId.Value))
+                            .Sum(item => item.Price * item.Quantity);
+                        // Category-scoped offers are already returned only for products
+                        // in the matching category by the product-offers endpoint.
+                        var calculatedDiscount = offer.DiscountType == "Percentage"
+                            ? eligibleSubtotal * offer.DiscountValue / 100m
+                            : offer.DiscountValue;
+                        if (offer.MaximumDiscount.HasValue)
+                            calculatedDiscount = Math.Min(calculatedDiscount, offer.MaximumDiscount.Value);
+                        calculatedDiscount = Math.Round(Math.Clamp(calculatedDiscount, 0m, eligibleSubtotal), 2, MidpointRounding.AwayFromZero);
                         checkoutOffers[offer.Id] = new CheckoutCouponOfferViewModel
                         {
                             Id = offer.Id,
                             Code = offer.Code,
                             Name = offer.Name,
                             DiscountText = offer.DiscountText,
+                            DiscountAmount = calculatedDiscount,
                             MinimumOrderAmount = offer.MinimumOrderAmount,
                             IsAutomatic = offer.IsAutomatic,
                             FirstOrderOnly = offer.FirstOrderOnly,
                             AppliesTo = offer.AppliesTo,
                             EndsAtUtc = offer.EndsAtUtc,
                             Terms = offer.Terms,
-                            CanApply = cart.Sum(item => item.Price * item.Quantity) >= offer.MinimumOrderAmount,
-                            EligibilityMessage = cart.Sum(item => item.Price * item.Quantity) < offer.MinimumOrderAmount
-                                ? $"Minimum order ₹{offer.MinimumOrderAmount:0.##} is required."
-                                : string.Empty
+                            CanApply = eligibleSubtotal >= offer.MinimumOrderAmount && calculatedDiscount > 0m,
+                            EligibilityMessage = eligibleSubtotal < offer.MinimumOrderAmount
+                                ? $"Minimum order ₹{offer.MinimumOrderAmount:0.##} is required for eligible items."
+                                : calculatedDiscount <= 0m
+                                    ? "This offer does not add a discount to your current cart."
+                                    : string.Empty
                         };
                     }
                 }
