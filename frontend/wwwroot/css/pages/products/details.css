@@ -4606,3 +4606,61 @@
         max-height: calc(100vh - 128px);
     }
 }
+
+
+/* Product detail coupon carousel — matches checkout offers for long coupon lists. */
+.product-coupon-offers-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 14px;
+    max-width: 100%;
+    padding: 3px 2px 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 2px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #b66b87 #f4e8ec;
+}
+
+.product-coupon-offers-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.product-coupon-offers-grid::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background: #f4e8ec;
+}
+
+.product-coupon-offers-grid::-webkit-scrollbar-thumb {
+    border: 2px solid #f4e8ec;
+    border-radius: 10px;
+    background: #b66b87;
+}
+
+.product-coupon-offers-grid .product-coupon-card {
+    box-sizing: border-box;
+    flex: 0 0 clamp(285px, 43%, 370px);
+    min-width: 0;
+    min-height: 166px;
+    scroll-snap-align: start;
+}
+
+@media (max-width: 760px) {
+    .product-coupon-offers-grid {
+        gap: 11px;
+    }
+
+    .product-coupon-offers-grid .product-coupon-card {
+        flex-basis: min(84vw, 340px);
+    }
+}
+
+@media (max-width: 420px) {
+    .product-coupon-offers-grid .product-coupon-card {
+        flex-basis: calc(100vw - 76px);
+    }
+}
