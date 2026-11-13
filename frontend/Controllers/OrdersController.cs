@@ -172,23 +172,29 @@ public class OrdersController(ApiService api, ILogger<OrdersController> logger) 
         catch (JsonException) { }
 
         var cartVariants = new Dictionary<int, List<ProductVariantViewModel>>();
+        var cartCategoryIds = new Dictionary<int, int?>();
         foreach (var productId in cart.Select(item => item.ProductId).Distinct())
         {
             try
             {
                 var product = await api.GetProductAsync(productId);
                 if (product is not null)
+                {
                     cartVariants[productId] = product.Variants;
+                    cartCategoryIds[productId] = product.CategoryId;
+                }
             }
             catch (HttpRequestException ex)
             {
                 logger.LogWarning(ex, "Unable to load stock variants for checkout product {ProductId}", productId);
                 cartVariants[productId] = [];
+                cartCategoryIds[productId] = null;
             }
         }
 
         ViewBag.SavedAddresses = savedAddresses;
         ViewBag.CartVariants = cartVariants;
+        ViewBag.CartCategoryIds = cartCategoryIds;
         // Use the same public product-offers API as the product detail page.
         // The checkout-offers endpoint requires a customer JWT and was returning
         // an empty list when the server-side storefront request had no usable token.
