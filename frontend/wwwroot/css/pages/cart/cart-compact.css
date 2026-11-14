@@ -318,3 +318,134 @@
     line-height: 1.3;
     text-align: right;
 }
+
+/* Mobile cart refinement: compact, aligned product cards. */
+@media (max-width: 700px) {
+    .shopping-cart-page {
+        padding-top: 14px;
+        padding-bottom: 28px;
+    }
+
+    .shopping-cart-header {
+        margin-bottom: 14px;
+        padding: 15px 16px;
+        border-radius: 12px;
+    }
+
+    .shopping-cart-header h1 {
+        font-size: clamp(30px, 8vw, 34px);
+        line-height: 1.05;
+    }
+
+    .shopping-cart-header > div > p:last-child {
+        margin-top: 5px;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .shopping-cart-continue {
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 7px;
+        font-size: 12px;
+    }
+
+    .shopping-cart-items {
+        gap: 9px;
+    }
+
+    .shopping-cart-item {
+        grid-template-columns: 78px minmax(0, 1fr);
+        column-gap: 10px;
+        row-gap: 0;
+        padding: 10px;
+        border-radius: 11px;
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--cart-accent) 7%, transparent);
+    }
+
+    .shopping-cart-image {
+        width: 78px;
+        max-height: 118px;
+        border-radius: 7px;
+    }
+
+    .shopping-cart-item-info h2 {
+        margin: 1px 30px 5px 0;
+        color: #34252a;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 650;
+        line-height: 1.3;
+        letter-spacing: -.01em;
+        overflow-wrap: anywhere;
+    }
+
+    .shopping-cart-item-info .shopping-cart-color {
+        margin: 3px 0 5px;
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+    .shopping-cart-item-pricing {
+        column-gap: 6px;
+        row-gap: 3px;
+        margin: 5px 0 6px;
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    .shopping-cart-item-pricing .price-sale {
+        font-size: 13px;
+    }
+
+    .shopping-cart-item-pricing .price-unit-label {
+        display: none;
+    }
+
+    .shopping-cart-item-pricing .price-discount {
+        padding: 2px 5px;
+        font-size: 8px;
+        letter-spacing: .25px;
+    }
+
+    .shopping-cart-controls {
+        margin-top: 5px;
+        gap: 6px;
+    }
+
+    .shopping-cart-controls .shopping-cart-update {
+        gap: 7px;
+    }
+
+    .shopping-cart-controls .shopping-cart-quantity-control {
+        gap: 4px;
+        font-size: 11px;
+    }
+
+    .shopping-cart-controls .shopping-cart-update select {
+        min-width: 54px;
+        min-height: 32px;
+        padding: 0 7px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .shopping-cart-price {
+        justify-self: end;
+        margin: 5px 2px 0 0;
+        font-size: 14px;
+        font-weight: 750;
+        line-height: 1.25;
+        text-align: right;
+    }
+
+    .shopping-cart-remove button {
+        width: 28px;
+        height: 28px;
+    }
+
+    .shopping-cart-summary {
+        padding: 14px;
+        border-radius: 11px;
+    }
+}

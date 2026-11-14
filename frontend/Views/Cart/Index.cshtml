@@ -79,7 +79,7 @@
                                 {
                                     <span class="price-mrp">₹@itemOriginalPrice.ToString("N2")</span>
                                 }
-                                <span class="price-sale">₹@itemSalePrice.ToString("N2") each</span>
+                                <span class="price-sale">₹@itemSalePrice.ToString("N2")<span class="price-unit-label"> each</span></span>
                                 @if (itemDiscount > 0 && itemDiscount < 100)
                                 {
                                     <span class="price-discount">-@itemDiscount.ToString("0.##")% SALE</span>

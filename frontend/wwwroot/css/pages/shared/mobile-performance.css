@@ -32,6 +32,28 @@
         opacity: 1;
     }
 
+    .home-page .featured-products .product-image-arrow {
+        display: none !important;
+    }
+
+    .home-page .featured-products .wishlist-button {
+        width: 44px;
+        height: 44px;
+        background: radial-gradient(circle 16px, #fff 98%, transparent 100%) !important;
+        box-shadow: none;
+        filter: drop-shadow(0 2px 5px rgb(30 20 20 / 16%));
+    }
+
+    .home-page .featured-products .wishlist-button svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .home-page .featured-products .wishlist-button:hover,
+    .home-page .featured-products .wishlist-button.is-saved {
+        background: radial-gradient(circle 16px, #68142e 98%, transparent 100%) !important;
+    }
+
     .catalog-image-link:focus-visible,
     .catalog-mobile-toolbar button:focus-visible,
     .catalog-apply-filters:focus-visible,

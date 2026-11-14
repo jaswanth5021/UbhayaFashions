@@ -1626,34 +1626,33 @@ svg:not([width]) {
         background: #fff !important;
     }
 }
-/* Mobile announcement strip prioritizes one readable offer. */
+/* Keep all announcement benefits visible in a compact mobile row. */
 @media (max-width: 600px) {
     .announcement-bar {
         height: auto !important;
         min-height: 34px !important;
-        justify-content: center !important;
-        gap: 0 !important;
-        padding: 0 10px !important;
+        justify-content: space-between !important;
+        gap: 4px !important;
+        padding: 0 6px !important;
     }
 
-    .announcement-bar > i,
-    .announcement-bar > .announcement-benefit:not(:first-of-type) {
+    .announcement-bar > i {
         display: none !important;
     }
 
-    .announcement-bar > .announcement-benefit:first-of-type {
+    .announcement-bar > .announcement-benefit {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 7px !important;
+        gap: 3px !important;
         min-height: 34px !important;
-        padding: 0 8px !important;
-        font-size: 10px !important;
-        letter-spacing: .08em !important;
+        padding: 0 !important;
+        font-size: clamp(6px, 1.65vw, 9px) !important;
+        letter-spacing: 0 !important;
     }
 
-    .announcement-bar > .announcement-benefit:first-of-type svg {
-        width: 14px !important;
-        height: 14px !important;
+    .announcement-bar > .announcement-benefit svg {
+        width: 11px !important;
+        height: 11px !important;
     }
 }
