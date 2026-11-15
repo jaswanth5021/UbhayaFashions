@@ -50,6 +50,11 @@ public class ProductSizeChartRowRequest
     public List<string> Values { get; set; } = [];
 }
 
+public class CopyProductSizeChartRequest
+{
+    public int TargetProductId { get; set; }
+}
+
 public class InventoryAdjustmentRequest
 {
     public string Color { get; set; } = string.Empty;

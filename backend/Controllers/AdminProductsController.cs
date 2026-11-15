@@ -84,6 +84,29 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         return Ok(chart);
     }
 
+    [HttpPost("{id:int}/size-chart/copy")]
+    public async Task<IActionResult> CopySizeChart(int id, CopyProductSizeChartRequest request)
+    {
+        if (request.TargetProductId <= 0 || request.TargetProductId == id)
+            return BadRequest("Choose a different product to copy the size chart to.");
+
+        var source = await db.Products.AsNoTracking()
+            .Where(product => product.Id == id)
+            .Select(product => new { product.Id, product.SizeChartJson })
+            .FirstOrDefaultAsync();
+        if (source is null) return NotFound("Source product was not found.");
+        if (string.IsNullOrWhiteSpace(source.SizeChartJson))
+            return BadRequest("Save this product's size chart before copying it.");
+
+        var target = await db.Products.FirstOrDefaultAsync(product => product.Id == request.TargetProductId);
+        if (target is null) return NotFound("Destination product was not found.");
+
+        target.SizeChartJson = source.SizeChartJson;
+        target.UpdatedDate = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return Ok(new { sourceProductId = source.Id, targetProductId = target.Id });
+    }
+
     private static int SizeSortOrder(string size) => size.ToUpperInvariant() switch
     {
         "XS" => 0, "S" => 1, "M" => 2, "L" => 3, "XL" => 4, "XXL" => 5, "2XL" => 6, "3XL" => 7, "FREE SIZE" => 8, "ONE SIZE" => 9, _ => 10
