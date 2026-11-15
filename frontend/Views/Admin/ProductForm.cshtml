@@ -61,9 +61,16 @@
             </div>
             <div class="full variant-editor">
                 <div class="variant-editor-heading">
-                    <div><h2>Size variants</h2><p>Set color, size, price, discount, and stock for every combination. Leave Color blank for products that use one shared size list.</p></div>
+                    <div><h2>Size variants</h2><p>Enter the sizes this manufacturer offers, with price and stock for each. Add only sizes that apply to this product; custom labels such as Free Size, One Size, or numeric sizes are supported. Leave Color blank to share sizes across colors.</p></div>
                     <button class="secondary" type="button" id="addVariantRow">+ Add size</button>
                 </div>
+                <datalist id="adminProductSizeOptions">
+                    <option value="XS"></option><option value="S"></option><option value="M"></option><option value="L"></option>
+                    <option value="XL"></option><option value="XXL"></option><option value="2XL"></option><option value="3XL"></option>
+                    <option value="4XL"></option><option value="5XL"></option><option value="28"></option><option value="30"></option>
+                    <option value="32"></option><option value="34"></option><option value="36"></option><option value="38"></option>
+                    <option value="40"></option><option value="FREE SIZE"></option><option value="ONE SIZE"></option>
+                </datalist>
                 <div class="variant-row variant-row-header" aria-hidden="true"><span>Color</span><span>Size</span><span>Price (INR)</span><span>Discount (%)</span><span>Stock</span><span></span></div>
                 <div id="variantRows">
                     @for (var index = 0; index < Model.Variants.Count; index++)
@@ -71,13 +78,7 @@
                         var variant = Model.Variants[index];
                         <div class="variant-row" data-variant-row>
                             <input name="Variants[@index].Color" data-variant-field="Color" type="text" value="@variant.Color" placeholder="e.g. Wine" aria-label="Color" />
-                            <select name="Variants[@index].Size" data-variant-field="Size" required>
-                                <option value="">Choose size</option>
-                                @foreach (var size in new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" })
-                                {
-                                    <option value="@size" selected="@(variant.Size == size)">@size</option>
-                                }
-                            </select>
+                            <input name="Variants[@index].Size" data-variant-field="Size" type="text" list="adminProductSizeOptions" value="@variant.Size" placeholder="e.g. S, 38 or Free Size" required aria-label="Size" />
                             <input name="Variants[@index].Price" data-variant-field="Price" type="number" min="0" step="0.01" value="@variant.Price" required aria-label="Price" />
                             <input name="Variants[@index].Discount" data-variant-field="Discount" type="number" min="0" max="100" step="0.01" value="@variant.Discount" aria-label="Discount percent" />
                             <input name="Variants[@index].Stock" data-variant-field="Stock" type="number" min="0" step="1" value="@variant.Stock" required aria-label="Stock" />
@@ -173,10 +174,7 @@
 <template id="variantRowTemplate">
     <div class="variant-row" data-variant-row>
         <input name="Variants[__index__].Color" data-variant-field="Color" type="text" placeholder="e.g. Wine" aria-label="Color" />
-        <select name="Variants[__index__].Size" data-variant-field="Size" required>
-            <option value="">Choose size</option><option value="S">S</option><option value="M">M</option><option value="L">L</option>
-            <option value="XL">XL</option><option value="XXL">XXL</option><option value="3XL">3XL</option><option value="FREE SIZE">FREE SIZE</option>
-        </select>
+        <input name="Variants[__index__].Size" data-variant-field="Size" type="text" list="adminProductSizeOptions" placeholder="e.g. S, 38 or Free Size" required aria-label="Size" />
         <input name="Variants[__index__].Price" data-variant-field="Price" type="number" min="0" step="0.01" value="0" required aria-label="Price" />
         <input name="Variants[__index__].Discount" data-variant-field="Discount" type="number" min="0" max="100" step="0.01" value="0" aria-label="Discount percent" />
         <input name="Variants[__index__].Stock" data-variant-field="Stock" type="number" min="0" step="1" value="0" required aria-label="Stock" />

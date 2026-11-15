@@ -1,7 +1,9 @@
 using backend.Data;
+using backend.DTOs;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace backend.Controllers;
 
@@ -172,6 +174,26 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             .FirstOrDefaultAsync(x => x.Id == id);
 
         return item is null ? NotFound() : Ok(item);
+    }
+
+    [HttpGet("{id:int}/size-chart")]
+    public async Task<IActionResult> GetSizeChart(int id)
+    {
+        var sizeChartJson = await db.Products.AsNoTracking()
+            .Where(product => product.Id == id)
+            .Select(product => product.SizeChartJson)
+            .FirstOrDefaultAsync();
+        if (sizeChartJson is null) return NotFound();
+        if (string.IsNullOrWhiteSpace(sizeChartJson)) return NoContent();
+        try
+        {
+            var chart = JsonSerializer.Deserialize<ProductSizeChartRequest>(sizeChartJson);
+            return chart is null ? NoContent() : Ok(chart);
+        }
+        catch (JsonException)
+        {
+            return NoContent();
+        }
     }
 
     [HttpGet("{id:int}/related")]

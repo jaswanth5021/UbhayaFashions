@@ -43,6 +43,21 @@ public class ProductViewModel
     public List<ProductVideoViewModel> Videos { get; set; } = [];
 }
 
+public class ProductSizeChartViewModel
+{
+    public string BrandName { get; set; } = string.Empty;
+    public string Caption { get; set; } = "GARMENT MEASUREMENTS";
+    public string Unit { get; set; } = "in";
+    public List<string> Sizes { get; set; } = [];
+    public List<ProductSizeChartRowViewModel> Rows { get; set; } = [];
+}
+
+public class ProductSizeChartRowViewModel
+{
+    public string Label { get; set; } = string.Empty;
+    public List<string> Values { get; set; } = [];
+}
+
 public class RelatedProductViewModel
 {
     public int Id { get; set; }

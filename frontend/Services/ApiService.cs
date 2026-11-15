@@ -191,6 +191,14 @@ public class ApiService(
                 $"api/products/{id}");
     }
 
+    public async Task<ProductSizeChartViewModel?> GetProductSizeChartAsync(int id)
+    {
+        using var response = await Client.GetAsync($"api/products/{id}/size-chart");
+        if (response.StatusCode is HttpStatusCode.NoContent or HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ProductSizeChartViewModel>();
+    }
+
     public async Task<ProductReviewsViewModel> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 2, int? rating = null, string? sort = null)
     {
         page = Math.Max(1, page);

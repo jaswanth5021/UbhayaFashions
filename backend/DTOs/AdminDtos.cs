@@ -35,6 +35,21 @@ public class AdminProductVariantRequest
     public int Stock { get; set; }
 }
 
+public class ProductSizeChartRequest
+{
+    public string BrandName { get; set; } = string.Empty;
+    public string Caption { get; set; } = "GARMENT MEASUREMENTS";
+    public string Unit { get; set; } = "in";
+    public List<string> Sizes { get; set; } = [];
+    public List<ProductSizeChartRowRequest> Rows { get; set; } = [];
+}
+
+public class ProductSizeChartRowRequest
+{
+    public string Label { get; set; } = string.Empty;
+    public List<string> Values { get; set; } = [];
+}
+
 public class InventoryAdjustmentRequest
 {
     public string Color { get; set; } = string.Empty;

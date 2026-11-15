@@ -141,6 +141,16 @@ public class ProductsController(ApiService api, ILogger<ProductsController> logg
 
         try
         {
+            ViewBag.ProductSizeChart = await api.GetProductSizeChartAsync(id);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            logger.LogWarning(ex, "Could not read the size chart for product {ProductId}", id);
+            ViewBag.ProductSizeChart = null;
+        }
+
+        try
+        {
             var productOffers = await api.GetProductCouponOffersAsync(id);
             ViewBag.ProductCouponOffers = productOffers;
             logger.LogInformation(

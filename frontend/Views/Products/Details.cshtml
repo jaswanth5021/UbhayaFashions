@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = $"{Model.Name} | {Model.Category}";
     ViewData["MetaDescription"] = $"{Model.Name} - shop this {Model.Category} style at Ubhaya Fashions. View product details, available sizes, colours and current price.";
+    var productSizeChart = ViewBag.ProductSizeChart as ProductSizeChartViewModel;
 
     var seoImageUrl = !string.IsNullOrWhiteSpace(Model.ImageUrl)
         ? ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"])
@@ -75,9 +76,20 @@
             string.Equals(variant.Color, initialColor, StringComparison.OrdinalIgnoreCase))
         .ToList();
 
-    var standardSizes = new[] { "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE" };
+    var preferredSizeOrder = new[] { "XXS", "XS", "S", "M", "L", "XL", "XXL", "2XL", "3XL", "4XL", "5XL", "6XL", "FREE SIZE", "ONE SIZE" };
+    var productSizes = variants
+        .Select(variant => variant.Size?.Trim() ?? string.Empty)
+        .Where(size => !string.IsNullOrWhiteSpace(size))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(size =>
+        {
+            var index = Array.FindIndex(preferredSizeOrder, preferredSize => string.Equals(preferredSize, size, StringComparison.OrdinalIgnoreCase));
+            return index < 0 ? int.MaxValue : index;
+        })
+        .ThenBy(size => size, StringComparer.OrdinalIgnoreCase)
+        .ToList();
     var availableSizes = new HashSet<string>(
-        variants.Where(variant => variant.Stock > 0).Select(variant => variant.Size),
+        variants.Where(variant => variant.Stock > 0).Select(variant => variant.Size.Trim()),
         StringComparer.OrdinalIgnoreCase);
     var startingVariant = variants.OrderBy(variant => variant.Price).FirstOrDefault();
     var regularPrice =
@@ -241,21 +253,18 @@
 
     <section class="product-details-info">
 
-        <p class="product-details-category">
-            @Model.Category
-        </p>
-
         <div class="product-details-title-row">
+            <div class="product-details-meta-row">
+                <p class="product-details-category">
+                    @Model.Category
+                </p>
 
-            <h1>
-                @Model.Name
-            </h1>
-
-            <div class="product-details-actions">
+                <div class="product-details-actions">
 
                 <button type="button"
                         class="product-share-button"
-                        id="shareProductButton">
+                        id="shareProductButton"
+                        aria-label="Share this product">
 
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="18" cy="5" r="3" />
@@ -304,8 +313,12 @@
 
                 </form>
 
+                </div>
             </div>
 
+            <h1>
+                @Model.Name
+            </h1>
         </div>
 
 
@@ -482,9 +495,13 @@
             </section>
         }
 
-        <p class="product-details-description">
-            @Model.Description
-        </p>
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <section class="product-description-card" aria-labelledby="productDescriptionTitle">
+                <h2 id="productDescriptionTitle">Product details</h2>
+                <p class="product-details-description">@Model.Description</p>
+            </section>
+        }
 
 
         @if (variants.Count > 0)
@@ -540,22 +557,18 @@
 
                 @if (variants.Count > 0)
                 {
-                    <fieldset class="product-size-fieldset"
-                              data-size-required="true">
+                    <div class="product-size-fieldset"
+                         role="group"
+                         aria-labelledby="productSizeHeading"
+                         data-size-required="true">
 
-                        <legend>
-
-                            Size
-
-                            <span id="selectedSizeLabel">
-                                Select a size
-                            </span>
-
+                        <div class="product-size-heading-row">
+                            <span class="product-size-heading-title" id="productSizeHeading">Size</span>
+                            <span id="selectedSizeLabel"></span>
                             <button type="button" class="product-size-guide-link" data-size-guide-open>
                                 Size Guide
                             </button>
-
-                        </legend>
+                        </div>
 
 
                         <input id="productSize"
@@ -566,7 +579,7 @@
 
                         <div class="product-size-options">
 
-                            @foreach (var size in standardSizes)
+                            @foreach (var size in productSizes)
                             {
                                 var isAvailable =
                                     availableSizes.Contains(size);
@@ -615,7 +628,7 @@
                               id="productSizeError"
                               role="alert">@(TempData["CartError"] as string)</span>
 
-                    </fieldset>
+                    </div>
                 }
 
 
@@ -651,8 +664,12 @@
                 *@
                 @if (displayColors.Count > 0)
                 {
-                    <fieldset class="product-color-fieldset product-color-readonly">
-                        <legend>Color</legend>
+                    <div class="product-color-fieldset product-color-readonly"
+                         role="group"
+                         aria-labelledby="productColorHeading">
+                        <div class="product-color-heading-row">
+                            <span class="product-color-heading-title" id="productColorHeading">Color</span>
+                        </div>
                         <div class="product-color-readonly-options" role="list" aria-label="Available product colors">
                             @foreach (var color in displayColors)
                             {
@@ -667,7 +684,7 @@
                                 </span>
                             }
                         </div>
-                    </fieldset>
+                    </div>
                 }
                 @if (hasColorVariants && !string.IsNullOrWhiteSpace(initialColor))
                 {
@@ -790,23 +807,46 @@
     <div class="product-size-guide-card">
         <div class="product-size-guide-header">
             <div>
-                <p>UBHAYA FIT GUIDE</p>
-                <h2 id="productSizeGuideTitle">Find your size</h2>
+                <p class="product-size-chart-brand">@(productSizeChart is not null && !string.IsNullOrWhiteSpace(productSizeChart.BrandName) ? productSizeChart.BrandName : "UBHAYA FIT GUIDE")</p>
+                <h2 id="productSizeGuideTitle">@(productSizeChart is not null ? "Size chart" : "Find your size")</h2>
             </div>
             <button type="button" data-size-guide-close aria-label="Close size guide">&#215;</button>
         </div>
-        <p class="product-size-guide-intro">Choose the size that normally fits you best. If you prefer a relaxed fit, consider going one size up.</p>
-        <div class="product-size-guide-table">
-            <div><strong>Size</strong><strong>Suggested fit</strong></div>
-            <div><span>S</span><span>Small / regular fit</span></div>
-            <div><span>M</span><span>Medium / regular fit</span></div>
-            <div><span>L</span><span>Large / regular fit</span></div>
-            <div><span>XL</span><span>Extra large / regular fit</span></div>
-            <div><span>XXL</span><span>Relaxed fit</span></div>
-            <div><span>3XL</span><span>Relaxed fit</span></div>
-            <div><span>FREE SIZE</span><span>One-size style</span></div>
-        </div>
-        <p class="product-size-guide-note">For the most accurate choice, compare your measurements with the garment details shown on the product or contact us before ordering.</p>
+        @if (productSizeChart is not null && productSizeChart.Sizes.Count > 0)
+        {
+            <div class="product-size-chart-meta">
+                <p>@productSizeChart.Caption</p>
+                <span>Measurements in <b>@(productSizeChart.Unit.Equals("cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in")</b></span>
+            </div>
+            <div class="product-size-chart-scroll" role="region" aria-label="Product garment measurements" tabindex="0">
+                <table class="product-size-chart-table">
+                    <thead><tr><th scope="col">Brand Size</th>@foreach (var size in productSizeChart.Sizes) { <th scope="col">@size</th> }</tr></thead>
+                    <tbody>
+                    @foreach (var row in productSizeChart.Rows)
+                    {
+                        <tr><th scope="row">@row.Label</th>@for (var valueIndex = 0; valueIndex < productSizeChart.Sizes.Count; valueIndex++) { <td>@(valueIndex < row.Values.Count ? row.Values[valueIndex] : string.Empty)</td> }</tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <p class="product-size-guide-note">Please allow a small measurement variation. If you are between sizes, contact us for help choosing your fit.</p>
+        }
+        else
+        {
+            <p class="product-size-guide-intro">Size labels and fit vary by manufacturer. Check the sizes offered for this product and review its description for fit details.</p>
+            <div class="product-size-guide-table">
+                <div><strong>Available size</strong><strong>Fit guidance</strong></div>
+                @foreach (var size in productSizes)
+                {
+                    var fitGuidance = size.Equals("FREE SIZE", StringComparison.OrdinalIgnoreCase)
+                        || size.Equals("ONE SIZE", StringComparison.OrdinalIgnoreCase)
+                        ? "One-size style; fit varies by design"
+                        : "Manufacturer-specific; check product details";
+                    <div><span>@size</span><span>@fitGuidance</span></div>
+                }
+            </div>
+            <p class="product-size-guide-note">For exact measurements, check the product description or contact us before ordering.</p>
+        }
     </div>
 </dialog>
 
@@ -2127,7 +2167,7 @@
                 const selectedSizeInput = document.getElementById("productSize");
                 const selectedSizeLabel = document.getElementById("selectedSizeLabel");
                 if (selectedSizeInput) selectedSizeInput.value = "";
-                if (selectedSizeLabel) selectedSizeLabel.textContent = "Select a size";
+                if (selectedSizeLabel) selectedSizeLabel.textContent = "";
                 const quantitySection = document.getElementById("productQuantitySection");
                 if (quantitySection) quantitySection.hidden = true;
                 const stockMessage = document.getElementById("productStockMessage");
@@ -2247,7 +2287,7 @@
                         document.getElementById(
                             "selectedSizeLabel"
                         ).textContent =
-                            option.dataset.size;
+                            "Selected: " + option.dataset.size;
 
                         const quantitySection = document.getElementById("productQuantitySection");
                         if (quantitySection) quantitySection.hidden = false;

@@ -23,6 +23,8 @@ public class Product
     public string Colors { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public bool IsBestSeller { get; set; }
+    [JsonIgnore]
+    public string SizeChartJson { get; set; } = string.Empty;
     [NotMapped]
     public decimal? AverageRating { get; set; }
     [NotMapped]

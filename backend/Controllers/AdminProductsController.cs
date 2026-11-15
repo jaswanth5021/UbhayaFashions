@@ -5,6 +5,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace backend.Controllers;
 
@@ -23,6 +24,70 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         var product = await db.Products.AsNoTracking().Include(x => x.CategoryNavigation).Include(x => x.Images).Include(x => x.Videos).Include(x => x.Variants).FirstOrDefaultAsync(x => x.Id == id);
         return product is null ? NotFound() : Ok(product);
     }
+
+    [HttpGet("{id:int}/size-chart")]
+    public async Task<IActionResult> GetSizeChart(int id)
+    {
+        var product = await db.Products.AsNoTracking().Include(x => x.Variants).FirstOrDefaultAsync(x => x.Id == id);
+        if (product is null) return NotFound();
+
+        ProductSizeChartRequest? chart = null;
+        if (!string.IsNullOrWhiteSpace(product.SizeChartJson))
+        {
+            try { chart = JsonSerializer.Deserialize<ProductSizeChartRequest>(product.SizeChartJson); }
+            catch (JsonException) { }
+        }
+
+        chart ??= new ProductSizeChartRequest
+        {
+            Sizes = product.Variants.Select(variant => variant.Size).Where(size => !string.IsNullOrWhiteSpace(size))
+                .Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(SizeSortOrder).ThenBy(size => size, StringComparer.OrdinalIgnoreCase).ToList(),
+            Rows = new[] { "Chest", "Waist", "Hip", "Sleeve Length", "Shoulder", "Length" }
+                .Select(label => new ProductSizeChartRowRequest { Label = label }).ToList()
+        };
+
+        return Ok(chart);
+    }
+
+    [HttpPut("{id:int}/size-chart")]
+    public async Task<IActionResult> SaveSizeChart(int id, ProductSizeChartRequest request)
+    {
+        var product = await db.Products.FirstOrDefaultAsync(x => x.Id == id);
+        if (product is null) return NotFound();
+        if (request.Unit is not ("in" or "cm")) return BadRequest("Choose inches or centimeters for the chart unit.");
+        if (request.Sizes is null || request.Rows is null) return BadRequest("Add size columns and measurement rows to the chart.");
+        if (request.Sizes.Count == 0 || request.Sizes.Count > 20) return BadRequest("Add between 1 and 20 size columns.");
+        if (request.Sizes.Any(size => string.IsNullOrWhiteSpace(size) || size.Trim().Length > 30)) return BadRequest("Each size label must contain 1 to 30 characters.");
+        if (request.Sizes.Select(size => size.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() != request.Sizes.Count)
+            return BadRequest("Size labels must be unique.");
+        if (request.Rows.Count > 30) return BadRequest("A size chart can have up to 30 measurement rows.");
+        if (request.Rows.Any(row => row is null || row.Values is null || string.IsNullOrWhiteSpace(row.Label) || row.Label.Trim().Length > 60 || row.Values.Count != request.Sizes.Count || row.Values.Any(value => value?.Length > 60)))
+            return BadRequest("Each measurement needs a label and one value for every size.");
+        if (request.Rows.Select(row => row.Label.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() != request.Rows.Count)
+            return BadRequest("Measurement labels must be unique.");
+
+        var chart = new ProductSizeChartRequest
+        {
+            BrandName = request.BrandName?.Trim() ?? string.Empty,
+            Caption = string.IsNullOrWhiteSpace(request.Caption) ? "GARMENT MEASUREMENTS" : request.Caption.Trim(),
+            Unit = request.Unit,
+            Sizes = request.Sizes.Select(size => size.Trim().ToUpperInvariant()).ToList(),
+            Rows = request.Rows.Select(row => new ProductSizeChartRowRequest
+            {
+                Label = row.Label.Trim(),
+                Values = row.Values.Select(value => value?.Trim() ?? string.Empty).ToList()
+            }).ToList()
+        };
+        product.SizeChartJson = JsonSerializer.Serialize(chart);
+        product.UpdatedDate = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return Ok(chart);
+    }
+
+    private static int SizeSortOrder(string size) => size.ToUpperInvariant() switch
+    {
+        "XS" => 0, "S" => 1, "M" => 2, "L" => 3, "XL" => 4, "XXL" => 5, "2XL" => 6, "3XL" => 7, "FREE SIZE" => 8, "ONE SIZE" => 9, _ => 10
+    };
 
     [HttpPost]
     public async Task<IActionResult> Create(AdminProductRequest request)

@@ -1,0 +1,150 @@
+@model AdminProductSizeChartInput
+@{
+    ViewData["Title"] = "Product size chart";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-head">
+    <div><h1>Size chart</h1><p>Configure the garment measurements shown for this product.</p></div>
+    <a class="admin-filter-clear" asp-action="Products">Back to products</a>
+</div>
+
+<section class="size-chart-admin-card">
+    <div class="size-chart-product-heading">
+        <span>PRODUCT #@Model.ProductId</span>
+        <h2>@Model.ProductName</h2>
+        <p>Size columns are prefilled from this product’s variants. You can add, remove, or rename columns here.</p>
+    </div>
+
+    <form asp-action="SaveProductSizeChart" method="post" id="productSizeChartForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ProductId" />
+        <input type="hidden" asp-for="ProductName" />
+        <div asp-validation-summary="ModelOnly" class="size-chart-error"></div>
+
+        <div class="size-chart-meta-grid">
+            <label class="size-chart-brand-field"><span>Brand / chart heading <small>Optional</small></span>
+                <input asp-for="BrandName" placeholder="e.g. Diwas by Manyavar" maxlength="100" />
+                <small class="size-chart-field-help">Leave blank if you don't want a brand name on the chart.</small>
+            </label>
+            <label>Chart subtitle
+                <input asp-for="Caption" placeholder="GARMENT MEASUREMENTS" maxlength="120" />
+            </label>
+            <label>Measurement unit
+                <select asp-for="Unit">
+                    <option value="in">Inches (in)</option>
+                    <option value="cm">Centimeters (cm)</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="size-chart-editor-heading">
+            <div><h3>Measurements</h3><p>Enter one measurement in each size column. Leave a cell blank if it does not apply.</p></div>
+            <button type="button" class="size-chart-add-button" id="addSizeColumn">+ Add size</button>
+        </div>
+
+        <div class="size-chart-admin-scroll">
+            <table class="size-chart-admin-table" id="sizeChartTable">
+                <thead><tr><th scope="col">Measurement</th>
+                    @for (var sizeIndex = 0; sizeIndex < Model.Sizes.Count; sizeIndex++)
+                    {
+                        <th scope="col" data-size-column><div class="size-chart-column-heading"><input name="Sizes[@sizeIndex]" value="@Model.Sizes[sizeIndex]" aria-label="Size column @(@sizeIndex + 1)" maxlength="30" required /><button type="button" class="remove-chart-column" aria-label="Remove size column">×</button></div></th>
+                    }
+                </tr></thead>
+                <tbody>
+                    @for (var rowIndex = 0; rowIndex < Model.Rows.Count; rowIndex++)
+                    {
+                        <tr data-measurement-row>
+                            <th scope="row"><div class="size-chart-row-heading"><input name="Rows[@rowIndex].Label" value="@Model.Rows[rowIndex].Label" placeholder="e.g. Chest" maxlength="60" required /><button type="button" class="remove-chart-row" aria-label="Remove measurement">×</button></div></th>
+                            @for (var sizeIndex = 0; sizeIndex < Model.Sizes.Count; sizeIndex++)
+                            {
+                                var cellValue = sizeIndex < Model.Rows[rowIndex].Values.Count ? Model.Rows[rowIndex].Values[sizeIndex] : string.Empty;
+                                <td data-value-cell><input name="Rows[@rowIndex].Values[@sizeIndex]" value="@cellValue" placeholder="—" maxlength="60" aria-label="@Model.Rows[rowIndex].Label for @Model.Sizes[sizeIndex]" /></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="size-chart-footer-actions">
+            <button type="button" class="size-chart-add-button secondary" id="addMeasurementRow">+ Add measurement</button>
+            <button type="submit" class="primary">Save size chart</button>
+        </div>
+    </form>
+</section>
+
+<style>
+    .size-chart-admin-card{max-width:1100px;padding:24px;border:1px solid #eadde1;border-radius:14px;background:#fff;box-shadow:0 8px 24px #41122508}
+    .size-chart-product-heading{padding-bottom:18px;border-bottom:1px solid #f0e5e8}.size-chart-product-heading>span{color:#8d5365;font-size:11px;font-weight:700;letter-spacing:.12em}.size-chart-product-heading h2{margin:7px 0;font-size:22px}.size-chart-product-heading p,.size-chart-editor-heading p{margin:0;color:#74666b;font-size:13px}
+    .size-chart-meta-grid{display:grid;grid-template-columns:1fr 1fr 190px;gap:14px;margin:20px 0 28px}.size-chart-meta-grid label{display:grid;gap:7px;color:#49383e;font-size:12px;font-weight:700}.size-chart-meta-grid input,.size-chart-meta-grid select,.size-chart-admin-table input{min-width:0;height:40px;padding:0 11px;border:1px solid #e7d8dd;border-radius:8px;background:#fff;color:#30242a;font:inherit}.size-chart-meta-grid input,.size-chart-meta-grid select{font-weight:400}
+    .size-chart-brand-field>span{display:flex;align-items:center;gap:8px}.size-chart-brand-field>span small{padding:3px 7px;border:1px solid #eadde1;border-radius:999px;background:#fbf5f7;color:#94707a;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.size-chart-field-help{color:#8b7d82;font-size:10px;font-weight:400;line-height:1.35}
+    .size-chart-editor-heading,.size-chart-footer-actions{display:flex;align-items:center;justify-content:space-between;gap:16px}.size-chart-editor-heading h3{margin:0 0 5px;font-size:16px}.size-chart-add-button{min-height:38px;padding:0 14px;border:1px solid #8e1745;border-radius:8px;background:#fff;color:#81143d;font-weight:700;cursor:pointer}.size-chart-add-button:hover{background:#fff5f8}.size-chart-admin-scroll{overflow:auto;margin:16px 0;border:1px solid #eadde1;border-radius:10px}.size-chart-admin-table{width:100%;min-width:620px;border-collapse:separate;border-spacing:0}.size-chart-admin-table th,.size-chart-admin-table td{min-width:145px;padding:9px;border-right:1px solid #f0e5e8;border-bottom:1px solid #f0e5e8;text-align:left}.size-chart-admin-table tr:last-child th,.size-chart-admin-table tr:last-child td{border-bottom:0}.size-chart-admin-table th:first-child{position:sticky;left:0;z-index:1;min-width:210px;background:#fcf8f9}.size-chart-admin-table thead th{background:#f8f1f3;color:#6d5260;font-size:12px}.size-chart-admin-table input{width:100%;height:38px}.size-chart-admin-table .size-chart-column-heading,.size-chart-admin-table .size-chart-row-heading{display:flex;align-items:center;gap:6px}.remove-chart-column,.remove-chart-row{flex:0 0 28px;width:28px;height:28px;border:0;border-radius:50%;background:#f8eef1;color:#8e1745;font-size:19px;cursor:pointer}.size-chart-footer-actions{justify-content:flex-end;padding-top:4px}.size-chart-add-button.secondary{margin-right:auto}.size-chart-error{margin:10px 0;color:#a12638;font-size:13px}
+    @@media(max-width:700px){.size-chart-admin-card{padding:16px}.size-chart-meta-grid{grid-template-columns:1fr}.size-chart-editor-heading{align-items:flex-start;flex-direction:column}.size-chart-footer-actions{flex-wrap:wrap}.size-chart-footer-actions .primary{width:100%}}
+</style>
+
+@section Scripts {
+<script>
+(() => {
+    const table = document.getElementById("sizeChartTable");
+    const sizesHeader = table?.tHead?.rows[0];
+    const body = table?.tBodies[0];
+    const sizeCount = () => sizesHeader.querySelectorAll("[data-size-column]").length;
+
+    function refreshNames() {
+        const sizeHeaders = [...sizesHeader.querySelectorAll("[data-size-column]")];
+        sizeHeaders.forEach((cell, index) => { cell.querySelector("input").name = `Sizes[${index}]`; });
+        [...body.querySelectorAll("[data-measurement-row]")].forEach((row, rowIndex) => {
+            row.querySelector(".size-chart-row-heading input").name = `Rows[${rowIndex}].Label`;
+            [...row.querySelectorAll("[data-value-cell] input")].forEach((input, sizeIndex) => { input.name = `Rows[${rowIndex}].Values[${sizeIndex}]`; });
+        });
+    }
+
+    document.getElementById("addSizeColumn")?.addEventListener("click", () => {
+        const index = sizeCount();
+        const header = document.createElement("th");
+        header.scope = "col";
+        header.dataset.sizeColumn = "";
+        header.innerHTML = `<div class="size-chart-column-heading"><input aria-label="Size column ${index + 1}" maxlength="30" required placeholder="Size" /><button type="button" class="remove-chart-column" aria-label="Remove size column">×</button></div>`;
+        sizesHeader.append(header);
+        [...body.querySelectorAll("[data-measurement-row]")].forEach(row => {
+            const cell = document.createElement("td");
+            cell.dataset.valueCell = "";
+            cell.innerHTML = '<input maxlength="60" placeholder="—" aria-label="Measurement value" />';
+            row.append(cell);
+        });
+        refreshNames();
+        header.querySelector("input").focus();
+    });
+
+    document.getElementById("addMeasurementRow")?.addEventListener("click", () => {
+        const row = document.createElement("tr");
+        row.dataset.measurementRow = "";
+        row.innerHTML = '<th scope="row"><div class="size-chart-row-heading"><input placeholder="e.g. Chest" maxlength="60" required /><button type="button" class="remove-chart-row" aria-label="Remove measurement">×</button></div></th>';
+        for (let index = 0; index < sizeCount(); index++) {
+            const cell = document.createElement("td");
+            cell.dataset.valueCell = "";
+            cell.innerHTML = '<input maxlength="60" placeholder="—" aria-label="Measurement value" />';
+            row.append(cell);
+        }
+        body.append(row);
+        refreshNames();
+        row.querySelector("th input").focus();
+    });
+
+    table?.addEventListener("click", event => {
+        if (event.target.closest(".remove-chart-column")) {
+            const headerCell = event.target.closest("[data-size-column]");
+            const index = [...sizesHeader.querySelectorAll("[data-size-column]")].indexOf(headerCell);
+            headerCell.remove();
+            [...body.querySelectorAll("[data-measurement-row]")].forEach(row => row.querySelectorAll("[data-value-cell]")[index]?.remove());
+            refreshNames();
+        }
+        if (event.target.closest(".remove-chart-row")) {
+            event.target.closest("[data-measurement-row]").remove();
+            refreshNames();
+        }
+    });
+})();
+</script>
+}
