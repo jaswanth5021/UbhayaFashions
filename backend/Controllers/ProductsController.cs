@@ -188,7 +188,9 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         try
         {
             var chart = JsonSerializer.Deserialize<ProductSizeChartRequest>(sizeChartJson);
-            return chart is null ? NoContent() : Ok(chart);
+            if (chart is null) return NoContent();
+            ProductSizeChartUnits.Normalize(chart);
+            return Ok(chart);
         }
         catch (JsonException)
         {

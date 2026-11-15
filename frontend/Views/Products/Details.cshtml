@@ -4,6 +4,9 @@
     ViewData["Title"] = $"{Model.Name} | {Model.Category}";
     ViewData["MetaDescription"] = $"{Model.Name} - shop this {Model.Category} style at Ubhaya Fashions. View product details, available sizes, colours and current price.";
     var productSizeChart = ViewBag.ProductSizeChart as ProductSizeChartViewModel;
+    var hasInSizeChartValues = productSizeChart?.Rows.Any(row => row.ValuesIn.Any(value => !string.IsNullOrWhiteSpace(value))) == true;
+    var hasCmSizeChartValues = productSizeChart?.Rows.Any(row => row.ValuesCm.Any(value => !string.IsNullOrWhiteSpace(value))) == true;
+    var hasBothSizeChartUnits = hasInSizeChartValues && hasCmSizeChartValues;
 
     var seoImageUrl = !string.IsNullOrWhiteSpace(Model.ImageUrl)
         ? ImageUrlHelper.Resolve(Model.ImageUrl, Configuration["ApiBaseUrl"])
@@ -816,7 +819,20 @@
         {
             <div class="product-size-chart-meta">
                 <p>@productSizeChart.Caption</p>
-                <span>Measurements in <b>@(productSizeChart.Unit.Equals("cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in")</b></span>
+                @if (hasBothSizeChartUnits)
+                {
+                    <div class="product-size-chart-unit-control" role="group" aria-label="Measurement unit">
+                        <span>Measurements</span>
+                        <div class="product-size-chart-unit-switch">
+                            <button type="button" data-size-chart-unit="in" aria-pressed="@(productSizeChart.Unit.Equals("in", StringComparison.OrdinalIgnoreCase) ? "true" : "false")">in</button>
+                            <button type="button" data-size-chart-unit="cm" aria-pressed="@(productSizeChart.Unit.Equals("cm", StringComparison.OrdinalIgnoreCase) ? "true" : "false")">cm</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <span>Measurements in <b data-size-chart-unit-label>@(productSizeChart.Unit.Equals("cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in")</b></span>
+                }
             </div>
             <div class="product-size-chart-scroll" role="region" aria-label="Product garment measurements" tabindex="0">
                 <table class="product-size-chart-table">
@@ -824,7 +840,15 @@
                     <tbody>
                     @foreach (var row in productSizeChart.Rows)
                     {
-                        <tr><th scope="row">@row.Label</th>@for (var valueIndex = 0; valueIndex < productSizeChart.Sizes.Count; valueIndex++) { <td>@(valueIndex < row.Values.Count ? row.Values[valueIndex] : string.Empty)</td> }</tr>
+                        <tr><th scope="row">@row.Label</th>
+                        @for (var valueIndex = 0; valueIndex < productSizeChart.Sizes.Count; valueIndex++)
+                        {
+                            var valueIn = valueIndex < row.ValuesIn.Count ? row.ValuesIn[valueIndex] : string.Empty;
+                            var valueCm = valueIndex < row.ValuesCm.Count ? row.ValuesCm[valueIndex] : string.Empty;
+                            var activeValue = productSizeChart.Unit.Equals("cm", StringComparison.OrdinalIgnoreCase) ? valueCm : valueIn;
+                            <td data-size-chart-value data-value-in="@valueIn" data-value-cm="@valueCm">@activeValue</td>
+                        }
+                        </tr>
                     }
                     </tbody>
                 </table>
@@ -2252,6 +2276,19 @@
         const closeButton = dialog?.querySelector("[data-size-guide-close]");
         openButton?.addEventListener("click", () => dialog?.showModal());
         closeButton?.addEventListener("click", () => dialog?.close());
+        dialog?.querySelectorAll("[data-size-chart-unit]").forEach(button => {
+            button.addEventListener("click", () => {
+                const unit = button.dataset.sizeChartUnit;
+                dialog.querySelectorAll("[data-size-chart-unit]").forEach(option => {
+                    option.setAttribute("aria-pressed", option === button ? "true" : "false");
+                });
+                dialog.querySelectorAll("[data-size-chart-value]").forEach(cell => {
+                    cell.textContent = unit === "cm" ? cell.dataset.valueCm || "" : cell.dataset.valueIn || "";
+                });
+                const label = dialog.querySelector("[data-size-chart-unit-label]");
+                if (label) label.textContent = unit;
+            });
+        });
         dialog?.addEventListener("click", event => {
             if (event.target === dialog) dialog.close();
         });

@@ -48,6 +48,50 @@ public class ProductSizeChartRowRequest
 {
     public string Label { get; set; } = string.Empty;
     public List<string> Values { get; set; } = [];
+    public List<string> ValuesIn { get; set; } = [];
+    public List<string> ValuesCm { get; set; } = [];
+}
+
+public static class ProductSizeChartUnits
+{
+    public static string? NormalizeUnit(string? unit)
+    {
+        var normalized = unit?.Trim();
+        if (string.Equals(normalized, "in", StringComparison.OrdinalIgnoreCase)) return "in";
+        if (string.Equals(normalized, "cm", StringComparison.OrdinalIgnoreCase)) return "cm";
+        return null;
+    }
+
+    public static void Normalize(ProductSizeChartRequest chart)
+    {
+        chart.Sizes ??= [];
+        chart.Rows ??= [];
+        chart.Unit = NormalizeUnit(chart.Unit) ?? "in";
+        foreach (var row in chart.Rows.Where(row => row is not null))
+            NormalizeRow(row, chart.Unit, chart.Sizes.Count);
+    }
+
+    public static void NormalizeRow(ProductSizeChartRowRequest row, string unit, int sizeCount)
+    {
+        row.Values ??= [];
+        row.ValuesIn ??= [];
+        row.ValuesCm ??= [];
+
+        if (row.ValuesIn.Count == 0 && row.ValuesCm.Count == 0 && row.Values.Count > 0)
+        {
+            if (string.Equals(unit, "cm", StringComparison.OrdinalIgnoreCase)) row.ValuesCm = Fit(row.Values, sizeCount);
+            else row.ValuesIn = Fit(row.Values, sizeCount);
+        }
+
+        row.ValuesIn = Fit(row.ValuesIn, sizeCount);
+        row.ValuesCm = Fit(row.ValuesCm, sizeCount);
+        row.Values = (string.Equals(unit, "cm", StringComparison.OrdinalIgnoreCase) ? row.ValuesCm : row.ValuesIn).ToList();
+    }
+
+    private static List<string> Fit(List<string>? values, int sizeCount)
+        => Enumerable.Range(0, sizeCount)
+            .Select(index => index < (values?.Count ?? 0) ? values![index] ?? string.Empty : string.Empty)
+            .ToList();
 }
 
 public class CopyProductSizeChartRequest

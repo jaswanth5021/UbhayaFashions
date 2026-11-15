@@ -9,6 +9,8 @@
     <div><h1>Size chart</h1><p>Configure the garment measurements shown for this product.</p></div>
     <a class="admin-filter-clear" asp-action="Products">Back to products</a>
 </div>
+@if (TempData["ProductMessage"] is string productMessage) { <p class="alert success" role="status" data-app-notification="success">@productMessage</p> }
+@if (TempData["ProductError"] is string productError) { <p class="alert error" role="alert" data-app-notification="warning">@productError</p> }
 
 <section class="size-chart-admin-card">
     <div class="size-chart-product-heading">
@@ -46,16 +48,18 @@
             <label>Chart subtitle
                 <input asp-for="Caption" placeholder="GARMENT MEASUREMENTS" maxlength="120" />
             </label>
-            <label>Measurement unit
-                <select asp-for="Unit">
-                    <option value="in">Inches (in)</option>
-                    <option value="cm">Centimeters (cm)</option>
-                </select>
-            </label>
+            <fieldset class="size-chart-unit-field">
+                <legend>Measurement unit</legend>
+                <div class="size-chart-unit-options" role="radiogroup" aria-label="Measurement unit">
+                    <label class="size-chart-unit-option"><input asp-for="Unit" id="unitInches" type="radio" value="in" /><span><strong>Inches</strong><small>in</small></span></label>
+                    <label class="size-chart-unit-option"><input asp-for="Unit" id="unitCentimeters" type="radio" value="cm" /><span><strong>Centimeters</strong><small>cm</small></span></label>
+                </div>
+                <small class="size-chart-field-help">Saved with this chart. Enter all measurements in the selected unit.</small>
+            </fieldset>
         </div>
 
         <div class="size-chart-editor-heading">
-            <div><h3>Measurements</h3><p>Enter one measurement in each size column. Leave a cell blank if it does not apply.</p></div>
+            <div><h3>Measurements (<span id="sizeChartUnitLabel">@Model.Unit</span>)</h3><p>Enter values in the selected unit. Switching units keeps each set separate.</p></div>
             <button type="button" class="size-chart-add-button" id="addSizeColumn">+ Add size</button>
         </div>
 
@@ -74,8 +78,11 @@
                             <th scope="row"><div class="size-chart-row-heading"><input name="Rows[@rowIndex].Label" value="@Model.Rows[rowIndex].Label" placeholder="e.g. Chest" maxlength="60" required /><button type="button" class="remove-chart-row" aria-label="Remove measurement">×</button></div></th>
                             @for (var sizeIndex = 0; sizeIndex < Model.Sizes.Count; sizeIndex++)
                             {
-                                var cellValue = sizeIndex < Model.Rows[rowIndex].Values.Count ? Model.Rows[rowIndex].Values[sizeIndex] : string.Empty;
-                                <td data-value-cell><input name="Rows[@rowIndex].Values[@sizeIndex]" value="@cellValue" placeholder="—" maxlength="60" aria-label="@Model.Rows[rowIndex].Label for @Model.Sizes[sizeIndex]" /></td>
+                                var row = Model.Rows[rowIndex];
+                                var valueIn = sizeIndex < row.ValuesIn.Count ? row.ValuesIn[sizeIndex] : string.Empty;
+                                var valueCm = sizeIndex < row.ValuesCm.Count ? row.ValuesCm[sizeIndex] : string.Empty;
+                                var cellValue = Model.Unit.Equals("cm", StringComparison.OrdinalIgnoreCase) ? valueCm : valueIn;
+                                <td data-value-cell><input type="hidden" data-value-in name="Rows[@rowIndex].ValuesIn[@sizeIndex]" value="@valueIn" /><input type="hidden" data-value-cm name="Rows[@rowIndex].ValuesCm[@sizeIndex]" value="@valueCm" /><input data-unit-editor name="Rows[@rowIndex].Values[@sizeIndex]" value="@cellValue" placeholder="—" maxlength="60" aria-label="@Model.Rows[rowIndex].Label for @Model.Sizes[sizeIndex]" /></td>
                             }
                         </tr>
                     }
@@ -109,6 +116,7 @@
     .size-chart-product-heading{padding-bottom:18px;border-bottom:1px solid #f0e5e8}.size-chart-product-heading>span{color:#8d5365;font-size:11px;font-weight:700;letter-spacing:.12em}.size-chart-product-heading h2{margin:7px 0;font-size:22px}.size-chart-product-heading p,.size-chart-editor-heading p{margin:0;color:#74666b;font-size:13px}
     .size-chart-meta-grid{display:grid;grid-template-columns:1fr 1fr 190px;gap:14px;margin:20px 0 28px}.size-chart-meta-grid label{display:grid;gap:7px;color:#49383e;font-size:12px;font-weight:700}.size-chart-meta-grid input,.size-chart-meta-grid select,.size-chart-admin-table input{min-width:0;height:40px;padding:0 11px;border:1px solid #e7d8dd;border-radius:8px;background:#fff;color:#30242a;font:inherit}.size-chart-meta-grid input,.size-chart-meta-grid select{font-weight:400}
     .size-chart-brand-field>span{display:flex;align-items:center;gap:8px}.size-chart-brand-field>span small{padding:3px 7px;border:1px solid #eadde1;border-radius:999px;background:#fbf5f7;color:#94707a;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.size-chart-field-help{color:#8b7d82;font-size:10px;font-weight:400;line-height:1.35}
+    .size-chart-unit-field{display:grid;align-content:start;gap:7px;min-width:0;margin:0;padding:0;border:0}.size-chart-unit-field legend{padding:0;color:#49383e;font-size:12px;font-weight:700}.size-chart-unit-options{display:grid;grid-template-columns:1fr 1fr;gap:7px}.size-chart-unit-option{position:relative;display:flex!important;align-items:center;justify-content:center;min-height:40px;padding:0 8px;border:1px solid #e7d8dd;border-radius:8px;background:#fff;color:#5c4a51;cursor:pointer}.size-chart-unit-option input[type=radio]{position:absolute;width:1px;min-width:0;height:1px;margin:0;padding:0;opacity:0}.size-chart-unit-option span{display:flex;align-items:baseline;gap:5px;white-space:nowrap}.size-chart-unit-option strong{font-size:11px;font-weight:700}.size-chart-unit-option small{color:#8b7d82;font-size:10px}.size-chart-unit-option:has(input:checked){border-color:#a64a6c;background:#fff6f9;color:#81143d;box-shadow:inset 0 0 0 1px #a64a6c}.size-chart-unit-option:has(input:focus-visible){outline:2px solid #a64a6c;outline-offset:2px}
     .size-chart-copy-panel{display:grid;grid-template-columns:minmax(190px,1fr) minmax(200px,280px) auto;align-items:end;gap:10px 14px;margin:18px 0 24px;padding:15px 16px;border:1px solid #eadde1;border-radius:11px;background:linear-gradient(120deg,#fcf7f8,#fff)}.size-chart-copy-intro{display:grid;gap:4px}.size-chart-copy-intro strong{color:#492c37;font-size:13px}.size-chart-copy-intro span{color:#82747a;font-size:11px;line-height:1.4}.size-chart-copy-panel label{grid-column:2;grid-row:1;color:#49383e;font-size:11px;font-weight:700}.size-chart-copy-panel select{grid-column:2;grid-row:2;min-width:0;height:39px;padding:0 10px;border:1px solid #e7d8dd;border-radius:8px;background:#fff;color:#30242a;font:inherit;font-size:12px}.size-chart-copy-button{grid-column:3;grid-row:2;min-height:39px;padding:0 15px;border:1px solid #81143d;border-radius:8px;background:#81143d;color:#fff;font-size:12px;font-weight:700;cursor:pointer}.size-chart-copy-button:hover:not(:disabled){background:#68142e}.size-chart-copy-button:disabled{opacity:.5;cursor:not-allowed}
     .size-chart-copy-dialog{width:min(460px,calc(100% - 32px));max-width:none;padding:0;border:1px solid #eadde1;border-radius:17px;background:transparent;color:#30242a;box-shadow:0 24px 70px rgba(45,20,31,.28)}.size-chart-copy-dialog::backdrop{background:rgba(34,22,27,.48);backdrop-filter:blur(3px)}.size-chart-copy-dialog-card{padding:25px;background:linear-gradient(145deg,#fff 0%,#fffafb 100%);border-radius:16px}.size-chart-copy-dialog-eyebrow{color:#8e5368;font-size:10px;font-weight:800;letter-spacing:.15em}.size-chart-copy-dialog-card h2{margin:9px 0 8px;color:#39262e;font:600 23px/1.2 Georgia,"Times New Roman",serif}.size-chart-copy-dialog-copy{margin:0;color:#77676d;font-size:13px}.size-chart-copy-target-preview{margin:14px 0 10px;padding:12px 14px;border:1px solid #ead6df;border-radius:10px;background:#fbf3f6;color:#68142e;font-size:14px;font-weight:700}.size-chart-copy-dialog-note{margin:0;color:#8a7d81;font-size:11px;line-height:1.5}.size-chart-copy-dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:23px}.size-chart-copy-dialog-actions button{min-height:40px;padding:0 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}.size-chart-copy-cancel{border:1px solid #e3d5da;background:#fff;color:#614c54}.size-chart-copy-confirm{border:1px solid #81143d;background:#81143d;color:#fff}.size-chart-copy-confirm:hover{border-color:#68142e;background:#68142e}
     .size-chart-editor-heading,.size-chart-footer-actions{display:flex;align-items:center;justify-content:space-between;gap:16px}.size-chart-editor-heading h3{margin:0 0 5px;font-size:16px}.size-chart-add-button{min-height:38px;padding:0 14px;border:1px solid #8e1745;border-radius:8px;background:#fff;color:#81143d;font-weight:700;cursor:pointer}.size-chart-add-button:hover{background:#fff5f8}.size-chart-admin-scroll{overflow:auto;margin:16px 0;border:1px solid #eadde1;border-radius:10px}.size-chart-admin-table{width:100%;min-width:620px;border-collapse:separate;border-spacing:0}.size-chart-admin-table th,.size-chart-admin-table td{min-width:145px;padding:9px;border-right:1px solid #f0e5e8;border-bottom:1px solid #f0e5e8;text-align:left}.size-chart-admin-table tr:last-child th,.size-chart-admin-table tr:last-child td{border-bottom:0}.size-chart-admin-table th:first-child{position:sticky;left:0;z-index:1;min-width:210px;background:#fcf8f9}.size-chart-admin-table thead th{background:#f8f1f3;color:#6d5260;font-size:12px}.size-chart-admin-table input{width:100%;height:38px}.size-chart-admin-table .size-chart-column-heading,.size-chart-admin-table .size-chart-row-heading{display:flex;align-items:center;gap:6px}.remove-chart-column,.remove-chart-row{flex:0 0 28px;width:28px;height:28px;border:0;border-radius:50%;background:#f8eef1;color:#8e1745;font-size:19px;cursor:pointer}.size-chart-footer-actions{justify-content:flex-end;padding-top:4px}.size-chart-add-button.secondary{margin-right:auto}.size-chart-error{margin:10px 0;color:#a12638;font-size:13px}
@@ -152,13 +160,40 @@
     const sizesHeader = table?.tHead?.rows[0];
     const body = table?.tBodies[0];
     const sizeCount = () => sizesHeader.querySelectorAll("[data-size-column]").length;
+    const unitLabel = document.getElementById("sizeChartUnitLabel");
+    const selectedUnit = () => document.querySelector('input[name="Unit"]:checked')?.value || "in";
+
+    function showSelectedUnit() {
+        const unit = selectedUnit();
+        unitLabel.textContent = unit;
+        body?.querySelectorAll("[data-value-cell]").forEach(cell => {
+            const editor = cell.querySelector("[data-unit-editor]");
+            const value = cell.querySelector(unit === "cm" ? "[data-value-cm]" : "[data-value-in]");
+            if (editor && value) editor.value = value.value;
+        });
+    }
+
+    document.querySelectorAll('input[name="Unit"]').forEach(radio => radio.addEventListener("change", showSelectedUnit));
+    table?.addEventListener("input", event => {
+        const editor = event.target.closest("[data-unit-editor]");
+        if (!editor) return;
+        const cell = editor.closest("[data-value-cell]");
+        const value = cell?.querySelector(selectedUnit() === "cm" ? "[data-value-cm]" : "[data-value-in]");
+        if (value) value.value = editor.value;
+    });
 
     function refreshNames() {
         const sizeHeaders = [...sizesHeader.querySelectorAll("[data-size-column]")];
         sizeHeaders.forEach((cell, index) => { cell.querySelector("input").name = `Sizes[${index}]`; });
         [...body.querySelectorAll("[data-measurement-row]")].forEach((row, rowIndex) => {
             row.querySelector(".size-chart-row-heading input").name = `Rows[${rowIndex}].Label`;
-            [...row.querySelectorAll("[data-value-cell] input")].forEach((input, sizeIndex) => { input.name = `Rows[${rowIndex}].Values[${sizeIndex}]`; });
+            [...row.querySelectorAll("[data-value-cell]")].forEach((cell, sizeIndex) => {
+                cell.querySelector("[data-value-in]").name = `Rows[${rowIndex}].ValuesIn[${sizeIndex}]`;
+                cell.querySelector("[data-value-cm]").name = `Rows[${rowIndex}].ValuesCm[${sizeIndex}]`;
+                const editor = cell.querySelector("[data-unit-editor]");
+                editor.name = `Rows[${rowIndex}].Values[${sizeIndex}]`;
+                editor.setAttribute("aria-label", `${row.querySelector(".size-chart-row-heading input").value} for ${sizeHeaders[sizeIndex]?.querySelector("input").value || "size"} in ${selectedUnit()}`);
+            });
         });
     }
 
@@ -172,7 +207,7 @@
         [...body.querySelectorAll("[data-measurement-row]")].forEach(row => {
             const cell = document.createElement("td");
             cell.dataset.valueCell = "";
-            cell.innerHTML = '<input maxlength="60" placeholder="—" aria-label="Measurement value" />';
+            cell.innerHTML = "<input type='hidden' data-value-in /><input type='hidden' data-value-cm /><input data-unit-editor maxlength='60' placeholder='' aria-label='Measurement value' />";
             row.append(cell);
         });
         refreshNames();
@@ -186,7 +221,7 @@
         for (let index = 0; index < sizeCount(); index++) {
             const cell = document.createElement("td");
             cell.dataset.valueCell = "";
-            cell.innerHTML = '<input maxlength="60" placeholder="—" aria-label="Measurement value" />';
+            cell.innerHTML = "<input type='hidden' data-value-in /><input type='hidden' data-value-cm /><input data-unit-editor maxlength='60' placeholder='' aria-label='Measurement value' />";
             row.append(cell);
         }
         body.append(row);

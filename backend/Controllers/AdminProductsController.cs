@@ -45,6 +45,7 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
             Rows = new[] { "Chest", "Waist", "Hip", "Sleeve Length", "Shoulder", "Length" }
                 .Select(label => new ProductSizeChartRowRequest { Label = label }).ToList()
         };
+        ProductSizeChartUnits.Normalize(chart);
 
         return Ok(chart);
     }
@@ -54,15 +55,20 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
     {
         var product = await db.Products.FirstOrDefaultAsync(x => x.Id == id);
         if (product is null) return NotFound();
-        if (request.Unit is not ("in" or "cm")) return BadRequest("Choose inches or centimeters for the chart unit.");
+        var unit = ProductSizeChartUnits.NormalizeUnit(request.Unit);
+        if (unit is not ("in" or "cm")) return BadRequest("Choose inches or centimeters for the chart unit.");
         if (request.Sizes is null || request.Rows is null) return BadRequest("Add size columns and measurement rows to the chart.");
         if (request.Sizes.Count == 0 || request.Sizes.Count > 20) return BadRequest("Add between 1 and 20 size columns.");
         if (request.Sizes.Any(size => string.IsNullOrWhiteSpace(size) || size.Trim().Length > 30)) return BadRequest("Each size label must contain 1 to 30 characters.");
         if (request.Sizes.Select(size => size.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() != request.Sizes.Count)
             return BadRequest("Size labels must be unique.");
         if (request.Rows.Count > 30) return BadRequest("A size chart can have up to 30 measurement rows.");
+        if (request.Rows.Any(row => row is null)) return BadRequest("Each measurement row must be valid.");
+        foreach (var row in request.Rows) ProductSizeChartUnits.NormalizeRow(row, unit, request.Sizes.Count);
         if (request.Rows.Any(row => row is null || row.Values is null || string.IsNullOrWhiteSpace(row.Label) || row.Label.Trim().Length > 60 || row.Values.Count != request.Sizes.Count || row.Values.Any(value => value?.Length > 60)))
             return BadRequest("Each measurement needs a label and one value for every size.");
+        if (request.Rows.Any(row => row.ValuesIn.Count != request.Sizes.Count || row.ValuesCm.Count != request.Sizes.Count || row.ValuesIn.Any(value => value?.Length > 60) || row.ValuesCm.Any(value => value?.Length > 60)))
+            return BadRequest("Each measurement value must be 60 characters or fewer.");
         if (request.Rows.Select(row => row.Label.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() != request.Rows.Count)
             return BadRequest("Measurement labels must be unique.");
 
@@ -70,12 +76,14 @@ public class AdminProductsController(ApplicationDbContext db, IConfiguration con
         {
             BrandName = request.BrandName?.Trim() ?? string.Empty,
             Caption = string.IsNullOrWhiteSpace(request.Caption) ? "GARMENT MEASUREMENTS" : request.Caption.Trim(),
-            Unit = request.Unit,
+            Unit = unit,
             Sizes = request.Sizes.Select(size => size.Trim().ToUpperInvariant()).ToList(),
             Rows = request.Rows.Select(row => new ProductSizeChartRowRequest
             {
                 Label = row.Label.Trim(),
-                Values = row.Values.Select(value => value?.Trim() ?? string.Empty).ToList()
+                Values = row.Values.Select(value => value?.Trim() ?? string.Empty).ToList(),
+                ValuesIn = row.ValuesIn.Select(value => value?.Trim() ?? string.Empty).ToList(),
+                ValuesCm = row.ValuesCm.Select(value => value?.Trim() ?? string.Empty).ToList()
             }).ToList()
         };
         product.SizeChartJson = JsonSerializer.Serialize(chart);

@@ -56,6 +56,8 @@ public class ProductSizeChartRowViewModel
 {
     public string Label { get; set; } = string.Empty;
     public List<string> Values { get; set; } = [];
+    public List<string> ValuesIn { get; set; } = [];
+    public List<string> ValuesCm { get; set; } = [];
 }
 
 public class RelatedProductViewModel
