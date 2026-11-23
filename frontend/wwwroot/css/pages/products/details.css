@@ -5343,11 +5343,24 @@
 }
 
 .product-quantity-section > label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
     margin: 0 0 10px;
     color: #302725;
     font-size: 12px;
     font-weight: 700;
+}
+
+.product-quantity-section > label::after {
+    display: block;
+    min-width: 24px;
+    height: 2px;
+    flex: 1 1 auto;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #b96f86 0%, #d7b3bd 100%);
+    content: "";
 }
 
 .product-quantity-error {
