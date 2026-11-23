@@ -738,10 +738,6 @@
                 </div>
 
 
-                <span class="product-quantity-error"
-                      id="productQuantityError"
-                      role="alert">
-                </span>
                 </div>
 
 
@@ -2483,7 +2479,6 @@
                         if (quantityInput) {
                             quantityInput.max = stock;
                             quantityInput.value = "1";
-                            document.getElementById("productQuantityError").textContent = "";
                         }
 
 
@@ -2557,23 +2552,6 @@
         document.getElementById(
             "productQuantity"
         );
-    const quantityError = document.getElementById("productQuantityError");
-
-    const updateQuantityLimitMessage = () => {
-        if (!quantityInput || !quantityError) return;
-        const quantity = Number(quantityInput.value);
-        const maximum = Number(quantityInput.max);
-        quantityError.textContent = Number.isFinite(quantity) && Number.isFinite(maximum) &&
-            maximum > 0 && quantity >= maximum
-            ? `You've reached the maximum quantity available in this size (${maximum}).`
-            : "";
-    };
-
-    quantityInput
-        ?.addEventListener(
-            "input",
-            updateQuantityLimitMessage);
-
 
     document
         .querySelectorAll(
@@ -2611,8 +2589,6 @@
 
 
                         quantityInput.value = String(Math.max(minimum, Math.min(maximum, next)));
-                        updateQuantityLimitMessage();
-
                     });
 
             });
@@ -2678,12 +2654,6 @@
                 const quantity =
                     Number(
                         quantityInput?.value
-                    );
-
-
-                const quantityError =
-                    document.getElementById(
-                        "productQuantityError"
                     );
 
 
