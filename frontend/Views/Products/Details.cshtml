@@ -699,11 +699,11 @@
                      QUANTITY
                      ================================================= -->
 
-                <div class="product-quantity-section" id="productQuantitySection" hidden="@(variants.Count > 0)">
-                <label for="productQuantity">
+                <section class="product-quantity-section" id="productQuantitySection"
+                         aria-labelledby="productQuantityLabel" hidden="@(variants.Count > 0)">
+                <label id="productQuantityLabel" for="productQuantity">
                     Quantity
                 </label>
-
 
                 <div class="product-quantity-control">
 
@@ -742,7 +742,7 @@
                       role="status"
                       aria-live="polite"></span>
 
-                </div>
+                </section>
 
 
                 <!-- =================================================
