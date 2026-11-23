@@ -5325,3 +5325,35 @@
     order: 3;
     margin-left: 0;
 }
+
+
+/* Quantity selector card — visually aligned with delivery, size and colour panels */
+.product-quantity-section {
+    display: block;
+    margin: 16px 0 20px;
+    padding: 14px 15px;
+    border: 1px solid #e8dfdc;
+    border-radius: 12px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.product-quantity-section[hidden] {
+    display: none !important;
+}
+
+.product-quantity-section > label {
+    display: block;
+    margin: 0 0 10px;
+    color: #302725;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.product-quantity-error {
+    display: block;
+    margin: 8px 0 0;
+    color: #b42335;
+    font-size: 12px;
+    line-height: 1.45;
+}
